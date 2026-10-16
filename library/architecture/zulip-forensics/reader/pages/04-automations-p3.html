@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,773</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">9 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">246</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 - POLE 3</div>
+    <h4>Automations: the claim queue and the 10-minute cutoff</h4>
+    <p>Exactly-one-worker-per-message from an at-least-once base - and a deliberate preference for a missing reminder over a flood</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 540" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">try_deliver_one_scheduled_message() - THE HEART OF P3</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">zerver/actions/scheduled_messages.py:431-465 - the same pattern as Multica's FOR UPDATE SKIP LOCKED, applied to a USER-VISIBLE deadline</text>
+
+      <text x="40" y="84" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE FIVE MECHANISMS (M1-M5)</text>
+      <g transform="translate(40, 96)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">M1 - THE THREE-FIELD CLAIM</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">scheduled_timestamp__lte=now()</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">delivered=False</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">failed=False</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">due - not-done - not-failed</text>
+      </g>
+      <g transform="translate(345, 96)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">M2 - THE ROW LOCK</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">.select_for_update(no_key=True)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Two cron workers cannot</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">grab the same message</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">scheduled_messages.py:440</text>
+      </g>
+      <g transform="translate(650, 96)">
+        <rect width="270" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">M3 - ONE TRANSACTION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">@transaction.atomic(durable=True)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">claim + send + flag flip</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">are a single atomic unit</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">scheduled_messages.py:431</text>
+      </g>
+      <g transform="translate(40, 210)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">M4 - TERMINAL STATE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">failed=True + failure_message</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A failed reminder is NOT</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">silently retried forever</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">scheduled_messages.py:455+</text>
+      </g>
+      <g transform="translate(345, 210)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">M5 - THE 10-MINUTE CUTOFF</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">SCHEDULED_MESSAGE_LATE_CUTOFF_MINUTES=10</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">After an outage, send what is</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">still in the window - let the rest go</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">scheduled_messages.py:43</text>
+      </g>
+      <g transform="translate(650, 210)">
+        <rect width="270" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE STATE MACHINE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">(False, False) - claimable</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">(True, _) - done</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">(False, True) - dead</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">THERE IS NO RETRY STATE</text>
+      </g>
+
+      <rect x="40" y="330" width="880" height="72" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.6"/>
+      <text x="480" y="354" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#059669">WHAT M1 + M2 + M3 TOGETHER ARE</text>
+      <text x="480" y="375" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A database-backed claim queue with exactly-one-worker-per-message, from an at-least-once base</text>
+      <text x="480" y="394" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The 10-minute cutoff is the clearest latency-limit primitive in the study: prefer a MISSING reminder to a FLOOD of stale ones</text>
+
+      <text x="40" y="436" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE QUEUE SURFACE - 14 QUEUES, ONE FRAMEWORK, AND ITS HONEST NAME</text>
+      <g transform="translate(40, 448)">
+        <rect width="440" height="78" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PLUMBING</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">delivery_mode=2 (at-least-once) - a disk dead-letter</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">failed_tries rides INSIDE the event payload</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">so retries survive a worker crash - MAX_REQUEST_RETRIES=3</text>
+      </g>
+      <g transform="translate(500, 448)">
+        <rect width="420" height="78" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE HONEST NAME</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">queue_json_publish_rollback_unsafe</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">republishes OUTSIDE the DB transaction</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the function name IS the document</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-04-automations-p3">Zulip Study — Batch 04: automations (P3)<a href="#batch-04/zulip-study-batch-04-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Pole:</strong> <strong>P3 — automations</strong>
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>The question this batch answers:</strong> <em>how does something run without a human?</em> Zulip has <strong>no
+workflow engine and no DAG</strong>. What it has instead is a <strong>mature, boring, at-least-once queue
+system</strong> (RabbitMQ + a typed worker framework), a <strong>cron-driven scheduled-message picker</strong>, and
+<strong>outgoing webhooks with a bounded retry</strong>. This batch reads all three and names their
+guarantees.</p>
+<p><strong>Headline before the detail:</strong> Zulip&#39;s P3 is not automation-as-product; it is <strong>automation as
+plumbing</strong> — the platform uses the same queue to send email, render thumbnails, deliver push
+notifications <em>and</em> run bots, and the delivery guarantee it actually provides is
+<strong>at-least-once with a 3-retry bound and a disk-parked dead-letter</strong>, not exactly-once.</p>
+<hr>
+<h2 id="4-1-the-queue-surface-14-workers-one-framework-a-decorator-registry">§4.1 The queue surface: 14 workers, one framework, a decorator registry<a href="#batch-04/4-1-the-queue-surface-14-workers-one-framework-a-decorator-registry" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured: <strong>17 <code>@assign_queue</code> sites</strong>, of which <strong>14 are real</strong> and <strong>3 are test-only</strong>
+(<code>test</code>, <code>noop</code>, <code>noop_batch</code> — all <code>is_test_queue=True</code> in <code>zerver/worker/test.py</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Queue</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>email_senders</code>, <code>deferred_email_senders</code>, <code>digest_emails</code>, <code>missedmessage_emails</code></td>
+<td>Email</td>
+</tr>
+<tr>
+<td><code>missedmessage_mobile_notifications</code></td>
+<td>Push notifications</td>
+</tr>
+<tr>
+<td><code>embed_links</code>, <code>thumbnail</code></td>
+<td>Media processing</td>
+</tr>
+<tr>
+<td><code>embedded_bots</code>, <code>outgoing_webhooks</code></td>
+<td>The P1 bot seams</td>
+</tr>
+<tr>
+<td><code>email_mirror</code></td>
+<td>Inbound email → message</td>
+</tr>
+<tr>
+<td><code>user_activity</code>, <code>user_activity_interval</code>, <code>soft_reactivation</code>, <code>deferred_work</code></td>
+<td>Housekeeping</td>
+</tr>
+</tbody></table></div>
+<p><strong>A queue is a decorated class</strong> (<code>zerver/worker/base.py:54-65</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def assign_queue(queue_name: str, enabled: bool = True, is_test_queue: bool = False):
+    def decorate(clazz):
+        clazz.queue_name = queue_name
+        if enabled:
+            register_worker(queue_name, clazz, is_test_queue)
+        return clazz
+    return decorate
+
+worker_classes: dict[str, type[&quot;QueueProcessingWorker&quot;]] = {}
+</code></pre>
+</div>
+<p><code>register_worker</code> populates a module-level <strong>registry dict</strong>, and <code>manage.py process_queue --queue=X</code> looks the class up by name. <strong>Adding a queue is: write a <code>QueueProcessingWorker</code>
+subclass, decorate it, and add its name to the <code>base_queues</code> list in the Puppet manifest</strong>
+(<code>docs/subsystems/queuing.md:30-35</code>). There is <strong>no broker-side topology to configure</strong> — the
+queue exists the first time the worker publishes to it.</p>
+<hr>
+<h2 id="4-2-the-worker-framework-four-named-mechanisms">§4.2 The worker framework: four named mechanisms<a href="#batch-04/4-2-the-worker-framework-four-named-mechanisms" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>QueueProcessingWorker</code> (<code>base.py</code>, 332 lines) — the base class every queue inherits:</p>
+<ol>
+<li><p><strong>A batch-aware consumer loop.</strong> <code>do_consume</code> wraps <code>consume(events)</code> and tracks statistics;
+<code>LoopQueueProcessingWorker</code> (<code>:306-333</code>) extends it for <strong>batched</strong> queues (<code>batch_size=100</code>).
+The abstraction is <code>consume_single_event</code> vs <code>consume_batch</code>.</p>
+</li>
+<li><p><strong>A hard per-batch timeout via <code>SIGALRM</code></strong> (<code>:196-208</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">signal.alarm(self.MAX_CONSUME_SECONDS * len(events))
+consume_func(events)
+</code></pre>
+</div>
+<p><code>MAX_CONSUME_SECONDS = 30</code> (<code>:91</code>). <strong>A single event gets 30 s; a batch of 100 gets 3,000 s.</strong>
+If the alarm fires, <code>timer_expired</code> raises <code>WorkerTimeoutError</code> — the batch is treated as a
+failure, not a hang. <strong>This is the study&#39;s most explicit statement of &quot;a slow worker must
+never wedge the queue&quot;</strong>: the framework will actively kill a runaway consume.</p>
+</li>
+<li><p><strong>A bounded retry with a dead-letter that is a file</strong> (<code>zerver/lib/queue.py:476-485</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">MAX_REQUEST_RETRIES = 3
+
+def retry_event(queue_name, event, failure_processor):
+    if &quot;failed_tries&quot; not in event:
+        event[&quot;failed_tries&quot;] = 0
+    event[&quot;failed_tries&quot;] += 1
+    if event[&quot;failed_tries&quot;] &gt; MAX_REQUEST_RETRIES:
+        failure_processor(event)
+    else:
+        queue_json_publish_rollback_unsafe(queue_name, event)
+</code></pre>
+</div>
+<p><strong>Named: the retry budget is 3.</strong> The counter rides <em>in the event itself</em>, so retries survive
+a worker crash. After 3, <code>failure_processor</code> runs and the event goes to the caller&#39;s
+<code>*.errors</code> file. (<code>base.py:278-288</code> writes a <strong>tab-separated line — <code>time\torjson(events)</code> — into
+<code>QUEUE_ERROR_DIR/&lt;queue&gt;.errors</code>, under a lockfile</strong>.) The message is <strong>parked on disk</strong>, not
+discarded and not in a broker DLQ.</p>
+</li>
+<li><p><strong>Persistence and at-least-once, stated in the publish call</strong> (<code>lib/queue.py:131</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">properties=pika.BasicProperties(delivery_mode=2),
+</code></pre>
+</div>
+<p><strong><code>delivery_mode=2</code> = persistent.</strong> A queued event survives a RabbitMQ restart. Combined with
+the ack-after-consume model (<code>:400-402</code>, <code>basic_ack(delivery_tag=…)</code>), <strong>the guarantee is
+at-least-once</strong> — a worker can ack <em>after</em> a partial side-effect, so a crash mid-handle can
+re-deliver. <strong>There is no idempotency key in this layer</strong>; correctness is the <em>handler&#39;s</em>
+problem.</p>
+</li>
+</ol>
+<hr>
+<h2 id="4-3-the-scheduled-message-picker-a-row-lock-inside-a-transaction">§4.3 ★ The scheduled-message picker: a row-lock inside a transaction<a href="#batch-04/4-3-the-scheduled-message-picker-a-row-lock-inside-a-transaction" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The cron-like heart of P3 is <code>zerver/actions/scheduled_messages.py</code>
+(<code>try_deliver_one_scheduled_message</code>, <code>:431-465</code>). <strong>This is the single most important piece of
+Zulip&#39;s automation plumbing</strong>, and it is short:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">@transaction.atomic(durable=True)
+def try_deliver_one_scheduled_message() -&gt; bool:
+    # Returns whether there was a scheduled message to attempt
+    # delivery on, regardless of whether delivery succeeded.
+    scheduled_message = (
+        ScheduledMessage.objects.filter(
+            scheduled_timestamp__lte=timezone_now(),
+            delivered=False,
+            failed=False,
+        )
+        .select_for_update(no_key=True)
+        .first()
+    )
+    if scheduled_message is None:
+        return False
+    ...
+    try:
+        send_scheduled_message(scheduled_message)
+    except Exception as e:
+        scheduled_message.refresh_from_db()
+        was_delivered = scheduled_message.delivered
+        scheduled_message.failed = True
+        ...
+</code></pre>
+</div>
+<p><strong>Named mechanisms:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>Line</th>
+<th>What it buys</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>M1</strong></td>
+<td><strong><code>scheduled_timestamp__lte=now(), delivered=False, failed=False</code></strong></td>
+<td><code>:437-439</code></td>
+<td>A <strong>three-field work claim</strong> — due, not-done, not-failed. Indexed (<code>scheduled_timestamp</code> is <code>db_index=True</code>).</td>
+</tr>
+<tr>
+<td><strong>M2</strong></td>
+<td><strong><code>.select_for_update(no_key=True)</code></strong></td>
+<td><code>:440</code></td>
+<td><strong>A row lock.</strong> Two cron workers cannot grab the same message.</td>
+</tr>
+<tr>
+<td><strong>M3</strong></td>
+<td><strong><code>@transaction.atomic(durable=True)</code></strong></td>
+<td><code>:431</code></td>
+<td>The claim, the send, and the flag flip are <strong>one transaction</strong>.</td>
+</tr>
+<tr>
+<td><strong>M4</strong></td>
+<td><strong><code>failed = True</code> + <code>failure_message</code></strong> on exception</td>
+<td><code>:455+</code></td>
+<td>A <strong>per-message terminal state</strong> — a failed reminder is not silently retried forever.</td>
+</tr>
+<tr>
+<td><strong>M5</strong></td>
+<td><strong><code>SCHEDULED_MESSAGE_LATE_CUTOFF_MINUTES = 10</code></strong></td>
+<td><code>:43</code></td>
+<td>A message is <strong>not</strong> sent if it is more than <strong>10 minutes</strong> late.</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ What M1+M2+M3 together are.</strong> This is a <strong>database-backed claim queue with exactly-one
+worker-per-message</strong>, achieved with the <em>same</em> pattern the study has seen before (Multica&#39;s
+<code>FOR UPDATE SKIP LOCKED</code>) but here applied to a <strong>user-visible deadline</strong>, not an internal job.
+The <code>delivered</code> / <code>failed</code> boolean pair is the entire state machine: <code>(False, False)</code> → claimable;
+<code>(True, _)</code> → done; <code>(False, True)</code> → dead. <strong>There is no &quot;retry&quot; state</strong> — a scheduled message
+that fails is failed, permanently, with a message stored.</p>
+<p><strong>★ The 10-minute cutoff (M5) is the subtlety.</strong> If the cron is down for an hour, Zulip does
+<strong>not</strong> dump an hour of messages the moment it returns. It sends the ones still within the
+10-minute window and lets the rest go. <strong>This is a deliberate choice to prefer <em>a missing
+reminder</em> over <em>a flood of stale reminders</em> — and it is the clearest &quot;latency-limit&quot; primitive
+in the study.</strong> (An exact-coupling: <code>deliver_scheduled_emails.py</code> uses the same
+<code>scheduled_timestamp__lte=timezone_now()</code> pattern for emails.)</p>
+<hr>
+<h2 id="4-4-reminders-scheduled-messages-wearing-a-delivery-type">§4.4 Reminders: scheduled messages wearing a delivery_type<a href="#batch-04/4-4-reminders-scheduled-messages-wearing-a-delivery-type" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Reminders are not a separate subsystem</strong> — they are <code>ScheduledMessage</code> rows with
+<code>delivery_type = REMIND</code> (<code>zerver/models/scheduled_jobs.py:152</code>, <code>zerver/lib/reminders.py:170</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def access_reminder(user_profile, reminder_id) -&gt; ScheduledMessage:
+    return ScheduledMessage.objects.get(id=reminder_id, sender=user_profile, delivery_type=ScheduledMessage.REMIND)
+</code></pre>
+</div>
+<p>The model carries the <em>origin message</em> (<code>reminder_target_message_id</code>) and an indexed
+composite (<code>fields=[&quot;realm_id&quot;, &quot;sender&quot;, &quot;delivery_type&quot;, &quot;scheduled_timestamp&quot;]</code>,
+<code>scheduled_jobs.py:208</code>) so &quot;my reminders&quot; and &quot;this conversation&#39;s reminders&quot; are index scans.
+Reminder <em>content</em> is generated by <code>get_reminder_formatted_content</code> (a 181-line note-builder
+with <code>MAX_REMINDER_NOTE_LENGTH</code> and <code>MAX_MESSAGE_LENGTH</code> caps). <strong>&quot;Remind me about this message
+on Tuesday&quot; and &quot;send this message on Tuesday&quot; are the same machine</strong> — one delivery path, two
+intents.</p>
+<hr>
+<h2 id="4-5-outgoing-webhooks-the-one-place-p1-and-p3-meet">§4.5 Outgoing webhooks: the one place P1 and P3 meet<a href="#batch-04/4-5-outgoing-webhooks-the-one-place-p1-and-p3-meet" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>zerver/lib/outgoing_webhook.py</code> (432 lines) + <code>zerver/worker/outgoing_webhooks.py</code> (30 lines):</p>
+<ul>
+<li>The <strong>worker is async</strong>: the bot&#39;s reply arrives on the <code>outgoing_webhooks</code> queue, off the
+request path. The originating message is <em>not</em> blocked on a third-party HTTP call.</li>
+<li><strong>Retry uses the shared <code>retry_event</code></strong> — so a webhook that times out is re-published up to
+<code>MAX_REQUEST_RETRIES = 3</code> times, then <code>failure_processor</code>.</li>
+<li><strong>The request is authenticated outbound</strong> (<code>token</code> + <code>User-Agent: ZulipOutgoingWebhook/</code> +
+<code>OUTGOING_WEBHOOK_TIMEOUT_SECONDS</code>).</li>
+<li><strong>The reply can be a widget</strong> — <code>OutgoingWebhookResult</code> carries <code>widget_content: str | None</code>
+(<code>:30-32</code>). <strong>A bot&#39;s automated reply can be a poll/TODO, not just text.</strong> (Batch 05 picks
+this up.)</li>
+</ul>
+<p><strong>Two failure modes named in the doc</strong> (<code>docs/subsystems/queuing.md:5-12</code>): email sends that
+&quot;would otherwise time out when 100s are triggered at once&quot;, and analytics updates that &quot;don&#39;t
+have any immediate runtime effect.&quot; <strong>The queue exists because a chat app must not block a user
+on a slow side-effect</strong> — that single sentence is the design intent.</p>
+<hr>
+<h2 id="4-6-the-three-levels-of-without-a-human-a-summary-table">§4.6 The three levels of "without a human" (a summary table)<a href="#batch-04/4-6-the-three-levels-of-without-a-human-a-summary-table" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Mechanism</th>
+<th>Trigger</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1. Reactive</strong></td>
+<td>Queue worker</td>
+<td>An event (message sent, upload, user action)</td>
+<td><strong>at-least-once</strong> (<code>delivery_mode=2</code> + ack-after)</td>
+</tr>
+<tr>
+<td><strong>2. Deferred / batched</strong></td>
+<td><code>LoopQueueProcessingWorker</code> (<code>batch_size=100</code>)</td>
+<td>Queue depth / timer</td>
+<td>Best-effort batch</td>
+</tr>
+<tr>
+<td><strong>3. Time-based</strong></td>
+<td><code>try_deliver_one_scheduled_message</code> cron</td>
+<td><code>scheduled_timestamp__lte=now()</code></td>
+<td><strong>exactly-one-per-message</strong> (row lock + txn), <strong>with a 10-minute lateness cutoff</strong></td>
+</tr>
+<tr>
+<td><strong>4. Third-party</strong></td>
+<td>Outgoing webhook worker</td>
+<td>A @-mention of a webhook bot</td>
+<td><strong>≤3 retries</strong>, then a disk dead-letter</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="4-7-divergences-and-honest-limits-batch-04">§4.7 Divergences and honest limits (batch 04) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/4-7-divergences-and-honest-limits-batch-04" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Divergence / limit</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D4-1</strong></td>
+<td><strong>At-least-once, with no idempotency layer</strong></td>
+<td><code>delivery_mode=2</code> + post-consume ack means a crash can re-deliver. <strong>Nothing in the queue layer dedupes.</strong> Email senders and thumbnails must be idempotent by construction (they mostly are: an email is sent once per event object) — but the <em>framework</em> does not enforce it.</td>
+</tr>
+<tr>
+<td><strong>D4-2</strong></td>
+<td><strong>The dead-letter is a file</strong></td>
+<td><code>QUEUE_ERROR_DIR/&lt;queue&gt;.errors</code>, a TSV line under a lockfile. No retry-from-dead-letter tooling in this tree; recovery is manual.</td>
+</tr>
+<tr>
+<td><strong>D4-3</strong></td>
+<td><strong>A failed scheduled message is terminal</strong></td>
+<td><code>failed=True</code> is a one-way door; there is no user-facing &quot;retry reminder&quot;. The <code>failure_message</code> is stored for diagnosis only.</td>
+</tr>
+<tr>
+<td><strong>D4-4</strong></td>
+<td><strong><code>rollback_unsafe</code> is in the retry path&#39;s name</strong></td>
+<td><code>queue_json_publish_rollback_unsafe</code> (<code>queue.py:485</code>) — the function name <em>admits</em> it republishes outside the DB transaction. If the DB transaction rolls back after a republish, the retry is orphaned. <strong>The name is the honest document (rule 1).</strong></td>
+</tr>
+<tr>
+<td><strong>D4-5</strong></td>
+<td><strong>No workflow/DAG concept at all</strong></td>
+<td>There is no scheduler abstraction beyond &quot;a cron calls one function&quot;. All ordering is implicit in the code.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="4-8-batch-04-verdict">§4.8 Batch-04 verdict<a href="#batch-04/4-8-batch-04-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Zulip&#39;s automations are <strong>plumbing, not a product</strong>: 14 queues behind one decorator-registered
+worker framework, with a 30-second <code>SIGALRM</code> per event to kill runaways, a 3-retry budget that
+travels <em>inside the event</em>, a persistent-message <code>delivery_mode=2</code> ack-after-consume guarantee
+(<strong>at-least-once</strong>), and a <strong>dead-letter that is a lockfile-guarded TSV on disk</strong>. The one
+genuinely elegant piece is the <strong>scheduled-message picker</strong> — a three-field work claim, a row
+lock, one transaction, and a <strong>10-minute lateness cutoff</strong> that deliberately prefers a missing
+reminder to a flood of stale ones.</p>
+<p><strong>The three things to carry forward:</strong> (1) the <strong>event-carried retry counter</strong> (<code>failed_tries</code>
+rides in the payload, so retries survive a crash); (2) the <strong><code>select_for_update</code> + atomic claim</strong>
+for exactly-once-per-item from an at-least-once base; and (3) the <strong>lateness cutoff</strong> as a named
+policy — the idea that &quot;how late is too late&quot; deserves a constant (<code>SCHEDULED_MESSAGE_LATE_CUTOFF_MINUTES</code>),
+not a judgment call.</p>
+<hr>
+<p><em>Batch 04 · Zulip · no DAG, one queue · persistent, at-least-once, 3 retries, disk dead-letter
+· the cron claims rows with a row lock · 10 minutes is the lateness limit.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#4-1-the-queue-surface-14-workers-one-framework-a-decorator-registry" class="toc-link">§4.1 The queue surface: 14 workers, one framework, a decorator registry</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-2-the-worker-framework-four-named-mechanisms" class="toc-link">§4.2 The worker framework: four named mechanisms</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-3-the-scheduled-message-picker-a-row-lock-inside-a-transaction" class="toc-link">§4.3 ★ The scheduled-message picker: a row-lock inside a transaction</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-4-reminders-scheduled-messages-wearing-a-delivery-type" class="toc-link">§4.4 Reminders: scheduled messages wearing a delivery_type</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-5-outgoing-webhooks-the-one-place-p1-and-p3-meet" class="toc-link">§4.5 Outgoing webhooks: the one place P1 and P3 meet</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-6-the-three-levels-of-without-a-human-a-summary-table" class="toc-link">§4.6 The three levels of &quot;without a human&quot; (a summary table)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-7-divergences-and-honest-limits-batch-04" class="toc-link">§4.7 Divergences and honest limits (batch 04)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-8-batch-04-verdict" class="toc-link">§4.8 Batch-04 verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

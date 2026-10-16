@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-synthesis.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,140</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">190</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 - THE SYNTHESIS</div>
+    <h4>The synthesis: three tiers, one answer, an honest ledger</h4>
+    <p>What we take, what we adapt, and what Zulip says about its own limits</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 560" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">12 RANKED MECHANISMS - THREE TIERS</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">7 batches - 1,693 lines - 30 divergences - 8 star-headed sections elevated to 12 mechanisms</text>
+
+      <rect x="40" y="70" width="880" height="66" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+      <text x="60" y="92" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#059669">TIER 1 - TRANSFERABLE NOW, NO ADAPTATION</text>
+      <text x="60" y="114" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1. The ambient realm - 2. The three-representation contract check - 3. The feature-level ratchet - 4. The five-fence LLM pattern</text>
+
+      <rect x="40" y="150" width="880" height="66" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.8"/>
+      <text x="60" y="172" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#7c3aed">TIER 2 - TRANSFERABLE WITH ADAPTATION</text>
+      <text x="60" y="194" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5. Widget-as-event-log - 6. The DB claim queue - 7. The lateness cutoff - 8. The event-carried retry - 9. mark_sanitized - 10. Bot-as-user</text>
+
+      <rect x="40" y="230" width="880" height="66" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+      <text x="60" y="252" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">TIER 3 - DECISIONS WORTH COPYING, NOT MECHANISMS</text>
+      <text x="60" y="274" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">11. The numeric audit-log namespace (a data model that documents its own topology) - 12. AGENTS.md + path-scoped .claude/rules</text>
+
+      <text x="40" y="332" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE VERDICT</text>
+      <g transform="translate(40, 344)">
+        <rect width="280" height="116" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE POLE MAP</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P1 real but deliberately TINY</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P2 the STRONGEST in the study</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P3 plumbing, not a product</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">PX-W the first REAL widget model</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">PX-F old-school - PZ the densest</text>
+      </g>
+      <g transform="translate(340, 344)">
+        <rect width="280" height="116" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE ONE ANSWER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">"Make the wrong thing hard to do,</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">then catch the rest automatically."</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A set of guardrails that</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">happened to ship a chat app</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the method IS the architecture</text>
+      </g>
+      <g transform="translate(640, 344)">
+        <rect width="280" height="116" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THREE THINGS NOBODY ELSE HAD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The first real widget model</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The strongest P2 (identity-embedded)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The densest PZ</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">check-schemas - the ratchet -</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">mark_sanitized - AGENTS.md</text>
+      </g>
+
+      <text x="40" y="496" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE HONEST LEDGER - stated in the code's own words</text>
+      <g transform="translate(40, 508)">
+        <rect width="290" height="44" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">RECORDED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">30 divergences - 6 named unfixed gaps - 3 retirements</text>
+      </g>
+      <g transform="translate(345, 508)">
+        <rect width="290" height="44" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE COST</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no RLS - the taint hatch is TRUST - the AI policy is ADVISORY</text>
+      </g>
+      <g transform="translate(650, 508)">
+        <rect width="270" height="44" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE RECOMMENDATION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">take 1, 2 and 3 first - the cheapest, and they change what a future bug looks like</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-07-the-synthesis">Zulip Study — Batch 07: the synthesis<a href="#batch-07/zulip-study-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Pole:</strong> synthesis
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>What this batch is.</strong> Batches 00–06 are closed. This is the synthesis: the measured totals, the
+ranked mechanisms, the pole map, the honest ledger, and the ranked actions. Per the method,
+<strong>the batches stayed comparison-free</strong> — the comparisons here are <em>observations</em>, and the
+decisions remain the owner&#39;s at the mapping pass.</p>
+<hr>
+<h2 id="7-1-the-measured-totals-rule-13-every-number-re-checked">§7.1 The measured totals (rule 13 — every number re-checked)<a href="#batch-07/7-1-the-measured-totals-rule-13-every-number-re-checked" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Batches</td>
+<td><strong>7</strong> (00 pin + 01–06)</td>
+</tr>
+<tr>
+<td>Total lines</td>
+<td><strong>1,693</strong> (pin 213 + findings 1,480)</td>
+</tr>
+<tr>
+<td><code>★</code>-named mechanisms</td>
+<td><strong>12 ranked</strong> — from <strong>8 <code>★</code>-headed sections</strong> in batches 02–06 (02/03/04/05 ×1, 06 ×4) plus 4 lifted from inside them (ambient realm · lateness cutoff · event-carried retry · bot-as-user); batch 01 contributes 3 (process topology · API surface · the silenced <code>auth.W004</code>)</td>
+</tr>
+<tr>
+<td>Divergences / honest limits</td>
+<td><strong>30</strong> (5 per findings batch)</td>
+</tr>
+<tr>
+<td>Zip md5</td>
+<td><code>f9cea131769925ceb01e64ea78c4113e</code></td>
+</tr>
+<tr>
+<td>Extract completeness</td>
+<td><strong>9,009 / 9,016 files = 99.92%</strong> (7 Mattermost-import fixtures lost to MAX_PATH)</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><strong>2,037 files / 425,702 LOC</strong> (385,211 non-migration · 40,491 migration · <strong>182,992 tests</strong>)</td>
+</tr>
+<tr>
+<td>TypeScript</td>
+<td><strong>471 files / 153,253 LOC</strong> (393 top-level <code>web/src</code> modules)</td>
+</tr>
+<tr>
+<td>Docs</td>
+<td><strong>426 <code>.md</code> / 63,546 lines / 365,693 words</strong> tree-wide; <code>docs/</code> alone = <strong>182 files / 41,582 lines / 249,763 words</strong>, incl. <strong>35 named subsystem docs</strong></td>
+</tr>
+<tr>
+<td>Migrations</td>
+<td><strong>789 numbered files, numbered <code>0001</code>–<code>0812</code></strong> — <strong>27 numbers absent</strong> (<code>0002</code>–<code>0028</code>, squashed away into <code>0001_squashed_0569.py</code>) and <strong>4 numbers carry two migrations each: <code>0001</code>, <code>0209</code>, <code>0261</code>, <code>0501</code> — exactly the <code>MIGRATIONS_TO_SKIP</code> set</strong> (§7.5)</td>
+</tr>
+<tr>
+<td>REST paths</td>
+<td><strong>119</strong> in a <strong>31,869-line</strong> hand-written OpenAPI spec</td>
+</tr>
+<tr>
+<td>Test suite</td>
+<td><code>zerver/tests</code> <strong>150 files / 163,703 LOC</strong> + 21 web e2e files</td>
+</tr>
+<tr>
+<td>Guard surface</td>
+<td><strong>9 <code>check-*</code> scripts · 65 executable tools</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>The one number to distrust by habit:</strong> the first measurement of Python LOC produced <strong>13,952</strong>
+via <code>find | xargs wc -l | tail -1</code> — a <strong>30× undercount</strong> caused by <code>xargs</code> batching. The honest
+figure is <strong>425,702</strong>. Recorded in batch 00 §2.3 as a standing hazard.</p>
+<hr>
+<h2 id="7-2-the-ranked-mechanisms-three-tiers">§7.2 The ranked mechanisms (three tiers)<a href="#batch-07/7-2-the-ranked-mechanisms-three-tiers" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="tier-1-transferable-now-no-adaptation-needed">Tier 1 — transferable now, no adaptation needed<a href="#batch-07/tier-1-transferable-now-no-adaptation-needed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ol>
+<li><strong>★ The ambient realm</strong> (P2, batch 03). The tenant is <strong>derived from the request&#39;s Host
+header, by subdomain</strong>, and the fence is a single comparison
+(<code>user_matches_subdomain(request_subdomain, user_profile)</code>). <strong>The tenant is the context of
+every request, not a parameter a caller passes.</strong> The most important single idea in the study.</li>
+<li><strong>★ The three-representation contract check</strong> (<code>check-schemas</code>, PZ, batch 06). The events-API
+schema is described in the OpenAPI YAML, in Python test schemas, and in JS fixtures — and a
+guard <strong>diffs them across language boundaries</strong>. Nothing else in the study does this.</li>
+<li><strong>★ The feature-level ratchet</strong> (PZ, batch 06). Leave a <code>ZF-</code> marker in the API docs and the
+build fails <strong>and the automated announcement is skipped, so a human must do it by hand.</strong> A
+mechanical check coupled to a human obligation. <code>API_FEATURE_LEVEL = 513</code>.</li>
+<li><strong>★ The five-fence LLM pattern</strong> (P1, batch 02). Server opt-in → per-realm group permission →
+per-user monthly cost cap → operator-chosen provider/secret → <strong>output through the platform&#39;s
+own Markdown sanitizer</strong>. The smallest defensible way to admit a model.</li>
+</ol>
+<h3 id="tier-2-transferable-with-adaptation">Tier 2 — transferable with adaptation<a href="#batch-07/tier-2-transferable-with-adaptation" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ol start="5">
+<li><strong>★ The widget-as-event-log</strong> (PX-W, batch 05). A widget is an <strong>append-only <code>SubMessage</code>
+log</strong>; state is <em>derived by replay</em>; late joiners are correct by construction; the existing
+message-event system is the transport. <strong>The study&#39;s first real widget model.</strong></li>
+<li><strong>★ The DB claim queue for exactly-once</strong> (P3, batch 04). A three-field work claim
+(<code>scheduled_timestamp__lte=now, delivered=False, failed=False</code>) + <code>.select_for_update</code> +
+<code>@transaction.atomic(durable=True)</code> — <strong>exactly-one-worker-per-item from an at-least-once
+base.</strong></li>
+<li><strong>★ The lateness cutoff</strong> (P3, batch 04). <code>SCHEDULED_MESSAGE_LATE_CUTOFF_MINUTES = 10</code>. After
+an outage, <strong>prefer a missing reminder to a flood of stale ones.</strong> &quot;How late is too late&quot;
+deserves a constant.</li>
+<li><strong>★ The event-carried retry counter</strong> (P3, batch 04). <code>failed_tries</code> rides <em>inside the event
+payload</em>, so <strong>retries survive a worker crash</strong>. <code>MAX_REQUEST_RETRIES = 3</code>.</li>
+<li><strong>★ <code>mark_sanitized</code></strong> (PZ, batch 06). A one-line identity function that is the <strong>escape hatch
+for the project&#39;s own taint analyser</strong> — 7 call sites, each with a written justification.</li>
+<li><strong>★ The bot-as-user primitive</strong> (P1, batch 02). A bot is a <code>UserProfile</code>; it is mentioned,
+DM&#39;d, subscribed and permission-checked by the same code as a human. <strong>No new &quot;agent&quot; object.</strong></li>
+</ol>
+<h3 id="tier-3-decisions-worth-copying-not-mechanisms">Tier 3 — decisions worth copying, not mechanisms<a href="#batch-07/tier-3-decisions-worth-copying-not-mechanisms" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ol start="11">
+<li><strong>★ The numeric audit-log namespace</strong> (P2, batch 03). 117 event types where the <em>number
+alone</em> tells you the tier: 1xx–2xx realm, 9xx folder, <strong>10xxx remote server (= realm + 10000)</strong>,
+20xxx remote realm. <strong>A data model that documents its own topology.</strong></li>
+<li><strong>★ <code>AGENTS.md</code> + path-scoped <code>.claude/rules</code></strong> (PZ, batch 06). The contributor discipline
+<strong>rewritten for an AI agent</strong>, auto-loading per file path. The platform teaching its own
+guardrails to a machine.</li>
+</ol>
+<hr>
+<h2 id="7-3-the-pole-map">§7.3 The pole map<a href="#batch-07/7-3-the-pole-map" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>Verdict</th>
+<th>The one line</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1 — the aissistant</strong></td>
+<td><strong>Real but deliberately tiny</strong></td>
+<td><em>One</em> LLM feature (topic summarisation), fenced five ways; a bot is a user; the bot API is a 7-operation façade. No tools, no memory, no streaming, no RAG.</td>
+</tr>
+<tr>
+<td><strong>P2 — the workspace</strong></td>
+<td><strong>The strongest P2 in the study</strong></td>
+<td>The realm is a 95-field config object, subdomain-resolved, <strong>part of the user&#39;s identity</strong> (email unique per-realm), governed by 5 roles / 8 system groups / <strong>38 <code>can_*_group</code> permissions</strong>, audited across 117 event types. <strong>No database-level enforcement.</strong></td>
+</tr>
+<tr>
+<td><strong>P3 — automations</strong></td>
+<td><strong>Plumbing, not a product</strong></td>
+<td>14 queues, one worker framework, a 30 s <code>SIGALRM</code> per event, a 3-retry budget inside the event, <strong>at-least-once</strong> (<code>delivery_mode=2</code>), a <strong>disk dead-letter</strong>, and the scheduled-message claim queue with a 10-minute lateness cutoff.</td>
+</tr>
+<tr>
+<td><strong>PX-W — widgets</strong></td>
+<td><strong>★ The study&#39;s first real widget model</strong></td>
+<td>A <code>SubMessage</code> event log + a zod discriminated union + a <code>GenericWidget</code> registry + the generic <strong>zform</strong> that bridges any bot. <strong>No plugin model, no composer, no versioning — by decision.</strong></td>
+</tr>
+<tr>
+<td><strong>PX-F — frontend</strong></td>
+<td><strong>Deliberately old-school</strong></td>
+<td>jQuery, 393 top-level TS modules, 462 hbs templates, 8 bundles, <code>blueslip</code>. No framework, no design-system package, no enforcement plugin. Readable, ordinary, unreusable.</td>
+</tr>
+<tr>
+<td><strong>PZ — out-of-pole</strong></td>
+<td><strong>The densest guard culture in the study</strong></td>
+<td><code>check-schemas</code> across three sources · the feature-level ratchet · <code>mark_sanitized</code> · a DEP-5 ledger that says &quot;this script is not a lawyer&quot; · <code>AGENTS.md</code> for AI agents.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-4-zulip-s-one-structural-answer">§7.4 Zulip's one structural answer<a href="#batch-07/7-4-zulip-s-one-structural-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>&quot;Make the wrong thing hard to do, then catch the rest automatically.&quot;</strong></p>
+<p>Every batch returned the same shape. The realm fence is a Host check so a developer cannot pass
+the wrong tenant. The events API is described three times so drift is impossible. The API contract
+has a ratchet so a half-finished change cannot merge. The taint analyser has a <em>named, justified</em>
+escape hatch rather than a blanket ignore. The widget contract is a zod union validated on both
+sides. The scheduled-message picker locks rows inside a transaction so two workers cannot collide.
+<strong>Zulip&#39;s architecture is not a set of features — it is a set of guardrails that happened to ship
+a chat app.</strong></p>
+<p><strong>The cost of that answer, stated plainly:</strong> the machinery is enormous (65 tools, 425,702 LOC,
+163,703 LOC of tests, 249,760 words of docs) and it is held together by <strong>discipline, not
+enforcement</strong> in exactly the places that matter most — the tenancy fence has <strong>no RLS</strong>, the
+taint escape hatch is <strong>trust</strong>, and the AI-agent policy is <strong>advisory</strong>. Zulip buys safety with
+effort, and it says so.</p>
+<hr>
+<h2 id="7-5-the-honest-ledger-rule-10-retirements-and-known-gaps">§7.5 The honest ledger (rule 10 — retirements and known gaps)<a href="#batch-07/7-5-the-honest-ledger-rule-10-retirements-and-known-gaps" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Retirements observed in the tree:</strong></p>
+<ul>
+<li><strong><code>tictactoe</code></strong> — a deleted legacy widget, still special-cased in
+<code>is_supported_widget_type</code> to suppress warnings (batch 05). <strong>A scar, left in the code.</strong></li>
+<li><strong>The <code>GenericWidget</code> wrapper</strong> — an acknowledged transitional abstraction (&quot;as of January
+2026&quot;), with concrete classes planned.</li>
+<li><strong>Migration renumbering</strong> — <code>tools/renumber-migrations</code> exists <em>because</em> backports collide
+(it skips <code>0209</code>, <code>0261</code>, <code>0501</code>, <code>0001</code>), and its own comment says <em>&quot;the migrations graph
+structure, not the IDs, is what matters.&quot;</em> <strong>Verified in this batch:</strong> those four numbers are
+exactly the four that <strong>each carry two migration files</strong> (<code>0001_initial</code> + <code>0001_squashed_0569</code>;
+<code>0209_stream_first_message_id</code> + <code>0209_user_profile_no_empty_password</code>; and two more pairs) —
+and numbers <code>0002</code>–<code>0028</code> are absent entirely, squashed away. <strong>The skip list is a precise
+index of the collisions, not an arbitrary list.</strong> A useful lesson: a maintenance script&#39;s
+constant set can be read as a fossil record of the mistakes it was written to absorb.</li>
+</ul>
+<p><strong>Known, named, unfixed gaps (all in the code&#39;s own words):</strong></p>
+<ul>
+<li>The <strong>AI cost-cap race</strong> — checked pre-call, stat incremented post-call; a TODO describes the
+fix (a transaction-locked reservation) and it is <strong>not implemented</strong> (batch 02).</li>
+<li><strong>Summary caching</strong> — &quot;does not attempt to make use of caching previous summaries… Doing so
+correctly will require careful work around invalidation&quot; (batch 02).</li>
+<li><strong>Widget schema versioning</strong> — &quot;This has yet to be designed&quot; (batch 05).</li>
+<li><strong><code>queue_json_publish_rollback_unsafe</code></strong> — republishes outside the DB transaction; the
+function <em>name</em> is the honest document (batch 04).</li>
+<li><strong><code>react</code> and <code>update_message</code></strong> on the bot façade — declared, empty, &quot;Not implemented&quot;
+(batch 02).</li>
+<li><strong>The aged widget doc</strong> — cites <code>submessage.js</code>/<code>poll_widget.js</code> while the tree has
+<code>widgetize.ts</code>/<code>poll_widget.ts</code>. The architecture is right; the filenames moved (batch 05).</li>
+</ul>
+<hr>
+<h2 id="7-6-ranked-actions">§7.6 Ranked actions<a href="#batch-07/7-6-ranked-actions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Why</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Take the ambient-realm pattern for the workspace fence.</strong> Resolve the tenant once from the request context; never let a caller pass it.</td>
+<td>The single most robust P2 idea measured; it makes a whole class of cross-tenant bug <em>unwritable</em>, not merely testable.</td>
+<td>Medium — needs a middleware boundary.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Adopt a contract-checked API schema in ≥2 representations.</strong> Pick the two cheapest (spec + test schemas) and diff them in CI.</td>
+<td><code>check-schemas</code> is the only cross-language contract guard in the study; it is what makes <code>API_FEATURE_LEVEL</code> a real number.</td>
+<td>Low–medium.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Take the five-fence LLM pattern</strong> (opt-in → group permission → per-user cost → provider-neutral → sanitised output) for any future AI feature.</td>
+<td>It is the smallest defensible way to admit a model, and it reuses existing primitives rather than adding an agent framework.</td>
+<td>Low.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Add a lateness cutoff constant to any scheduler</strong> (the <code>LATE_CUTOFF_MINUTES</code> idea).</td>
+<td>Prevents the post-outage stampede; makes an explicit product decision that is otherwise made implicitly.</td>
+<td>Very low.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Put the retry counter in the event payload</strong>, not in the worker&#39;s memory.</td>
+<td>Retries survive a crash; a worker restart cannot lose the budget.</td>
+<td>Very low.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Name every &quot;we know it&#39;s safe&quot; decision</strong> in the security model (the <code>mark_sanitized</code> idea) — a no-op annotation plus a one-line justification.</td>
+<td>Turns invisible trust into greppable, reviewable intent.</td>
+<td>Very low.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Ship an <code>AGENTS.md</code>-class file</strong> with path-scoped rules for AI contributors.</td>
+<td>Zulip proves the contributor discipline can be made legible to a machine; we will be working with agents.</td>
+<td>Low.</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>If we ever add a widget model, start from the event-log design</strong>, not a config object.</td>
+<td>State-by-replay gives multi-user interaction, late-join correctness, and no second transport — for free.</td>
+<td>High (only when needed).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Do NOT copy the queue layer as-is.</strong> At-least-once with no idempotency key and a file dead-letter is a conscious trade for simplicity.</td>
+<td>If we adopt it, we must own handler idempotency and add a dead-letter tool.</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>My recommendation:</strong> take <strong>1, 2 and 3</strong> first — the ambient realm, the two-representation
+contract check, and the five-fence LLM pattern. They are the three that change what a <em>future
+bug</em> looks like, they are the cheapest, and they do not require Zulip&#39;s scale.</p>
+<hr>
+<h2 id="7-7-the-verdict">§7.7 The verdict<a href="#batch-07/7-7-the-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Zulip is the most mature, largest, most conventionally-engineered platform in the study</strong> — and
+the most instructive, because its engineering quality is not a feature but a <em>method</em>: a
+31,869-line hand-maintained API contract checked against two other representations; a tenancy
+fence that is the ambient context of every request; a taint analyser with a named, justified
+escape hatch; an AI-agent instruction set shipped beside the code.</p>
+<p><strong>It contributes three things no other platform in this study did:</strong> the <strong>first real widget
+model</strong> (the <code>SubMessage</code> event log), the <strong>strongest P2</strong> (the ambient realm, identity-embedded),
+and the <strong>densest PZ</strong> (<code>check-schemas</code>, the feature-level ratchet, <code>mark_sanitized</code>, <code>AGENTS.md</code>).</p>
+<p><strong>And it is honest about its own limits in a way worth copying:</strong> 30 recorded divergences, 6 named
+unfixed gaps, 3 acknowledged retirements, an aged document, a 99.92% extract — and a licence guard
+that says, of itself, <strong>&quot;This script is not a lawyer.&quot;</strong></p>
+<hr>
+<p><em>Batch 07 · Zulip · 7 batches · 1,693 lines for batches 00–06 (1,876 with this file) ·
+12 ranked mechanisms · 30 divergences ·
+the answer is &quot;make the wrong thing hard to do, then catch the rest automatically.&quot;</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#7-1-the-measured-totals-rule-13-every-number-re-checked" class="toc-link">§7.1 The measured totals (rule 13 — every number re-checked)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-2-the-ranked-mechanisms-three-tiers" class="toc-link">§7.2 The ranked mechanisms (three tiers)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-1-transferable-now-no-adaptation-needed" class="toc-link">Tier 1 — transferable now, no adaptation needed</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-2-transferable-with-adaptation" class="toc-link">Tier 2 — transferable with adaptation</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-3-decisions-worth-copying-not-mechanisms" class="toc-link">Tier 3 — decisions worth copying, not mechanisms</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-3-the-pole-map" class="toc-link">§7.3 The pole map</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-4-zulip-s-one-structural-answer" class="toc-link">§7.4 Zulip&#039;s one structural answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-5-the-honest-ledger-rule-10-retirements-and-known-gaps" class="toc-link">§7.5 The honest ledger (rule 10 — retirements and known gaps)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-6-ranked-actions" class="toc-link">§7.6 Ranked actions</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-7-the-verdict" class="toc-link">§7.7 The verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

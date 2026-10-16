@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,094</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">268</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 - PX-W / PX-F</div>
+    <h4>Widgets: an event log, not a config object</h4>
+    <p>The study's first real widget model - and a frontend that is deliberately old-school</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">A WIDGET IS AN APPEND-ONLY SubMessage LOG</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">zerver/models/messages.py:331-346 - each interaction is a NEW row; the current state is the REPLAY of all submessages</text>
+
+      <rect x="40" y="70" width="880" height="60" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.4"/>
+      <text x="60" y="92" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#7c3aed">THE DOC SAYS IT PLAINLY</text>
+      <text x="60" y="114" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">"The server's only real role is to decide who gets delivered which submessages. It's a lot like a 'subchat' system."</text>
+
+      <text x="40" y="166" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">WHAT THE REPLAY MODEL BUYS</text>
+      <g transform="translate(40, 178)">
+        <rect width="290" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STATE IS DERIVED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No poll_state column</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The votes ARE the rows</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">state is a function of the log</text>
+      </g>
+      <g transform="translate(345, 178)">
+        <rect width="290" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">MULTI-USER IS NATIVE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Every participant appends</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The server broadcasts via the</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">EXISTING message-event system</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no second transport</text>
+      </g>
+      <g transform="translate(650, 178)">
+        <rect width="270" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">LATE JOINERS CORRECT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A client opening an old message</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">REPLAYS all submessages first</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">widgetize.ts:62-72</text>
+      </g>
+
+      <text x="40" y="310" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE CONTRACT AND THE BRIDGE</text>
+      <g transform="translate(40, 322)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CONTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A zod discriminated union</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">validated on BOTH sides</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">drift is caught at the boundary</text>
+      </g>
+      <g transform="translate(345, 322)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE REGISTRY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">GenericWidget registry</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ a capability check</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">an acknowledged TRANSITIONAL wrapper</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">"as of January 2026"</text>
+      </g>
+      <g transform="translate(650, 322)">
+        <rect width="270" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE BRIDGE - zform</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">How a third party gets a button UI</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">without touching Zulip</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">flows BOTH ways</text>
+      </g>
+
+      <rect x="40" y="442" width="440" height="62" rx="8" fill="var(--surface-card, #ffffff)" stroke="#b45309" stroke-width="1.4"/>
+      <text x="260" y="464" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#b45309">THE SCAR - tictactoe</text>
+      <text x="260" y="484" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A DELETED legacy widget, still special-cased to suppress warnings</text>
+      <text x="260" y="500" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No plugin model, no composer, no versioning - BY DECISION</text>
+
+      <rect x="500" y="442" width="420" height="62" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+      <text x="710" y="464" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">PX-F - DELIBERATELY OLD-SCHOOL</text>
+      <text x="710" y="484" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">jQuery - 393 top-level TS modules - 462 hbs templates - 8 bundles</text>
+      <text x="710" y="500" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No framework, no design system, no enforcement plugin. Readable, unreusable.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-05-widgets-frontend-px-w-px-f">Zulip Study — Batch 05: widgets & frontend (PX-W / PX-F)<a href="#batch-05/zulip-study-batch-05-widgets-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Poles:</strong> <strong>PX-W (widgets) + PX-F (frontend)</strong>
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>The question this batch answers:</strong> <em>does Zulip have a widget model, and how is its client
+built?</em> The pin&#39;s probe said yes. <strong>This batch confirms it — and Zulip is the first platform in
+this study with a genuine, schema-validated, event-sourced widget architecture.</strong> The rest of the
+batch reads the frontend (PX-F): a hand-written TypeScript SPA on jQuery, with a bundling and
+templating story that is deliberately old-school and completely un-React.</p>
+<p><strong>Headline:</strong> Zulip&#39;s widget model is built on a <strong><code>SubMessage</code> table</strong> — an append-only log of
+interactions attached to a message — with a <strong>zod discriminated-union schema</strong> on the client and
+a <strong><code>GenericWidget</code> registry</strong> on the server&#39;s transport. It is not a <em>plugin system</em> (the doc
+says so outright: <em>&quot;Right now we don&#39;t have a plugin model&quot;</em>), but it is the first <em>composition
+model</em> the study has found.</p>
+<hr>
+<h2 id="5-1-px-w-a-widget-is-a-submessage-log-not-a-config-object">§5.1 ★ PX-W: a widget is a SubMessage log, not a config object<a href="#batch-05/5-1-px-w-a-widget-is-a-submessage-log-not-a-config-object" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The architecture (<code>docs/subsystems/widgets.md</code>, traced to code): a <strong><code>SubMessage</code> row</strong>
+(<code>zerver/models/messages.py:331-346</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">class SubMessage(AbstractSubMessage):
+    message = models.ForeignKey(Message, on_delete=CASCADE)
+</code></pre>
+</div>
+<p>Each widget interaction — a vote, a todo check-off, a zform click — is a <strong>new <code>SubMessage</code>
+row</strong> (<code>msg_type=&quot;widget&quot;</code>, <code>content</code> = JSON) appended to the parent message. <strong>This is an
+append-only, event-sourced model</strong>: the <em>current state</em> of a poll is the <strong>replay of all its
+submessages</strong>. The doc says it plainly: <em>&quot;The server&#39;s only real role is to decide who gets
+delivered which submessages. It&#39;s a lot like a &#39;subchat&#39; system.&quot;</em></p>
+<p><strong>Why this matters, and why it is the study&#39;s first true PX-W:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>How Zulip does it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>State is derived, not stored</strong></td>
+<td>No <code>poll_state</code> column — the votes <em>are</em> the rows</td>
+</tr>
+<tr>
+<td><strong>Multi-user interaction is native</strong></td>
+<td>Every participant appends; the server broadcasts submessages via the <strong>existing event system</strong> (batch 01&#39;s Tornado pipeline)</td>
+</tr>
+<tr>
+<td><strong>Late joiners are correct by construction</strong></td>
+<td>A client opening an old message <em>replays all submessages</em> before rendering (<code>widgetize.ts:62-72</code>: <em>&quot;Replay any events that already happened&quot;</em>)</td>
+</tr>
+<tr>
+<td><strong>No new transport</strong></td>
+<td>The widget reuses the message-event machinery — no second channel</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The replay comment in code</strong> (<code>web/src/widgetize.ts:62-69</code>) is the clearest statement of the
+model: <em>&quot;If there are no events to replay, don&#39;t annoy the widget by making it handle the
+degenerate case.&quot;</em> The architecture assumes <strong>the widget is a state machine driven by an event
+log</strong> — and the server is deliberately dumb.</p>
+<hr>
+<h2 id="5-2-the-contract-a-zod-discriminated-union">§5.2 The contract: a zod discriminated union<a href="#batch-05/5-2-the-contract-a-zod-discriminated-union" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>web/src/widget_schema.ts</code> (37 lines — small, precise):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export const any_widget_data_schema = z.discriminatedUnion(&quot;widget_type&quot;, [
+    z.object({widget_type: z.literal(&quot;poll&quot;), extra_data: poll_widget_extra_data_schema}),
+    z.object({widget_type: z.literal(&quot;zform&quot;), extra_data: z.nullable(zform_widget_extra_data_schema)}),
+    z.object({widget_type: z.literal(&quot;todo&quot;), extra_data: z.nullable(todo_widget_extra_data_schema)}),
+]);
+export type AnyWidgetData = z.infer&lt;typeof any_widget_data_schema&gt;;
+</code></pre>
+</div>
+<p><strong>Three widget types, each with its own schema module</strong> (<code>poll_data.ts</code> 283 lines,
+<code>todo_data.ts</code> 296 lines, <code>zform_data.ts</code> 28 lines). The <code>zform</code> schema is the <em>generic</em> one
+(<code>zform_data.ts</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export const zform_widget_extra_data_schema = z.object({
+    choices: z.array(z.object({
+        type: z.string(), long_name: z.string(), reply: z.string(), short_name: z.string(),
+    })),
+    heading: z.string(),
+    type: z.literal(&quot;choices&quot;),
+});
+</code></pre>
+</div>
+<p><strong>The validation happens in two places (rule 6 — name the mechanism):</strong></p>
+<ol>
+<li><strong>Server-side, before storage</strong> — <code>check_message</code> validates <code>widget_content</code> <em>before</em> it is
+trusted, and <code>zerver/lib/widget.py</code> says so in a comment: <em>&quot;Note that we validate this data in
+<code>check_message</code>, so we can trust it here.&quot;</em></li>
+<li><strong>Client-side, at parse</strong> — the zod schema, so a widget can never render on a malformed
+payload.</li>
+</ol>
+<hr>
+<h2 id="5-3-the-abstraction-a-genericwidget-registry-with-a-capability-check">§5.3 The abstraction: a `GenericWidget` registry with a capability check<a href="#batch-05/5-3-the-abstraction-a-genericwidget-registry-with-a-capability-check" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>web/src/generic_widget.ts</code> (114 lines) is the composition surface. The key mechanisms:</p>
+<p><strong>A registry</strong> (<code>generic_widget.ts:31-44</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export const widgets = new Map&lt;string, WidgetImplementation&gt;();
+
+export function is_supported_widget_type(widget_type: string): boolean {
+    if (widgets.has(widget_type)) {
+        return true;
+    }
+    if (widget_type === &quot;tictactoe&quot;) {
+        return false; // don&#39;t warn for deleted legacy widget
+    }
+    blueslip.warn(&quot;unknown widget_type&quot;, {widget_type});
+    return false;
+}
+</code></pre>
+</div>
+<p><strong>★ <code>tictactoe</code> — a DELETED legacy widget.</strong> The code keeps a <strong>deliberate exception</strong> so that
+old messages containing a retired widget type do not produce warnings. <strong>This is rule 10 in a
+single line</strong>: the widget ecosystem has already had a retirement, and the codebase carries a
+scar for it. <code>is_widget_message</code> (<code>zerver/lib/widget.py</code>) — <em>&quot;all messages that are widgetized
+use submessage, and vice versa&quot;</em> — is the invariant that ties the two halves.</p>
+<p><strong>The <code>WidgetImplementation</code> interface</strong> (<code>generic_widget.ts:17-29</code>) — every widget must provide
+exactly two functions:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">type WidgetImplementation = {
+    activate: (data: {message: Message; any_data: AnyWidgetData}) =&gt; {
+        inbound_events_handler: HandleInboundEventsFunction;
+        widget_data: WidgetData;
+    };
+    render: (data: {$elem: JQuery; callback: (data: WidgetOutboundData) =&gt; void;
+                    message: Message; widget_data: WidgetData; rerender: boolean}) =&gt; void;
+};
+</code></pre>
+</div>
+<p><strong><code>activate</code> builds the state machine; <code>render</code> paints it.</strong> Outbound interaction is a
+black-box <code>post_to_server</code> callback (<code>generic_widget.ts:95-99</code>, in a comment: <em>&quot;a black-box
+service that sends any events <strong>outbound</strong> to the other active users&quot;</em>). The comment at
+<code>:46-49</code> is honest about the debt: <em>&quot;Eventually we will have concrete classes for PollWidget,
+TodoWidget, and ZformWidget, but for now we need this wrapper class.&quot;</em> And <code>:14-16</code>: <em>&quot;They are
+currently injected into us from another module for historical reasons. (as of January 2026)&quot;</em> —
+<strong>the registry is populated by injection, not import, and the code says why.</strong></p>
+<hr>
+<h2 id="5-4-the-generic-widget-zform-how-a-third-party-gets-a-button-ui-without-touching-zulip">§5.4 The generic widget: zform — how a third party gets a button UI without touching Zulip<a href="#batch-05/5-4-the-generic-widget-zform-how-a-third-party-gets-a-button-ui-without-touching-zulip" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The doc&#39;s own framing (<code>widgets.md</code>): a trivia bot wants buttons, not &quot;@bot answer A&quot;. <strong>zform</strong>
+is the answer, and it is <em>completely generic</em> — any bot can send a <code>choices</code> payload and the
+client renders buttons whose <code>reply</code> field is sent as a normal chat message on click
+(<code>widgets.md</code> zform section). <strong>The bot stays an ordinary bot</strong> (it grades the answer &quot;using
+ordinary chat-bot coding&quot;); the <em>buttons</em> are the only thing the platform renders.</p>
+<p><strong>★ This is the study&#39;s first genuine bot↔widget bridge, and it flows both ways:</strong></p>
+<ul>
+<li><strong>Bot → widget:</strong> the bot framework&#39;s <code>send_reply</code> accepts an optional <code>widget_content</code>, which
+the server validates (<code>check_widget_content</code>) and stores as a <code>SubMessage</code> (batch 02 §2.5).</li>
+<li><strong>Widget → bot:</strong> a click posts a <code>SubMessage</code>, which is broadcast; the bot receives it as a
+chat message and replies normally.</li>
+</ul>
+<p><strong>&quot;Any third party developer can enhance bots… without touching any Zulip code&quot;</strong> — the doc&#39;s
+claim, and the schema (<code>zform_data.ts</code>) confirms it is schema-driven, not code-driven.</p>
+<hr>
+<h2 id="5-5-what-px-w-does-not-have-measured-so-the-negative-is-solid">§5.5 What PX-W does NOT have (measured, so the negative is solid)<a href="#batch-05/5-5-what-px-w-does-not-have-measured-so-the-negative-is-solid" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Present?</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>A typed widget contract</strong></td>
+<td>✅ yes — zod discriminated union</td>
+<td><code>widget_schema.ts</code></td>
+</tr>
+<tr>
+<td><strong>Event-sourced widget state</strong></td>
+<td>✅ yes — <code>SubMessage</code> log + replay</td>
+<td><code>messages.py:331</code>, <code>widgetize.ts:62-72</code></td>
+</tr>
+<tr>
+<td><strong>A bot↔widget bridge</strong></td>
+<td>✅ yes — zform + <code>widget_content</code></td>
+<td><code>widgets.md</code>, <code>widget.py</code></td>
+</tr>
+<tr>
+<td><strong>A widget registry with capability check</strong></td>
+<td>✅ yes — <code>widgets</code> Map + <code>is_supported_widget_type</code></td>
+<td><code>generic_widget.ts:31-44</code></td>
+</tr>
+<tr>
+<td><strong>A plugin/sandbox model for widgets</strong></td>
+<td>❌ <strong>no</strong></td>
+<td><em>&quot;Right now we don&#39;t have a plugin model&quot;</em> (doc)</td>
+</tr>
+<tr>
+<td><strong>Dynamic loading of external widget code</strong></td>
+<td>❌ no</td>
+<td>widgets are compiled into the bundle</td>
+</tr>
+<tr>
+<td><strong>A composer/editor for widgets</strong></td>
+<td>❌ no</td>
+<td>(the <code>/poll</code> slash command is a parser, not an editor)</td>
+</tr>
+<tr>
+<td><strong>Widget schema versioning</strong></td>
+<td>❌ <strong>no, and the doc admits it</strong></td>
+<td><em>&quot;This has yet to be designed&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Mobile widget parity</strong></td>
+<td>❌ no</td>
+<td>doc: <em>&quot;Other clients just show raw messages like &#39;/poll&#39;&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The three most honest lines in the whole batch are in the doc&#39;s own limitations section:</strong>
+<em>&quot;Right now we don&#39;t have a plugin model… anybody who wishes to build their own widget has the
+option of forking the server code.&quot;</em> · <em>&quot;This has yet to be designed&quot;</em> (versioning) · <em>&quot;most
+widgets are somewhat ephemeral in nature, so it&#39;s not the end of the world if upgrades cause
+some older messages to be obsolete.&quot;</em> <strong>Zulip has a widget model and explicitly declines to
+make it a plugin system</strong> — that is a <em>decision</em>, recorded.</p>
+<hr>
+<h2 id="5-6-px-f-the-frontend-is-jquery-hand-written-typescript-and-8-bundles">§5.6 PX-F: the frontend is jQuery, hand-written TypeScript, and 8 bundles<a href="#batch-05/5-6-px-f-the-frontend-is-jquery-hand-written-typescript-and-8-bundles" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TS modules under <code>web/src</code> (top level)</td>
+<td><strong>393</strong> <code>.ts</code> files (<strong>471</strong> <code>.ts</code>+<code>.tsx</code> across all <code>web/</code>, <strong>153,253 LOC</strong>)</td>
+<td>measured</td>
+</tr>
+<tr>
+<td>Handlebars templates (<code>web/templates</code>)</td>
+<td><strong>462</strong> <code>.hbs</code></td>
+<td><code>find</code></td>
+</tr>
+<tr>
+<td>Widget templates</td>
+<td><strong>7</strong> (<code>poll_widget</code>, <code>todo_widget</code>, <code>zform_choices</code>, + examples/results)</td>
+<td><code>web/templates/widgets/</code></td>
+</tr>
+<tr>
+<td>CSS files (<code>web/styles</code>)</td>
+<td>dozens, incl. <code>dark_theme.css</code>, <code>light_theme.css</code>, <code>app_variables.css</code></td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td>Webpack bundles</td>
+<td><strong>8</strong> (<code>app</code>, <code>common</code>, <code>hello</code>, <code>help_bundle</code>, <code>integrations_bundle</code>, <code>legacy_portico_bundle</code>, <code>marketing_page</code>, <code>showroom</code>)</td>
+<td><code>web/src/bundles/</code></td>
+</tr>
+<tr>
+<td>Framework</td>
+<td><strong>none</strong> — jQuery + hand-written modules</td>
+<td><code>import {$} from &quot;jquery&quot;</code> throughout</td>
+</tr>
+<tr>
+<td>E2E tests</td>
+<td>21 TS files under <code>web/e2e-tests</code></td>
+<td><code>find</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>The architecture, named:</strong></p>
+<ul>
+<li><strong>A module-per-feature convention.</strong> <code>compose_*.ts</code> (×20), <code>message_*.ts</code> (×30),
+<code>settings_*.ts</code> (×20) — the file <em>is</em> the feature, and the name tells you what it is.</li>
+<li><strong>A small <code>components.ts</code> (218 lines)</strong> of hand-built UI primitives — <code>toggle</code>, popovers,
+typeahead — built on jQuery. There is <strong>no design-system package</strong> like n8n&#39;s 129 components.</li>
+<li><strong><code>blueslip</code></strong> — Zulip&#39;s own client-side error reporter (used by the widget registry to
+<code>warn</code> on unknown types). <strong>Error reporting is a first-class module, not a <code>console.log</code>.</strong></li>
+<li><strong>Server-rendered HTML + hydration</strong> (<code>web/templates/*.hbs</code>), not a client-only SPA. The
+message feed is the app; portico pages are separate bundles.</li>
+</ul>
+<p><strong>The bundle split is a deliberate performance boundary:</strong> the marketing page and the help
+centre do not ship the chat app&#39;s JavaScript. <code>common.ts</code> holds what every page needs.</p>
+<hr>
+<h2 id="5-7-the-poll-parser-the-only-composer-zulip-has">§5.7 The `/poll` parser: the only "composer" Zulip has<a href="#batch-05/5-7-the-poll-parser-the-only-composer-zulip-has" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>zerver/lib/widget.py</code>&#39;s <code>get_widget_data</code> is a <strong>slash-command parser</strong>, not a UI:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def get_widget_data(content: str) -&gt; tuple[str | None, Any]:
+    valid_widget_types = [&quot;poll&quot;, &quot;todo&quot;]
+    tokens = re.split(r&quot;\s+|\n+&quot;, content)
+    if tokens[0].startswith(&quot;/&quot;):
+        widget_type = tokens[0].removeprefix(&quot;/&quot;)
+        if widget_type in valid_widget_types:
+            remaining_content = content.replace(tokens[0], &quot;&quot;, 1)
+            extra_data = get_extra_data_from_widget_type(remaining_content, widget_type)
+            return widget_type, asdict(extra_data)
+    return None, None
+</code></pre>
+</div>
+<p><code>/poll Question</code> pre-fills a question; <code>/todo Title</code> pre-fills a task list. <strong>The &quot;composer&quot; is
+typing a slash command, and the web client&#39;s <code>widget_modal.ts</code> + <code>web/templates/widgets/</code>
+collect the rest.</strong> There is <strong>no drag-and-drop builder</strong> anywhere in the tree.</p>
+<hr>
+<h2 id="5-8-divergences-and-honest-limits-batch-05">§5.8 Divergences and honest limits (batch 05) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/5-8-divergences-and-honest-limits-batch-05" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Divergence / limit</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D5-1</strong></td>
+<td><strong>The doc contradicts the code on file names</strong></td>
+<td><code>widgets.md</code> cites <code>web/src/submessage.js</code>, <code>poll_widget.js</code>, <code>zform.ts</code>; the tree has <code>widgetize.ts</code>, <code>poll_widget.ts</code>, <code>zform_data.ts</code>, <code>widget_data.ts</code>. <strong>The doc has aged</strong> — rule 1 in action, and the <em>architecture</em> (submessage log) is unchanged while the <em>filenames</em> moved.</td>
+</tr>
+<tr>
+<td><strong>D5-2</strong></td>
+<td><strong><code>GenericWidget</code> is a transitional wrapper</strong></td>
+<td><code>generic_widget.ts:46-49</code> says so: concrete classes are planned, this is interim. The registry-by-injection (<code>:14-16</code>, &quot;historical reasons (as of January 2026)&quot;) is acknowledged debt.</td>
+</tr>
+<tr>
+<td><strong>D5-3</strong></td>
+<td><strong>A deleted widget leaves a scar</strong></td>
+<td><code>tictactoe</code> is special-cased in <code>is_supported_widget_type</code> to suppress warnings.</td>
+</tr>
+<tr>
+<td><strong>D5-4</strong></td>
+<td><strong>No schema versioning — by decision, not oversight</strong></td>
+<td>The doc proposes it (&quot;would be worthwhile to add some kind of versioning scheme… This has yet to be designed&quot;) and accepts obsolescence for ephemeral widgets.</td>
+</tr>
+<tr>
+<td><strong>D5-5</strong></td>
+<td><strong>Mobile/other clients show raw text</strong></td>
+<td>The widget experience is web-only today; the graceful-degradation path (show <code>/poll</code>) is the design.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-9-batch-05-verdict">§5.9 Batch-05 verdict<a href="#batch-05/5-9-batch-05-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Zulip has the study&#39;s <strong>first real widget model</strong>, and its centre is one idea: <strong>a widget is an
+append-only log of interactions attached to a message</strong> (<code>SubMessage</code>), replayed by every client
+that sees it, with <strong>no second transport</strong> — the normal message-event system carries the
+submessages. On top of that sits a <strong>zod discriminated-union contract</strong> (validated server-side
+by <code>check_message</code> <em>and</em> client-side), a <strong><code>GenericWidget</code> registry</strong> with an
+<code>activate</code>/<code>render</code> capability pair, and a <strong>generic zform</strong> that lets any third-party bot put
+buttons in a message without touching Zulip code.</p>
+<p><strong>What Zulip explicitly does NOT have</strong>, and says so: <strong>a plugin model, dynamic loading, a
+visual composer, and schema versioning</strong> — all four are named as deliberate gaps or &quot;has yet to
+be designed.&quot;</p>
+<p><strong>PX-F is the opposite of n8n.</strong> Where n8n shipped a 129-component design system, its own ESLint
+plugin and CRDT collaboration, Zulip ships <strong>jQuery, 393 top-level feature modules (471 across
+<code>web/</code>), 462 hbs templates, 8 bundles, and <code>blueslip</code></strong> — and is completely unapologetic about
+it. <strong>The
+trade-off to carry forward:</strong> Zulip&#39;s frontend is <em>readable and ordinary</em> but has no reuse
+mechanism beyond &quot;another file&quot;; n8n&#39;s is <em>systematised and enforced</em> but heavy.</p>
+<hr>
+<p><em>Batch 05 · Zulip · the study&#39;s first widget model · a submessage log, a zod union, a
+GenericWidget registry · zform bridges any bot · no plugin model — by decision.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#5-1-px-w-a-widget-is-a-submessage-log-not-a-config-object" class="toc-link">§5.1 ★ PX-W: a widget is a SubMessage log, not a config object</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-2-the-contract-a-zod-discriminated-union" class="toc-link">§5.2 The contract: a zod discriminated union</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-3-the-abstraction-a-genericwidget-registry-with-a-capability-check" class="toc-link">§5.3 The abstraction: a GenericWidget registry with a capability check</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-4-the-generic-widget-zform-how-a-third-party-gets-a-button-ui-without-touching-zulip" class="toc-link">§5.4 The generic widget: zform — how a third party gets a button UI without touching Zulip</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-5-what-px-w-does-not-have-measured-so-the-negative-is-solid" class="toc-link">§5.5 What PX-W does NOT have (measured, so the negative is solid)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-6-px-f-the-frontend-is-jquery-hand-written-typescript-and-8-bundles" class="toc-link">§5.6 PX-F: the frontend is jQuery, hand-written TypeScript, and 8 bundles</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-7-the-poll-parser-the-only-composer-zulip-has" class="toc-link">§5.7 The /poll parser: the only &quot;composer&quot; Zulip has</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-8-divergences-and-honest-limits-batch-05" class="toc-link">§5.8 Divergences and honest limits (batch 05)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-9-batch-05-verdict" class="toc-link">§5.9 Batch-05 verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

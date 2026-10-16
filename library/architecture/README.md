@@ -52,6 +52,9 @@ library/architecture/
 ├── openrig-forensics/         ← the OpenRig study (DONE, 7 batches + pin) + reader/
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
+├── zulip-forensics/           ← the Zulip study (DONE, 7 batches + pin) + reader/
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
 └── platforms/                 ← the raw platform archives + references
     ├── *.zip                  (gitignored)
@@ -72,6 +75,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 - **n8n reader** → `n8n-forensics/reader/` (port 3500)
 - **buzz reader** → `buzz-forensics/reader/` (port 3600)
 - **OpenRig reader** → `openrig-forensics/reader/` (port 3700)
+- **Zulip reader** → `zulip-forensics/reader/` (port 3800)
 
 **The markdown is the source of truth.** Readers are generated from it and never edited by hand.
 
@@ -89,8 +93,8 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **n8n** | `n8n-io/n8n` | **STUDIED — 7 batches + pin (73 findings) + reader (port 3500). The first platform with a real composition surface.** |
 | buzz | `block/buzz` | **STUDIED — 7 batches + pin (90 findings) + reader (`bfc3833`, port 3600).** Nostr-based team workspace; Apache-2.0; 34 Rust crates; formally verified tenancy. |
 | **openrig** | `mvschwarz/openrig` | **STUDIED — 7 batches + pin (79 findings) + reader (port 3700).** Orchestration substrate for **unmodified** Claude Code + Codex in tmux; Apache-2.0; 0.6.10; TS monorepo (4 pkgs). **The first platform in the study with NO tenancy at all** (0 `tenant_id`); **the strongest P1 permission seam** (the two-surface rule); and **the study's most transferable PZ** (the gate culture). No widget model. |
+| **zulip** | `zulip/zulip` | **STUDIED — 7 batches + pin (12 ranked mechanisms, 30 divergences) + reader (port 3800).** Mature Django+Tornado team chat; Apache-2.0; `12.0-dev+git`; 425,702 LOC Python. **The strongest P2 in the study** (the ambient realm — the tenant is derived from the request's Host header, and email is unique only within it); **the study's first real widget model** (a widget is an append-only `SubMessage` log, replayed); **the densest PZ** (`check-schemas` across three representations, the `API_FEATURE_LEVEL` ratchet, `mark_sanitized`, `AGENTS.md`). P1 is deliberately tiny — one LLM feature fenced five ways. |
 | mattermost | `mattermost/mattermost` | to study |
-| zulip | `zulip/zulip` | to study |
 
 ---
 
@@ -124,5 +128,6 @@ fixed later.
 ---
 
 *Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; n8n closed (7 batches
-+ reader 3500); buzz closed (7 batches + reader 3600); **OpenRig closed (7 batches + reader 3700)**;
-two platforms remain (**mattermost, zulip** — order not fixed; ask before extracting).*
++ reader 3500); buzz closed (7 batches + reader 3600); OpenRig closed (7 batches + reader 3700);
+**Zulip closed (7 batches + reader 3800)**. One platform remains (**mattermost** — ask before
+extracting; it is ~700 MB).*

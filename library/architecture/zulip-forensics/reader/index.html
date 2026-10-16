@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zulip Platform Study — Executive Master Reader</title>
+  <link rel="stylesheet" href="assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <!-- Reading Progress Bar -->
+  <div id="readingProgressBar"></div>
+
+  <!-- Master App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="tool-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation" title="Toggle Documents Menu">☰</button>
+      <span class="brand-badge">Forensics</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Zulip Platform Study <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Upstream Zulip 12.0-dev+git — a mature decade-old team-chat product run by thousands of organisations, with the strongest tenancy model in the study and the densest guard culture built around it)</span></div>
+        <div class="header-subtitle">8 Unabridged Batches • 2,037 Python / 471 TS Files • 425,702 LOC Python • 789 Migrations • The Ambient Realm • The First Real Widget Model</div>
+      </div>
+    </div>
+
+    <!-- Header Controls -->
+    <div class="header-controls">
+      <!-- Font Size Slider Group -->
+      <div class="font-slider-group" title="Adjust reading font size relatively">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn" title="Decrease font size (A-)">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider" aria-label="Font Size">
+        <button class="font-btn" id="fontIncBtn" title="Increase font size (A+)">A+</button>
+        <button class="font-btn" id="fontResetBtn" title="Reset font size to 16px" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <!-- Font Family Switcher -->
+      <select id="fontSelect" class="tool-btn" style="cursor:pointer;" title="Switch font typography">
+        <option value="sans">Modern Sans</option>
+        <option value="serif">Classic Serif</option>
+        <option value="mono">Technical Mono</option>
+      </select>
+
+      <!-- Reading Width Switcher -->
+      <select id="widthSelect" class="tool-btn" style="cursor:pointer;" title="Adjust reading column width">
+        <option value="reading">Column: Reading (760px)</option>
+        <option value="standard" selected>Column: Standard (900px)</option>
+        <option value="wide">Column: Wide (1180px)</option>
+        <option value="full">Column: Full Width</option>
+      </select>
+
+      <!-- Theme Selector -->
+      <div class="theme-selector" title="Choose color theme">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <!-- Architecture Guides Button -->
+      <button class="tool-btn" id="headerGalleryBtn" title="Explore all 9 visual architecture guides (Press 'A')">
+        <span>🏛️</span>
+        <span>Architecture Guides</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">A</kbd>
+      </button>
+
+      <!-- Search Trigger -->
+      <button class="tool-btn" id="searchTrigger" title="Search all 8 documents (Press '/')">
+        <span>🔍</span>
+        <span>Search</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">/</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Main Layout -->
+  <div class="app-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-left" id="sidebarLeft">
+      <div class="sidebar-search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="sidebarFilterInput" class="search-input" placeholder="Filter batches...">
+      </div>
+
+      <nav class="sidebar-docs-list" id="sidebarDocsList">
+        
+    <a href="#batch-00" class="doc-nav-item active" data-id="batch-00">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 00</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Pin &amp; Method</div>
+      <div class="doc-nav-meta">
+        <span>1,934 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-01" class="doc-nav-item " data-id="batch-01">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 01</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Platform Overview</div>
+      <div class="doc-nav-meta">
+        <span>1,612 words</span>
+        <span>•</span>
+        <span>8 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-02" class="doc-nav-item " data-id="batch-02">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 02</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Aissistant (P1)</div>
+      <div class="doc-nav-meta">
+        <span>2,031 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-03" class="doc-nav-item " data-id="batch-03">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 03</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Workspace (P2)</div>
+      <div class="doc-nav-meta">
+        <span>1,944 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-04" class="doc-nav-item " data-id="batch-04">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 04</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Automations (P3)</div>
+      <div class="doc-nav-meta">
+        <span>1,773 words</span>
+        <span>•</span>
+        <span>9 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-05" class="doc-nav-item " data-id="batch-05">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 05</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Widgets &amp; Frontend</div>
+      <div class="doc-nav-meta">
+        <span>2,094 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-06" class="doc-nav-item " data-id="batch-06">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 06</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Out-of-Pole (PZ)</div>
+      <div class="doc-nav-meta">
+        <span>2,110 words</span>
+        <span>•</span>
+        <span>11 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-07" class="doc-nav-item " data-id="batch-07">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 07</span>
+        <span class="doc-nav-badge badge-complete">COMPLETE</span>
+      </div>
+      <div class="doc-nav-title">The Synthesis</div>
+      <div class="doc-nav-meta">
+        <span>2,140 words</span>
+        <span>•</span>
+        <span>11 min</span>
+      </div>
+    </a>
+  
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>8 Batches • 12 Ranked Mechanisms</span>
+        <span>Three-Pole Frame</span>
+      </div>
+    </aside>
+
+    <!-- Workspace Main Reader -->
+    <main class="reader-workspace">
+      <!-- Sub-header bar inside reader -->
+      <div class="reader-sub-header">
+        <div class="sub-header-left">
+          <span style="font-weight: 700; color: var(--primary);">Document View:</span>
+          <div class="view-toggle-wrap">
+            <button class="view-toggle-btn active" id="viewRenderedBtn">Rendered Reading View</button>
+            <button class="view-toggle-btn" id="viewRawBtn">Verbatim Raw Markdown</button>
+          </div>
+        </div>
+
+        <div class="sub-header-right">
+          <button class="tool-btn" id="readerGalleryBtn" style="font-size:0.75rem; padding: 0.25rem 0.6rem;" title="Explore all architecture guides">
+            <span>🏛️ Architecture Explorer</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrolling Reader Canvas -->
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <!-- Document Seal & Metadata Card -->
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • ZERO CONTENT OMITTED</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Zulip Extract Pin</span>
+              </div>
+              <div class="seal-stats-grid" id="docSealStats">
+                
+    <div class="seal-stat-item">
+      <span class="stat-label">Document Status</span>
+      <span class="stat-value" style="color: #d97706">DONE</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Text Fidelity</span>
+      <span class="stat-value" style="color: #059669;">100% UNABRIDGED</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Word Count</span>
+      <span class="stat-value">1,934</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Est. Reading Time</span>
+      <span class="stat-value">10 min</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Source Lines</span>
+      <span class="stat-value">214</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Verified Date</span>
+      <span class="stat-value">2026-10-16</span>
+    </div>
+  
+              </div>
+            </div>
+
+            <!-- Explanatory Graphical Representation Section -->
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Document Default Architecture Guide</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <button type="button" class="tool-btn" id="openGalleryBtn" title="Explore all 9 visual architecture guides">
+                    <span>🏛️ All Guides</span>
+                  </button>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>Zulip Platform Study Topology: one repository, three entry points, and a tenancy fence that is the request itself</h4>
+    <p>Where each studied mechanism lands, and what the nine platforms before it did not have</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 590" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">Zulip 12.0-dev+git - DJANGO + TORNADO + RABBITMQ</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">One manage.py, three entry points - 425,702 LOC Python / 153,253 TS - 789 migrations - Apache-2.0</text>
+
+      <text x="40" y="80" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE PROCESS FAMILIES (the first multi-process server by construction in the study)</text>
+      <g transform="translate(40, 92)">
+        <rect width="280" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">DJANGO (WSGI)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">HTTP API + web app + business logic</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">zerver/ - 1,186 files</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ROOT_URLCONF swapped only under runtornado</text>
+      </g>
+      <g transform="translate(340, 92)">
+        <rect width="280" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TORNADO</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">manage.py runtornado</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the event queues - long-poll client sync</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">zerver/tornado/ - 10 files</text>
+      </g>
+      <g transform="translate(640, 92)">
+        <rect width="280" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">QUEUE WORKERS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">manage.py process_queue --queue=X</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">email - push - thumbnails - analytics</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">zerver/worker/ - 19 files</text>
+      </g>
+
+      <text x="40" y="222" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE THREE POLES</text>
+      <g transform="translate(40, 234)">
+        <rect width="280" height="148" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P1 - THE AISSISTANT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ONE LLM feature: topic summarisation</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A bot IS a UserProfile - no agent object</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No tools - no memory - no streaming</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">DELIBERATELY TINY</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">fenced five ways (F1-F5)</text>
+      </g>
+      <g transform="translate(340, 234)">
+        <rect width="280" height="148" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P2 - THE WORKSPACE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A 95-field Realm config object</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Email is unique ONLY per-realm</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5 roles - 8 system groups - 38 can_*</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">THE STRONGEST P2 IN THE STUDY</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the ambient realm: Host to subdomain</text>
+      </g>
+      <g transform="translate(640, 234)">
+        <rect width="280" height="148" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P3 - AUTOMATIONS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">14 queues - one worker framework</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">delivery_mode=2 (at-least-once)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A disk dead-letter</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">THE CLAIM QUEUE (M1-M5)</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">exactly-one-worker per message</text>
+      </g>
+
+      <rect x="40" y="400" width="440" height="74" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.4"/>
+      <text x="260" y="424" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#059669">THE STUDY'S FIRST REAL WIDGET MODEL (PX-W)</text>
+      <text x="260" y="443" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A widget is an APPEND-ONLY SubMessage log - state is DERIVED BY REPLAY</text>
+      <text x="260" y="460" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Late joiners correct by construction - no new transport</text>
+
+      <rect x="500" y="400" width="420" height="74" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.4"/>
+      <text x="710" y="424" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#7c3aed">THE DENSEST GUARD CULTURE (PZ)</text>
+      <text x="710" y="443" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">check-schemas: ONE truth across THREE representations, diffed across languages</text>
+      <text x="710" y="460" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">API_FEATURE_LEVEL=513 ratchet - mark_sanitized - AGENTS.md</text>
+
+      <rect x="40" y="492" width="880" height="60" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+      <text x="480" y="516" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--text-primary, #0f172a)">THE ONE STRUCTURAL ANSWER</text>
+      <text x="480" y="538" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">"Make the wrong thing hard to do, then catch the rest automatically." - and it is honest about where discipline replaces enforcement (no RLS)</text>
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 - THE PIN</div>
+    <h4>The pin, the extraction, and the two counting traps</h4>
+    <p>99.92% of the tree, one lost fixture class, and why a numbering ceiling is not a count</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 430" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">Zulip 12.0-dev+git - PINNED BEFORE ANY READING</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Zip md5 f9cea131769925ceb01e64ea78c4113e - Apache-2.0 - extracted to platforms/_extracted/zulip-main</text>
+
+      <g transform="translate(40, 76)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE EXTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">9,009 / 9,016 files = 99.92%</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 Mattermost-import fixtures lost</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">to the Windows 260-char MAX_PATH</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">extraction re-run TOLERATING failures</text>
+      </g>
+      <g transform="translate(340, 76)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TRAP 1 - THE CEILING</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Migrations numbered 0001-0812</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">But that is the CEILING, not the count</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">truth: 789 numbered files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">27 numbers absent (0002-0028, squashed)</text>
+      </g>
+      <g transform="translate(640, 76)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TRAP 2 - THE BATCH</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">find | xargs wc -l | tail -1</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">gave 13,952 Python LOC</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">a 30x UNDERCOUNT</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">honest per-file walk: 425,702</text>
+      </g>
+
+      <text x="40" y="242" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE DUPLICATE NUMBERS - a maintenance script's constant set read as a fossil record</text>
+      <g transform="translate(40, 256)">
+        <rect width="440" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">FOUR NUMBERS CARRY TWO MIGRATIONS EACH</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">0001 - 0001_initial + 0001_squashed_0569</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">0209 - stream_first_message_id + user_profile_no_empty_password</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">0261, 0501 - two more collision pairs</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">exactly the MIGRATIONS_TO_SKIP set</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the skip list indexes the mistakes it absorbs</text>
+      </g>
+      <g transform="translate(500, 256)">
+        <rect width="420" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">WHAT THE PIN DECLARED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Docs are claims; code is the authority</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Every claim carries file:line</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Rule 13: a committed number can be wrong</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">re-measure, then commit the fix BY NAME</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The batches stayed comparison-free</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <!-- 100% Unabridged Rendered Markdown Body -->
+            <article class="markdown-body" id="renderedContent">
+              <h1 id="zulip-study-batch-00-the-pin-the-method-and-what-this-study-is">Zulip Study — Batch 00: the pin, the method, and what this study is<a href="#batch-00/zulip-study-batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/zulip-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-16
+<strong>This is a clean forensic study</strong>, run the same way as <code>hermes-forensics/</code>,
+<code>paperclip-forensics/</code>, <code>crewai-forensics/</code>, <code>multica-forensics/</code>, <code>gastown-forensics/</code>,
+<code>n8n-forensics/</code>, <code>buzz-forensics/</code> and <code>openrig-forensics/</code>. It reads ONE source tree,
+measures it, and verifies every load-bearing claim against the source code. <strong>Nothing from any
+earlier study is reused, referenced, or assumed</strong> — Zulip is read on its own terms.</p>
+<p><strong>Why this platform is ninth.</strong> The owner&#39;s ruling was <em>&quot;one platform at a time&quot;</em>. Eight are
+closed: Hermes, Paperclip, CrewAI, Multica, Gas Town, n8n, buzz, openrig. The owner&#39;s own
+<code>platforms/references.md</code> names the remaining two in order — <strong>mattermost, zulip</strong> — and the
+owner chose <strong>zulip</strong> as the ninth.</p>
+<p>Zulip is the first platform in this study that is a <strong>mature, decade-old, production chat
+product run by thousands of organisations</strong> (the README claims &quot;over 1,500 contributors&quot;).
+Where buzz was a young reimplementation of team chat on Nostr, Zulip is the real thing —
+19 years of design decisions, a hosted-service business behind it, and a documentation body
+large enough to <em>measure</em> against the code. It is also the first platform whose tenancy model
+is <strong>a first-class, separately-documented subsystem</strong> (<code>docs/subsystems/realms.md</code>), which
+makes it the strongest P2 counterweight the study has yet seen to openrig&#39;s <em>no-tenancy</em>.</p>
+<p><strong>The owner&#39;s directive carried into this study</strong> (from the n8n, buzz and openrig briefs,
+still in force): identify what fits the vision <strong>and</strong> what could be <em>taken further</em>. Per the
+method, the batches stay comparison-free — the &quot;take it further&quot; notes are <strong>observations</strong> in
+the synthesis, and the decisions stay the owner&#39;s at the mapping pass.</p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> —
+extracted from <code>library/architecture/platforms/zulip-main.zip</code>, which came from
+<code>https://github.com/zulip/zulip</code>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/zulip/zulip</code> (<code>main</code>)</td>
+<td>the owner&#39;s <code>platforms/references.md</code></td>
+</tr>
+<tr>
+<td><strong>Zip md5</strong></td>
+<td><strong><code>f9cea131769925ceb01e64ea78c4113e</code></strong></td>
+<td><code>hashlib.md5</code></td>
+</tr>
+<tr>
+<td>Zip</td>
+<td><code>platforms/zulip-main.zip</code> — <strong>63,499,938 B</strong> (60.6 MB)</td>
+<td><code>os.path.getsize</code></td>
+</tr>
+<tr>
+<td>Zip entries</td>
+<td><strong>9,847 = 831 directories + 9,016 files</strong></td>
+<td><code>zipfile.namelist()</code></td>
+</tr>
+<tr>
+<td><strong>Extraction</strong></td>
+<td><code>platforms/_extracted/zulip-main/</code> — <strong>9,009 of 9,016 files (99.92%)</strong></td>
+<td>a Python existence check per zip entry</td>
+</tr>
+<tr>
+<td><strong>The 7 that did not extract</strong></td>
+<td>all <strong>binary Mattermost-import test fixtures</strong> under <code>zerver/tests/fixtures/mattermost_*/</code> — 4 <code>.png</code>, 1 <code>.mp4</code>, 1 <code>.jpg</code>, 1 <code>.txt</code></td>
+<td>see §1.2</td>
+</tr>
+<tr>
+<td><strong>MAX_PATH hazard</strong></td>
+<td><strong>max path = 233 characters</strong>, but the <em>absolute</em> target path reaches <strong>309</strong> — 7 files exceed Windows&#39; 260-char limit</td>
+<td><code>max(len(...))</code> over the zip namelist</td>
+</tr>
+<tr>
+<td><strong><code>.git</code> present?</strong></td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td><strong>Declared version</strong></td>
+<td><strong><code>12.0-dev+git</code></strong>; latest release <strong><code>12.3</code></strong>; <code>API_FEATURE_LEVEL = 513</code>; <code>PROVISION_VERSION = (392, 0)</code></td>
+<td><code>version.py</code></td>
+</tr>
+<tr>
+<td>Product one-liner</td>
+<td><em>&quot;an open-source organized team chat app with unique topic-based threading that combines the best of email and chat&quot;</em></td>
+<td><code>README.md:3</code></td>
+</tr>
+<tr>
+<td>Toolchain</td>
+<td><strong>Python ≥3.10</strong> + <strong>Django 5.2</strong> (backend) · <strong>TypeScript/Node + pnpm</strong> (web) · PostgreSQL · Redis · RabbitMQ</td>
+<td><code>pyproject.toml</code>, <code>package.json</code></td>
+</tr>
+<tr>
+<td>Licence</td>
+<td><strong>Apache-2.0</strong></td>
+<td><code>LICENSE:2</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-identity-limit-stated-not-glossed">1.1 The identity limit (stated, not glossed)<a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree. What <em>is</em>
+readable is <code>version.py</code>&#39;s <strong><code>ZULIP_VERSION = &quot;12.0-dev+git&quot;</code></strong> — a <code>main</code>-branch development
+string, not a tagged release — beside <code>LATEST_RELEASE_VERSION = &quot;12.3&quot;</code> and
+<code>LATEST_MAJOR_VERSION = &quot;12.0&quot;</code>. <code>version.py</code> tries to read a <code>zulip-git-version</code> file that
+<strong>does not exist in the extract</strong> (it is generated at build time), so the commit hash is
+unavailable. <strong>Any claim here about &quot;the latest Zulip&quot; is a claim about this extract, at
+<code>12.0-dev+git</code> (the 12.x line, past the 12.3 release).</strong></p>
+<p><strong>⚠️ The one version trap in this tree.</strong> <code>version.py</code> also carries <strong>three compatibility
+constants that are NOT the version of this tree</strong>: <code>DESKTOP_MINIMUM_VERSION = &quot;5.4.3&quot;</code> and
+<code>DESKTOP_WARNING_VERSION = &quot;5.9.3&quot;</code> are the <em>desktop-app</em> gates (a different product line,
+<code>zulip-desktop</code>, versioned independently), and <code>API_FEATURE_LEVEL = 513</code> is a <em>monotonic API
+counter</em>, not a release number. A later reader must not read <code>5.4.3</code> or <code>513</code> as the study&#39;s
+pin. <strong>The pin is <code>12.0-dev+git</code>; the others are contract constants.</strong></p>
+<h3 id="1-2-the-seven-missing-files-measured-named-and-dismissed-as-inert-a-pin-finding">1.2 The seven missing files — measured, named, and dismissed as inert (a pin finding)<a href="#batch-00/1-2-the-seven-missing-files-measured-named-and-dismissed-as-inert-a-pin-finding" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The extraction <strong>did not silently truncate</strong>: every file was attempted and the failures
+enumerated. <strong>7 of 9,016 files (0.08%)</strong> could not be written because their absolute paths
+exceed 260 characters on Windows. All 7 are <strong>test fixtures for the Mattermost data-importer</strong>
+— binary assets used to exercise an <em>import</em> tool, not any part of Zulip&#39;s own architecture:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.../mattermost_fixtures/.../harry-ron.jpg</code></td>
+<td>image</td>
+</tr>
+<tr>
+<td><code>.../mattermost_fixtures/.../this is a file</code></td>
+<td>binary blob</td>
+</tr>
+<tr>
+<td><code>.../mattermost_v11.1.0_fixtures/.../Recording 2026-01-19 203522.mp4</code></td>
+<td>video</td>
+</tr>
+<tr>
+<td><code>.../mattermost_v11.1.0_fixtures/.../Screenshot 2025-12-19 210913.png</code></td>
+<td>image</td>
+</tr>
+<tr>
+<td><code>.../mattermost_v11.1.0_fixtures/.../text file.txt</code></td>
+<td>text</td>
+</tr>
+<tr>
+<td><code>.../mattermost_v11.6.0_fixtures/.../Screenshot 2026-03-10 210730.png</code></td>
+<td>image (×2)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this does not weaken the study.</strong> (1) They are <em>fixtures</em>, not source — no <code>.py</code>, <code>.ts</code>,
+<code>.md</code> or config file is missing. (2) They belong to <code>data_import/</code>, which the pin does not
+study. (3) The fixture <em>directory tree</em> extracted intact, so the parent structure (which reveals
+how the importer works) is present. <strong>Rule 1 is satisfied: the absence is stated, not hidden;
+13 of the 14 long paths are directories or these fixtures, and the study does not depend on
+any of them.</strong> The one honest consequence: any future claim of the form <em>&quot;the Mattermost
+importer accepts file X&quot;</em> cannot cite this extract for byte-exact fixture content.</p>
+<h3 id="1-3-where-the-extract-lives">1.3 Where the extract lives<a href="#batch-00/1-3-where-the-extract-lives" class="heading-anchor" title="Direct link to this section">#</a></h3>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>library/architecture/platforms/_extracted/zulip-main/    ← the source under study (gitignored)
+library/architecture/platforms/zulip-main.zip            ← the archive (md5 recorded above)
+library/architecture/zulip-forensics/                    ← this study
+  ├── 00-PIN-AND-METHOD.md
+  ├── findings/01-platform-overview.md … 07-synthesis.md
+  └── reader/                                            ← built at the END (port 3800)
+</code></pre>
+</div>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-this-tree-is-a-hybrid-a-mature-python-backend-with-a-large-typescript-client">2.1 This tree is a hybrid — a mature Python backend with a large TypeScript client<a href="#batch-00/2-1-this-tree-is-a-hybrid-a-mature-python-backend-with-a-large-typescript-client" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured with a Python <code>os.walk</code> (not <code>wc -l | tail -1</code>, which <strong>lies</strong> when the argument list
+is split across <code>xargs</code> batches — see §2.3):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Substrate</th>
+<th>Files</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Python (all)</strong></td>
+<td><strong>2,037</strong></td>
+<td><strong>425,702</strong></td>
+</tr>
+<tr>
+<td>— Python excluding migrations</td>
+<td>1,079</td>
+<td>385,211</td>
+</tr>
+<tr>
+<td>— Python migrations</td>
+<td>958</td>
+<td>40,491</td>
+</tr>
+<tr>
+<td>— Python tests</td>
+<td>172</td>
+<td><strong>182,992</strong> (43% of all Python)</td>
+</tr>
+<tr>
+<td><strong>TypeScript (<code>.ts</code>/<code>.tsx</code>, all)</strong></td>
+<td><strong>471</strong></td>
+<td><strong>153,253</strong></td>
+</tr>
+<tr>
+<td>Markdown (all)</td>
+<td>422</td>
+<td>63,466</td>
+</tr>
+<tr>
+<td>Django templates (<code>.hbs</code>)</td>
+<td>473</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Locale files (<code>.po</code>)</td>
+<td>50</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>The shape of it.</strong> A Python/Django monolith (<code>zerver/</code>, <code>corporate/</code>, <code>analytics/</code>) with a
+substantial hand-written TypeScript client (<code>web/src/</code>, <code>web/</code>) — <strong>not</strong> a React SPA. The web
+client is server-rendered HTML + hbs templates hydrated by ~463 <code>.ts</code> modules under <code>web/src/</code>,
+organised by <em>feature</em> (<code>compose_*.ts</code> ×20, <code>message_*.ts</code> ×30, <code>settings_*.ts</code> ×20). The
+1,763 <code>.json</code> files are overwhelmingly test fixtures and API-schema data, not configuration.</p>
+<h3 id="2-2-the-measured-distribution">2.2 The measured distribution<a href="#batch-00/2-2-the-measured-distribution" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Files</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>corporate/</code></td>
+<td>1,735</td>
+<td>Billing + support (the hosted-service side) — <strong>99 Python files / 32,090 LOC</strong></td>
+</tr>
+<tr>
+<td><code>web/</code></td>
+<td>1,491</td>
+<td>The TypeScript client</td>
+</tr>
+<tr>
+<td><code>zerver/</code></td>
+<td>1,186</td>
+<td>The core Django app</td>
+</tr>
+<tr>
+<td><code>static/</code></td>
+<td>625</td>
+<td>Third-party + generated assets</td>
+</tr>
+<tr>
+<td><code>starlight_help/</code></td>
+<td>512</td>
+<td>The help-centre site (Astro)</td>
+</tr>
+<tr>
+<td><code>templates/</code></td>
+<td>369</td>
+<td>Server-rendered HTML</td>
+</tr>
+<tr>
+<td><code>puppet/</code></td>
+<td>272</td>
+<td>Deployment manifests</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>224</td>
+<td><strong>The contributor documentation — 249,760 words</strong></td>
+</tr>
+<tr>
+<td><code>locale/</code></td>
+<td>143</td>
+<td>Translations</td>
+</tr>
+<tr>
+<td><code>tools/</code></td>
+<td>201</td>
+<td>Dev tooling + linters</td>
+</tr>
+<tr>
+<td><code>analytics/</code></td>
+<td>43</td>
+<td>The analytics subsystem (separate Django app)</td>
+</tr>
+</tbody></table></div>
+<h3 id="2-3-the-rule-1-caution-a-count-that-lied-caught-in-the-pin">2.3 The rule-1 caution — a count that lied, caught in the pin<a href="#batch-00/2-3-the-rule-1-caution-a-count-that-lied-caught-in-the-pin" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The first pass at &quot;how much Python is there&quot; produced <strong>13,952</strong> lines via
+<code>find … | xargs wc -l | tail -1</code>. That number is <strong>wrong by 30×</strong>. <code>xargs</code> split the 2,037
+filenames into multiple <code>wc</code> invocations, and <code>tail -1</code> showed only the <strong>last batch&#39;s</strong> total.
+The honest measurement is a walk that sums per-file: <strong>425,702</strong>. <strong>This is the same failure
+mode that memory already records for <code>grep -c $&#39;\r&#39;</code></strong> — a shell pipeline quietly reporting a
+<em>subset</em>. The corrected number is used everywhere in this study.</p>
+<h3 id="2-4-the-three-architecture-docs-that-matter-rule-1-a-claim-is-a-claim">2.4 The three "architecture docs" that matter (rule 1 — a claim is a claim)<a href="#batch-00/2-4-the-three-architecture-docs-that-matter-rule-1-a-claim-is-a-claim" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Zulip ships <strong>249,760 words</strong> of contributor documentation across 182 markdown files, of which
+the <code>docs/subsystems/</code> directory holds <strong>35 named subsystem documents</strong> — <code>realms.md</code>
+(the tenancy model), <code>queuing.md</code>, <code>events-system.md</code>, <code>sending-messages.md</code>,
+<code>database-concurrency.md</code>, <code>caching.md</code>, <code>widgets.md</code>, <code>schema-migrations.md</code> and more. This is
+the <strong>richest first-party documentation body in the study</strong> (n8n shipped 45 pages × 5 languages;
+Zulip ships a whole contributor manual). <strong>Per rule 1, none of it is accepted as truth</strong> — every
+claim is traced to code — but its existence, and the <em>fact that it names subsystems</em>, is itself
+a finding about how this project thinks about its own architecture.</p>
+<hr>
+<h2 id="3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop">3. The three poles — the frame for every batch (carried from the workshop)<a href="#batch-00/3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ol>
+<li><strong>P1 — the aissistant.</strong> How does a conversation with a machine happen? Agents, bots,
+tool-calls, the seam between the platform and the model.</li>
+<li><strong>P2 — the workspace.</strong> How is a <em>tenant</em> represented? What is the container, the membership
+model, the permission surface? <strong>This is Zulip&#39;s strongest documented pole</strong> (<code>realm</code>).</li>
+<li><strong>P3 — automations.</strong> How does something run <em>without a human</em>? Schedulers, queues,
+webhooks, outgoing bots, the delivery guarantee.</li>
+</ol>
+<p>Plus the cross-cutting lenses: <strong>PX-W</strong> (the widget/composition surface) and <strong>PX-F</strong> (the
+frontend architecture), and <strong>PZ</strong> (the out-of-pole escape hatch — security, tooling, the
+verification culture).</p>
+<h2 id="4-the-method-inherited-binding-from-library-development-working-rules-md">4. The method (inherited, binding — from `library/development/WORKING-RULES.md`)<a href="#batch-00/4-the-method-inherited-binding-from-library-development-working-rules-md" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Rule 1 — docs are claims, code is the authority.</strong> Count FIRST (rule 0b).</li>
+<li><strong>Rule 5 — no comparison to our own platform inside a batch.</strong> Comparisons are the synthesis&#39;
+job, and even there they are <em>observations</em>, not decisions.</li>
+<li><strong>Rule 6 — name every capability.</strong> A mechanism without a name cannot be discussed.</li>
+<li><strong>Rule 9 — pole-tag everything</strong> (P1/P2/P3/PX-W/PX-F/PZ).</li>
+<li><strong>Rule 10 — the retirement rule.</strong> What was built, then removed, is the most honest evidence.</li>
+<li><strong>Rule 13 — never let a number stand unverified.</strong> Re-measure before citing.</li>
+<li><strong>Never <code>git add -A</code>.</strong> Plain-English reporting; never end on &quot;your call&quot;.</li>
+</ul>
+<h2 id="5-the-batch-plan-7-batches-this-pin">5. The batch plan (7 batches + this pin)<a href="#batch-00/5-the-batch-plan-7-batches-this-pin" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Batch</th>
+<th>Pole</th>
+<th>The question it answers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>00</td>
+<td><strong>the pin, the method, and the pack</strong> <em>(this)</em></td>
+<td>—</td>
+<td>What exactly is under study, and how big is it?</td>
+</tr>
+<tr>
+<td>01</td>
+<td>the platform overview</td>
+<td>—</td>
+<td>What is Zulip, as one measured picture?</td>
+</tr>
+<tr>
+<td>02</td>
+<td>the aissistant</td>
+<td><strong>P1</strong></td>
+<td>How does a machine participate in a conversation?</td>
+</tr>
+<tr>
+<td>03</td>
+<td>the workspace</td>
+<td><strong>P2</strong></td>
+<td>How is a realm (tenant) built and fenced?</td>
+</tr>
+<tr>
+<td>04</td>
+<td>automations</td>
+<td><strong>P3</strong></td>
+<td>How does something run without a human?</td>
+</tr>
+<tr>
+<td>05</td>
+<td>widgets &amp; frontend</td>
+<td><strong>PX-W / PX-F</strong></td>
+<td>What composes, and how is the client built?</td>
+</tr>
+<tr>
+<td>06</td>
+<td>out-of-pole</td>
+<td><strong>PZ</strong></td>
+<td>Security, tooling, and the verification culture.</td>
+</tr>
+<tr>
+<td>07</td>
+<td>the synthesis</td>
+<td>—</td>
+<td>Where Zulip sits, what we take, what we don&#39;t.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Batch 05 will answer the study&#39;s sharpest open question first:</strong> whether Zulip is the <strong>first
+platform in this study with a genuine widget model</strong> — the pin&#39;s early probe already found
+<code>widget_schema.ts</code> (a zod discriminated union), <code>widgetize.ts</code>, <code>poll_widget.ts</code>,
+<code>todo_widget.ts</code> and <code>docs/subsystems/widgets.md</code>, which points to <strong>yes</strong>. Six platforms
+(Paperclip, Multica, Gas Town, buzz, openrig, and CrewAI) had none.</p>
+<hr>
+<p><em>Zulip study · Batch 00 · the pin is <code>12.0-dev+git</code> · the extract is 99.92% complete · the
+weaker shell readings in this batch are the point of the method, not an accident.</em></p>
+
+            </article>
+
+            <!-- Verbatim Raw Markdown Display (for transparency & verification) -->
+            <pre class="verbatim-raw-container" id="rawContentArea"># Zulip Study — Batch 00: the pin, the method, and what this study is
+
+**Folder:** `library/architecture/zulip-forensics/` · **Status:** OPEN — begun 2026-10-16
+**This is a clean forensic study**, run the same way as `hermes-forensics/`,
+`paperclip-forensics/`, `crewai-forensics/`, `multica-forensics/`, `gastown-forensics/`,
+`n8n-forensics/`, `buzz-forensics/` and `openrig-forensics/`. It reads ONE source tree,
+measures it, and verifies every load-bearing claim against the source code. **Nothing from any
+earlier study is reused, referenced, or assumed** — Zulip is read on its own terms.
+
+**Why this platform is ninth.** The owner&#039;s ruling was *&quot;one platform at a time&quot;*. Eight are
+closed: Hermes, Paperclip, CrewAI, Multica, Gas Town, n8n, buzz, openrig. The owner&#039;s own
+`platforms/references.md` names the remaining two in order — **mattermost, zulip** — and the
+owner chose **zulip** as the ninth.
+
+Zulip is the first platform in this study that is a **mature, decade-old, production chat
+product run by thousands of organisations** (the README claims &quot;over 1,500 contributors&quot;).
+Where buzz was a young reimplementation of team chat on Nostr, Zulip is the real thing —
+19 years of design decisions, a hosted-service business behind it, and a documentation body
+large enough to *measure* against the code. It is also the first platform whose tenancy model
+is **a first-class, separately-documented subsystem** (`docs/subsystems/realms.md`), which
+makes it the strongest P2 counterweight the study has yet seen to openrig&#039;s *no-tenancy*.
+
+**The owner&#039;s directive carried into this study** (from the n8n, buzz and openrig briefs,
+still in force): identify what fits the vision **and** what could be *taken further*. Per the
+method, the batches stay comparison-free — the &quot;take it further&quot; notes are **observations** in
+the synthesis, and the decisions stay the owner&#039;s at the mapping pass.
+
+---
+
+## 1. THE PIN — task zero, answered by measurement
+
+**The source of this study is:** `library/architecture/platforms/_extracted/zulip-main/` —
+extracted from `library/architecture/platforms/zulip-main.zip`, which came from
+`https://github.com/zulip/zulip`.
+
+| Fact | Value | How measured |
+|---|---|---|
+| Origin | `https://github.com/zulip/zulip` (`main`) | the owner&#039;s `platforms/references.md` |
+| **Zip md5** | **`f9cea131769925ceb01e64ea78c4113e`** | `hashlib.md5` |
+| Zip | `platforms/zulip-main.zip` — **63,499,938 B** (60.6 MB) | `os.path.getsize` |
+| Zip entries | **9,847 = 831 directories + 9,016 files** | `zipfile.namelist()` |
+| **Extraction** | `platforms/_extracted/zulip-main/` — **9,009 of 9,016 files (99.92%)** | a Python existence check per zip entry |
+| **The 7 that did not extract** | all **binary Mattermost-import test fixtures** under `zerver/tests/fixtures/mattermost_*/` — 4 `.png`, 1 `.mp4`, 1 `.jpg`, 1 `.txt` | see §1.2 |
+| **MAX_PATH hazard** | **max path = 233 characters**, but the *absolute* target path reaches **309** — 7 files exceed Windows&#039; 260-char limit | `max(len(...))` over the zip namelist |
+| **`.git` present?** | **NO** — this is an extract, not a clone | `ls -d .git` → absent |
+| **Declared version** | **`12.0-dev+git`**; latest release **`12.3`**; `API_FEATURE_LEVEL = 513`; `PROVISION_VERSION = (392, 0)` | `version.py` |
+| Product one-liner | *&quot;an open-source organized team chat app with unique topic-based threading that combines the best of email and chat&quot;* | `README.md:3` |
+| Toolchain | **Python ≥3.10** + **Django 5.2** (backend) · **TypeScript/Node + pnpm** (web) · PostgreSQL · Redis · RabbitMQ | `pyproject.toml`, `package.json` |
+| Licence | **Apache-2.0** | `LICENSE:2` |
+
+### 1.1 The identity limit (stated, not glossed)
+
+There is **no `.git`**, so the exact upstream commit cannot be read from the tree. What *is*
+readable is `version.py`&#039;s **`ZULIP_VERSION = &quot;12.0-dev+git&quot;`** — a `main`-branch development
+string, not a tagged release — beside `LATEST_RELEASE_VERSION = &quot;12.3&quot;` and
+`LATEST_MAJOR_VERSION = &quot;12.0&quot;`. `version.py` tries to read a `zulip-git-version` file that
+**does not exist in the extract** (it is generated at build time), so the commit hash is
+unavailable. **Any claim here about &quot;the latest Zulip&quot; is a claim about this extract, at
+`12.0-dev+git` (the 12.x line, past the 12.3 release).**
+
+**⚠️ The one version trap in this tree.** `version.py` also carries **three compatibility
+constants that are NOT the version of this tree**: `DESKTOP_MINIMUM_VERSION = &quot;5.4.3&quot;` and
+`DESKTOP_WARNING_VERSION = &quot;5.9.3&quot;` are the *desktop-app* gates (a different product line,
+`zulip-desktop`, versioned independently), and `API_FEATURE_LEVEL = 513` is a *monotonic API
+counter*, not a release number. A later reader must not read `5.4.3` or `513` as the study&#039;s
+pin. **The pin is `12.0-dev+git`; the others are contract constants.**
+
+### 1.2 The seven missing files — measured, named, and dismissed as inert (a pin finding)
+
+The extraction **did not silently truncate**: every file was attempted and the failures
+enumerated. **7 of 9,016 files (0.08%)** could not be written because their absolute paths
+exceed 260 characters on Windows. All 7 are **test fixtures for the Mattermost data-importer**
+— binary assets used to exercise an *import* tool, not any part of Zulip&#039;s own architecture:
+
+| File | Type |
+|---|---|
+| `.../mattermost_fixtures/.../harry-ron.jpg` | image |
+| `.../mattermost_fixtures/.../this is a file` | binary blob |
+| `.../mattermost_v11.1.0_fixtures/.../Recording 2026-01-19 203522.mp4` | video |
+| `.../mattermost_v11.1.0_fixtures/.../Screenshot 2025-12-19 210913.png` | image |
+| `.../mattermost_v11.1.0_fixtures/.../text file.txt` | text |
+| `.../mattermost_v11.6.0_fixtures/.../Screenshot 2026-03-10 210730.png` | image (×2) |
+
+**Why this does not weaken the study.** (1) They are *fixtures*, not source — no `.py`, `.ts`,
+`.md` or config file is missing. (2) They belong to `data_import/`, which the pin does not
+study. (3) The fixture *directory tree* extracted intact, so the parent structure (which reveals
+how the importer works) is present. **Rule 1 is satisfied: the absence is stated, not hidden;
+13 of the 14 long paths are directories or these fixtures, and the study does not depend on
+any of them.** The one honest consequence: any future claim of the form *&quot;the Mattermost
+importer accepts file X&quot;* cannot cite this extract for byte-exact fixture content.
+
+### 1.3 Where the extract lives
+
+```
+library/architecture/platforms/_extracted/zulip-main/    ← the source under study (gitignored)
+library/architecture/platforms/zulip-main.zip            ← the archive (md5 recorded above)
+library/architecture/zulip-forensics/                    ← this study
+  ├── 00-PIN-AND-METHOD.md
+  ├── findings/01-platform-overview.md … 07-synthesis.md
+  └── reader/                                            ← built at the END (port 3800)
+```
+
+---
+
+## 2. What the tree contains (measured)
+
+### 2.1 This tree is a hybrid — a mature Python backend with a large TypeScript client
+
+Measured with a Python `os.walk` (not `wc -l | tail -1`, which **lies** when the argument list
+is split across `xargs` batches — see §2.3):
+
+| Substrate | Files | Lines |
+|---|---|---|
+| **Python (all)** | **2,037** | **425,702** |
+| — Python excluding migrations | 1,079 | 385,211 |
+| — Python migrations | 958 | 40,491 |
+| — Python tests | 172 | **182,992** (43% of all Python) |
+| **TypeScript (`.ts`/`.tsx`, all)** | **471** | **153,253** |
+| Markdown (all) | 422 | 63,466 |
+| Django templates (`.hbs`) | 473 | — |
+| Locale files (`.po`) | 50 | — |
+
+**The shape of it.** A Python/Django monolith (`zerver/`, `corporate/`, `analytics/`) with a
+substantial hand-written TypeScript client (`web/src/`, `web/`) — **not** a React SPA. The web
+client is server-rendered HTML + hbs templates hydrated by ~463 `.ts` modules under `web/src/`,
+organised by *feature* (`compose_*.ts` ×20, `message_*.ts` ×30, `settings_*.ts` ×20). The
+1,763 `.json` files are overwhelmingly test fixtures and API-schema data, not configuration.
+
+### 2.2 The measured distribution
+
+| Area | Files | Notes |
+|---|---|---|
+| `corporate/` | 1,735 | Billing + support (the hosted-service side) — **99 Python files / 32,090 LOC** |
+| `web/` | 1,491 | The TypeScript client |
+| `zerver/` | 1,186 | The core Django app |
+| `static/` | 625 | Third-party + generated assets |
+| `starlight_help/` | 512 | The help-centre site (Astro) |
+| `templates/` | 369 | Server-rendered HTML |
+| `puppet/` | 272 | Deployment manifests |
+| `docs/` | 224 | **The contributor documentation — 249,760 words** |
+| `locale/` | 143 | Translations |
+| `tools/` | 201 | Dev tooling + linters |
+| `analytics/` | 43 | The analytics subsystem (separate Django app) |
+
+### 2.3 The rule-1 caution — a count that lied, caught in the pin
+
+The first pass at &quot;how much Python is there&quot; produced **13,952** lines via
+`find … | xargs wc -l | tail -1`. That number is **wrong by 30×**. `xargs` split the 2,037
+filenames into multiple `wc` invocations, and `tail -1` showed only the **last batch&#039;s** total.
+The honest measurement is a walk that sums per-file: **425,702**. **This is the same failure
+mode that memory already records for `grep -c $&#039;\r&#039;`** — a shell pipeline quietly reporting a
+*subset*. The corrected number is used everywhere in this study.
+
+### 2.4 The three &quot;architecture docs&quot; that matter (rule 1 — a claim is a claim)
+
+Zulip ships **249,760 words** of contributor documentation across 182 markdown files, of which
+the `docs/subsystems/` directory holds **35 named subsystem documents** — `realms.md`
+(the tenancy model), `queuing.md`, `events-system.md`, `sending-messages.md`,
+`database-concurrency.md`, `caching.md`, `widgets.md`, `schema-migrations.md` and more. This is
+the **richest first-party documentation body in the study** (n8n shipped 45 pages × 5 languages;
+Zulip ships a whole contributor manual). **Per rule 1, none of it is accepted as truth** — every
+claim is traced to code — but its existence, and the *fact that it names subsystems*, is itself
+a finding about how this project thinks about its own architecture.
+
+---
+
+## 3. The three poles — the frame for every batch (carried from the workshop)
+
+1. **P1 — the aissistant.** How does a conversation with a machine happen? Agents, bots,
+   tool-calls, the seam between the platform and the model.
+2. **P2 — the workspace.** How is a *tenant* represented? What is the container, the membership
+   model, the permission surface? **This is Zulip&#039;s strongest documented pole** (`realm`).
+3. **P3 — automations.** How does something run *without a human*? Schedulers, queues,
+   webhooks, outgoing bots, the delivery guarantee.
+
+Plus the cross-cutting lenses: **PX-W** (the widget/composition surface) and **PX-F** (the
+frontend architecture), and **PZ** (the out-of-pole escape hatch — security, tooling, the
+verification culture).
+
+## 4. The method (inherited, binding — from `library/development/WORKING-RULES.md`)
+
+- **Rule 1 — docs are claims, code is the authority.** Count FIRST (rule 0b).
+- **Rule 5 — no comparison to our own platform inside a batch.** Comparisons are the synthesis&#039;
+  job, and even there they are *observations*, not decisions.
+- **Rule 6 — name every capability.** A mechanism without a name cannot be discussed.
+- **Rule 9 — pole-tag everything** (P1/P2/P3/PX-W/PX-F/PZ).
+- **Rule 10 — the retirement rule.** What was built, then removed, is the most honest evidence.
+- **Rule 13 — never let a number stand unverified.** Re-measure before citing.
+- **Never `git add -A`.** Plain-English reporting; never end on &quot;your call&quot;.
+
+## 5. The batch plan (7 batches + this pin)
+
+| # | Batch | Pole | The question it answers |
+|---|---|---|---|
+| 00 | **the pin, the method, and the pack** *(this)* | — | What exactly is under study, and how big is it? |
+| 01 | the platform overview | — | What is Zulip, as one measured picture? |
+| 02 | the aissistant | **P1** | How does a machine participate in a conversation? |
+| 03 | the workspace | **P2** | How is a realm (tenant) built and fenced? |
+| 04 | automations | **P3** | How does something run without a human? |
+| 05 | widgets &amp; frontend | **PX-W / PX-F** | What composes, and how is the client built? |
+| 06 | out-of-pole | **PZ** | Security, tooling, and the verification culture. |
+| 07 | the synthesis | — | Where Zulip sits, what we take, what we don&#039;t. |
+
+**Batch 05 will answer the study&#039;s sharpest open question first:** whether Zulip is the **first
+platform in this study with a genuine widget model** — the pin&#039;s early probe already found
+`widget_schema.ts` (a zod discriminated union), `widgetize.ts`, `poll_widget.ts`,
+`todo_widget.ts` and `docs/subsystems/widgets.md`, which points to **yes**. Six platforms
+(Paperclip, Multica, Gas Town, buzz, openrig, and CrewAI) had none.
+
+---
+
+*Zulip study · Batch 00 · the pin is `12.0-dev+git` · the extract is 99.92% complete · the
+weaker shell readings in this batch are the point of the method, not an accident.*
+</pre>
+
+            <!-- Bottom Navigation Bar (Prev / Next Batch) -->
+            <footer class="reader-nav-footer">
+              <a href="#" class="nav-page-btn" id="prevDocBtn" style="visibility:hidden;">
+                <span class="nav-btn-sub">← Previous Batch</span>
+                <span class="nav-btn-title" id="prevDocTitle">Batch 00</span>
+              </a>
+              <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Use keyboard <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">[</kbd> and <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">]</kbd> to navigate
+              </div>
+              <a href="#batch-01" class="nav-page-btn" id="nextDocBtn" style="text-align: right;">
+                <span class="nav-btn-sub">Next Batch →</span>
+                <span class="nav-btn-title" id="nextDocTitle">Platform Overview</span>
+              </a>
+            </footer>
+
+          </div>
+        </div>
+
+        <!-- Sticky Right Table of Contents Sidebar -->
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+            <span style="font-size:0.68rem; font-weight:normal; color:var(--text-muted);">Scrollspy</span>
+          </div>
+          <ul class="toc-list" id="tocList">
+            
+    <li class="toc-item level-2">
+      <a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="toc-link" data-target="1-the-pin-task-zero-answered-by-measurement">
+        1. THE PIN — task zero, answered by measurement
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="toc-link" data-target="1-1-the-identity-limit-stated-not-glossed">
+        1.1 The identity limit (stated, not glossed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-2-the-seven-missing-files-measured-named-and-dismissed-as-inert-a-pin-finding" class="toc-link" data-target="1-2-the-seven-missing-files-measured-named-and-dismissed-as-inert-a-pin-finding">
+        1.2 The seven missing files — measured, named, and dismissed as inert (a pin finding)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-3-where-the-extract-lives" class="toc-link" data-target="1-3-where-the-extract-lives">
+        1.3 Where the extract lives
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/2-what-the-tree-contains-measured" class="toc-link" data-target="2-what-the-tree-contains-measured">
+        2. What the tree contains (measured)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-1-this-tree-is-a-hybrid-a-mature-python-backend-with-a-large-typescript-client" class="toc-link" data-target="2-1-this-tree-is-a-hybrid-a-mature-python-backend-with-a-large-typescript-client">
+        2.1 This tree is a hybrid — a mature Python backend with a large TypeScript client
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-2-the-measured-distribution" class="toc-link" data-target="2-2-the-measured-distribution">
+        2.2 The measured distribution
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-3-the-rule-1-caution-a-count-that-lied-caught-in-the-pin" class="toc-link" data-target="2-3-the-rule-1-caution-a-count-that-lied-caught-in-the-pin">
+        2.3 The rule-1 caution — a count that lied, caught in the pin
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-4-the-three-architecture-docs-that-matter-rule-1-a-claim-is-a-claim" class="toc-link" data-target="2-4-the-three-architecture-docs-that-matter-rule-1-a-claim-is-a-claim">
+        2.4 The three &quot;architecture docs&quot; that matter (rule 1 — a claim is a claim)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop" class="toc-link" data-target="3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop">
+        3. The three poles — the frame for every batch (carried from the workshop)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/4-the-method-inherited-binding-from-library-development-working-rules-md" class="toc-link" data-target="4-the-method-inherited-binding-from-library-development-working-rules-md">
+        4. The method (inherited, binding — from library/development/WORKING-RULES.md)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/5-the-batch-plan-7-batches-this-pin" class="toc-link" data-target="5-the-batch-plan-7-batches-this-pin">
+        5. The batch plan (7 batches + this pin)
+      </a>
+    </li>
+  
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Full-Text Search Modal -->
+  <div class="search-modal-backdrop" id="searchModal">
+    <div class="search-modal-card">
+      <div class="modal-search-header">
+        <span style="font-size: 1.2rem;">🔍</span>
+        <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="Search across all 8 study batches..." autofocus>
+        <button class="tool-btn" id="closeSearchBtn" style="padding: 0.25rem 0.5rem;">Esc</button>
+      </div>
+      <div class="modal-results-list" id="modalResultsList">
+        <!-- Search results list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Architecture Gallery Modal -->
+  <div class="gallery-modal-backdrop" id="galleryModal">
+    <div class="gallery-modal-card">
+      <div class="gallery-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">🏛️</span>
+          <div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Zulip Architectural Guides &amp; Decision Models</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">9 Interactive Study Visual Models • Call up any architecture piece on demand</div>
+          </div>
+        </div>
+        <button class="tool-btn" id="closeGalleryBtn" style="padding: 0.25rem 0.6rem;">Esc</button>
+      </div>
+
+      <!-- Detail View Area when a diagram is selected in gallery -->
+      <div class="gallery-detail-container" id="galleryDetailContainer" style="display: none;">
+        <div class="gallery-detail-bar">
+          <button class="tool-btn" id="backToGalleryGridBtn">← Back to All Guides</button>
+          <span id="galleryDetailTitle" style="font-weight: 700; color: var(--primary);"></span>
+          <button class="tool-btn active" id="galleryJumpToDocBtn">Open Batch Document →</button>
+        </div>
+        <div class="gallery-detail-svg" id="galleryDetailSvg"></div>
+      </div>
+
+      <!-- Grid of all 9 Architecture Cards -->
+      <div class="gallery-cards-grid" id="galleryCardsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Data & Controller -->
+  <script src="assets/docs-data.js"></script>
+  <script src="assets/reader.js"></script>
+</body>
+</html>

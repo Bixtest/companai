@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,031</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">242</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 - POLE 1</div>
+    <h4>The aissistant: one LLM feature, five fences</h4>
+    <p>Where n8n built the agent, Zulip admitted the model and fenced it with primitives that already existed</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 500" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">P1 IS DELIBERATELY TINY - ONE FEATURE, FIVE FENCES</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Topic summarisation. No tools, no memory, no streaming, no RAG - and no agent framework was added.</text>
+
+      <text x="40" y="84" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE FIVE FENCES - each one an existing product primitive</text>
+      <g transform="translate(40, 96)">
+        <rect width="290" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">F1 - SERVER OPT-IN</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">TOPIC_SUMMARIZATION_MODEL defaults to None</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">AI features DO NOT EXIST</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">unless the operator configures them</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">default_settings.py:769</text>
+      </g>
+      <g transform="translate(345, 96)">
+        <rect width="290" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">F2 - PER-REALM PERMISSION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">can_summarize_topics_group</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a GroupPermissionSetting</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">defaults to EVERYONE, settable to nobody</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">realms.py:914</text>
+      </g>
+      <g transform="translate(650, 96)">
+        <rect width="270" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">F3 - PER-USER COST CAP</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MAX_PER_USER_MONTHLY_AI_COST</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">default 0.5 USD</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">enforced in the view</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">message_summary.py:28-33</text>
+      </g>
+      <g transform="translate(40, 214)">
+        <rect width="290" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">F4 - PROVIDER-NEUTRAL</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">API_BASE + API_KEY from a SECRET</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">not hardcoded</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">dev uses Groq; prod template shows HF</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">computed_settings.py:1329-1330</text>
+      </g>
+      <g transform="translate(345, 214)">
+        <rect width="290" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">F5 - UNTRUSTED OUTPUT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">markdown_convert(summary,</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  message_realm=user_profile.realm)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">model output goes through the SAME</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">sanitizer as a user message</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the model never produces safe HTML</text>
+      </g>
+      <g transform="translate(650, 214)">
+        <rect width="270" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE BOT PRIMITIVE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A bot IS a UserProfile</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">mentioned - DMd - subscribed -</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">permission-checked by the SAME code</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">NO new "agent" object</text>
+      </g>
+
+      <text x="40" y="352" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE HONEST LEDGER - named, unfixed, in the code's own words</text>
+      <g transform="translate(40, 364)">
+        <rect width="440" height="108" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">KNOWN GAPS (BATCH 02)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">The AI cost-cap race: checked pre-call,</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">  incremented post-call. TODO describes</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">  the fix (a locked reservation) - NOT done</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Summary caching deliberately absent</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">react and update_message: declared, empty</text>
+      </g>
+      <g transform="translate(500, 364)">
+        <rect width="420" height="108" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MEASURE OF THE DESIGN</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The bot API is a 7-operation facade</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The old bot path is still the generic one</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Capability lives in the PROVIDER, not</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">in a new agent framework</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">admit the model - do not build an agent</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-02-the-aissistant-p1">Zulip Study — Batch 02: the aissistant (P1)<a href="#batch-02/zulip-study-batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Pole:</strong> <strong>P1 — the aissistant</strong>
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>The question this batch answers:</strong> <em>how does a machine participate in a conversation in
+Zulip?</em> Zulip predates the LLM era by a decade, so its &quot;machine participant&quot; is the <strong>bot</strong> —
+and this batch reads the bot model, the bot API surface, the outgoing-webhook seam, <strong>and the
+one genuine LLM integration that has been added on top</strong> (topic summarisation). Per rule 1, the
+<code>docs/subsystems/</code> prose is quoted but every claim is traced to code.</p>
+<p><strong>Headline before the detail:</strong> Zulip is the <strong>second platform in the study with a real LLM
+call in its core</strong> (n8n was the first, via <code>@n8n/agents</code>), but where n8n built an <em>agent
+framework</em>, Zulip added <strong>one narrow, permission-gated, cost-metered feature</strong>: &quot;summarise this
+topic.&quot; The interesting architecture is not the call — it is the <strong>fence around the call</strong>.</p>
+<hr>
+<h2 id="2-1-the-bot-taxonomy-four-types-one-field">§2.1 The bot taxonomy — four types, one field<a href="#batch-02/2-1-the-bot-taxonomy-four-types-one-field" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>zerver/models/users.py</code> defines the bot taxonomy as <strong>integer constants on <code>UserProfile</code></strong>
+(<code>users.py:453-473</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">DEFAULT_BOT = 1            # &quot;Generic bot&quot;
+INCOMING_WEBHOOK_BOT = 2   # &quot;Incoming webhook&quot;
+OUTGOING_WEBHOOK_BOT = 3   # &quot;Outgoing webhook&quot;
+EMBEDDED_BOT = 4           # &quot;Embedded bot&quot;
+</code></pre>
+</div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Type</th>
+<th>Who drives it</th>
+<th>Where it runs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Generic bot</strong></td>
+<td>An external program holding an API key</td>
+<td>Your server</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Incoming webhook</strong></td>
+<td>A third-party service POSTs a message in</td>
+<td>Their server → Zulip</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Outgoing webhook</strong></td>
+<td>Zulip POSTs a message out, gets a reply</td>
+<td>Zulip → their server</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Embedded bot</strong></td>
+<td>Zulip&#39;s own worker hosts the bot&#39;s Python</td>
+<td><strong>Inside Zulip</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>A bot is not a separate entity.</strong> It is a <code>UserProfile</code> with <code>is_bot = True</code> and a <code>bot_type</code>
+(<code>users.py:557</code>: <code>bot_type = models.PositiveSmallIntegerField(null=True, db_index=True)</code>). A bot
+has an email, a full name, an avatar, and can be @-mentioned <strong>exactly like a human</strong>. <strong>This is
+the single most important P1 fact in the batch:</strong> Zulip did not invent an &quot;agent&quot; object — it
+made the machine a <em>user</em>, and let every existing mechanism (mentions, DMs, subscriptions,
+permissions) apply unchanged. The taxonomy above is only about <em>how the bot&#39;s brain is wired</em>.</p>
+<p><strong>Two of the four fire on a message; two do not</strong> (<code>users.py:476-479</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">MESSAGE_TRIGGERED_BOT_TYPES = [
+    OUTGOING_WEBHOOK_BOT,
+    EMBEDDED_BOT,
+]
+</code></pre>
+</div>
+<p>Only <strong>type 3 and type 4</strong> are triggered by an incoming message. Generic bots (1) act when their
+external program decides to; incoming webhooks (2) act when a third party decides to.</p>
+<hr>
+<h2 id="2-2-the-bot-api-is-a-deliberately-restricted-fa-ade">§2.2 The bot API is a deliberately restricted façade<a href="#batch-02/2-2-the-bot-api-is-a-deliberately-restricted-fa-ade" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The most carefully-designed artefact in the whole P1 surface is <code>zerver/lib/bot_lib.py</code>
+(166 lines) — in particular <code>EmbeddedBotHandler</code> (<code>bot_lib.py:70-160</code>). It is <strong>not</strong> a general
+API client. It is a <strong>hand-written capability set</strong>, and the code says so in its own
+constructor comment:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">class EmbeddedBotHandler:
+    def __init__(self, user_profile: UserProfile) -&gt; None:
+        # Only expose a subset of our UserProfile&#39;s functionality
+        self.user_profile = user_profile
+        self._rate_limit = RateLimit(20, 5)
+        ...
+</code></pre>
+</div>
+<p><strong>The complete capability set of an embedded bot</strong> (measured, <code>bot_lib.py</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it does</th>
+<th>Implemented?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>send_message</code></td>
+<td>Post to a channel/topic or DM</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>send_reply</code></td>
+<td>Reply into the same conversation</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>react</code></td>
+<td>Add an emoji reaction</td>
+<td>❌ <code>return {}  # Not implemented</code></td>
+</tr>
+<tr>
+<td><code>update_message</code></td>
+<td>Edit a message</td>
+<td>❌ <code>pass  # Not implemented</code></td>
+</tr>
+<tr>
+<td><code>storage</code> (<code>.get/.put/.remove/.contains</code>)</td>
+<td>A small per-bot key-value store</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>get_config_info</code></td>
+<td>Read bot config</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>quit</code></td>
+<td>Terminate</td>
+<td>✅ (raises)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Three design decisions worth naming (rule 6):</strong></p>
+<ol>
+<li><strong>The façade is narrow on purpose.</strong> A bot cannot read messages it wasn&#39;t sent, cannot see
+the channel list, cannot touch settings, and cannot reach the database. The comment <em>&quot;Only
+expose a subset of our UserProfile&#39;s functionality&quot;</em> is the whole security model.</li>
+<li><strong>Two methods are declared and left empty</strong> — <code>react</code> and <code>update_message</code>. They exist to
+satisfy the interface so that the <em>external</em> bot framework (which does implement them) can
+share the shape. <strong>This is a divergence the study must record (D2-*):</strong> an interface with
+methods that do nothing, distinguished only by a comment.</li>
+<li><strong>A rate limit is built into the constructor</strong> — <code>RateLimit(20, 5)</code> (20 requests, presumably
+per 5 seconds; from the external <code>zulip_bots.lib</code>). A bot cannot flood a realm.</li>
+</ol>
+<p><strong>Bot state is a real, bounded store.</strong> <code>StateHandler</code> (<code>bot_lib.py:41-66</code>) wraps
+<code>BotStorageData</code>/<code>BotConfigData</code> (two models in <code>zerver/models/bots.py</code>, 80 lines total) with a
+hard size cap: <code>storage_size_limit = settings.USER_STATE_SIZE_LIMIT</code>. A bot can remember things
+between turns, but not unboundedly.</p>
+<hr>
+<h2 id="2-3-the-llm-integration-one-feature-five-fences">§2.3 ★ The LLM integration: ONE feature, five fences<a href="#batch-02/2-3-the-llm-integration-one-feature-five-fences" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured across the tree: the only production LLM call is <strong><code>zerver/actions/message_summary.py</code></strong>
+(215 lines, <code>from openai import OpenAI</code> at line 7). It implements <strong>topic summarisation</strong> — the
+user asks for a summary of a conversation, the server sends the last ≤100 messages to an
+OpenAI-compatible endpoint, and returns a rendered summary.</p>
+<p><strong>What the code does, in order</strong> (<code>message_summary.py</code>):</p>
+<ol>
+<li>Reads a narrow (channel + topic), fetches <strong>at most <code>MAX_MESSAGES_SUMMARIZED = 100</code> messages</strong>
+(<code>:24</code>, <code>:106</code>).</li>
+<li><strong>Formats them for the model</strong> (<code>format_zulip_messages_for_model</code>, <code>:50-69</code>) — stripping the
+recipient, timestamps, reactions; sending only <code>{&quot;sender&quot;: full_name, &quot;content&quot;: text}</code> as
+JSON. The comment block at <code>:51-64</code> is a <em>list of deliberate omissions</em>.</li>
+<li>Builds a <strong>3-message chat</strong> (<code>:163-167</code>): a <code>system</code> intro (&quot;The following is a chat
+conversation in the Zulip team chat app.&quot; + channel/topic), the conversation as a <code>user</code>
+message, and a <code>user</code> instruction (&quot;Succinctly summarize this conversation… up to N
+sentences… Refer to specific people as appropriate. Don&#39;t use an intro phrase.&quot;).</li>
+<li>Calls the model with <strong>operator-supplied credentials and parameters</strong>:
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">client = OpenAI(
+    api_key=settings.TOPIC_SUMMARIZATION_API_KEY,
+    base_url=settings.TOPIC_SUMMARIZATION_API_BASE,
+)
+response = client.chat.completions.create(
+    model=model,
+    messages=messages,
+    **settings.TOPIC_SUMMARIZATION_PARAMETERS,
+)
+</code></pre>
+</div>
+</li>
+<li><strong>Meters cost from the API&#39;s own token counts</strong> (<code>:196-202</code>):
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">credits_used = (output_tokens * settings.OUTPUT_COST_PER_GIGATOKEN) + (
+    input_tokens * settings.INPUT_COST_PER_GIGATOKEN
+)
+</code></pre>
+</div>
+and writes it into a <code>LoggingCountStat</code> (<code>ai_credit_usage::day</code>).</li>
+</ol>
+<h3 id="the-five-fences-around-the-llm-this-is-the-finding">The five fences around the LLM (this is the finding)<a href="#batch-02/the-five-fences-around-the-llm-this-is-the-finding" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Fence</th>
+<th>Where</th>
+<th>What it guarantees</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F1</strong></td>
+<td><strong>Server opt-in</strong></td>
+<td><code>TOPIC_SUMMARIZATION_MODEL</code> defaults to <strong><code>None</code></strong> (<code>default_settings.py:769</code>)</td>
+<td>AI features <strong>do not exist</strong> unless the operator configures them. <code>events.py:582</code> broadcasts <code>server_can_summarize_topics</code> so clients can hide the button.</td>
+</tr>
+<tr>
+<td><strong>F2</strong></td>
+<td><strong>Per-realm permission</strong></td>
+<td><code>can_summarize_topics_group</code> (<code>realms.py:914</code>) — a <code>GroupPermissionSetting</code> defaulting to <code>SystemGroups.EVERYONE</code>, but settable to nobody / a chosen group</td>
+<td>A realm admin controls <em>which members</em> may use AI.</td>
+</tr>
+<tr>
+<td><strong>F3</strong></td>
+<td><strong>Per-user monthly cost cap</strong></td>
+<td><code>MAX_PER_USER_MONTHLY_AI_COST</code> (default <strong><code>0.5</code></strong> USD, <code>default_settings.py:776</code>); enforced in the view (<code>message_summary.py:28-33</code>)</td>
+<td>A user cannot spend unboundedly.</td>
+</tr>
+<tr>
+<td><strong>F4</strong></td>
+<td><strong>Provider-neutral, operator-chosen</strong></td>
+<td><code>TOPIC_SUMMARIZATION_API_BASE</code> + <code>API_KEY</code> from a <strong>secret</strong>, not hardcoded (<code>computed_settings.py:1329-1330</code>)</td>
+<td>The operator decides <em>which</em> model and <em>whose</em> endpoint. Dev uses Groq (<code>llama-3.3-70b-versatile</code>); the prod template shows HuggingFace.</td>
+</tr>
+<tr>
+<td><strong>F5</strong></td>
+<td><strong>The result is rendered as untrusted Markdown</strong></td>
+<td><code>:214</code> — <code>markdown_convert(summary, message_realm=user_profile.realm)</code></td>
+<td>Model output goes through Zulip&#39;s <strong>existing</strong> Markdown sanitizer, exactly like a user message. The model is never trusted to produce safe HTML.</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The measure of this design.</strong> Zulip added an LLM and treated it as <strong>a feature of the
+product, fenced by the product&#39;s own primitives</strong> — the same group-permission model, the same
+Markdown pipeline, the same metering infrastructure that already existed for other stats. It
+did <strong>not</strong> add an agent framework, a tool-call loop, or a memory system. <strong>Where n8n&#39;s P1 was
+&quot;build the agent&quot;, Zulip&#39;s P1 is &quot;admit the model, fence it with what you already have.&quot;</strong></p>
+<hr>
+<h2 id="2-4-what-the-p1-surface-does-not-have-measured-so-the-negatives-are-as-solid-as-the-positives">§2.4 What the P1 surface does NOT have (measured, so the negatives are as solid as the positives)<a href="#batch-02/2-4-what-the-p1-surface-does-not-have-measured-so-the-negatives-are-as-solid-as-the-positives" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Present?</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>An <strong>LLM call in the core</strong></td>
+<td>✅ <strong>yes</strong> — one, summarisation</td>
+<td><code>message_summary.py:7</code></td>
+</tr>
+<tr>
+<td><strong>Tool-calling / function-calling loop</strong></td>
+<td>❌ no</td>
+<td>no <code>tools=</code> argument anywhere; grep of <code>tool_call</code> → 0 in <code>zerver/</code></td>
+</tr>
+<tr>
+<td><strong>A memory / context store for a model</strong></td>
+<td>❌ no (bots have a small KV store, not the model)</td>
+<td><code>BotStorageData</code> is per-<em>bot</em>, not per-<em>model</em></td>
+</tr>
+<tr>
+<td><strong>A vector store / embeddings / RAG</strong></td>
+<td>❌ no</td>
+<td>no <code>embedding</code>, <code>vector</code>, <code>pgvector</code> in the tree</td>
+</tr>
+<tr>
+<td><strong>Streaming responses to the client</strong></td>
+<td>❌ no (single blocking completion)</td>
+<td><code>client.chat.completions.create</code> — no <code>stream=True</code></td>
+</tr>
+<tr>
+<td><strong>Multi-turn agent conversation</strong></td>
+<td>❌ no (one-shot: messages in → summary out)</td>
+<td><code>do_summarize_narrow</code> is stateless per call</td>
+</tr>
+<tr>
+<td><strong>Summarisation caching</strong></td>
+<td>❌ <strong>no, and the code admits it</strong></td>
+<td><code>:94-97</code> TODO: <em>&quot;does not attempt to make use of caching previous summaries… Doing so correctly will require careful work around invalidation&quot;</em></td>
+</tr>
+<tr>
+<td><strong>A separate LLM for anything else</strong></td>
+<td>❌ no</td>
+<td>only <code>TOPIC_SUMMARIZATION_*</code> exists</td>
+</tr>
+</tbody></table></div>
+<p><strong>The most honest sentence in the batch</strong> is the TODO at <code>:172-184</code>, which plans a <em>token
+reservation</em> protocol:</p>
+<blockquote>
+<p><code># TODO when implementing user plans:</code> … <em>&quot;These first two steps should be a short database
+transaction that locks the <code>LoggingCountStat</code> row… That way, you can&#39;t easily get extra tokens
+by sending 25 requests all at once when you&#39;re just below the limit.&quot;</em></p>
+</blockquote>
+<p><strong>This is an unimplemented race-condition fix, stated in the code.</strong> The cost cap (F3) is checked
+<em>before</em> the call but the <em>stat is incremented after</em> — so a burst of parallel requests can
+overshoot the monthly cap. Zulip knows, named it, and left a plan. Per rule 10, that TODO is
+more informative than the feature.</p>
+<hr>
+<h2 id="2-5-where-the-old-bot-path-is-still-the-generic-one">§2.5 Where the old bot path is still the "generic" one<a href="#batch-02/2-5-where-the-old-bot-path-is-still-the-generic-one" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two more seams complete the P1 picture, both predating the LLM:</p>
+<ul>
+<li><strong>Outgoing webhooks</strong> (<code>zerver/lib/outgoing_webhook.py</code>, 432 lines). An abstract base
+<code>OutgoingWebhookServiceInterface</code> with two concrete implementations — a <strong>generic</strong> one and a
+<strong>Slack-compatible</strong> one (<code>GENERIC_INTERFACE</code>, <code>SLACK_INTERFACE</code>). The service POSTs the
+message to a URL and forwards the reply. <strong>The endpoint can return a <code>widget_content</code></strong> field
+(<code>OutgoingWebhookResult</code>, <code>:28-32</code>) — <strong>this is the bridge to batch 05: a bot can return
+widget data, not just text.</strong></li>
+<li><strong>Embedded bots run in a queue worker</strong> (<code>zerver/worker/embedded_bots.py</code>, 61 lines) —
+<code>EmbeddedBotWorker(QueueProcessingWorker)</code>. <strong>The bot&#39;s execution is async, off the request
+path</strong>, exactly like email sending. There are exactly <strong>6 embedded bots</strong> (<code>integrations.py:478-484</code>):
+<code>converter</code>, <code>encrypt</code>, <code>helloworld</code>, <code>virtual_fs</code>, <code>giphy</code>, <code>followup</code>.</li>
+</ul>
+<p><strong>Outgoing webhooks carry a token.</strong> <code>OutgoingWebhookServiceInterface.__init__</code> takes a <code>token</code>
+and sets a <strong>User-Agent</strong> (<code>ZulipOutgoingWebhook/</code> + version) — the call is authenticated
+outbound, not open.</p>
+<hr>
+<h2 id="2-6-divergences-and-honest-limits-batch-02">§2.6 Divergences and honest limits (batch 02) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/2-6-divergences-and-honest-limits-batch-02" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Divergence / limit</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D2-1</strong></td>
+<td><strong>An interface with two dead methods</strong></td>
+<td><code>EmbeddedBotHandler.react</code> returns <code>{}  # Not implemented</code>; <code>update_message</code> is <code>pass  # Not implemented</code>. They exist for interface-shape only — a reader could mistakenly believe embedded bots can react/edit.</td>
+</tr>
+<tr>
+<td><strong>D2-2</strong></td>
+<td><strong>The cost cap has a known race</strong></td>
+<td>F3 is enforced pre-call, the stat is incremented post-call; a parallel burst can overshoot the monthly limit. The code says so (<code>:172-184</code>) but it is <em>not fixed</em>.</td>
+</tr>
+<tr>
+<td><strong>D2-3</strong></td>
+<td><strong>&quot;Embedded bot&quot; is a different product</strong></td>
+<td>The handler imports <code>zulip_bots.lib</code> — the embedded-bot engine lives in a <strong>separate repository/package</strong>, not this tree. This study sees only the <em>host</em> side.</td>
+</tr>
+<tr>
+<td><strong>D2-4</strong></td>
+<td><strong>No streaming, no multi-turn, no tools</strong></td>
+<td>The LLM surface is one-shot and blocking. Any claim of &quot;Zulip has an agent&quot; would be false.</td>
+</tr>
+<tr>
+<td><strong>D2-5</strong></td>
+<td><strong>The summariser sends conversation content to a third party</strong></td>
+<td>F4 makes the <em>endpoint</em> operator-chosen, but the feature&#39;s contract is that message text leaves the server. There is no local-model path in this tree.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-7-batch-02-verdict">§2.7 Batch-02 verdict<a href="#batch-02/2-7-batch-02-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Zulip&#39;s machine-participant model rests on <strong>one insight</strong>: <em>make the machine a user.</em> A bot is a
+<code>UserProfile</code>; it is mentioned, DM&#39;d, subscribed and permission-checked by the same code as a
+human. On that base sit <strong>four wiring types</strong> (generic / incoming / outgoing / embedded), a
+<strong>deliberately narrow bot façade</strong> that exposes seven operations and blocks the rest, and — new
+in the 12.x line — <strong>exactly one LLM feature</strong>, topic summarisation, which is the textbook
+example of <em>admitting a model without letting it become the architecture</em>: server-opt-in,
+realm-permissioned, per-user cost-capped, provider-neutral, and its output sanitised by the
+platform&#39;s own Markdown pipeline.</p>
+<p><strong>The two things to carry forward:</strong> (1) the <strong>bot-as-user</strong> primitive — the machine needs no
+new core object; and (2) the <strong>five-fence pattern</strong> for an LLM feature, which is the most
+transferable P1 mechanism Zulip has, precisely because it is <em>smaller</em> than the agent frameworks
+other platforms built.</p>
+<hr>
+<p><em>Batch 02 · Zulip · a bot is a user · a narrow façade · one LLM feature, five fences ·
+the cost race is named, not fixed.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#2-1-the-bot-taxonomy-four-types-one-field" class="toc-link">§2.1 The bot taxonomy — four types, one field</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-2-the-bot-api-is-a-deliberately-restricted-fa-ade" class="toc-link">§2.2 The bot API is a deliberately restricted façade</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-3-the-llm-integration-one-feature-five-fences" class="toc-link">§2.3 ★ The LLM integration: ONE feature, five fences</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#the-five-fences-around-the-llm-this-is-the-finding" class="toc-link">The five fences around the LLM (this is the finding)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-4-what-the-p1-surface-does-not-have-measured-so-the-negatives-are-as-solid-as-the-positives" class="toc-link">§2.4 What the P1 surface does NOT have (measured, so the negatives are as solid as the positives)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-5-where-the-old-bot-path-is-still-the-generic-one" class="toc-link">§2.5 Where the old bot path is still the &quot;generic&quot; one</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-6-divergences-and-honest-limits-batch-02" class="toc-link">§2.6 Divergences and honest limits (batch 02)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-7-batch-02-verdict" class="toc-link">§2.7 Batch-02 verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Out-of-pole findings (PZ) — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Out-of-Pole (PZ)</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-out-of-pole.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,110</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">264</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 - PZ</div>
+    <h4>Out-of-pole: the densest guard culture in the study</h4>
+    <p>Nine check scripts, one truth across three representations, and a ratchet with a social consequence</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">9 check-* SCRIPTS - 65 EXECUTABLE TOOLS - EACH WITH ONE JOB</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Zulip's engineering quality is not a feature but a METHOD - a set of guardrails that happened to ship a chat app</text>
+
+      <text x="40" y="84" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">check-schemas - ONE TRUTH, THREE REPRESENTATIONS, DIFFED ACROSS LANGUAGE BOUNDARIES</text>
+      <g transform="translate(40, 96)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">REPRESENTATION 1</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The OpenAPI YAML</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">hand-written</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">31,869 lines - 119 REST paths</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">not generated</text>
+      </g>
+      <g transform="translate(345, 96)">
+        <rect width="290" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">REPRESENTATION 2</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The Python test schemas</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">zerver/tests</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">150 files / 163,703 LOC</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the largest test mass in the study</text>
+      </g>
+      <g transform="translate(650, 96)">
+        <rect width="270" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">REPRESENTATION 3</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The JS fixtures</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">web/ test fixtures</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">21 web e2e files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a third language, same contract</text>
+      </g>
+
+      <rect x="40" y="216" width="880" height="66" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+      <text x="480" y="240" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#059669">THE ONLY CROSS-LANGUAGE CONTRACT GUARD IN THE STUDY</text>
+      <text x="480" y="262" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A guard diffs them. Nothing else in nine platforms does this - and it is what makes API_FEATURE_LEVEL a real number.</text>
+      <text x="480" y="278" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">It is what makes the widget contract a zod union rather than a hope.</text>
+
+      <text x="40" y="318" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE RATCHET, THE ESCAPE HATCH, AND THE MACHINE-READABLE DISCIPLINE</text>
+      <g transform="translate(40, 330)">
+        <rect width="290" height="108" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE FEATURE-LEVEL RATCHET</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">API_FEATURE_LEVEL = 513</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Leave a ZF- marker and the build</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">fails AND the announcement is skipped</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">so a HUMAN must do it by hand</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">mechanical check + social obligation</text>
+      </g>
+      <g transform="translate(345, 330)">
+        <rect width="290" height="108" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">mark_sanitized</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A one-line IDENTITY function</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the named, justified escape hatch</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">for the project own taint analyser</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 call sites, each with a justification</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a NEGATIVE capability - elegant</text>
+      </g>
+      <g transform="translate(650, 330)">
+        <rect width="270" height="108" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">AGENTS.md</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Contributor discipline rewritten</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">for an AI agent</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ path-scoped .claude/rules</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">the platform teaching its own</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">guardrails to a machine</text>
+      </g>
+
+      <rect x="40" y="458" width="880" height="46" rx="8" fill="var(--surface-card, #ffffff)" stroke="#b45309" stroke-width="1.4"/>
+      <text x="480" y="478" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#b45309">THE DEP-5 LICENCE LEDGER, GUARDED BY A SCRIPT</text>
+      <text x="480" y="496" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">"This script is not a lawyer." - the single most quotable line in the tree: a guard that states its own limits</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-06-out-of-pole-pz">Zulip Study — Batch 06: out-of-pole (PZ)<a href="#batch-06/zulip-study-batch-06-out-of-pole-pz" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Pole:</strong> <strong>PZ — the escape hatch</strong> (security,
+tooling, and the verification culture)
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>The question this batch answers:</strong> <em>what exists outside the three poles that nonetheless
+determines how the code is written?</em> For Zulip the answer is overwhelming: <strong>a guard culture</strong>.
+This is the batch where Zulip&#39;s real genius shows — not in any single feature, but in the
+<strong>systematic machinery that makes the other features hard to break</strong>.</p>
+<p><strong>Headline before the detail:</strong> Zulip has built the study&#39;s densest <strong>verification culture</strong>:
+9 dedicated <code>check-*</code> guard scripts, <strong>65 executable tools</strong>, a <strong>cross-source schema validator</strong>
+that makes three independent descriptions of the events API agree, a <strong>taint-analysis escape
+hatch</strong> (<code>mark_sanitized</code>), a <strong>DEP-5 licence ledger</strong>, a <strong><code>feature level</code> ratchet</strong> on the API,
+and — remarkably — <strong>a set of in-tree instructions for AI coding agents</strong> (<code>.claude/rules/</code> +
+<code>AGENTS.md</code>).</p>
+<hr>
+<h2 id="6-1-the-guard-surface-9-check-scripts-each-with-one-job">§6.1 The guard surface: 9 `check-*` scripts, each with one job<a href="#batch-06/6-1-the-guard-surface-9-check-scripts-each-with-one-job" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured in <code>tools/</code>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Guard</th>
+<th>What it enforces</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>check-schemas</code></strong></td>
+<td>★ <strong>Three independent descriptions of the events API must agree</strong> (see §6.2)</td>
+</tr>
+<tr>
+<td><strong><code>check-feature-level-updated</code></strong></td>
+<td>★ <strong>If you touch any API doc, you must bump <code>API_FEATURE_LEVEL</code></strong></td>
+</tr>
+<tr>
+<td><strong><code>check-capitalization</code></strong></td>
+<td>Title-case conventions in user-facing strings (with an allow-list)</td>
+</tr>
+<tr>
+<td><strong><code>check-frontend-i18n</code></strong></td>
+<td>Translatable strings contain no unescaped handlebars; correct <code>t()</code> usage</td>
+</tr>
+<tr>
+<td><strong><code>check-thirdparty</code></strong></td>
+<td>The <strong>DEP-5 licence file</strong> is syntactically valid and matches dependencies</td>
+</tr>
+<tr>
+<td><strong><code>check-provision</code></strong></td>
+<td>Provision-version invariants</td>
+</tr>
+<tr>
+<td><strong><code>check-templates</code></strong></td>
+<td>Template consistency</td>
+</tr>
+<tr>
+<td><strong><code>check-issue-labels</code></strong></td>
+<td>Commit/PR hygiene</td>
+</tr>
+<tr>
+<td><strong><code>check-openapi.ts</code></strong></td>
+<td>The OpenAPI spec is well-formed</td>
+</tr>
+</tbody></table></div>
+<p>Plus <code>renumber-migrations</code>, <code>commit-message-lint</code>, <code>run-mypy</code>, <code>run-tsc</code>, <code>run-dev</code>,
+<code>review</code>, <code>self-review</code>, <code>diagnose</code>, <code>build-docs</code>, and <strong>65 executable tools</strong> total.</p>
+<p><strong>The pattern (rule 6):</strong> each guard is <strong>a small, single-purpose script that exits non-zero</strong>,
+runnable from the CLI <em>and</em> in CI. There is no guard framework — the framework is &quot;a script that
+fails.&quot;</p>
+<hr>
+<h2 id="6-2-check-schemas-one-truth-enforced-across-three-representations">§6.2 ★ `check-schemas`: one truth enforced across three representations<a href="#batch-06/6-2-check-schemas-one-truth-enforced-across-three-representations" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The most important PZ artefact in the tree (<code>tools/check-schemas</code>, its own docstring):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code># Validates that 3 data sources agree about the structure of Zulip&#39;s events API:
+#
+# * Node fixtures for the server_events_dispatch.js tests.
+# * OpenAPI definitions in zerver/openapi/zulip.yaml
+# * The schemas defined in zerver/lib/event_schema.py used for the
+#   Zulip server&#39;s test suite.
+#
+# We compare the Python and OpenAPI schemas by converting the OpenAPI data
+# into the event_schema style of types and the diffing the schemas.
+</code></pre>
+</div>
+<p><strong>What this means, and why it is the study&#39;s strongest PZ finding.</strong> The events API — the
+server→client push contract that batch 01 identified as the heart of real-time sync — is
+described in <strong>three places</strong>: the hand-written OpenAPI YAML (31,869 lines), a <strong>Python schema
+module used by the test suite</strong>, and <strong>JavaScript test fixtures</strong>. Drift between any two is
+caught automatically. <strong>This is the only place in the study where a contract is enforced
+across language boundaries by a differ</strong>, and it is the mechanism that makes Zulip&#39;s
+<code>API_FEATURE_LEVEL</code> a real number rather than a comment.</p>
+<hr>
+<h2 id="6-3-the-api-feature-level-ratchet">§6.3 ★ The `API_FEATURE_LEVEL` ratchet<a href="#batch-06/6-3-the-api-feature-level-ratchet" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>tools/check-feature-level-updated</code> — the whole guard, essentially:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">api_docs_folder = Path(&quot;api_docs&quot;)
+api_docs_paths = list(api_docs_folder.glob(&quot;*.md&quot;))
+api_docs_paths.append(Path(&quot;zerver/openapi/zulip.yaml&quot;))
+for api_docs_path in api_docs_paths:
+    with open(api_docs_path) as file:
+        if &quot;ZF-&quot; in file.read():
+            content = f&quot;[Build] ... has failed: Feature level not replaced in &#39;{api_docs_path}&#39;...&quot;
+            print(f&quot;fail=true\ntopic={topic}\ncontent={content}&quot;)
+            sys.exit(0)
+</code></pre>
+</div>
+<p><strong>The mechanism (rule 6 — name it): the feature-level ratchet.</strong></p>
+<ol>
+<li>A contributor writing an API change runs <code>tools/create-api-changelog</code>, which creates a
+changelog file containing a <strong>placeholder <code>ZF-&lt;random-id&gt;</code></strong>.</li>
+<li>When they actually implement it, they <strong>replace <code>ZF-</code> with the new feature level</strong> in the
+changelog.</li>
+<li><strong>If a merged PR leaves any <code>ZF-</code> marker in the API docs or the spec, this guard fails the
+build</strong> — and it <em>also skips the job that posts the announcement to the API-docs channel</em>,
+and tells the author to post it manually.</li>
+</ol>
+<p><strong>★ This is a ratchet with a <em>social</em> consequence attached.</strong> The guard does not just say &quot;you
+forgot&quot;; it says <em>&quot;and now the announcement will not post itself, so do it by hand.&quot;</em> It couples
+a mechanical check to a human obligation. <strong><code>API_FEATURE_LEVEL = 513</code></strong> (version.py) is thus a
+<strong>monotonically increasing, guard-enforced counter</strong> — the number of times the public API
+contract has changed.</p>
+<hr>
+<h2 id="6-4-the-taint-analysis-escape-hatch-mark-sanitized">§6.4 ★ The taint-analysis escape hatch: `mark_sanitized`<a href="#batch-06/6-4-the-taint-analysis-escape-hatch-mark-sanitized" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>zerver/lib/pysa.py</code> is the entire module:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">from typing import TypeVar
+T = TypeVar(&quot;T&quot;)
+
+def mark_sanitized(arg: T) -&gt; T:
+    return arg
+</code></pre>
+</div>
+<p><strong>A function that does nothing</strong> — used in exactly <strong>8 files</strong> in <code>zerver/</code> (7 call sites plus
+<code>pysa.py</code> itself). Its purpose is visible in the call sites. In <code>zerver/views/auth.py:124-127</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python"># Mark as safe to prevent Pysa from surfacing false positives for
+# open redirects. In this branch, we have already checked that the URL
+# points to the specified &#39;redirect_host&#39;, or is relative.
+return urljoin(redirect_host, mark_sanitized(url))
+</code></pre>
+</div>
+<p>And in <code>zerver/worker/base.py:282</code> (batch 04&#39;s dead-letter writer):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python"># Use &#39;mark_sanitized&#39; to prevent Pysa from detecting this false positive
+# flow. &#39;queue_name&#39; is always a constant string.
+fname = mark_sanitized(f&quot;{self.queue_name}.errors&quot;)
+</code></pre>
+</div>
+<p><strong>★ This is the study&#39;s most elegant PZ mechanism, and it is a <em>negative</em> capability.</strong> Zulip runs
+<strong>Pysa</strong> (Facebook&#39;s static taint-analysis tool for Python) over its codebase. When Pysa raises a
+<em>false positive</em> — a flow that looks like a vulnerability but is not, because a human has proven
+it safe — the developer <strong>annotates the line with <code>mark_sanitized</code> and writes a comment saying
+why.</strong> The annotation:</p>
+<ul>
+<li>is a <strong>no-op at runtime</strong> (identity function),</li>
+<li>makes the intent <strong>explicit and greppable</strong>,</li>
+<li>and — crucially — <strong>must be justified by a comment</strong>, which means every &quot;we know it&#39;s safe&quot;
+decision in the security model is written down.</li>
+</ul>
+<p><strong>The count matters: 7 call sites across 8 files.</strong> Zulip does not spray <code>mark_sanitized</code> to
+silence a noisy tool; it appears where a specific, defensible taint flow was proven safe.
+<strong>This is the anti-pattern of <code># type: ignore</code> used as a sledgehammer</strong> — and it is the first time
+in the study that a platform has shipped an <em>escape hatch for its own security tooling</em>, with the
+discipline to use it sparingly.</p>
+<hr>
+<h2 id="6-5-the-licence-ledger-a-dep-5-file-guarded">§6.5 The licence ledger: a DEP-5 file, guarded<a href="#batch-06/6-5-the-licence-ledger-a-dep-5-file-guarded" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>docs/THIRDPARTY</code> is a <strong>DEP-5</strong> (Debian machine-readable copyright) ledger of every third-party
+dependency and its licence. <code>tools/check-thirdparty</code> validates it — and its own docstring is a
+model of honesty:</p>
+<blockquote>
+<p>`# Disclaimer: This script is not a lawyer. It cannot validate that the claimed licenses are</p>
+<h1 id="correct-it-can-only-check-for-basic-syntactic-issues">correct. It can only check for basic syntactic issues.`<a href="#batch-06/correct-it-can-only-check-for-basic-syntactic-issues" class="heading-anchor" title="Direct link to this section">#</a></h1>
+</blockquote>
+<p><strong>★ &quot;This script is not a lawyer&quot;</strong> is the single most quotable line in the Zulip tree. It states
+precisely what an automated guard can and cannot do — a rarity in tooling. Combined with the
+DEP-5 format, Zulip gets <strong>a machine-checkable licence manifest that admits its own limits</strong>.</p>
+<hr>
+<h2 id="6-6-the-testing-culture-measured">§6.6 The testing culture, measured<a href="#batch-06/6-6-the-testing-culture-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>zerver/tests/</code></td>
+<td>150 files / <strong>163,703 LOC</strong></td>
+</tr>
+<tr>
+<td>Web e2e tests (Puppeteer)</td>
+<td>21 <code>.ts</code> files</td>
+</tr>
+<tr>
+<td>Test rules shipped in-tree</td>
+<td><code>.claude/rules/testing.md</code>, <code>ui-testing.md</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>The philosophy is written down</strong> (<code>.claude/rules/testing.md</code>):</p>
+<blockquote>
+<p><em>&quot;Write end-to-end tests when possible verifying what&#39;s important, not internal APIs.&quot;</em>
+<em>&quot;A good failing test before implementing is good practice so your test and code can jointly
+verify each other.&quot;</em>
+<em>&quot;Remember to always assert state is correctly updated, not just &#39;success&#39;.&quot;</em></p>
+</blockquote>
+<p>And from <code>AGENTS.md</code> (see §6.7): <strong>&quot;What isn&#39;t tested probably doesn&#39;t work&quot;</strong> — applied to
+visual changes &quot;just as much as to backend logic.&quot;</p>
+<hr>
+<h2 id="6-7-the-ai-agent-instruction-set-shipped-in-tree">§6.7 ★ The AI-agent instruction set, shipped in-tree<a href="#batch-06/6-7-the-ai-agent-instruction-set-shipped-in-tree" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A PZ finding unique to Zulip: <strong><code>AGENTS.md</code> + <code>.claude/rules/*.md</code> + <code>.claude/skills/*</code></strong> — a
+complete, in-tree instruction manual for <strong>AI coding agents</strong>, with:</p>
+<ul>
+<li><strong>6 rules</strong> (<code>api-changelog.md</code>, <code>css.md</code>, <code>frontend.md</code>, <code>python.md</code>, <code>testing.md</code>,
+<code>ui-testing.md</code>) — each with a <strong><code>paths:</code> front-matter</strong> so it auto-loads when an agent touches
+the relevant files (<code>.claude/rules/testing.md</code> opens with <code>paths: - &quot;zerver/tests/**&quot;</code>).</li>
+<li><strong>9 skills</strong> (<code>commit-message</code>, <code>fix-backend-coverage</code>, <code>fetch-zulip-messages</code>,
+<code>self-review</code>, <code>visual-test</code>, <code>write-changelog</code>, …).</li>
+<li><strong>An explicit philosophy</strong> (<code>AGENTS.md:28-40</code>):</li>
+</ul>
+<blockquote>
+<p><em>&quot;Zulip&#39;s coding philosophy is to focus relentlessly on making the codebase easy to understand
+and difficult to make dangerous mistakes. This applies equally to AI-generated contributions.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Zulip&#39;s engineering strategy is to &#39;move quickly without breaking things&#39;. This is possible
+because the project has invested years in testing, tooling, code structure, documentation, and
+development practices that catch bugs systematically rather than relying on individual
+vigilance.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;There is no category of &#39;minor issue&#39; that is acceptable to ship… The right attitude is:
+&#39;What could go wrong, and how do I verify that it doesn&#39;t?&#39; not &#39;It looks fine to me.&#39;&quot;</em></p>
+</blockquote>
+<p><strong>★ Why this belongs in PZ, not P1.</strong> This is not an AI <em>feature</em> (that was batch 02&#39;s one
+summariser). This is <strong>the platform teaching its own guardrails to an AI contributor</strong> — the same
+<code>AGENTS.md</code> that tells a human how to work tells a Claude Code agent how to work, with
+path-scoped rules and named skills. <strong>Zulip has made its PZ machinery legible to a machine.</strong> The
+first line even sets the policy: <em>&quot;Do not submit an AI-generated PR you haven&#39;t personally
+understood and tested.&quot;</em></p>
+<hr>
+<h2 id="6-8-divergences-and-honest-limits-batch-06">§6.8 Divergences and honest limits (batch 06) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/6-8-divergences-and-honest-limits-batch-06" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Divergence / limit</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D6-1</strong></td>
+<td><strong><code>tools/lint</code> is an entry point to a repo not in this tree</strong></td>
+<td><code>tools/lint</code> is a 7,475-byte executable that drives the <strong><code>zulip-lint</code></strong> repository (a separate project). The 100+ custom lint rules are <strong>not visible in this extract</strong>. The guard <em>surface</em> is readable; the guard <em>bodies</em> are not.</td>
+</tr>
+<tr>
+<td><strong>D6-2</strong></td>
+<td><strong>No <code>.github/workflows</code> in the extract</strong></td>
+<td><code>.github/</code> exists but the CI workflow YAMLs are not present (the README badge references <code>zulip-ci.yml</code>, which is absent). <strong>The CI is therefore documented, not measured</strong> — this batch reads the guards, not the pipeline that runs them.</td>
+</tr>
+<tr>
+<td><strong>D6-3</strong></td>
+<td><strong>Pysa&#39;s configuration is not in this tree</strong></td>
+<td>The 7 <code>mark_sanitized</code> call sites are visible, but the taint-model/stubs config that makes Pysa run is elsewhere. <strong>The escape hatch is visible; the analyser is not.</strong></td>
+</tr>
+<tr>
+<td><strong>D6-4</strong></td>
+<td><strong><code>mark_sanitized</code> is a no-op by design — trust rests on the comment</strong></td>
+<td>Nothing <em>enforces</em> that the justification is correct. If a developer marks a real vulnerability safe, no tool catches it. <strong>The mechanism raises the cost of a lie; it does not forbid it.</strong></td>
+</tr>
+<tr>
+<td><strong>D6-5</strong></td>
+<td><strong>The AI-agent instructions are advisory</strong></td>
+<td><code>AGENTS.md</code> says &quot;do not submit an AI-generated PR you haven&#39;t personally understood&quot; — a policy, not a gate. No automated check verifies a human reviewed an AI PR.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-9-batch-06-verdict">§6.9 Batch-06 verdict<a href="#batch-06/6-9-batch-06-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Zulip&#39;s out-of-pole surface is the <strong>densest verification culture in the study</strong>, and its centre
+is a single idea: <strong>make the wrong thing hard to do, then catch the rest automatically.</strong> The
+mechanisms that carry that idea:</p>
+<ol>
+<li><strong><code>check-schemas</code></strong> — the events-API contract enforced across <strong>three independent
+representations</strong> (OpenAPI YAML, Python test schemas, JS fixtures) by a differ. Unique in the
+study.</li>
+<li><strong>The <code>API_FEATURE_LEVEL</code> ratchet</strong> — a guard that fails the build <em>and skips the automated
+announcement</em> if a placeholder marker survives, coupling a mechanical check to a human
+obligation. <code>513</code> is a guard-enforced monotonic counter.</li>
+<li><strong><code>mark_sanitized</code></strong> — a one-line identity function that is the <strong>escape hatch for the
+project&#39;s own taint analyser</strong>, used exactly 7 times, each with a written justification.
+The first time in the study a platform ships an escape hatch <em>for its own security tooling</em>
+and uses it sparingly.</li>
+<li><strong>The DEP-5 licence ledger</strong> — machine-checkable, and guarded by a script that says <strong>&quot;This
+script is not a lawyer.&quot;</strong></li>
+<li><strong><code>AGENTS.md</code> + <code>.claude/rules</code> + <code>.claude/skills</code></strong> — the whole contributor discipline,
+<strong>rewritten for an AI agent</strong>, with path-scoped auto-loading rules.</li>
+</ol>
+<p><strong>The honest counterweights:</strong> the actual lint rules live in a repository not in this extract
+(D6-1), the CI workflows are absent (D6-2), the taint analyser&#39;s config is absent (D6-3), and the
+two most safety-critical mechanisms — <code>mark_sanitized</code> and the AI-agent policy — are <strong>trust,
+not enforcement</strong> (D6-4, D6-5). <strong>Zulip&#39;s culture is real and measurable, but its deepest layer
+is held by a written norm.</strong></p>
+<hr>
+<p><em>Batch 06 · Zulip · a guard culture · check-schemas across three sources · a feature-level
+ratchet with a human consequence · mark_sanitized as the taint analyser&#39;s escape hatch ·
+AGENTS.md teaches the machine.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-the-synthesis.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#6-1-the-guard-surface-9-check-scripts-each-with-one-job" class="toc-link">§6.1 The guard surface: 9 check-* scripts, each with one job</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-2-check-schemas-one-truth-enforced-across-three-representations" class="toc-link">§6.2 ★ check-schemas: one truth enforced across three representations</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-3-the-api-feature-level-ratchet" class="toc-link">§6.3 ★ The API_FEATURE_LEVEL ratchet</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-4-the-taint-analysis-escape-hatch-mark-sanitized" class="toc-link">§6.4 ★ The taint-analysis escape hatch: mark_sanitized</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-5-the-licence-ledger-a-dep-5-file-guarded" class="toc-link">§6.5 The licence ledger: a DEP-5 file, guarded</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-6-the-testing-culture-measured" class="toc-link">§6.6 The testing culture, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-7-the-ai-agent-instruction-set-shipped-in-tree" class="toc-link">§6.7 ★ The AI-agent instruction set, shipped in-tree</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-8-divergences-and-honest-limits-batch-06" class="toc-link">§6.8 Divergences and honest limits (batch 06)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-9-batch-06-verdict" class="toc-link">§6.9 Batch-06 verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

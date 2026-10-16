@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — Zulip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">Zulip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,944</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">270</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three process families, the ambient realm, and the densest guard culture</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the two counting traps</option>
+              <option value="01">Batch 01: The platform - one codebase, three entry points, four stores</option>
+            </optgroup>
+            <optgroup label="Pole 1 - The Aissistant">
+              <option value="02">Batch 02: The aissistant - one LLM feature, five fences</option>
+            </optgroup>
+            <optgroup label="Pole 2 - The Workspace">
+              <option value="03">Batch 03: The workspace - the ambient realm</option>
+            </optgroup>
+            <optgroup label="Pole 3 - Automations">
+              <option value="04">Batch 04: Automations - the claim queue and the 10-minute cutoff</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets and frontend - an event log, not a config object</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole - the densest guard culture in the study</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis - three tiers, one answer, an honest ledger</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 - POLE 2</div>
+    <h4>The workspace: the ambient realm</h4>
+    <p>The tenant is derived from the request's Host header, and the fence is one comparison</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 560" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-b03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-b03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-b03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">THE STRONGEST P2 IN THE STUDY</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">zerver/lib/subdomains.py is 96 lines - the entire tenancy module</text>
+
+      <rect x="40" y="70" width="880" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="60" y="92" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#7c3aed">THE REQUEST ARRIVES</text>
+      <text x="60" y="112" font-family="monospace, monospace" font-size="11" fill="var(--text-primary, #0f172a)">GET https://acme.example.com/api/v1/messages</text>
+      <text x="60" y="132" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">host = request.get_host().lower()  -  subdomain = get_subdomain_from_hostname(host)  -  EXTERNAL_HOST drives everything</text>
+      <text x="60" y="152" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">REALM_HOSTS gives a realm a COMPLETELY DIFFERENT hostname (chat.theircompany.com) - ROOT_SUBDOMAIN_ALIASES maps www back to root</text>
+
+      <line x1="480" y1="166" x2="480" y2="188" stroke="var(--diagram-accent, #7c3aed)" stroke-width="1.8" marker-end="url(#arr-b03)"/>
+
+      <rect x="220" y="190" width="520" height="56" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+      <text x="480" y="213" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#059669">THE FENCE - ONE COMPARISON</text>
+      <text x="480" y="234" text-anchor="middle" font-family="monospace, monospace" font-size="11" fill="var(--text-primary, #0f172a)">user_profile.realm.subdomain == realm_subdomain</text>
+
+      <text x="40" y="284" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">WHY THIS IS THE FINDING</text>
+      <g transform="translate(40, 296)">
+        <rect width="280" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STRUCTURALLY OPPOSITE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A tenant is NOT an argument</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a developer might forget to pass</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">It is resolved ONCE, from the request</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">unwritable, not merely testable</text>
+      </g>
+      <g transform="translate(340, 296)">
+        <rect width="280" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">IDENTITY-EMBEDDED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Email is unique ONLY per-realm</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a@b.com can exist in two realms</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">revealed by a SILENCED auth.W004</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the realm is part of who you are</text>
+      </g>
+      <g transform="translate(640, 296)">
+        <rect width="280" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE HONEST LIMIT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">NO database-level enforcement</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no row-level security</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the fence is a middleware comparison</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">discipline, not enforcement</text>
+      </g>
+
+      <text x="40" y="448" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="var(--text-secondary, #475569)">THE AUDIT LOG - 117 EVENT TYPES, A NAMESPACE THAT ENCODES THE TOPOLOGY</text>
+      <g transform="translate(40, 460)">
+        <rect width="200" height="84" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">1xx - 2xx</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">realm events</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the ambient tier</text>
+      </g>
+      <g transform="translate(255, 460)">
+        <rect width="200" height="84" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">9xx</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">folder events</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">streams and topics</text>
+      </g>
+      <g transform="translate(470, 460)">
+        <rect width="240" height="84" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">10xxx = REALM + 10000</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">REMOTE SERVER events</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the namespace documents</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">its own federation topology</text>
+      </g>
+      <g transform="translate(725, 460)">
+        <rect width="195" height="84" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">20xxx</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">remote realm events</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the same trick, one tier out</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="zulip-study-batch-03-the-workspace-p2">Zulip Study — Batch 03: the workspace (P2)<a href="#batch-03/zulip-study-batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE · <strong>Date:</strong> 2026-10-16 · <strong>Pole:</strong> <strong>P2 — the workspace</strong>
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/zulip-main/</code> @ <code>12.0-dev+git</code></p>
+<p><strong>The question this batch answers:</strong> <em>how is a tenant built, and how is it fenced?</em> In Zulip
+the tenant is the <strong><code>Realm</code></strong> (user-facing name: <em>organization</em>). This is the <strong>strongest P2
+documented pole in the study</strong> — Zulip ships a whole subsystem doc for it, and the pin already
+found the sharpest fact: a user&#39;s login key (email) is unique only <em>within</em> a realm. This batch
+reads the model, the host-resolution boundary, the role/permission system, and the audit log.</p>
+<hr>
+<h2 id="3-1-the-container-a-realm-with-95-fields">§3.1 The container: a `Realm` with 95 fields<a href="#batch-03/3-1-the-container-a-realm-with-95-fields" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Realm</code> lives in <code>zerver/models/realms.py</code> (1,497 lines — the largest model file in the tree).
+Measured: <strong>95 model fields</strong> on the <code>Realm</code> class alone. It is not a thin <code>(id, name, created)</code>
+row; it is the <strong>full configuration surface of an organization</strong> — settings for
+authentication, notifications, policy defaults, upload limits, push-notification state, and
+more.</p>
+<p>The three identity fields that matter (<code>realms.py:192-201</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python"># A short, identifier-like name for the organization.  Used in subdomains;
+# e.g. on a server at example.com, an org with string_id `foo` is reached
+# at `foo.example.com`.
+string_id = models.CharField(max_length=MAX_REALM_SUBDOMAIN_LENGTH, unique=True)
+
+# uuid and a secret for the sake of per-realm authentication with the push notification
+# bouncer.
+uuid = models.UUIDField(default=uuid4, unique=True)
+uuid_owner_secret = models.TextField(default=generate_realm_uuid_owner_secret)
+</code></pre>
+</div>
+<p><strong>What this says.</strong> A realm has <strong>three distinct identifiers for three distinct jobs</strong>:
+<code>id</code> (the integer primary key used in foreign keys), <strong><code>string_id</code></strong> (the human/subdomain name,
+globally unique), and <strong><code>uuid</code></strong> (a stable opaque id shared with the push-notification bouncer
+so the <em>notification service</em> — a separate machine — can authenticate a realm without knowing
+its name). The <code>uuid_owner_secret</code> is the realm&#39;s credential to <em>that</em> external service. <strong>This
+is the first platform in the study where the tenant holds a cryptographic identity of its own</strong>,
+not merely a row id.</p>
+<p><strong>The lookup is by name</strong> (<code>realms.py:1325</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def get_realm(string_id: str) -&gt; Realm:
+    return Realm.objects.get(string_id=string_id)
+</code></pre>
+</div>
+<hr>
+<h2 id="3-2-the-boundary-realm-is-resolved-from-the-host-header-by-subdomain">§3.2 The boundary: realm is resolved from the Host header, by subdomain<a href="#batch-03/3-2-the-boundary-realm-is-resolved-from-the-host-header-by-subdomain" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The tenancy fence is <strong>not</strong> a <code>WHERE realm_id = ?</code> filter applied by hand. It is resolved once,
+from the request, in <code>zerver/lib/subdomains.py</code> (96 lines — the entire module):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def get_subdomain(request: HttpRequest) -&gt; str:
+    host = request.get_host().lower()
+    subdomain = get_subdomain_from_hostname(host)
+    assert subdomain is not None
+    return subdomain
+
+def get_subdomain_from_hostname(host, default_subdomain=Realm.SUBDOMAIN_FOR_ROOT_DOMAIN):
+    m = re.search(rf&quot;\.{settings.EXTERNAL_HOST}(:\d+)?$&quot;, host)
+    if m:
+        subdomain = host[: m.start()]
+        if default_subdomain is not None and subdomain in settings.ROOT_SUBDOMAIN_ALIASES:
+            return default_subdomain
+        return subdomain
+    for subdomain, realm_host in settings.REALM_HOSTS.items():
+        if re.search(rf&quot;^{realm_host}(:\d+)?$&quot;, host):
+            return subdomain
+    return default_subdomain
+</code></pre>
+</div>
+<p><strong>The mechanism, named (rule 6):</strong></p>
+<ul>
+<li><strong>Subdomain routing.</strong> On a server at <code>example.com</code>, <code>foo.example.com</code> → realm <code>string_id = &quot;foo&quot;</code>.</li>
+<li><strong><code>REALM_HOSTS</code> — a custom-domain override.</strong> A realm can also be reached at a <em>completely
+different</em> hostname (<code>:41-43</code>). This is how a big customer gets <code>chat.theircompany.com</code>
+instead of <code>theircompany.example.com</code>.</li>
+<li><strong><code>ROOT_SUBDOMAIN_ALIASES</code></strong> maps special subdomains (like <code>www</code>) back to the root realm.</li>
+<li><strong>The dev environment uses the same code</strong>: <code>*.zulipdev.com</code> (the doc, <code>realms.md:60-74</code>,
+describes this; the code confirms it, since <code>EXTERNAL_HOST</code> drives everything).</li>
+</ul>
+<p><strong>And the fence itself</strong> is one comparison (<code>zerver/decorator.py:301</code>, <code>:489</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">if user_matches_subdomain(get_subdomain(request), user_profile):
+    ...
+# subdomains.py:
+def user_matches_subdomain(realm_subdomain: str, user_profile: UserProfile) -&gt; bool:
+    return user_profile.realm.subdomain == realm_subdomain
+</code></pre>
+</div>
+<p><strong>★ The load-bearing P2 finding.</strong> Zulip&#39;s tenancy is enforced by <strong>deriving the realm from the
+request&#39;s Host and checking the authenticated user belongs to it</strong>. A request to
+<code>acme.example.com</code> from a user whose <code>user_profile.realm.subdomain</code> is <code>globex</code> <strong>fails the
+fence immediately</strong> — before any row is fetched. <strong>The realm is the ambient context of every
+request, not a parameter a caller passes.</strong> This is structurally the opposite of a design where
+the tenant is an argument the developer might forget.</p>
+<hr>
+<h2 id="3-3-identity-the-realm-is-part-of-who-a-user-is">§3.3 Identity: the realm is part of who a user is<a href="#batch-03/3-3-identity-the-realm-is-part-of-who-a-user-is" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The pin found this; batch 03 confirms and extends it. From <code>zerver/models/users.py</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">class UserProfile(AbstractBaseUser, PermissionsMixin, UserBaseSettings):
+    USERNAME_FIELD = &quot;email&quot;
+    ...
+    # Both fields are unique within a realm (in a case-insensitive fashion).
+    delivery_email = models.EmailField(blank=False, db_index=True)
+    email = models.EmailField(blank=False, db_index=True)
+    realm = models.ForeignKey(&quot;zerver.Realm&quot;, on_delete=CASCADE)
+</code></pre>
+</div>
+<p>And the project <strong>silences Django&#39;s own warning</strong> about it (<code>computed_settings.py:313-325</code>):
+<em>&quot;auth.W004 checks that the UserProfile field named by USERNAME_FIELD has <code>unique=True</code>. For us
+this is <code>email</code>, and it&#39;s unique only per-realm.&quot;</em></p>
+<p><strong>Three consequences (all measured):</strong></p>
+<ol>
+<li><strong>The same person can be a member of many realms</strong> with the same email, as distinct
+<code>UserProfile</code> rows.</li>
+<li><strong>The case-insensitive uniqueness is a hand-written SQL index</strong> in migration <code>0295</code>
+(<code>users.py:506-509</code> explains why Django&#39;s <code>unique_together</code> — which is case-*sensitive` —
+could not be used).</li>
+<li><strong><code>delete on CASCADE</code> from realm</strong> — deleting a realm deletes its users. The realm is the
+<em>owning</em> parent of the person.</li>
+</ol>
+<p><strong>This is the deepest form of tenancy in the study.</strong> In n8n, a <code>User</code> is a global object that
+<em>memberships</em> attach to projects; in buzz, a community is resolved from the host but users are
+separate. In Zulip, <strong>the user does not exist without the realm</strong> — the realm is a column on the
+user row, and the login key is only meaningful inside it.</p>
+<hr>
+<h2 id="3-4-membership-and-roles-5-roles-8-system-groups-unlimited-custom-groups">§3.4 Membership and roles: 5 roles, 8 system groups, unlimited custom groups<a href="#batch-03/3-4-membership-and-roles-5-roles-8-system-groups-unlimited-custom-groups" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Roles</strong> (<code>users.py:565-576</code>) — a fixed ladder on the user row:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>API name</th>
+<th>Display</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ROLE_REALM_OWNER</code></td>
+<td>100</td>
+<td><code>owner</code></td>
+<td>Organization owner</td>
+</tr>
+<tr>
+<td><code>ROLE_REALM_ADMINISTRATOR</code></td>
+<td>200</td>
+<td><code>administrator</code></td>
+<td>Organization administrator</td>
+</tr>
+<tr>
+<td><code>ROLE_MODERATOR</code></td>
+<td>300</td>
+<td><code>moderator</code></td>
+<td>Moderator</td>
+</tr>
+<tr>
+<td><code>ROLE_MEMBER</code></td>
+<td>400 (<strong>default</strong>)</td>
+<td><code>member</code></td>
+<td>Member</td>
+</tr>
+<tr>
+<td><code>ROLE_GUEST</code></td>
+<td>600</td>
+<td><code>guest</code></td>
+<td>Guest</td>
+</tr>
+</tbody></table></div>
+<p><strong>System groups</strong> (<code>groups.py:11-19</code>) — <strong>8 built-in groups</strong>, each with a <code>role:</code> slug:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>role:nobody · role:owners · role:administrators · role:moderators
+role:fullmembers · role:members · role:everyone · role:internet
+</code></pre>
+</div>
+<p><strong>On top of the ladder sits a full custom-group system.</strong> <code>UserGroup</code>
+(<code>groups.py:33</code>) is a real model with a <strong><code>ManyToManyField</code> through a membership table</strong>
+(<code>UserGroupMembership</code>), so groups can nest and overlap. <strong>The permission model is not the role
+ladder</strong> — the ladder is a convenience; the <em>actual</em> authority is <strong>group-based</strong>. Every
+sensitive setting on a <code>Realm</code> is a <code>GroupPermissionSetting</code>, carrying three policy flags
+(<code>realms.py</code>, e.g. <code>can_summarize_topics_group</code> at <code>:914</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">can_summarize_topics_group=GroupPermissionSetting(
+    allow_nobody_group=True,
+    allow_everyone_group=True,
+    default_group_name=SystemGroups.EVERYONE,
+),
+</code></pre>
+</div>
+<p><strong>The measured shape.</strong> A <code>Realm</code> field named <code>can_&lt;action&gt;_group</code> decides <em>who</em> may do
+<code>&lt;action&gt;</code> — and it can be set to <code>role:nobody</code> (nobody), a system group, or a <strong>custom group the
+realm built</strong>. <strong>Measured: 38 such <code>can_*_group</code> permission fields on <code>Realm</code>.</strong> <strong>This is the
+most granular per-tenant permission system in the study</strong> — finer than n8n&#39;s flat 206-scope
+list, because here the <em>granting unit</em> (a user-defined group) is itself tenant-defined data.</p>
+<hr>
+<h2 id="3-5-the-audit-log-117-event-types-with-a-numeric-namespace-that-encodes-the-topology">§3.5 ★ The audit log: 117 event types, with a numeric namespace that encodes the topology<a href="#batch-03/3-5-the-audit-log-117-event-types-with-a-numeric-namespace-that-encodes-the-topology" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>zerver/models/realm_audit_logs.py</code> (313 lines) defines <code>AuditLogEventType</code> with <strong>117 named
+integer constants</strong>. The numbering is <strong>not arbitrary</strong> — it partitions the space by <em>where the
+event happened</em> (<code>realm_audit_logs.py:142-170</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python"># REALM_DEACTIVATED = 201, and REMOTE_SERVER_DEACTIVATED = 10201
+REMOTE_SERVER_DEACTIVATED = 10201
+...
+REMOTE_REALM_VALUE_UPDATED = 20001
+REMOTE_PLAN_TRANSFERRED_SERVER_TO_REALM = 20002
+</code></pre>
+</div>
+<p><strong>The namespace, decoded:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Range</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1xx–2xx</td>
+<td>Events <strong>inside a realm</strong> (101 USER_CREATED, 201 REALM_DEACTIVATED, …)</td>
+</tr>
+<tr>
+<td>9xx</td>
+<td>Channel-folder events (901–905)</td>
+</tr>
+<tr>
+<td>1001</td>
+<td><code>INVITATION_REVOKED</code></td>
+</tr>
+<tr>
+<td><strong>10xxx</strong></td>
+<td>Events on a <strong>remote server</strong> — offset by exactly <strong>+10000</strong> from their realm twin</td>
+</tr>
+<tr>
+<td><strong>20xxx</strong></td>
+<td>Events on a <strong>remote realm</strong>, reported back to the bouncer</td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this matters (rule 10 — the retirement rule, and the &quot;most honest document&quot; idea).</strong>
+Zulip has <strong>three tiers of self-description</strong>: a realm; the <em>server that hosts</em> realms
+(<code>RemoteRealm</code>); and the <strong>central push-notification bouncer</strong> that many self-hosted servers
+report to (<code>RemoteServer</code>). The audit-log numbering <strong>encodes that hierarchy arithmetically</strong> —
+a reader can tell from the <em>number alone</em> whether an event is local, server-scoped, or
+bouncer-scoped. <strong>This is the clearest example in the study of a data model that documents its
+own topology.</strong></p>
+<p>The base class <code>AbstractRealmAuditLog</code> shares fields between the local and remote logs
+(<code>event_time</code> with a <strong><code>backfilled</code> boolean</strong> — <em>&quot;If True, event_time is an overestimate… Can be
+used by migrations when introducing a new event_type&quot;</em>). <strong>That <code>backfilled</code> flag is rule 10 in
+miniature</strong>: it admits, in the schema, that a historical record is not trustworthy about <em>when</em>
+it happened. The extra-data keys encode old/new values as stringified integers (<code>OLD_VALUE = &quot;1&quot;</code>,
+<code>NEW_VALUE = &quot;2&quot;</code>, <code>ROLE_COUNT = &quot;10&quot;</code>).</p>
+<hr>
+<h2 id="3-6-realm-creation-invitations-and-the-initial-owner">§3.6 Realm creation, invitations, and the initial owner<a href="#batch-03/3-6-realm-creation-invitations-and-the-initial-owner" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Creation</strong> (<code>zerver/actions/create_realm.py</code>) has two documented paths (<code>realms.md:20-35</code>):
+a <strong>unique link</strong> (<code>./manage.py generate_realm_creation_link</code>, expiry
+<code>CAN_CREATE_REALM_LINK_VALIDITY_DAYS</code>, <strong>7 days</strong>, single-use) and <strong>open realm creation</strong>
+(a server setting). Each path creates the realm <strong>and an administrator user</strong>.</li>
+<li><strong>The root domain is special.</strong> <code>is_subdomain_root_or_alias</code> and
+<code>SUBDOMAIN_FOR_ROOT_DOMAIN</code> (<code>subdomains.py:48-59</code>) — a realm <em>can</em> claim the root domain, but
+only if <code>is_root_domain_available()</code> says the root is not already taken.</li>
+<li><strong>Domain restriction.</strong> <code>RealmDomain</code> (<code>realms.py:1406-1419</code>) — when
+<code>emails_restricted_to_domains</code> is on, only listed domains may join; <code>allow_subdomains</code> extends
+it; the constraint is <code>unique_together = (&quot;realm&quot;, &quot;domain&quot;)</code>.</li>
+</ul>
+<hr>
+<h2 id="3-7-divergences-and-honest-limits-batch-03">§3.7 Divergences and honest limits (batch 03) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/3-7-divergences-and-honest-limits-batch-03" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Divergence / limit</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D3-1</strong></td>
+<td><strong>The realm is 95 fields — a config monolith</strong></td>
+<td>Every policy default lives on one wide row. It is a <em>single-tenant-per-row</em> design that scales to thousands of realms but makes each realm a large object.</td>
+</tr>
+<tr>
+<td><strong>D3-2</strong></td>
+<td><strong>Subdomain routing assumes wildcard DNS</strong></td>
+<td><code>realms.md:45-48</code> requires a wildcard <code>A</code> record; without it, realms must be reached via <code>REALM_HOSTS</code>. The code <em>supports</em> the override but the normal path depends on DNS the operator must configure.</td>
+</tr>
+<tr>
+<td><strong>D3-3</strong></td>
+<td><strong>The fence is a Host-derived check, not a DB policy</strong></td>
+<td>There is <strong>no Postgres row-level security</strong> in this tree (searched: 0 RLS policies). Containment is the application&#39;s <code>user_matches_subdomain</code> + every query being written realm-aware. <strong>A query that forgets <code>realm=</code> is a bug the model does not prevent.</strong></td>
+</tr>
+<tr>
+<td><strong>D3-4</strong></td>
+<td><strong>Two identity systems coexist</strong></td>
+<td><code>UserProfile</code> (Zulip&#39;s own) sits beside Django&#39;s <code>contrib.auth</code> — Zulip uses <code>AbstractBaseUser</code> and silences the framework&#39;s uniqueness check rather than reshaping auth.</td>
+</tr>
+<tr>
+<td><strong>D3-5</strong></td>
+<td><strong>The push-bouncer tier is partly out of this tree</strong></td>
+<td><code>RemoteRealm</code> / <code>RemoteServer</code> models exist, but the bouncer itself is a separate deployment. Batch 03 can read the <em>client</em> half only.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-8-batch-03-verdict">§3.8 Batch-03 verdict<a href="#batch-03/3-8-batch-03-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Zulip&#39;s workspace is the study&#39;s <strong>most complete tenancy implementation</strong>, and its completeness
+is not a feature bolted on — it is the spine. The realm is (1) a <strong>95-field configuration
+object</strong>, (2) resolved <strong>ambiently from the Host header</strong> by subdomain (or a custom domain via
+<code>REALM_HOSTS</code>), (3) <strong>part of the user&#39;s identity</strong> (email unique only per-realm, enforced by a
+hand-written SQL index), (4) governed by <strong>5 roles over 8 system groups plus unlimited
+tenant-defined custom groups</strong>, and (5) recorded in a <strong>117-event audit log whose numeric
+namespace encodes a three-tier topology</strong> (realm / remote server / remote realm).</p>
+<p><strong>The single most transferable P2 mechanism</strong> is the <strong>ambient-context resolution</strong>: the tenant
+is decided once, from the request, and every downstream check is a comparison against it —
+rather than a <code>tenant_id</code> a developer must remember to filter on. <strong>The honest counterweight</strong> is
+D3-3: Zulip has <em>no database-level enforcement</em> of that fence; it is an application invariant,
+held by discipline and a very large test suite.</p>
+<hr>
+<p><em>Batch 03 · Zulip · the realm is the spine · subdomain-resolved, identity-embedded,
+group-governed, audit-logged · no RLS — the fence is application-held.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#3-1-the-container-a-realm-with-95-fields" class="toc-link">§3.1 The container: a Realm with 95 fields</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-2-the-boundary-realm-is-resolved-from-the-host-header-by-subdomain" class="toc-link">§3.2 The boundary: realm is resolved from the Host header, by subdomain</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-3-identity-the-realm-is-part-of-who-a-user-is" class="toc-link">§3.3 Identity: the realm is part of who a user is</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-4-membership-and-roles-5-roles-8-system-groups-unlimited-custom-groups" class="toc-link">§3.4 Membership and roles: 5 roles, 8 system groups, unlimited custom groups</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-5-the-audit-log-117-event-types-with-a-numeric-namespace-that-encodes-the-topology" class="toc-link">§3.5 ★ The audit log: 117 event types, with a numeric namespace that encodes the topology</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-6-realm-creation-invitations-and-the-initial-owner" class="toc-link">§3.6 Realm creation, invitations, and the initial owner</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-7-divergences-and-honest-limits-batch-03" class="toc-link">§3.7 Divergences and honest limits (batch 03)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-8-batch-03-verdict" class="toc-link">§3.8 Batch-03 verdict</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('zulip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('zulip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('zulip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('zulip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.ZulipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
