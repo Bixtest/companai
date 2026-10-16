@@ -1,42 +1,20 @@
-# Project memory - Companai / open-mercato
+# Project memory — Companai / open-mercato
 
-> Detail -> daily logs + `JOURNAL.md`. New work: HERE + today's log.
+> Detail → daily logs + `JOURNAL.md`. Archive of pre-2026-10-12 work: `extended_deep_memory.md`.
 
-## ARCHITECTURE WORKSHOP - `library/architecture/`
-Study platforms ONE AT A TIME against the three poles (P1 assistant / P2 workspace / P3 automations),
-widgets/frontend + escape hatch; then map every pole across ALL platforms vs mercato -> a clean SRS;
-then build one-tenant <-> one-Hermes. **No development before a written requirement. Hermes is NOT forked
-or edited. Markdown is the source of truth.**
-**MAPPING FRAME (owner 2026-10-16): we are NOT limited by what mercato allows** - engineer the
-best/richest/most-integratable version per pole, then re-engineer.
+## ARCHITECTURE WORKSHOP — `library/architecture/`
+Study platforms ONE AT A TIME against the three poles (P1 assistant / P2 workspace / P3 automations), widgets/frontend + escape hatch; then map every pole across ALL platforms vs mercato → a clean SRS; then build one-tenant ↔ one-Hermes. **No development before a written requirement. Hermes is NOT forked or edited. Markdown is the source of truth.** **MAPPING FRAME (owner 2026-10-16): we are NOT limited by what mercato allows** — engineer the best/richest/most-integratable version per pole; ceiling = the target design.
+**Rule 1: docs are claims, code is the authority. Rule 13: a committed number can be wrong — re-measure, and commit the fix *by name*.**
 
-**Rule 1: docs are claims, code is the authority. Rule 13: a committed number can be wrong -
-re-measure, and commit the fix *by name*.**
-
-## STANDING FORMAT - every turn MUST state (owner, 2026-10-16)
-**(1) what was done, (2) its address in `MASTER-CHECKLIST.html` (`CC-nn`), (3) what is next** - and
-update the HTML's `FRONTIER` array (LAST DONE with `CC-*` + NEXT); the `.md` twin's section 2 mirrors it.
-Syntax-check a script edit: extract `<script>` and `node --check` it.
+## STANDING FORMAT — every turn MUST state (owner, 2026-10-16)
+**(1) what was done, (2) its address in `MASTER-CHECKLIST.html` (`CC-nn`), (3) what is next** — and update the HTML's `FRONTIER` array (LAST DONE + NEXT); the `.md` twin's §2 mirrors it. Syntax-check a script edit: extract `<script>` and `node --check` it.
 
 ## Standing hazards
-- **MASTER-CHECKLIST.html is DATA-DRIVEN, not generated** - content lives in the JS arrays at the top of
-  its `<script>` (`PHASES`/`ROWS`/`OPEN`/`PLATFORMS`/`FRONTIER`/`REGISTER`/`SRSREG`); edit an array entry,
-  never the markup. Hand-synced with the `.md` twin, so the two DO drift.
-- **CORRECTED 2026-10-16: `MASTER-CHECKLIST.html` is pure LF, NOT CRLF** (HEAD and worktree both 0 CR
-  bytes); the old "CRLF as-is" note was wrong for this file. Never a BOM.
-- **A bare-word grep is NOT a declaration census** - grepping `capability` matched the prose "adapter
-  capability" in a comment. Use `^\s*capability\s*:`. Git-Bash `grep -c` on CR LIES; byte truth is
-  `tr -cd '\r' < f | wc -c`. **Never `git add -A`** - explicit paths.
+- **MASTER-CHECKLIST.html is DATA-DRIVEN** — content lives in the JS arrays at the top of its `<script>` (`PHASES`…`SRSREG`); edit an array entry, never the markup. Hand-synced with the `.md` twin, so the two DO drift.
+- Pure LF, never CRLF; never a BOM.
+- **A bare-word grep is NOT a declaration census** — use `^\s*capability\s*:`. Git-Bash `grep -c` on CR LIES; byte truth is `tr -cd '\r' < f | wc -c`. **Never `git add -A`** — explicit paths.
 
 ## Live code frontier (`JOURNAL.md`)
-**NEXT = `SR-42` - a declared-control coverage check - then the two CRITICALs T-01/T-02.** Why `SR-42`
-first: **six triage findings are the SAME finding** - a control declared, **zero production readers**,
-invisible to the build (named in `CC-92`) - and the workshop owns the mechanism (`SR-39` + `SR-41`).
-A patch closes an instance; `SR-42` closes the class. **T-01:** the
-delegation route guards `auth.delegations.manage`, never the capability being granted. **T-02:**
-`business_ir.run_query` passes `features: ctx.userFeatures` into the Business-IR chain and nothing reads
-it. Both are one function to close - copy `getCapabilityDescriptor` / `authorizeEntityAccess`.
-**`CC-92`** = the `preview/` triage (46 findings validated against `b183df58`, zero false) ->
-`PREVIEW-AUDIT-TRIAGE.md`. **Then** the tooling set's remainder (`SR-38` + `SR-46` re-homed to
-`scripts/check-*.mjs`) -> identity -> **`SR-12`** (the fix for open `CC-84`) -> `P2-9b`.
-Owner decided: **core architecture first - business modules generated from the core workspace.**
+**LAST DONE = the two CRITICALs ✅ BOTH BUILT 2026-10-17** — **T-01 `fa974bb1`**: the delegation route runs three checks before `grant` (grantor-holds — one more than the triage's fix sentence named; `delegable: false` refuses even a holder; self-delegation needs a ceiling). **T-02 `60a6714f`**: `authorizeEntityRead` gates `engine.query` in `business-ir-run.ts`, copied from the search module's `authorizeEntityAccess` (no cross-package dependency), fail-closed. **Proof standard: the decisive assertion is the write/read NEVER HAPPENED (grant/query never called); mutations run for real — 3 for T-01, 7 for T-02, each killing exactly its named test.** Pin *which* guard refused or overlapping guards hide a mutation. Register: **51 closed · 43 open · 94 total**; `CC-94`/`CC-95` added.
+**▶ NEXT = T-32** — the one-character `UUID_PATTERN` fix (`[1-5]`→`[0-9a-f]`; a v7 id fails the match, so no lock lookup runs and a locked record is writable). **Then** T-13/T-14 (compose lines), tooling set (`SR-38`+`SR-46`) → identity (`SR-02`+`SR-07`) → `SR-12` (fix for open `CC-84`) → `P2-9b`.
+Owner decided: **core architecture first — business modules generated from the core workspace.**

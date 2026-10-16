@@ -37,9 +37,10 @@ Every row carries four decisions, and none of them is optional:
 documents are more accurate than the code; the failures are wiring failures, a control declared and never
 read"* — **holds completely.** I confirmed 46 discrete findings against the code and found **zero that were
 false**. Two of the audit's claims are now outdated because the work they named has since been done, and
-five of its own measurements needed correcting. The two CRITICAL authorization defects are **both still
-open, both reachable from an ordinary HTTP route, and both are the same defect shape**: a control the design
-declares and nothing reads.
+five of its own measurements needed correcting. The two CRITICAL authorization defects **were both still open
+at triage time — both reachable from an ordinary HTTP route, and both the same defect shape**: a control the
+design declares and nothing reads. **Both are now built** (T-01 `fa974bb1`, T-02 `60a6714f`, 2026-10-17; see
+§2.1 and §2.2), as is the class-level mechanism that would have caught them (`SR-47`, T-03).
 
 **The single most useful thing in the audit is its §18 structural observation**, and it is the finding I
 would act on first, ahead of both CRITICALs: there is no automated mechanism that notices a declared control
@@ -57,8 +58,8 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 
 | # | Src | The finding | Validation | Rank | Urgency | Action |
 |---|---|---|---|---|---|---|
-| **T-01** | 08 §1 | **A delegation lends authority the lender does not have.** The route grants any `capabilityId` to any grantee; nothing checks the grantor holds it; `.delegable: false` has **zero** production readers | 🔬 CONFIRMED | critical | **urgent** | EXECUTE |
-| **T-02** | 08 §2 | **The AI's business-query tool checks scope but not authorization.** `features` is passed into the Business-IR chain and never read; `engine.query` runs unguarded | 🔬 CONFIRMED | critical | **urgent** | EXECUTE |
+| **T-01** | 08 §1 | **A delegation lends authority the lender does not have.** The route grants any `capabilityId` to any grantee; nothing checks the grantor holds it; `.delegable: false` has **zero** production readers | 🔬 CONFIRMED | critical | **urgent** | EXECUTE — ✅ **BUILT 2026-10-17** (`fa974bb1`; one check beyond the fix sentence — see §2.1) |
+| **T-02** | 08 §2 | **The AI's business-query tool checks scope but not authorization.** `features` is passed into the Business-IR chain and never read; `engine.query` runs unguarded | 🔬 CONFIRMED | critical | **urgent** | EXECUTE — ✅ **BUILT 2026-10-17** (`60a6714f`; see §2.2) |
 | **T-03** | 08 §18, 09 §3.1, 10 §1.2 | **No test for "this declared control has a consumer."** The root cause behind T-01, T-08 and T-29 | 🔬 CONFIRMED | critical | **urgent** | EXECUTE — `SR-47` ✅ **BUILT 2026-10-17** (see §1.5 `C-07` for why the label changed) |
 
 ### 1.2 HIGH
@@ -179,6 +180,17 @@ themselves. `api_keys.manage` is declared `delegable: false` and nothing notices
 `getCapabilityDescriptor(capabilityId)`, refuse when `delegable: false`, refuse a self-delegation with a null
 ceiling. **Rank: critical. Urgency: urgent.**
 
+> ✅ **T-01 WAS BUILT, 2026-10-17** — commit `fa974bb1`, three checks in the route — and **one more than the
+> fix sentence above named.** The sentence named the descriptor read, the `delegable: false` refusal and the
+> self-delegation ceiling; the build added the **grantor-holds** check first: the caller must actually *hold*
+> the capability they are lending. That is the route's own header principle ("nobody may lend authority they do
+> not hold") applied to the caller's own holdings, not just the grantor *id* — without it, a caller holding
+> only `auth.delegations.manage` could still lend `api_keys.manage`, because the grantor's identity was
+> checked while the grantor's holdings were not. Proof: 9 tests in
+> `packages/core/src/modules/auth/api/__tests__/delegations.route.test.ts`, 3 mutations run for real, each
+> killing exactly its own test, and the decisive assertion in every refusal case is that **the write never
+> happened** — `delegations.grant` was never called, not merely a 403 returned after it.
+
 ### 2.2 T-02 — the AI's business-query tool checks scope but not authorization
 
 **Every decisive line, read today.**
@@ -206,6 +218,17 @@ makes this gate inert is itself invisible to the build.
 `packages/search/src/modules/search/ai-tools.ts:86`, with all 53 entities' `aclFeatures` behind it.
 **Rank: critical. Urgency: urgent.**
 
+> ✅ **T-02 WAS BUILT, 2026-10-17** — commit `60a6714f`. One gate before the engine read,
+> `authorizeEntityRead` in `packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-run.ts`, copied
+> from the donor because the two packages must not depend on each other. Fail-closed the way the donor is: no
+> config → refusal, no `aclFeatures` → refusal, no container → refusal, superadmin bypasses (the donor's rule,
+> preserved deliberately and pinned by a test so a later reader sees it was carried over, not missed). Proof:
+> 8 tests in `business-ir-run.authorization.test.ts`, 7 mutations run for real, each killing exactly its named
+> test, and the decisive assertion in every refusal case is that **the read never happened** — `engine.query`
+> was never called, not a refusal after the rows came back. The existing run suite's fixtures were
+> **completed, not weakened**: they passed no container, so the fail-closed gate would have refused every
+> happy path — the fixtures lacked the gate's input because the control they feed did not exist yet.
+
 ### 2.3 T-03 — the root cause, and why it is ranked with them
 
 `.delegable` written in twenty places, read in none — nothing fails. `demoteIfEvidenceDemands` tested and
@@ -232,7 +255,8 @@ one instance. `SR-47` closes the class.
 > watch, not a gate to trip, and the reason the registry is curated rather than automatic. The check was also
 > **wrong twice while being built, both times in the dangerous direction** (a dead control reading as wired),
 > which is why `strip()` removes string, comment *and* regex-literal contents before any pattern is applied.
-> T-03 is now closed; **T-01, T-08, T-29 and T-43 remain open and are still the work.**
+> T-03 is now closed; **T-01 is now built as well** (`fa974bb1`, 2026-10-17); **T-08, T-29 and T-43 remain
+> open and are still the work.**
 
 ---
 
@@ -259,8 +283,8 @@ is the one substantive recommendation this document adds.
 | # | The work | Why here |
 |---|---|---|
 | 1 | **`SR-47` — the declared-control coverage check** (T-03) — ✅ **BUILT 2026-10-17** | It is the class, not an instance. The workshop already owns the mechanism. Doing it first means T-01, T-08, T-29 and the next three are caught mechanically rather than patched one at a time |
-| 2 | **T-01 and T-02** — the two CRITICALs | Live privilege-escalation and data-exposure routes, both reachable from an ordinary role, both one function to close, both with the code to copy already in the repo |
-| 3 | **T-32** — `UUID_PATTERN` `[1-5]` → `[0-9a-f]` | One character. Locked records become writable by a v7-id payload. There is no reason to leave a one-character fail-open in place |
+| 2 | **T-01 and T-02** — the two CRITICALs — ✅ **BOTH BUILT 2026-10-17** (`fa974bb1`, `60a6714f`) | Live privilege-escalation and data-exposure routes, both reachable from an ordinary role, both one function to close, both with the code to copy already in the repo |
+| 3 | **T-32** — `UUID_PATTERN` `[1-5]` → `[0-9a-f]` — **next** | One character. Locked records become writable by a v7-id payload. There is no reason to leave a one-character fail-open in place |
 | 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL | Both are one line in a compose file, both are live today, and T-14 is the difference between the embedding lane working and it silently calling `api.openai.com` |
 | 5 | **T-04, T-05, T-06** — the count gap, the double approve, the ledger hole | The three HIGHs that break a central guarantee with a green test suite behind them |
 | 6 | **T-07, T-27, T-16, T-17** — the fail-open flips | Four small edits that each remove a silent failure mode, and T-27 is the one that lets an `auth: null` context accept a foreign tenant |
