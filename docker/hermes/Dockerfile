@@ -78,12 +78,20 @@ RUN useradd -m -s /bin/bash hermes \
 USER hermes
 WORKDIR /hermes-src
 
-COPY --chown=hermes:hermes entrypoint.py verify_pin.py ws_host.py ws_entry.py mcp_bootstrap.py /opt/hermes/
+COPY --chown=hermes:hermes entrypoint.py verify_pin.py ws_host.py ws_entry.py mcp_bootstrap.py warmup.py /opt/hermes/
 
 # A syntax error in these files used to surface only at container boot (the
 # live run caught one). Compile-check at build time: a broken image fails
 # HERE, in seconds, instead of in a FATAL log line after a 15-second boot.
-RUN python3 -m py_compile /opt/hermes/entrypoint.py /opt/hermes/ws_host.py /opt/hermes/ws_entry.py /opt/hermes/mcp_bootstrap.py
+#
+# `warmup.py` is compiled here for the same reason but is NOT run by this
+# image: it ships in the image only so an operator can drive a one-off warm-up
+# by hand — `docker exec mercato-hermes-gateway python3 /opt/hermes/warmup.py
+# --once` — without copying a file into a running container. Its normal home is
+# the `hermes-warmup` service in `docker-compose.hermes.yml`, which runs it on
+# the bare `python:3.14-slim-bookworm` base over a read-only bind mount, so the
+# service needs no rebuild when the script changes.
+RUN python3 -m py_compile /opt/hermes/entrypoint.py /opt/hermes/ws_host.py /opt/hermes/ws_entry.py /opt/hermes/mcp_bootstrap.py /opt/hermes/warmup.py
 
 # The gateway speaks newline-delimited JSON-RPC on stdio, so for years this
 # image exposed no port: the platform spawned the worker and owned its pipes

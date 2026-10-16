@@ -166,3 +166,9 @@ skills-lock.json
 # Local GGUF models (Sprint 0 model server)
 models/
 *.gguf
+
+# Python bytecode caches — `docker/hermes/*.py` is compiled by the image build
+# and by any local `python3 -m py_compile`, which drops `__pycache__/` next to
+# the source. Never tracked.
+__pycache__/
+*.pyc

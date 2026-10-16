@@ -43,7 +43,7 @@
 #                    The tree is mounted READ-ONLY and digest-verified at boot,
 #                    so nothing may be written into it.
 #   HERMES_PIN_DIGEST  the digest the mounted tree must produce. Defaults to the
-#                    recorded pin (`ca760e97…`, revision `3569e846…`).
+#                    recorded pin (`07ee857b…`, revision `db44c462…`).
 #
 # Provider keys are read from the host environment exactly as the OpenCode
 # service reads them. The handshake needs neither a key nor a model — no model
@@ -84,7 +84,7 @@ services:
       # State root. Writable volume; the mounted source stays read-only.
       HERMES_HOME: /var/lib/hermes
       # The pin this worker is allowed to run.
-      HERMES_PIN_DIGEST: ${HERMES_PIN_DIGEST:-ca760e97ff1ef1f0e2ed3deb0dfc2923}
+      HERMES_PIN_DIGEST: ${HERMES_PIN_DIGEST:-07ee857bdab59a875317035d8aaad4d6}
       HERMES_SKIP_PIN_VERIFY: ${HERMES_SKIP_PIN_VERIFY:-}
       # Provider selection, recorded on the run (P2-3 turns it into a gateway
       # call). Same contract the platform already speaks for OpenCode.
@@ -190,6 +190,109 @@ services:
     tty: false
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - mercato-network
+
+  # ── THE PROMPT-CACHE WARM-UP (added 2026-10-16) ───────────────────────────
+  # WHY THIS SERVICE EXISTS
+  # -----------------------
+  # The first turn of a conversation on this stack costs ~2,264 s (~38 min) —
+  # measured, 16,572 tokens at 7.32 tok/s on the 4 CPUs this VM used to expose.
+  # Nothing is asleep: the model container has `restart: unless-stopped` and had
+  # been up 15 hours when that was measured. The cost is that the model must
+  # READ the whole shared instruction sheet before it can answer.
+  #
+  # It does not have to read it again for the NEXT conversation. The model
+  # server caches prompt prefixes in process RAM (`--cache-prompt` default on,
+  # `--cache-ram` default 8192 MiB), and the reuse is measured twice over:
+  #   · two real sessions recorded `cache_read_tokens = 16,724`;
+  #   · a live probe saw a cold call at 112.2 s, then warm calls at 1.2 s and
+  #     0.9 s with `cache_n` 1142 of 1148 — a DIFFERENT conversation reusing
+  #     the shared prefix, ~93x faster.
+  #
+  # The gap is therefore narrow and specific: the FIRST turn after the model
+  # process starts. Four model loads were measured in two days (`RestartCount=0`,
+  # `OOMKilled=false` — the restarts came from outside the container), and each
+  # one emptied the RAM cache. The next human to open a chat paid all 38 minutes.
+  #
+  # WHAT IT DOES
+  # ------------
+  # `warmup.py` replays the shared prefix to the model server so the cache is
+  # already full before anyone asks a question. It does NOT rebuild the prompt:
+  # the worker already stores both halves of the exact request prefix in its own
+  # state DB (`sessions.system_prompt_hash` -> the system text, 26,549 chars;
+  # `sessions.tool_names` -> the tools array in literal OpenAI wire JSON,
+  # 42,619 chars; 26,549 + 42,619 = the 69,168 chars the prompt audit measured).
+  # The script reads those two rows and posts them back unchanged — same bytes
+  # in, same tokens rendered, same prefix cached, nothing to keep in sync.
+  #
+  # VERIFIED 2026-10-16: the replay matched the model's cached prefix at
+  # **16,558 of 16,560 tokens** and returned in 8.1 s. Byte-faithful, and
+  # effectively free when the cache is already warm.
+  #
+  # WHY IT LOOPS RATHER THAN RUNNING ONCE
+  # -------------------------------------
+  # The case that hurts is the model restarting UNDER a long-lived worker, which
+  # a boot-time-only warm-up would miss entirely. Each cycle reads back
+  # `usage.prompt_tokens_details.cached_tokens` and reports COLD (it just filled
+  # the cache) or already WARM (the cycle was ~free), so the loop is self-healing
+  # with no restart detection at all. A SKIPPED cycle — model still starting, or
+  # no session has stored a prefix yet — retries in 30 s instead of waiting out
+  # the interval, so the warm-up lands the moment the stack is ready.
+  #
+  # WHY ITS OWN IMAGE AND NOT THE WORKER'S
+  # --------------------------------------
+  # `warmup.py` is stdlib-only (`urllib`, `sqlite3`, `json`), so it needs no
+  # dependency closure — a bare `python:3.14-slim-bookworm`, which is already
+  # the worker image's own base and therefore already on the host, is enough.
+  # The script arrives as a read-only bind mount, so changing it needs no image
+  # rebuild and no restart of the worker. Verified: that image carries
+  # `sqlite3` (3.40.1).
+  #
+  # WHY THE STATE VOLUME IS MOUNTED READ-WRITE
+  # ------------------------------------------
+  # Not a mistake, and not a licence to write. The script opens the DB itself
+  # with `mode=ro` and only ever SELECTs; the mount's mode is about SQLite's
+  # requirement, not this service's behaviour. It shares the SAME named volume
+  # the worker owns.
+  #
+  # MEASURED 2026-10-16 (rule 13 — corrected by name): this block used to
+  # justify the rw mount with the WAL rule — "SQLite cannot read a WAL database
+  # through a read-only mount, because the reader needs write access to the
+  # `-shm` wal-index file". The worker's own boot log says otherwise for THIS
+  # database: `state.db: … using journal_mode=DELETE instead of enabling WAL`
+  # (it refuses WAL because its bundled SQLite 3.40.1 is WAL-reset-vulnerable).
+  # So the WAL rationale does not describe the deployed database. The mount
+  # stays read-write because it is harmless, the script never writes, and a
+  # future WAL flip would need it.
+  hermes-warmup:
+    image: python:3.14-slim-bookworm
+    container_name: mercato-hermes-warmup
+    restart: unless-stopped
+    command: ["python3", "-u", "/opt/warmup/warmup.py"]
+    environment:
+      # The same service the worker reaches: `.env` sets
+      # `OPENAI_BASE_URL=http://model:8080/v1`. Note that llama.cpp's control
+      # endpoints (`/props`) live at the ROOT, not under `/v1` — `warmup.py`
+      # derives the root from this value.
+      WARMUP_MODEL_BASE_URL: ${WARMUP_MODEL_BASE_URL:-http://model:8080/v1}
+      WARMUP_STATE_DB: /var/lib/hermes/state.db
+      # Cosmetic only — llama.cpp does not validate the model name — but it
+      # keeps the request shaped like the worker's.
+      WARMUP_MODEL_NAME: ${HERMES_MODEL:-${OM_AI_MODEL:-}}
+      # How often to re-check that the cache is still warm. When it IS warm a
+      # cycle costs one token of decode, so the interval can be short without
+      # being wasteful; 600 s bounds the cold window after a model restart.
+      WARMUP_INTERVAL_SECONDS: ${WARMUP_INTERVAL_SECONDS:-600}
+      # MUST exceed a cold prefill, or every cold warm-up aborts and the service
+      # silently never does its job. Measured 2,264 s on 4 CPUs; 3600 s is the
+      # ceiling with headroom. A fast model never approaches it.
+      WARMUP_TIMEOUT_SECONDS: ${WARMUP_TIMEOUT_SECONDS:-3600}
+      # Set to 0 to keep the service resident but idle.
+      WARMUP_ENABLED: ${WARMUP_ENABLED:-1}
+    volumes:
+      - ./docker/hermes/warmup.py:/opt/warmup/warmup.py:ro
+      - hermes_state:/var/lib/hermes
     networks:
       - mercato-network
 

@@ -114,10 +114,10 @@ def main(argv):
         stdout_frames.append(frame)
         return frame
 
-    def read_response(label, wanted_id):
+    def read_response(label, wanted_id, timeout=FRAME_TIMEOUT_S):
         """Read frames until the one carrying `wanted_id`; events are collected on the way."""
         while True:
-            frame = next_frame(label, FRAME_TIMEOUT_S)
+            frame = next_frame(label, timeout)
             if frame is None:
                 return None
             if frame.get("id") == wanted_id:
@@ -153,11 +153,11 @@ def main(argv):
             return None
         return request_id
 
-    def request(method, params, want):
+    def request(method, params, want, timeout=FRAME_TIMEOUT_S):
         request_id = send(method, params)
         if request_id is None:
             return None
-        frame = read_response(method, request_id)
+        frame = read_response(method, request_id, timeout)
         if frame is None:
             return None
         result = frame.get("result")
@@ -174,9 +174,17 @@ def main(argv):
     try:
         print("gate: handshake (boot timeout %.0fs — the entrypoint digests the mount first)"
               % BOOT_TIMEOUT_S)
-        request("client.capabilities", {"server_requests": True}, ["server_requests"])
-        request("gateway.capabilities", {}, ["per_session_exclusive_submit"])
-        request("ping", {}, ["pong"])
+        # The FIRST frame the worker will ever send is `gateway.ready`, and it is
+        # only written after the entrypoint has digest-verified the mount and the
+        # worker has imported its locked dependencies — measured at ~3-4 minutes
+        # on 8 CPUs. A per-frame timeout of 60 s is right for the CONVERSATION but
+        # wrong for the BOOT, so the first three requests wait on the boot clock.
+        # (First run of this gate failed here: the "unexpected frame" it reported
+        # was the correct answer to request id 1, arriving after the 60 s window.)
+        request("client.capabilities", {"server_requests": True}, ["server_requests"],
+                BOOT_TIMEOUT_S)
+        request("gateway.capabilities", {}, ["per_session_exclusive_submit"], BOOT_TIMEOUT_S)
+        request("ping", {}, ["pong"], BOOT_TIMEOUT_S)
 
         print("gate: the first event the transport emits")
         ready = next((e for e in events if (e.get("params") or {}).get("type") == "gateway.ready"), None)

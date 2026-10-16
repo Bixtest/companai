@@ -30,11 +30,21 @@ import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-# The recorded pin — `library/development/HERMES-PIN.md`, revision
-# `3569e8461ea721623fa16e6f01fb636157989fe6` (read from the zip's own archive
-# comment). Update this ONLY together with the pin document and
-# `library/.hermes_pin.py`, in the same change.
-DEFAULT_EXPECTED_DIGEST = "ca760e97ff1ef1f0e2ed3deb0dfc2923"
+# The recorded pin — `library/development/HERMES-PIN.md` §1, revision
+# `db44c46208f1b421b4ecb7e56bf9d68b0423906f` (the owner's 2026-10-15 download,
+# flattened to the mount-root layout; 19,728 files). Update this ONLY together
+# with the pin document and `library/.hermes_pin.py`, in the same change.
+#
+# MEASURED 2026-10-16 (rule 13 — corrected by name): this constant was MISSED in
+# the 2026-10-16 re-pin. `library/.hermes_pin.py` (`EXPECTED_DIGEST`),
+# `HERMES-PIN.md` and the compose's `HERMES_PIN_DIGEST` default all moved to
+# `07ee857b…`/`db44c462…`, while this copy still named the PREVIOUS pin
+# (`3569e846…`/`ca760e97…`). Effect: any invocation WITHOUT `HERMES_PIN_DIGEST`
+# set — a manual `docker run`, a test, the `handshake_gate.py` — rejected the
+# CORRECTLY-pinned tree with "PIN BROKEN". The live stack was unaffected only
+# because `docker-compose.hermes.yml` injects the env. The value below is the
+# one the pin of record actually produces, verified by the gate's PIN HOLDS.
+DEFAULT_EXPECTED_DIGEST = "07ee857bdab59a875317035d8aaad4d6"
 DEFAULT_SOURCE_DIR = "/hermes-src"
 
 # Measured 2026-10-12 on the pinned tree (18,248 files) over a Docker Desktop
@@ -87,7 +97,7 @@ def main(argv):
             "HERMES PIN VERIFICATION SKIPPED (HERMES_SKIP_PIN_VERIFY=1).\n"
             "  The worker will run whatever is mounted at %s, with no proof\n"
             "  that it is the pinned revision %s.\n"
-            % (source, "3569e846…")
+            % (source, "db44c462…")
         )
         return 0
 
