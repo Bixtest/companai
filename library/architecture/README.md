@@ -130,4 +130,4 @@ fixed later.
 *Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; n8n closed (7 batches
 + reader 3500); buzz closed (7 batches + reader 3600); OpenRig closed (7 batches + reader 3700);
 **Zulip closed (7 batches + reader 3800)**. One platform remains (**mattermost** — ask before
-extracting; it is ~700 MB).*
+extracting; the 226 MB zip is already on disk).*
