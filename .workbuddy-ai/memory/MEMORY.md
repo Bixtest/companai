@@ -25,28 +25,27 @@ honest document in a repo.**
 | 1 | Hermes forensics | ✅ 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no composer. |
 | 3 | CrewAI 1.15.28 | ✅ 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, delivery no, tenancy nowhere. |
-| 4 | Multica 0.2.0 | ✅ 7/7 **+ r3300** | **All three poles real — closest neighbour.** No widget model; no engine of its own. |
-| 5 | Gas Town 1.2.1 | ✅ 7/7 **+ r3400** | Go multi-agent orchestration. **The watchdog chain is made of agents**; Hook = durability primitive; ZFC = transport, don't decide; 3-layer sandbox. **NO widget model.** Top mechanisms = DECIDED LIMITS. |
+| 4 | Multica 0.2.0 | ✅ 7/7 **+r3300** | **All three poles real — closest neighbour.** No widget model; no engine of its own. |
+| 5 | Gas Town 1.2.1 | ✅ 7/7 **+r3400** | Go multi-agent orchestration. **Watchdog chain made of agents**; Hook = durability primitive; ZFC = transport, don't decide; 3-layer sandbox. **NO widget model.** Top mechanisms = DECIDED LIMITS. |
 | 6 | n8n 2.44.0 | ✅ 7/7, 73 findings, **r3500** | **P1:** `@n8n/agents` (SKILL.md, sub-agents, guardrails). **P2:** `Project personal\|team`, **10 roles + 206 scopes**. **★ PX-W: FIRST real composition surface** — canvas of 7 element types, 129-component design system + own ESLint plugin, CRDT on y-websocket. Reader 8 docs / 153,204 chars. |
 | 7 | buzz 0.5.28 | ✅ 7/7 **+ r3600** | **Team workspace on Nostr (NIP-01)**; relay = source of truth; **community = tenant** (host-resolved, TLA+/Tamarin + prose contract). 34 Rust crates, 62 migrations, **90 findings**. Reader 8 docs / **347,516 chars**. |
-| 8 | **openrig 0.6.10** | ✅ **7/7** (reader 3700 next) | TS monorepo; daemon+CLI+TUI+MCP orchestrating **unmodified Claude Code / Codex** in tmux. **★ P2: NO tenancy at all — first in the study** (0 `tenant_id`; static bearer token = fully privileged; boundary = loopback/Tailscale). **P1: the two-surface rule** (launch flags may be deterministic code; config-file policy may NOT) → 5 permission policies (`locked`/`standard`⭐/`open` + `yolo`/`auto`). **★ PZ = the study's most transferable: the gate culture** — 4-rail exclusion ledger (green-with-exclusions + **mechanical expiry**; ships EMPTY by design), *"a green is only as good as what could have been red"*, *"two reads of the same flag can diverge; one cannot"*. **★ PX: NO widget model (6th in study)** — the one composition system (Context Packs) composes **prompts**. **★ The digital-twin harness** (real UI + fixtures typechecked vs real interfaces → drift breaks the build). 3,685 files, 105 migrations, daemon :7433, 79 findings / 34 divergences. **RIGGED rename hazard** (284 occ / 85 files). |
+| 8 | **openrig 0.6.10** | ✅ **7/7 + r3700** | TS monorepo; daemon+CLI+TUI+MCP orchestrating **unmodified Claude Code / Codex** in tmux. **★ P2: NO tenancy at all — first in study** (0 `tenant_id`; static bearer token = fully privileged; boundary = loopback/Tailscale). **P1: the two-surface rule** (launch flags may be deterministic code; config-file policy may NOT) → 5 permission policies (`locked`/`standard`⭐/`open`+`yolo`/`auto`). **★ PZ = most transferable: the gate culture** — 4-rail exclusion ledger (green-with-exclusions + **mechanical expiry**; ships EMPTY by design), *"a green is only as good as what could have been red"*, *"two reads of the same flag can diverge; one cannot"*. **★ PX: NO widget model (6th in study)** — the one composition system (Context Packs) composes **prompts**. **★ digital-twin harness** (real UI + fixtures typechecked vs real interfaces → drift breaks the build). 3,685 files, 105 migrations, daemon :7433, 79 findings / 34 divergences. **RIGGED rename hazard** (284 occ / 85 files). Reader 8 docs / **199,911 chars**. |
 | — | mattermost, zulip | ⬜ 2 remain | Order not fixed — **ASK before extracting more (~700 MB / ~63 MB).** |
 
-**★ STUDY CHAIN (8 CLOSED, readers pending for openrig):** Hermes 13/13 · Paperclip · CrewAI ·
-Multica (+r3300) · Gas Town (+r3400) · n8n (+r3500) · buzz (+r3600) · **openrig (study DONE
-`1d56d22`; reader 3700 next)** — then **ASK** for the 9th (mattermost / zulip) — then the
-cross-platform mapping pass.
+**★ STUDY CHAIN (8 CLOSED, all readers built):** Hermes 13/13 · Paperclip · CrewAI ·
+Multica (+r3300) · Gas Town (+r3400) · n8n (+r3500) · buzz (+r3600) · openrig (+**r3700**) —
+then **ASK** for the 9th (mattermost / zulip) — then the cross-platform mapping pass.
+Reader ports: Hermes 3000 → Paperclip 3100 → CrewAI 3200 → Multica 3300 → Gas Town 3400 → n8n 3500 → buzz 3600 → openrig 3700.
 
 **OpenRig chain:** `d7114a8` (b00) · `2989111` (b01) · `5f5fa77` (b02) · `206530e` (b03) ·
-`0b1d6dc` (b04) · `bae9a99` (b05) · `031022d` (b06) · **`1d56d22` (b07 synthesis)** — **COMPLETE**.
-Remaining: **reader 3700**.
+`0b1d6dc` (b04) · `bae9a99` (b05) · `031022d` (b06) · `1d56d22` (b07 synthesis) · reader (r3700) — **COMPLETE**.
 
-**buzz (b00 `4304e7f` → b07 `87d9135`; reader `bfc3833`) — load-bearing facts.** *(Detail → logs 2026-10-16 + findings files.)*
+**buzz (b00 `4304e7f` → b07 `87d9135`; reader `bfc3833`) — load-bearing facts.**
 1. **★ An event log is NOT a widget model.** buzz composes signed events w/ integer kinds (136 in
    `ALL_KINDS`) — **5th platform with NO widget model**; the one composition-shaped surface
    (Channel Canvas `kind:40100`) is a document, not a widget tree. Policy = *"prefer a new kind over
    a new HTTP endpoint."*
-2. **★ PZ = the strongest in the study — five artefacts across THREE languages:** a 1,110-line
+2. **★ PZ = the strongest in the study — five artefacts, THREE languages:** a 1,110-line
    prose contract (10 axioms, one §Conformance gate each) · `MultiTenantRelay.tla` (12 invariants,
    13 mutations, 4 deliberately-FALSE vacuity probes) · `MultiTenantAuth.spthy` (21 lemmas, security
    proven UNDER key compromise) · a runtime conformance harness whose **`LIMITS.md` names 7 blind
@@ -78,6 +77,9 @@ Remaining: **reader 3700**.
 - **Never `git add -A`** — explicit paths. Docs repo = `C:/Users/Ramzi/Downloads/companai`.
 - **A committed number can be wrong** — re-measure before citing (rule 13); the fix is a new commit
   that *names* the correction, never a silent edit.
+- **Reader copy-then-rebrand (the L168 hazard):** engine vocabulary (`BuzzReader`, `buzz_reader_`,
+  stale `<title>`) is a leak; the *new* platform's own markdown **quoting a sibling study by name**
+  is legitimate. Verify: `BuzzReader`/`buzz_reader_` = 0 files in the generated output.
 - `tsc` needs `--incremental false`; jest does NOT type-check. node→node spawn throws `EBUSY`.
 - **How to report to Ramzi:** plain words · named thing → what it means → why it matters → risk →
   **ranked options + one recommendation** → the single decision he must make. **Never end on "your call."**
@@ -87,5 +89,5 @@ Remaining: **reader 3700**.
 **`CC-84` (tenancy, drives the whole study):** worker MCP calls authenticate as ONE superadmin
 identity → a Hermes turn runs platform tools OUTSIDE the chat's tenant; one shared `HERMES_HOME`.
 Ranked: per-run minted credential (recommended) → interim single-tenant fail-closed guard →
-doc-only rejected. Also open: `CC-81`, `CC-83`, `CC-51` (falsified).
+doc-only rejected. Also open: `CC-81`, `CC-85`-candidate (MCP-key 401), `CC-51` (falsified).
 Owner decided: **core architecture first — business modules generated from the core workspace.**

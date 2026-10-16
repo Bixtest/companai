@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — OpenRig Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">OpenRig Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,192</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">16 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">410</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE · POLE 2</div>
+    <h4>The workspace — a rig, a queue, and the tenancy answer</h4>
+    <p>The first platform in the study with NO tenant at all</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE RIG</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">nodes + typed edges</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">declared in YAML</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">5 edge kinds</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a cross-rig trigger</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">enforced BEFORE INSERT</text>
+      </g>
+      <g transform="translate(240, 20)">
+        <rect width="200" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE WORKSPACE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a root + named repos</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">migrations 038 / 039</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the container a person</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">operates in</text>
+      </g>
+      <g transform="translate(460, 20)">
+        <rect width="200" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE QUEUE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">durable work</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">stream_items (intake)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">queue_transitions (audit)</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">current state is DERIVED</text>
+      </g>
+      <g transform="translate(680, 20)">
+        <rect width="220" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MIGRATIONS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">105 migrations on disk</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">docs say 96, ARCHITECTURE</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">says 94</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">three different numbers</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">the doc set disagrees with itself</text>
+      </g>
+
+      <rect x="20" y="170" width="880" height="170" rx="8" fill="var(--surface-card, #ffffff)" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="198" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#ef4444">★ THE TENANCY ANSWER: THERE IS NONE</text>
+      <text x="40" y="224" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">0 tenant_id across 105 migrations. The auth middleware’s own header states the stance:</text>
+      <text x="40" y="246" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">“single-developer, single-user, single-host … Token holder is fully privileged.”</text>
+      <text x="40" y="270" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The tenant boundary, if any, is the MACHINE — loopback or a Tailscale tailnet (“the tailnet is the auth boundary”).</text>
+      <text x="40" y="298" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#7c3aed">This makes OpenRig a personal / team-local COCKPIT — not a multi-tenant service.</text>
+      <text x="40" y="324" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">For the mapping: the SRS needs its tenancy design justified by other platforms — OpenRig answers it with a clean zero.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="openrig-study-batch-03-the-workspace-p2">OpenRig Study — Batch 03: the workspace (P2)<a href="#batch-03/openrig-study-batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Batch 03 of 08</strong> · <strong>Status:</strong> OPEN
+<strong>Pole:</strong> <strong>P2 — the workspace</strong> (the container a person operates in: versatile, integratable,
+compatible with a mix of current and future features)
+<strong>What this batch answers:</strong> what the <em>container</em> is in OpenRig — what a rig is made of, how
+topology is declared and enforced, what a project is, where state lives, and <strong>whether there is
+a tenant at all.</strong></p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch.</p>
+<p><strong>Rule 1 reminder:</strong> every claim was read from source; divergences are in §7.</p>
+<hr>
+<h2 id="1-the-one-sentence-shape">1. The one-sentence shape<a href="#batch-03/1-the-one-sentence-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>An OpenRig workspace is a <em>rig</em> — a SQLite row holding a topology of <code>nodes</code> joined by typed
+<code>edges</code>, declared in YAML, scoped to a <em>workspace</em> (a root plus named repos), driven by a
+durable <em>queue</em>, and reachable only over loopback or a Tailscale tailnet. There is no tenant
+column anywhere: the boundary is the process and the network, not a row.</strong></p>
+<p>The eight ideas in this batch, each read from code:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>Owner</th>
+<th>§</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>the rig = container</td>
+<td><code>db/migrations/001_core_schema.ts</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td>topology = nodes + typed edges</td>
+<td><code>rigspec-schema.ts</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td>the workspace primitive</td>
+<td>migrations <code>038</code>, <code>039</code>; <code>domain/workspace/**</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>the queue = durable work</td>
+<td>migrations <code>024</code>, <code>025</code>, …</td>
+<td>5</td>
+</tr>
+<tr>
+<td>state = one SQLite file</td>
+<td><code>$OPENRIG_HOME/openrig.sqlite</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td><strong>the tenancy answer</strong></td>
+<td><code>middleware/auth-bearer-token.ts</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td>the missions/slices tree</td>
+<td><code>domain/slices/**</code></td>
+<td>4.3</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-core-schema-a-rig-is-three-tables">2. The core schema — a rig is three tables<a href="#batch-03/2-the-core-schema-a-rig-is-three-tables" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>001_core_schema.ts</code> is the whole container, and it is <strong>short enough to quote in full</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">-- rigs: top-level topology container
+CREATE TABLE rigs (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime(&#39;now&#39;)),
+  updated_at TEXT NOT NULL DEFAULT (datetime(&#39;now&#39;))
+);
+
+-- nodes: logical identity within a rig
+-- id = opaque DB primary key (ulid). All FKs reference this.
+-- logical_id = logical name from rig spec (e.g. &quot;orchestrator&quot;). Human-facing.
+CREATE TABLE nodes (
+  id TEXT PRIMARY KEY,
+  rig_id TEXT NOT NULL REFERENCES rigs(id) ON DELETE CASCADE,
+  logical_id TEXT NOT NULL, role TEXT, runtime TEXT, model TEXT, cwd TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime(&#39;now&#39;)),
+  UNIQUE(rig_id, logical_id)
+);
+
+-- edges: relationships between nodes
+CREATE TABLE edges (
+  id TEXT PRIMARY KEY,
+  rig_id TEXT NOT NULL REFERENCES rigs(id) ON DELETE CASCADE,
+  source_id TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+  target_id TEXT NOT NULL REFERENCES nodes(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime(&#39;now&#39;))
+);
+</code></pre>
+</div>
+<p><strong>Two design facts worth naming:</strong></p>
+<ol>
+<li><p><strong>A node has two identities</strong> — <code>id</code> (<em>&quot;opaque DB primary key (ulid), all FKs reference
+this&quot;</em>) and <code>logical_id</code> (<em>&quot;the logical name from the rig spec, human-facing&quot;</em>), with
+<code>UNIQUE(rig_id, logical_id)</code>. <strong>This is the seat&#39;s identity≠process idea at the schema
+level</strong>: the human-facing name is stable inside a rig; the row id is what FKs bind to.</p>
+</li>
+<li><p><strong>Edge integrity is enforced by a trigger, not a CHECK</strong> — because SQLite cannot
+cross-reference tables:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">CREATE TRIGGER edge_same_rig_insert
+BEFORE INSERT ON edges BEGIN
+  SELECT RAISE(ABORT, &#39;edge source and target must belong to the same rig&#39;)
+  WHERE (SELECT rig_id FROM nodes WHERE id = NEW.source_id)
+     != (SELECT rig_id FROM nodes WHERE id = NEW.target_id);
+  SELECT RAISE(ABORT, &#39;edge rig_id must match source node rig_id&#39;)
+  WHERE NEW.rig_id != (SELECT rig_id FROM nodes WHERE id = NEW.source_id);
+END;
+</code></pre>
+</div>
+<p><strong>A rig cannot contain a cross-rig edge.</strong> The invariant is enforced at the storage layer
+with a <strong>named abort message</strong>, not left to application code. <em>(P2.)</em></p>
+</li>
+</ol>
+<blockquote>
+<p><strong>Named mechanism (rule 6): <em>schema-level edge integrity via a BEFORE INSERT trigger</em>.</strong> The
+comment even explains <em>why</em> it is a trigger (<em>&quot;SQLite CHECK cannot cross-reference tables&quot;</em>).</p>
+</blockquote>
+<hr>
+<h2 id="3-the-topology-rigspec-validated-strictly">3. The topology — RigSpec, validated strictly<a href="#batch-03/3-the-topology-rigspec-validated-strictly" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>rigspec-schema.ts</code> is <strong>1,340 lines</strong> and the validation is unusually strict. Measured
+vocabulary:</p>
+<p><strong>5 edge kinds</strong> (<code>VALID_EDGE_KINDS</code>): <code>delegates_to · spawned_by · can_observe · collaborates_with · escalates_to</code>. The set is <strong>exported</strong> so that a converge operation
+validates against <em>&quot;the SAME canonical set as a rigspec pod-local edge (no second, looser edge
+input path)&quot;</em> — one source of truth for what an edge may be. <em>(P2.)</em></p>
+<p><strong>Three levels of keys, each an allow-list</strong> — <code>RIG_KEYS</code>, <code>POD_KEYS</code>, <code>MEMBER_KEYS</code> — and
+<code>rejectUnknownTopologyKeys()</code> <strong>refuses an unknown structural key</strong> rather than ignoring it:</p>
+<blockquote>
+<p><em>&quot;OPR.0.5.8.7 — the topology normalizer is an explicit literal. Reject an unknown structural
+key before that literal can make accepted input vanish. This stays deliberately small: one
+check over the four topology object levels, <strong>not a second schema framework</strong>.&quot;</em></p>
+</blockquote>
+<p><strong>Other measured enums</strong> (each a <code>Set</code>, so a typo is a validation error not a silent default):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>VALID_SYNC_TRIGGERS</code></td>
+<td><code>pre_compaction · pre_shutdown · manual · milestone</code></td>
+</tr>
+<tr>
+<td><code>VALID_RESTORE_POLICIES</code></td>
+<td><code>resume_if_possible · relaunch_fresh · checkpoint_only</code></td>
+</tr>
+<tr>
+<td><code>VALID_SERVICES_KIND</code></td>
+<td><code>compose</code></td>
+</tr>
+<tr>
+<td><code>VALID_DOWN_POLICIES</code></td>
+<td><code>leave_running · down · down_and_volumes</code></td>
+</tr>
+<tr>
+<td><code>VALID_WAIT_TARGET_CONDITIONS</code></td>
+<td><code>healthy</code></td>
+</tr>
+<tr>
+<td><code>VALID_IMPORT_PREFIXES</code></td>
+<td><code>local: · path:</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>And a capability registry with a self-destruct clause</strong> — <code>SPEC_VALIDATION_CAPABILITIES</code>, whose
+comment is one of the sharpest in the tree:</p>
+<blockquote>
+<p><em>&quot;a validation feature that other code must react to REGISTERS itself here, and consumers gate
+on the capability. Current contract: the spec-validation ADVISORY, when it lands model-pin
+canonicalization, MUST add <code>&quot;model-pin-canonicalization&quot;</code> — <strong>that single line mechanically
+kills the claude alias migration bridge at runtime AND turns its pin test red until the bridge
+constant is deleted</strong>.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><strong>Named mechanism: a capability set that is also a self-destruct instruction.</strong> When the
+follow-up feature lands, adding one string <em>mechanically</em> forces the temporary bridge to be
+deleted (its test goes red). <strong>The codebase schedules its own cleanups as a data change.</strong>
+<em>(PZ — a mechanism of real interest, carried to batch 06.)</em></p>
+</blockquote>
+<h3 id="3-1-the-shipped-rigs-measured">3.1 The shipped rigs, measured<a href="#batch-03/3-1-the-shipped-rigs-measured" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/daemon/specs/rigs/</code> holds two families: <code>launch/</code> (the real teams — <code>starter</code>,
+<code>factory</code>, <code>kernel</code>, <code>secrets-manager</code>) and <code>focused/</code> (specialists — <code>code-review</code>, <code>pm</code>,
+<code>research</code>). The <code>starter</code> rig (verbatim):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>yaml</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-yaml">version: &quot;0.2&quot;
+name: starter
+summary: &gt;
+  A Claude Code builder and a Codex reviewer in your repository…
+culture_file: CULTURE.md
+pods:
+  - id: dev
+    label: Project
+    members:
+      - id: build
+        agent_ref: &quot;local:../../../agents/development/implementer&quot;
+        runtime: claude-code
+        profile: default
+        cwd: &quot;.&quot;
+        startup: { files: [ { path: guidance/lead-first-move.md,
+                              delivery_hint: send_text, required: true } ] }
+      - id: review
+        agent_ref: &quot;local:../../../agents/development/qa&quot;
+        runtime: codex
+        model: gpt-6-astra
+        profile: default
+        cwd: &quot;.&quot;
+    edges: [ { kind: delegates_to, from: build, to: review } ]
+edges: []
+</code></pre>
+</div>
+<p><strong>A rig is <code>pods → members → edges</code>, and an edge is always <code>kind + from + to</code>.</strong> The <code>factory</code>
+rig is the same shape at seven seats, with 11 <code>delegates_to</code> edges from <code>orch.lead</code> to each
+member and from each reviewer back to build/design/qa — <strong>the topology is a declared graph,
+not a convention.</strong> <em>(P2.)</em></p>
+<hr>
+<h2 id="4-the-workspace-primitive-where-the-work-lives">4. The workspace primitive — where the work lives<a href="#batch-03/4-the-workspace-primitive-where-the-work-lives" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A rig may declare <strong><code>workspace</code></strong> — <em>&quot;the typed declaration that lets a rig name where its work
+lives&quot;</em> (<code>docs/as-built/architecture/workspace-primitive.md</code>, 606 lines, verified against
+<code>e8f0ab34…</code>). It carries <code>workspaceRoot</code>, named <code>repos[]</code> with <strong>kinds</strong>, an optional
+<code>defaultRepo</code>, and an optional <code>knowledgeRoot</code>.</p>
+<p><strong>Persistence is two columns, added by two migrations</strong> (deliberately split so a test can apply
+one half without the other):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>Change</th>
+<th>Why split</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>038_workspace_primitive</code></strong></td>
+<td><code>rigs.workspace_json TEXT</code></td>
+<td>the rig&#39;s typed workspace block as JSON</td>
+</tr>
+<tr>
+<td><strong><code>039_queue_target_repo</code></strong></td>
+<td><code>queue_items.target_repo TEXT</code> + index</td>
+<td><em>&quot;so test fixtures that exercise rigs without queue_items (and vice versa) can apply only the half they need&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong><code>target_repo</code> is the per-item repo scope</strong>, <em>&quot;validated at the route layer against the source
+rig&#39;s <code>RigSpec.workspace.repos[]</code>&quot;</em>. So <strong>a queue item can name which repo it is for</strong>, and that
+name is validated against the rig&#39;s declared repos. <em>(P2.)</em></p>
+<h3 id="4-1-the-missions-slices-tree">4.1 The missions/slices tree<a href="#batch-03/4-1-the-missions-slices-tree" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Alongside the typed workspace, <em>&quot;a <strong>file-backed missions/slices tree</strong> is indexed <strong>read-only</strong>
+and projected into the Project UI&#39;s mission / slice surfaces&quot;</em> (<code>workspace-primitive.md</code>).
+Three concepts, measured from the file names: <strong>mission → project → slice</strong> (<code>domain/slices/</code>:
+<code>slice-indexer.ts</code>, <code>slice-detail-projector.ts</code>; <code>routes/missions.ts</code>). The tree is
+<strong>file-backed and indexed read-only</strong> — the files are the truth, the DB holds a projection.
+<em>(P2 — &quot;altitudes&quot;: mission, slice.)</em></p>
+<h3 id="4-2-what-a-project-is">4.2 What a "project" is<a href="#batch-03/4-2-what-a-project-is" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>project-catalog-surface.ts</code> / <code>domain/project-*</code> back the <strong>Project</strong> view. Per the
+CHANGELOG section read in the pin, <em>&quot;Queue folds into Story&quot;</em> and the <em>&quot;Project tab&quot;</em> renamed
+<strong>Topology → Workflow</strong> with a <strong>stable test-id</strong> (<code>project-tab-topology</code>) — so a shipped UI
+label can change while an automation&#39;s handle stays put. <em>(P2/PX-F.)</em></p>
+<hr>
+<h2 id="5-the-queue-durable-owned-work">5. The queue — durable owned work<a href="#batch-03/5-the-queue-durable-owned-work" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The queue is the workspace&#39;s <strong>work ledger</strong>, and it is P3&#39;s core (batch 04), read here only
+for its P2 shape. <code>024_queue_items.ts</code>:</p>
+<ul>
+<li><strong><code>queue_items</code></strong> with <strong>8-state</strong> validation (<code>pending | in-progress | done | blocked | failed | denied | canceled | handed-off</code>) and a <strong>closure-reason enum</strong> required on <code>done</code>
+(<code>handed_off_to | blocked_on | denied | canceled | no-follow-on | escalation</code>) — the comment
+calls it <strong>&quot;hot-potato strict-rejection&quot;</strong>: <em>a unit of work cannot be closed without saying
+where it went.</em></li>
+<li>Columns for the baton: <code>handed_off_to</code>, <code>handed_off_from</code>, <code>chain_of_record</code>, <code>claimed_at</code>,
+<code>last_heartbeat</code>, <code>last_nudge_attempt</code>, <code>last_nudge_result</code>, <code>closure_required_at</code>,
+<code>expires_at</code>, <code>resolution</code>.</li>
+<li><strong>Nine queue migrations</strong> in total (<code>024</code>, <code>025</code> transitions, <code>039</code> target_repo, <code>044</code>
+summary, <code>048</code> evidence_ref, <code>054</code> transitions_archive, <code>073</code> transition_wakes, <code>098</code>
+transition order, <code>099</code> recovery_tags) — <strong>the queue is the most-evolved table in the
+schema.</strong></li>
+</ul>
+<blockquote>
+<p><strong>The queue&#39;s own comment states its authority:</strong> <em>&quot;Live runtime state is SQLite-canonical;
+markdown queue mirrors are read-only debug/export only.&quot;</em> <strong>One truth, and the file copy
+cannot be it.</strong> <em>(P2 — a rule worth carrying.)</em></p>
+</blockquote>
+<hr>
+<h2 id="6-state-and-the-two-ways-to-reach-it">6. State, and the two ways to reach it<a href="#batch-03/6-state-and-the-two-ways-to-reach-it" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>State is one SQLite file</strong> at <code>$OPENRIG_HOME/openrig.sqlite</code> (default <code>~/.openrig</code>), opened
+<strong>WAL mode with foreign keys on</strong> (<code>startup.ts</code> → <code>db/connection.ts</code>). <strong>105 migrations</strong> build
+it. There is no server database, no per-tenant schema, no row-level security.</p>
+<p><strong>Reachability is decided at startup</strong> by <code>assertBindAuthInvariant()</code> (<code>middleware/auth-bearer-token.ts</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Bind</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>loopback (<code>127.x</code>, <code>::1</code>, <code>localhost</code>)</td>
+<td>no bearer required — <em>&quot;short-circuit&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Tailscale</strong> (CGNAT <code>100.64.0.0/10</code>, ULA <code>fd7a:115c:a1e0::/48</code>)</td>
+<td>no bearer required — <strong>&quot;the tailnet is the auth boundary&quot;</strong></td>
+</tr>
+<tr>
+<td>anything else (LAN, <code>0.0.0.0</code>, <code>::</code>, public IP/hostname)</td>
+<td><strong>the daemon REFUSES TO START unless a bearer token is set</strong></td>
+</tr>
+</tbody></table></div>
+<p>The hostname path <strong>resolves via DNS (5-second timeout)</strong> and re-checks the resolved IP. A
+<code>0.0.0.0</code> default is treated as <strong>non-loopback for safety</strong> — <em>&quot;force operator to either bind
+explicitly to 127.0.0.1 or set the bearer token.&quot;</em> <em>(P2 — a fail-closed startup invariant.)</em></p>
+<hr>
+<h2 id="7-the-tenancy-answer-measured-and-it-is-none">7. The tenancy answer — measured, and it is "none"<a href="#batch-03/7-the-tenancy-answer-measured-and-it-is-none" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The pin (§7 of batch 00) predicted no tenant column. <strong>The code confirms it in its own words.</strong>
+The header of <code>auth-bearer-token.ts</code> states the model exactly:</p>
+<blockquote>
+<p>*&quot;<strong>MVP context (single-developer, single-user, single-host): one static bearer token sourced
+from a config field. NO OAuth / SSO / per-user routing / role-based permissions / token
+rotation. Token holder is fully privileged.</strong>&quot;*</p>
+</blockquote>
+<p><strong>Measured checks:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tenant_id</code> / <code>tenantId</code> in <code>packages/daemon/src/**</code></td>
+<td><strong>0 hits</strong></td>
+</tr>
+<tr>
+<td><code>workspace_id</code> in migrations</td>
+<td><strong>1 hit</strong>, in <code>108_pi_usage_charges.ts</code> — a <strong>Pi usage</strong> table, not tenancy</td>
+</tr>
+<tr>
+<td>a per-user / per-org column on <code>rigs</code> / <code>nodes</code></td>
+<td><strong>none</strong> — <code>rigs(id, name, created_at, updated_at)</code></td>
+</tr>
+<tr>
+<td>auth model</td>
+<td><strong>one static bearer token</strong>, <code>timingSafeEqual</code>; <strong>no roles, no per-user routing</strong></td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p>★★★ <strong>OPENRIG IS THE FIRST PLATFORM IN THIS STUDY WITH NO TENANCY CONCEPT AT ALL.</strong>
+For comparison across the seven prior studies: Multica carried <code>workspace_id</code> on <strong>82
+tables</strong>; n8n had <code>Project personal|team</code> with <strong>10 roles + 206 scopes</strong>; buzz resolved a
+<strong>community</strong> from the request host and <em>proved</em> the isolation with TLA+/Tamarin. <strong>OpenRig&#39;s
+boundary is the machine and the network</strong>: one daemon, one SQLite file, loopback or tailnet,
+one token whose holder is fully privileged. <em>(P2 — the batch&#39;s headline.)</em></p>
+</blockquote>
+<p><strong>Why this is coherent, not a gap.</strong> The product is <em>&quot;a local control plane&quot;</em> / <em>&quot;a serious
+local cockpit, not a cloud marketing product&quot;</em> (<code>docs/DESIGN.md</code>). A <strong>rig is a personal or
+team-local asset</strong>; sharing happens by <strong>exporting a bundle</strong> (<code>RigBundle</code>, SHA-256 integrity),
+not by hosting many teams in one daemon. <strong>There is nothing to isolate because there is no
+second party inside the process.</strong> <em>(Observation only; the mapping decision is the owner&#39;s.)</em></p>
+<h3 id="7-1-the-one-place-sharing-is-modelled-the-bundle">7.1 The one place sharing *is* modelled: the bundle<a href="#batch-03/7-1-the-one-place-sharing-is-modelled-the-bundle" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>RigBundle</code> (<code>README.md:343</code>) is <em>&quot;a portable archive with vendored AgentSpecs and <strong>SHA-256
+integrity</strong>&quot;</em>; <code>rig bundle check</code> validates a folder before you share it; <code>rig bundle inspect</code>
+<em>&quot;shows what a bundle will do before you install it&quot;</em>; installs are recorded in
+<code>$OPENRIG_HOME/bundle-audit.jsonl</code>. <strong>Sharing is a signed artefact with an audit trail</strong>, not a
+tenancy row. <em>(P2/PZ.)</em></p>
+<hr>
+<h2 id="8-divergences-rule-1">8. Divergences (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/8-divergences-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D3-1</strong></td>
+<td>The <code>starter</code> rig&#39;s builder carries <code>startup.files: guidance/lead-first-move.md</code></td>
+<td><strong>verified</strong>: the file exists at <code>specs/rigs/launch/starter/guidance/lead-first-move.md</code> — <strong>rig-local</strong>, resolved relative to the <strong>rig spec</strong>, not the agent. <code>resolveAuthoredCwd</code> (<code>cwd-resolution.ts:21</code>) + the 7-layer <code>resolveStartup</code> own the resolution</td>
+<td><strong>HOLDS</strong> (§F3-3b)</td>
+</tr>
+<tr>
+<td><strong>D3-2</strong></td>
+<td><code>docs/DESIGN.md</code> says the web UI is <em>&quot;in maintenance mode&quot;</em></td>
+<td>confirmed — <code>packages/ui</code> still builds and ships but gets <em>&quot;no new feature work&quot;</em>; the <strong>TUI and CLI are the supported surfaces</strong> (<code>ARCHITECTURE.md:26</code>)</td>
+<td><strong>HOLDS</strong> (a doc that tells you not to rely on the UI)</td>
+</tr>
+<tr>
+<td><strong>D3-3</strong></td>
+<td>batch 00 hypothesis: <em>no tenant column</em></td>
+<td><strong>confirmed</strong>: 0 <code>tenant_id</code>; auth is one static bearer token; §7</td>
+<td><strong>HYPOTHESIS CONFIRMED</strong></td>
+</tr>
+<tr>
+<td><strong>D3-4</strong></td>
+<td><code>workspace-primitive.md</code> attributes the primitive to <strong>0.3.0</strong> and explicitly says <em>&quot;do not back-attribute it to 0.3.1&quot;</em></td>
+<td>the module itself carries the correction — a <strong>self-correcting attribution</strong> rather than a silent drift</td>
+<td><strong>HOLDS</strong> (and exemplary — see F3-8)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-findings-batch-03">9. Findings (batch 03)<a href="#batch-03/9-findings-batch-03" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F3-1.</strong> ★ <strong>A rig is three tables — <code>rigs</code> → <code>nodes</code> → <code>edges</code> — and a node has two
+identities</strong> (<code>id</code> for FKs, <code>logical_id</code> human-facing, <code>UNIQUE(rig_id, logical_id)</code>). The
+seat&#39;s identity≠process idea is <strong>enforced at the schema</strong>. <em>(P2.)</em></p>
+<p><strong>F3-2.</strong> ★ <strong>A rig cannot contain a cross-rig edge, and a BEFORE INSERT trigger enforces it</strong>
+with a named abort message — because <em>&quot;SQLite CHECK cannot cross-reference tables.&quot;</em> The
+invariant lives at the storage layer, not in application code. <em>(P2.)</em></p>
+<p><strong>F3-3.</strong> <strong>Topology is validated strictly: 5 edge kinds, three allow-lists of keys, and an
+unknown structural key is REJECTED</strong> — <em>&quot;not a second schema framework&quot;</em>, a deliberate
+single-small-check design. <em>(P2.)</em></p>
+<p><strong>F3-3b.</strong> ★ <strong>Startup is assembled in a fixed 7-layer additive order</strong> (<code>resolveStartup</code>):
+agent base → profile → <strong>rig culture file</strong> (as a synthetic startup file) → rig startup →
+pod shared → member → <em>&quot;operator debug append (always last)&quot;</em>. <strong>Files and actions are
+concatenated with NO deduplication</strong> — the comment delegates it: <em>&quot;adapters handle replay
+tolerance per the startup contract.&quot;</em> So <em>where</em> a seat&#39;s context comes from is a <strong>declared,
+ordered stack</strong>, and an optional culture file is <strong>a layer in that stack</strong>, not a separate
+mechanism. <em>(P2/P1.)</em></p>
+<p><strong>F3-4.</strong> ★ <strong>A capability set doubles as a self-destruct instruction</strong>
+(<code>SPEC_VALIDATION_CAPABILITIES</code>): adding one string when a feature lands <em>&quot;mechanically kills
+the bridge at runtime AND turns its pin test red until the bridge constant is deleted.&quot;</em>
+<strong>The codebase schedules its own cleanup as a data change.</strong> <em>(PZ — top-tier.)</em></p>
+<p><strong>F3-5.</strong> <strong>The workspace is a typed declaration, persisted as one JSON column, with a
+deliberately split companion column</strong> (<code>rigs.workspace_json</code> + <code>queue_items.target_repo</code>,
+<em>&quot;so test fixtures … can apply only the half they need&quot;</em>). <strong>A migration split for test
+independence</strong> is a small, honest craft detail. <em>(P2.)</em></p>
+<p><strong>F3-6.</strong> <strong>The mission/project/slice tree is file-backed and indexed read-only</strong> — the files
+are the truth, the DB holds a projection. Same rule as the queue (<em>&quot;SQLite-canonical; markdown
+mirrors are read-only&quot;</em>) applied in the opposite direction: <strong>each surface names which side is
+authoritative.</strong> <em>(P2.)</em></p>
+<p><strong>F3-7.</strong> <strong>The queue is the most-evolved table in the schema</strong>: 8 states, a required closure
+reason (hot-potato), the baton columns, and <strong>nine migrations</strong> — the workspace&#39;s work ledger is
+where the platform&#39;s real complexity lives. <em>(P2 — hands to batch 04.)</em></p>
+<p><strong>F3-8.</strong> ★ <strong><code>workspace-primitive.md</code> corrects a future reader pre-emptively</strong>: <em>&quot;The workspace
+primitive … is a 0.3.0 feature — do not back-attribute it to 0.3.1.&quot;</em> <strong>A doc that anticipates
+its own most likely misreading and forbids it.</strong> <em>(PZ — let it be a candidate for the mapping
+step&#39;s documentation conventions.)</em></p>
+<p><strong>F3-9.</strong> ★★★ <strong>OpenRig has NO tenancy concept.</strong> 0 <code>tenant_id</code>; one static bearer token whose
+<em>&quot;token holder is fully privileged&quot;</em>; no roles, no per-user routing. <strong>The boundary is the
+machine and the network</strong> — loopback, or a Tailscale tailnet where <em>&quot;the tailnet is the auth
+boundary.&quot;</em> <strong>First platform in the study with no tenant at all.</strong> <em>(P2 — headline.)</em></p>
+<p><strong>F3-10.</strong> <strong>The bind/auth invariant is fail-closed at startup</strong>: loopback and tailnet
+short-circuit; <strong>anything else REFUSES to start without a bearer token</strong>, and <code>0.0.0.0</code> is
+treated as non-loopback <em>&quot;for safety&quot;</em>. <em>(P2.)</em></p>
+<p><strong>F3-11.</strong> <strong>Sharing is a signed, inspectable artefact, not a hosted tenant</strong>: <code>RigBundle</code>
+(SHA-256), <code>bundle check</code> (validate before sharing), <code>bundle inspect</code> (what will it do),
+<code>bundle-audit.jsonl</code> (an install audit trail). <em>(P2/PZ.)</em></p>
+<p><strong>F3-12.</strong> <strong>The data model is legible enough to quote in full.</strong> <code>001_core_schema.ts</code> is ~60
+lines and carries the <em>why</em> for each structural choice in comments. <strong>A container whose
+foundation a newcomer can read in one sitting.</strong> <em>(P2 — a quality, not a mechanism, but a
+real one.)</em></p>
+<hr>
+<h2 id="10-plain-english-summary-of-batch-03">10. Plain-English summary of batch 03<a href="#batch-03/10-plain-english-summary-of-batch-03" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The OpenRig <strong>workspace is a <em>rig</em></strong> — and a rig is three small tables: <code>rigs</code>, <code>nodes</code> and
+<code>edges</code>. A node has a human-facing name and a stable row id; an edge is <code>kind + from + to</code>, from
+a fixed set of five kinds; and a <strong>database trigger</strong> makes it impossible to draw an edge
+between two different rigs. The topology is declared in YAML, validated strictly (unknown keys
+are <strong>rejected</strong>, not ignored), and the shipped teams (<code>starter</code>, <code>factory</code>, <code>code-review</code>, …)
+are just YAML files the user could have written.</p>
+<p>Work lives in a <strong>durable queue</strong> with eight states and a rule that <strong>you cannot close a task
+without saying where it went</strong> — and the queue is the most-evolved table in the schema. Alongside
+it, a <strong>file-backed mission/project/slice tree</strong> is indexed read-only into the Project UI. The
+rig can declare a <strong>typed workspace</strong> (a root, named repos, a default repo, a knowledge root),
+persisted as one JSON column, and a queue item can name which repo it targets.</p>
+<p>Two things define this pole. First, <strong>the container is legible</strong>: the whole foundation is ~60
+lines of SQL a person can read in one sitting. Second — and this is the batch&#39;s headline —
+<strong>there is no tenant.</strong> Measured: zero <code>tenant_id</code>, one static bearer token whose holder is
+<em>&quot;fully privileged&quot;</em>, no roles, no per-user routing; the only boundary is the machine and the
+network (loopback, or a Tailscale tailnet). Every other platform in this study modelled a
+tenant somehow; <strong>OpenRig models a <em>rig</em>.</strong> Sharing is a <strong>signed, inspectable bundle</strong>, not a
+hosted row. That is a coherent choice for <em>&quot;a serious local cockpit&quot;</em> — and it is the single
+most important fact about this platform for the mapping step.</p>
+<p><strong>Next: batch 04 — automations (P3).</strong> The queue as the at-least-once baton, message delivery,
+the watchdog, continuity and restore.</p>
+<hr>
+<p><em>Batch 03 of 08 — the workspace (P2). All claims read from source at <code>0.6.10</code>. 4 divergences
+(3 holds, 1 hypothesis-confirmed); 13 findings (F3-1..F3-12 + F3-3b).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-one-sentence-shape" class="toc-link">1. The one-sentence shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-core-schema-a-rig-is-three-tables" class="toc-link">2. The core schema — a rig is three tables</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-topology-rigspec-validated-strictly" class="toc-link">3. The topology — RigSpec, validated strictly</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-shipped-rigs-measured" class="toc-link">3.1 The shipped rigs, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-workspace-primitive-where-the-work-lives" class="toc-link">4. The workspace primitive — where the work lives</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-missions-slices-tree" class="toc-link">4.1 The missions/slices tree</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-what-a-project-is" class="toc-link">4.2 What a &quot;project&quot; is</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-queue-durable-owned-work" class="toc-link">5. The queue — durable owned work</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-state-and-the-two-ways-to-reach-it" class="toc-link">6. State, and the two ways to reach it</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-tenancy-answer-measured-and-it-is-none" class="toc-link">7. The tenancy answer — measured, and it is &quot;none&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-the-one-place-sharing-is-modelled-the-bundle" class="toc-link">7.1 The one place sharing *is* modelled: the bundle</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-rule-1" class="toc-link">8. Divergences (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings-batch-03" class="toc-link">9. Findings (batch 03)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-plain-english-summary-of-batch-03" class="toc-link">10. Plain-English summary of batch 03</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('openrig_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('openrig_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('openrig_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('openrig_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.OpenRigReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

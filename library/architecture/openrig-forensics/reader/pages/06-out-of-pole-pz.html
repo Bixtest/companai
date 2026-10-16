@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Out-of-pole findings (PZ) — OpenRig Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Out-of-Pole (PZ)</div>
+        <div class="header-subtitle">OpenRig Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-out-of-pole.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">5,134</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">26 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">510</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 VISUAL GUIDE · PZ</div>
+    <h4>Out-of-pole — the gate culture</h4>
+    <p>The four-rail exclusion ledger, and a green that carries the load it ran under</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 400" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="16" width="880" height="52" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="460" y="38" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#7c3aed">★ “A GREEN IS ONLY AS GOOD AS WHAT COULD HAVE BEEN RED”</text>
+      <text x="460" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The verdict RECORDS per-leg time, ambient load, and the mode it ran in — sealed, not printed</text>
+
+      <g transform="translate(20, 82)">
+        <rect width="210" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MUTEX</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a bound localhost port</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no stale-lock class</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5 pins; alternatives named</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">refuse, never queue</text>
+      </g>
+      <g transform="translate(248, 82)">
+        <rect width="210" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SINGLE READ</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">read the mode flag ONCE</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">two reads can diverge;</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">one cannot</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ per-leg time = the</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">independent cross-check</text>
+      </g>
+      <g transform="translate(476, 82)">
+        <rect width="210" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE GUARDS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">4 guard scripts</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">each with a co-located test</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1 shared rule engine</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a named remedy per finding</text>
+      </g>
+      <g transform="translate(704, 82)">
+        <rect width="196" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SELF-DESTRUCT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a bridge with a deletion</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">contract — and it expired</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ a TOMBSTONE</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ a test it STAYS dead</text>
+      </g>
+
+      <rect x="20" y="204" width="880" height="180" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.6"/>
+      <text x="40" y="232" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#059669">★ THE FOUR-RAIL EXCLUSION LEDGER — a gate that can be green WITH named exceptions</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">RAIL 1 · green-with-exclusions — a covered failure still PASSES the gate, but the resident is NAMED in-band.</text>
+      <text x="40" y="282" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">RAIL 2 · mechanical expiry — a resident past its expiry FAILS the gate even if its suite now passes (“self-dying”).</text>
+      <text x="40" y="304" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">RAIL 3 · receipt + owner + expiry — mandatory; an invalid ledger is a LOUD failure, never a silent pass.</text>
+      <text x="40" y="326" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">RAIL 4 · cut ceiling — no exclusion may expire after the cut. Exceptions cannot rot into permanent exemptions.</text>
+      <text x="40" y="352" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#7c3aed">AND IT SHIPS EMPTY, BY DESIGN — “the named-6 were KILLED, not excluded, so main is truly green.”</text>
+      <text x="40" y="372" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Establishes the advisory / advisory-but-recorded / enforcing vocabulary — each tier named where it is used.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="openrig-study-batch-06-out-of-pole-pz">OpenRig Study — Batch 06: out-of-pole (PZ)<a href="#batch-06/openrig-study-batch-06-out-of-pole-pz" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Batch 06 of 08</strong> · <strong>Status:</strong> OPEN
+<strong>Pole:</strong> <strong>PZ — the escape hatch</strong> (the guards, hard limits, self-tests and honest-advisory
+machinery that is not one of the three product poles but tells you what the platform <em>refuses</em> to
+do, and how it <em>proves</em> it)
+<strong>What this batch answers:</strong> what does OpenRig guard, how does it prove the guard works, what does
+it refuse to check, and how does it let a gate be <strong>honest about what it does not check</strong>?</p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch.</p>
+<p><strong>Rule 1 reminder:</strong> every claim was read from source; divergences are in §9.</p>
+<hr>
+<h2 id="1-the-one-sentence-shape">1. The one-sentence shape<a href="#batch-06/1-the-one-sentence-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>OpenRig&#39;s out-of-pole surface is a <em>gate culture</em>: four named guard scripts (each with a
+co-located <code>.test.mjs</code>), a machine-wide <strong>gate lane</strong> that refuses rather than queues, a <strong>4-rail
+exclusion ledger</strong> that lets the gate be green <em>with named exceptions</em> while mechanically
+expiring them, a <strong>portability report that is deliberately advisory</strong> (&quot;a finding is a question,
+not a verdict&quot;), a <strong>self-expiring migration bridge that actually expired and is now tested to
+stay dead</strong>, and a <strong>compiled-package probe</strong> that proves the assembled artifact byte-for-byte.</strong></p>
+<p>The organising idea, stated in the code and carried through every guard in this batch, is:
+<strong>green carries the load it ran under.</strong> A pass is not just &quot;all legs ok&quot; — it records <em>what else
+was running</em>, <em>how long each leg took</em>, <em>whether the run was a smoke</em>, and <em>which failures were
+covered by a named, owned, expiring exclusion</em>. The platform&#39;s honesty machinery is aimed at the
+gate itself.</p>
+<p>The eight ideas in this batch, each read from code:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>Owner</th>
+<th>§</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>the guard inventory (4 guards, 4 co-located tests)</td>
+<td><code>scripts/check-*.mjs</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>★ the gate lane</strong> (mutex + honesty gap + verdict)</td>
+<td><code>scripts/gate-lane*.mjs</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>★★ the 4-rail exclusion ledger</strong></td>
+<td><code>scripts/gate-lane-ledger.mjs</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>the advisory portability report</td>
+<td><code>scripts/portability-report.mjs</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td>the docs guard + the leak guard</td>
+<td><code>check-docs-guard.mjs</code> / <code>internal-leak-guard.mjs</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td><strong>★ the completed self-destruct + its tombstone test</strong></td>
+<td><code>model-divergence-monitor.ts:280</code></td>
+<td>8.1</td>
+</tr>
+<tr>
+<td>the scenario harness (RED-FIRST, <code>seed_regression</code>)</td>
+<td><code>packages/test-system/scenarios/**</code></td>
+<td>8.2</td>
+</tr>
+<tr>
+<td>the disk-truth digests + compiled-package probe</td>
+<td><code>regen-edge-digests.mjs</code> / <code>verify-packaged-builtins.mjs</code></td>
+<td>8.3</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-guard-inventory-measured-first-rule-0b">2. The guard inventory, measured first (rule 0b)<a href="#batch-06/2-the-guard-inventory-measured-first-rule-0b" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Counts before interpretation. <code>scripts/</code> holds <strong>60 <code>.mjs</code> files and 6 <code>.sh</code> files</strong>. Of the <code>.mjs</code>,
+<strong>20 have a co-located <code>&lt;name&gt;.test.mjs</code></strong>.</p>
+<p>There are exactly <strong>four guard scripts</strong> (the <code>check-*.mjs</code> family, excluding the test files
+themselves) — and <strong>all four have a co-located test</strong>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Guard</th>
+<th>Co-located test</th>
+<th>What it guards</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>check-docs-guard.mjs</code> (62 lines)</td>
+<td>✅ <code>check-docs-guard.test.mjs</code></td>
+<td>where tracked docs may live</td>
+</tr>
+<tr>
+<td><code>check-first-run-references.mjs</code></td>
+<td>✅ <code>check-first-run-references.test.mjs</code></td>
+<td><em>&quot;concrete references, not prose quality&quot;</em></td>
+</tr>
+<tr>
+<td><code>check-internal-leak-guard.mjs</code> (251 lines)</td>
+<td>✅ <code>check-internal-leak-guard.test.mjs</code></td>
+<td>internal text leaking into public artefacts</td>
+</tr>
+<tr>
+<td><code>check-substance-gate.mjs</code> (468 lines)</td>
+<td>✅ <code>check-substance-gate.test.mjs</code></td>
+<td>whether a package has <em>substance</em> (reuses the leak scanner)</td>
+</tr>
+</tbody></table></div>
+<p>This is the shape buzz&#39;s batch-07 recommendations argued for and named the <strong>&quot;guard-as-document&quot;
+pattern</strong> — and OpenRig has it <em>natively</em>, with a <strong>1:1 guard-to-test ratio</strong>. The extra libs are
+shared, not duplicated: <code>internal-leak-scanner.mjs</code> (77 lines) is the <strong>rule engine</strong> that both
+<code>check-internal-leak-guard.mjs</code> and <code>check-substance-gate.mjs</code> import — <strong>one scanner, two
+consumers.</strong> <em>(PZ — the guard-as-document pattern, present by construction.)</em></p>
+<hr>
+<h2 id="3-the-gate-lane-a-gate-that-refuses-rather-than-queues">3. The gate lane — a gate that refuses rather than queues<a href="#batch-06/3-the-gate-lane-a-gate-that-refuses-rather-than-queues" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>scripts/gate-lane*.mjs</code> is a six-module family (lock / run / ledger / hermeticity / consume /
+entrypoint), each 54–171 lines, <strong>all six with a co-located test</strong>. It is the study&#39;s most complete
+CI-gate mechanism.</p>
+<h3 id="3-1-the-entrypoint-and-what-it-does-in-order">3.1 The entrypoint, and what it does in order<a href="#batch-06/3-1-the-entrypoint-and-what-it-does-in-order" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gate-lane.mjs</code> (171 lines) wires four things into one gate, and states the order in its own header:</p>
+<blockquote>
+<p><code>// acquire lane (non-blocking) → refuse+teach+exit-nonzero on contention (P5) → observe foreign // load (advisory, recorded) → run BOTH legs (typecheck AND vitest) → write the C2 verdict (green // carries the load it ran under) → release (kernel also frees on death).</code></p>
+</blockquote>
+<p>The <strong>exclusion ledger is loaded first, and its failure mode is stated</strong>: <em>&quot;Absent/corrupt → treat
+as EMPTY (strict gate), never a silent skip.&quot;</em> <strong>A missing exclusions file makes the gate stricter,
+not laxer.</strong> <em>(PZ.)</em></p>
+<h3 id="3-2-the-mutex-74-lines-5-binding-pins-and-every-rejected-alternative-named">3.2 The mutex: 74 lines, 5 binding pins, and every rejected alternative named<a href="#batch-06/3-2-the-mutex-74-lines-5-binding-pins-and-every-rejected-alternative-named" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gate-lane-lock.mjs</code> is the batch&#39;s clearest example of <em>&quot;a decision, not a preference.&quot;</em> Its
+header names the property first and the syscall second:</p>
+<blockquote>
+<p><code>// The arch rationale is the PROPERTY, not the syscall: a machine-wide, kernel-RELEASED-on-process- // death, NON-BLOCKING mutex with no stale-lock class. A bound localhost port delivers all three // (the kernel frees the port when the holder dies; EADDRINUSE is an immediate non-blocking probe // = LOCK_NB) with zero native deps. (Unix-socket bind was REJECTED for the record: the socket // file lingers post-kill-9 = stale-artifact.)</code></p>
+</blockquote>
+<p>The <strong>5 pins</strong> each name what would break them:</p>
+<ul>
+<li><strong>P1</strong> — bind <code>127.0.0.1</code> <strong>explicitly</strong>.</li>
+<li><strong>P2</strong> — exclusivity is <strong>LOAD-BEARING</strong>: *&quot;NO SO_REUSEPORT (never set… ) so a second concurrent
+bind MUST fail — with REUSEPORT the mutex silently vanishes. <strong>Guard-tested.</strong>&quot;*</li>
+<li><strong>P3</strong> — <em>&quot;the PORT NUMBER <strong>is</strong> the lock name: ONE named constant, ONE home.&quot;</em></li>
+<li><strong>P4</strong> — the holder-info file is <strong>NAMING-ONLY</strong>: written <em>after</em> a successful bind, <em>&quot;NEVER
+consulted for the lock DECISION (the bind is the decision; EADDRINUSE alone refuses).&quot;</em></li>
+<li><strong>P5</strong> — foreign-squatter honesty: a gate holder is <strong>named</strong> (pid/started-at); a foreign squatter
+is <strong>honest-unknown</strong>; <em>&quot;ALWAYS hard-refuse, never auto-override.&quot;</em></li>
+</ul>
+<p>The release is honest about the kernel too: <em>&quot;release (kernel also frees on death).&quot;</em> <strong>A lock with
+no stale-lock class, and the reason its alternates were rejected is on the record.</strong> <em>(PZ — top-tier.)</em></p>
+<h3 id="3-3-the-honesty-gap-a-green-is-only-as-good-as-what-could-have-been-red">3.3 ★ The honesty gap: "a green is only as good as what could have been red"<a href="#batch-06/3-3-the-honesty-gap-a-green-is-only-as-good-as-what-could-have-been-red" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gate-lane-run.mjs</code> (134 lines) is where the batch&#39;s central idea lives.</p>
+<p><strong>Both legs always run (not fail-fast)</strong>, so the verdict records every result:</p>
+<blockquote>
+<p><code>// All legs run (not fail-fast) so the verdict records every result; green = every leg ok.</code></p>
+</blockquote>
+<p><strong>Per-leg wall-clock is recorded, with the reason:</strong></p>
+<blockquote>
+<p><code>// Per-leg wall-clock (ms) — the discriminator a whole-run total hides: a MIXED-mode run (some // legs real, some smoked/skipped) still sums into a plausible band, but the skipped legs show // ~0ms here.</code></p>
+</blockquote>
+<p><strong>Foreign load is <em>observed</em>, never locked</strong> — because it <em>cannot</em> be locked, and the code says so:</p>
+<blockquote>
+<p><code>// Advisory foreign-load context (arch: foreign NON-gate load cannot be locked, only OBSERVED → // advisory warn, exit code UNCHANGED, RECORDED in the verdict).</code></p>
+</blockquote>
+<p><strong>And the verdict&#39;s own rationale:</strong></p>
+<blockquote>
+<p><code>// a green carries the load context it ran under (RECORDED, not just printed) — a green is only // as good as what could have been red.</code></p>
+</blockquote>
+<h3 id="3-4-the-two-reads-of-one-flag-hazard-solved-in-code">3.4 ★★ The two-reads-of-one-flag hazard, solved in code<a href="#batch-06/3-4-the-two-reads-of-one-flag-hazard-solved-in-code" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The sharpest single detail in the batch. A &quot;smoke&quot; mode (which skips the real legs) must not be
+sealable as a normal pass. OpenRig solves it by <strong>reading the flag exactly once</strong>, at the single
+choice point, and threading that <em>value</em> into both the executor and the verdict:</p>
+<blockquote>
+<p><code>// SELF-DESCRIBING: the mode this verdict ran under, taken from the SINGLE choice point — the // caller computes SMOKE ONCE to pick the executor and passes THAT same value here. It is // deliberately NOT a second, independent </code>process.env<code> read: … reading the env here would record // INTENT that can disagree with what actually ran (a smoking exec under an unset env → // smoke:false over legs that never executed). **Two reads of the same flag can diverge; one // cannot.** The per-leg durationMs below is the INDEPENDENT observed cross-check: declared mode vs // observed effect — if they ever disagree, that disagreement is itself detectable. Without this a // smoke run seals a normal PASS indistinguishable from a real one; **hash-verifying the JSON // proves the file authentic, never that the gate RAN.**</code></p>
+</blockquote>
+<p>That last sentence is a <strong>rule-13-grade distinction</strong>: <em>authenticity of an artefact is not evidence
+of the act that produced it.</em> And the remedy is named as a <strong>belt-and-braces pair</strong>: a single read
+(removes the divergence) <strong>plus</strong> an independent observed effect (detects it if it still happens).</p>
+<p><strong>The test-calls-production-shape</strong> is also explicit: <code>runGate</code> is extracted <em>&quot;so production and its
+test call ONE origin — not a mirror,&quot;</em> and <em>&quot;its negative control guards the shipped path rather
+than a lookalike.&quot;</em> <em>(PZ — top-tier; carry BOTH ideas to the SRS.)</em></p>
+<h3 id="3-5-the-web-ui-is-deliberately-not-a-gate-leg">3.5 ★ The web UI is deliberately NOT a gate leg<a href="#batch-06/3-5-the-web-ui-is-deliberately-not-a-gate-leg" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gate-lane-run.mjs</code> states the exclusion and its reason:</p>
+<blockquote>
+<p><code>// The web UI (packages/ui) is deliberately NOT a gate leg. Founder ruling 2026-08-21: the web UI // went best-effort experimental at the 0.5.0 TUI pivot and releases must not spend gate time or // block on it. </code>npm run test:ui<code> still exists for manual runs; it gates nothing.</code></p>
+</blockquote>
+<p><strong>The scope of the gate is a stated decision with a date</strong> — matching batch 05&#39;s &quot;wording rule.&quot;
+<em>(PZ.)</em></p>
+<h3 id="3-6-hermeticity-the-dependency-root-is-verified-and-the-check-only-reports-it-never-repairs">3.6 Hermeticity: the dependency root is verified, and the check "only reports; it never repairs"<a href="#batch-06/3-6-hermeticity-the-dependency-root-is-verified-and-the-check-only-reports-it-never-repairs" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gate-lane-hermeticity.mjs</code> (88 lines) verifies that <strong>this worktree owns</strong> <code>node_modules</code> and
+<strong>every lock-derived <code>@openrig/*</code> workspace link</strong>. It refuses on a symlinked <code>node_modules</code>
+(<em>&quot;node_modules is a symlink&quot;</em>), derives the expected targets <strong>from <code>package-lock.json</code></strong>, requires
+each real target to equal its lock-derived target, and refuses if any target <strong>escapes
+<code>packages/</code></strong>. Its own docstring: <em>&quot;The check reports only; it never repairs.&quot;</em> <strong>A verifier that
+will not paper over what it finds.</strong> <em>(PZ.)</em></p>
+<hr>
+<h2 id="4-the-4-rail-exclusion-ledger-a-gate-that-can-be-green-with-named-exceptions">4. ★★ The 4-rail exclusion ledger — a gate that can be green *with named exceptions*<a href="#batch-06/4-the-4-rail-exclusion-ledger-a-gate-that-can-be-green-with-named-exceptions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>gate-lane-ledger.mjs</code> (112 lines) is the study&#39;s best answer to the question <em>&quot;how do you let a
+gate admit it does not check something, without that admission becoming permanent?&quot;</em> Its header:</p>
+<blockquote>
+<p><code>// A base-health suite that genuinely cannot be fixed before a cut may be EXCLUDED from the gate — // but only VISIBLY, OWNED, RECEIPTED, and MECHANICALLY EXPIRING.</code></p>
+</blockquote>
+<p>The four rails, which map exactly onto the questions a reviewer would ask:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Rail</th>
+<th>Name</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1</strong></td>
+<td><strong>green-with-exclusions</strong></td>
+<td>a failure <em>covered</em> by an active resident → gate <strong>PASS</strong>, but the resident is <strong>named in-band</strong></td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>mechanical expiry</strong></td>
+<td>a resident <strong>past its expiry → gate FAIL</strong>, <em>&quot;forces removal; self-dying&quot;</em></td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>receipt + owner + expiry</strong></td>
+<td>every resident must carry all five fields (<code>suite, reason, receipt, owner, expiry</code>) — <strong>an invalid ledger is a loud gate failure, never a silent pass</strong></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>cut ceiling</strong></td>
+<td>no resident&#39;s expiry may outlive the cut date</td>
+</tr>
+</tbody></table></div>
+<p>Three details make it a real mechanism rather than a form:</p>
+<ol>
+<li><strong>An invalid ledger fails the gate</strong> — <code>validity.valid</code> is <strong>AND-ed</strong> into the verdict
+(<code>gate = validity.valid &amp;&amp; uncovered.length === 0 &amp;&amp; expired.length === 0 ? &quot;pass&quot; : &quot;fail&quot;</code>).
+A malformed entry cannot buy a suite a pass.</li>
+<li><strong>An expired resident fails the gate <em>even if its suite now passes</em></strong> — <em>&quot;a resident past its
+expiry forces RED regardless of its suite&#39;s current state — it must be removed or
+re-justified.&quot;</em> <strong>The ledger cannot rot into a permanent exemption.</strong></li>
+<li><strong>A green that carries exclusions must NAME every one of them, in-band and loud</strong> — the
+<code>renderLedgerState</code> output prints <code>owner</code>, <code>expires</code>, <code>receipt</code> and <code>reason</code> per resident, and
+says <em>&quot;gate ledger: 0 exclusions (clean — no residents)&quot;</em> when empty.</li>
+</ol>
+<p><strong>And the seed is EMPTY — with the reason recorded in the data file itself:</strong></p>
+<blockquote>
+<p><code>// F1 exclusion-ledger — base-health suites EXCLUDED from the gate. EMPTY by design: the named-6 // were KILLED (E/C/D/A + B), not excluded, so main is truly green.</code></p>
+</blockquote>
+<p><strong>A framework built to allow exceptions, shipped with zero exceptions, and documenting <em>why</em> it can
+afford to.</strong> <em>(PZ — top-tier; this is the batch&#39;s headline.)</em></p>
+<hr>
+<h2 id="5-the-portability-report-advisory-by-design">5. The portability report — advisory by design<a href="#batch-06/5-the-portability-report-advisory-by-design" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>portability-report.mjs</code> (187 lines) inverts the usual guard posture, and says so in its header:</p>
+<blockquote>
+<p><code>// Findings never fail it: a finding is a question, not a verdict. It exits 0 with or without // findings and 2 on an operational error (bad argument, git failure).</code></p>
+</blockquote>
+<p>It scans <strong>lines added by a change</strong> for values <em>&quot;tied to one machine, network or account&quot;</em>:
+credentials, absolute home paths, IPs and local-network hostnames, temp/instance-specific
+directories, email addresses. And it draws a boundary the reader should note: <strong>&quot;Rig, seat and
+agent names are ordinary identifiers and are not reported.&quot;</strong> <em>(Advisory scope, stated.)</em></p>
+<p><strong>The CI wiring respects the leak the guard is about.</strong> The workflow file explains:</p>
+<blockquote>
+<p><code>// The repository is public, so this summary lists file and line only; authors see the matched // text when they run the report locally or on push.</code></p>
+</blockquote>
+<p>and CI runs it with <code>--locations-only</code>. <strong>A leak-adjacent guard that will not itself leak into a
+public job summary</strong> — <code>--locations-only</code> exists precisely for that. <em>(PZ — a small, precise
+capability.)</em></p>
+<p><strong>The advisory/enforcing split is a three-tier vocabulary across the platform:</strong> the portability
+report is <strong>advisory</strong> (exit 0, findings are questions); the foreign-load observation is <strong>advisory
+but recorded</strong> (exit code unchanged, in the verdict); the gate legs and the four guards are
+<strong>enforcing</strong> (nonzero). <em>Each tier is named where it is used.</em> <em>(PZ — carry the three-tier
+vocabulary to the SRS.)</em></p>
+<hr>
+<h2 id="6-the-docs-guard-and-the-leak-guard">6. The docs guard and the leak guard<a href="#batch-06/6-the-docs-guard-and-the-leak-guard" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-the-docs-guard-an-exact-path-and-why-a-directory-would-be-wrong">6.1 The docs guard: an exact path, and why a directory would be wrong<a href="#batch-06/6-1-the-docs-guard-an-exact-path-and-why-a-directory-would-be-wrong" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>check-docs-guard.mjs</code> (62 lines) enforces that tracked docs live under three durable roots, with
+<strong>one exact-path exception whose justification is longer than its code</strong>:</p>
+<blockquote>
+<p><code>// docs/DESIGN.md is the canonical visual/brand/design-system spec, and its root placement is // RATIFIED doctrine, not drift… [and] it cannot be satisfied by relocating into any allowed root: //   docs/as-built/ — every file there carries last-verified-against-source; DESIGN.md is not //                    source-derived, and Q1 rules this destination out by name //   docs/reference/ — that directory SHIPS (scripts/build-package.sh stages it into the package //                    and the daemon materializes it to $OPENRIG_HOME/reference/), so moving there //                    would start distributing the brand spec to every operator //   docs/releases/ — not a release note // So it is named here as an EXACT PATH rather than relocated or covered by a widened directory // allowance. Keep this exact-path: the policy this guard enforces is &quot;loose plans and notes stay // untracked&quot;, and a directory hole would quietly readmit exactly that.</code></p>
+</blockquote>
+<p><strong>Three rejected destinations, each with a distinct reason, and the guard explicitly refuses to be
+weakened into a directory allowance</strong> with the reason stated: <em>&quot;a directory hole would quietly
+readmit exactly that.&quot;</em> <strong>The exception is one file, named, with its escape route closed.</strong> <em>(PZ.)</em></p>
+<h3 id="6-2-the-leak-guard-rule-driven-with-a-remedy-named-on-every-finding">6.2 The leak guard: rule-driven, with a remedy named on every finding<a href="#batch-06/6-2-the-leak-guard-rule-driven-with-a-remedy-named-on-every-finding" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal-leak-scanner.mjs</code> (77 lines) is a pure rule engine. It exports a <strong>named remedy</strong> as a
+constant and attaches it to <em>every</em> finding:</p>
+<blockquote>
+<p><code>export const INTERNAL_LEAK_REMEDY = &quot;Move the detail to an internal sidecar, fence it, genericize it, or keep the whole file host-only.&quot;</code></p>
+</blockquote>
+<p>Rules are <strong>data, not code</strong> (<code>internal_path_globs</code>, <code>path_prefixes</code>, <code>seat_and_rig_patterns</code>,
+<code>host_patterns</code>, <code>charged_terms</code>), with <strong>allow-context escape hatches</strong> that are themselves
+explicit (<code>allowed_context_substrings</code>, <code>allowed_context_lines</code>). The consumer
+(<code>check-internal-leak-guard.mjs</code>, 251 lines) can emit a <strong>deterministic JSON report</strong> recording the
+mode, the scanned file list and the finding count — <em>&quot;mode&quot;</em> being <strong>scanned</strong>, i.e. the report says
+<em>how</em> it was produced. <strong>Findings are actionable by construction: every one carries what to do about
+it.</strong> <em>(PZ.)</em></p>
+<hr>
+<h2 id="7-guardian-lists-are-generated-not-hand-maintained">7. Guardian lists are generated, not hand-maintained<a href="#batch-06/7-guardian-lists-are-generated-not-hand-maintained" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two <code>.generated.json</code> files sit beside the guards and are regenerated from disk truth:</p>
+<ul>
+<li><strong><code>skill-edge-digests.generated.json</code></strong> — SHA-256 per skill edge file, regenerated by
+<code>regen-edge-digests.mjs</code>, whose header states the <strong>authority/reality split</strong>:<blockquote>
+<p><code>// PROPERTY (layout = authority, disk = reality, regen touches only reality): buildEdgeDigests // hashes PRESENT files only. A layout-demanded file missing from disk is never given a digest // here…</code></p>
+</blockquote>
+</li>
+<li><strong><code>internal-tokens.generated.json</code></strong> — the token list the leak scanner charges against.</li>
+</ul>
+<p><strong>The property line is the finding:</strong> <em>layout is the authority; disk is the reality; the regen
+touches only reality.</em> A missing file cannot acquire a fabricated digest — it simply has none, and
+that absence is the signal. <em>(PZ — the same &quot;never fabricate a value you were not given&quot; discipline
+seen in batch 05&#39;s <code>honest-unknown ○</code> glyph.)</em></p>
+<hr>
+<h2 id="8-the-self-destruct-the-scenarios-and-the-packaged-probe">8. The self-destruct, the scenarios, and the packaged probe<a href="#batch-06/8-the-self-destruct-the-scenarios-and-the-packaged-probe" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="8-1-the-completed-self-destruct-with-a-tombstone-and-a-test-that-it-stays-dead">8.1 ★ The completed self-destruct — with a tombstone AND a test that it stays dead<a href="#batch-06/8-1-the-completed-self-destruct-with-a-tombstone-and-a-test-that-it-stays-dead" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>model-divergence-monitor.ts:280</code> carries the study&#39;s cleanest retirement artefact:</p>
+<blockquote>
+<p><code>// (The self-expiring CLAUDE_ALIAS_MIGRATION_BRIDGE and its SPEC_VALIDATION_CAPABILITIES sentinel // gate completed their arc and are DELETED per the bridge&#39;s own deletion contract: the 5.3 // advisory landed, the bridge emptied, and f7dfca0c replaced the no-tolerance state with // canonicalization through the advisory&#39;s shipped map.)</code></p>
+</blockquote>
+<p>And <code>model-divergence-monitor.test.ts:256</code> <strong>asserts the bridge is gone</strong>:</p>
+<blockquote>
+<p><code>expect(&quot;CLAUDE_ALIAS_MIGRATION_BRIDGE&quot; in monitorMod).toBe(false);</code></p>
+</blockquote>
+<p><strong>This is rule 10 at its most rigorous:</strong> the bridge declared a <em>deletion contract</em>, <em>executed</em> it,
+left a <strong>tombstone explaining the arc</strong>, and the codebase <strong>tests that it stayed deleted</strong> so it
+cannot silently return. <strong>A migration bridge that expires itself and a test that guards the
+tombstone.</strong> <em>(PZ — top-tier.)</em></p>
+<p>The same file also records a <strong>rule-13-grade history of a reversal</strong> (the pin-comparison logic):</p>
+<blockquote>
+<p><code>// History on record: exact was ruled at build; a seat reversed it to whole-token alias matching; // r2 reversed THAT back because generic token containment lets one pin bless multiple distinct // models (&quot;codex&quot; matched gpt-5.6-codex AND gpt-5.1-codex-mini). … Never add a second map here, // and never token containment: an unknown alias or a fallback model canonicalizes to itself and // still diverges.</code></p>
+</blockquote>
+<p><strong>The wrong answer is documented, with the concrete counter-example that killed it.</strong> <em>(PZ.)</em></p>
+<h3 id="8-2-the-scenario-harness-red-first-is-the-exception-and-the-exception-is-loud">8.2 The scenario harness — RED-FIRST is the exception, and the exception is *loud*<a href="#batch-06/8-2-the-scenario-harness-red-first-is-the-exception-and-the-exception-is-loud" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/test-system/scenarios/</code> holds <strong>23 scenario YAMLs</strong>, <strong>12 of which carry a
+<code>seed_regression: {class: …}</code></strong> — the defect class the scenario exists to reproduce. The naming is
+the invariant statement (<code>locked-restore-never-permissive</code>, <code>queue-baton-survives-restart</code>,
+<code>ps-scope-honesty</code>, <code>send-verify-means-rendered</code>, <code>clean-lifecycle-no-residue</code>).</p>
+<p><strong>One scenario is RED-FIRST, and it explains itself at length.</strong> <code>kill-daemon-mid-handoff.yaml</code>
+describes a <strong>real incident</strong> (2026-08-05, pm-lead ruling <code>6eb9166a</code>):</p>
+<blockquote>
+<p><code>// a gated, guard-cleared branch cleanup EXECUTED correctly and was receipted on disk, but the // daemon died before the queue closure landed — so a later reader misread completed work as an // out-of-band incident for ~5 hours. The divergence between completed EXECUTION and queue STATE // must become VISIBLE on a shipped surface, never silently misread as unexecuted.</code></p>
+</blockquote>
+<p>And then states its own honesty rule:</p>
+<blockquote>
+<p><code>// *** RED-FIRST *** … Until that lands, its runs are recorded as EXPECTED-RED (the class // demonstrably caught), NEVER massaged to green.</code></p>
+</blockquote>
+<p>It also names its <strong>blocking dependencies, routed rather than shimmed</strong> (<em>&quot;Deps (BLOCKING, routed —
+never shimmed here)&quot;</em>) and, at the end, the assertion boundary: <em>&quot;#11 may NOT assert on the on-disk
+receipt (not a shipped surface): its assertions ride queue/stream.&quot;</em> <strong>RED-FIRST is one scenario out
+of 23 — the exception, not the rule — and it is the loudest file in the directory.</strong> <em>(PZ —
+top-tier.)</em></p>
+<h3 id="8-3-the-compiled-package-probe-proving-the-assembled-artefact">8.3 The compiled-package probe — proving the *assembled* artefact<a href="#batch-06/8-3-the-compiled-package-probe-proving-the-assembled-artefact" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>verify-packaged-builtins.mjs</code> proves, <strong>against an assembled package</strong>, three things:</p>
+<ol>
+<li><strong>package identity</strong> — the assembled daemon <em>and</em> cli build-info name <strong>the exact candidate SHA
+with <code>dirty === false</code></strong>;</li>
+<li><strong>assembled policy bytes</strong> — <code>daemon/policies/builtin/*</code> equal <strong>the four authority hashes</strong>;</li>
+<li><strong>the compiled assembled startup boundary</strong> — invoking the assembled <code>dist</code>&#39;s exported
+<code>createDaemon()</code> (no listen) under a <strong>fresh temporary <code>OPENRIG_HOME</code></strong> with isolated state
+materializes <strong>exactly</strong> the four stable files at <code>reference/policies/builtin/</code> — <strong>byte-equal,
+mode 0444</strong>.</li>
+</ol>
+<p>And its own containment rule:</p>
+<blockquote>
+<p><code>// The probe NEVER touches the live daemon, its port, or the operator home.</code></p>
+</blockquote>
+<p><strong>It tests the artefact an operator would actually receive, not the source tree</strong> — the exact gap
+buzz&#39;s <code>LIMITS.md</code> recommendation warned about, closed natively. <em>(PZ.)</em></p>
+<h3 id="8-4-honest-ledgers-around-the-build">8.4 Honest ledgers around the build<a href="#batch-06/8-4-honest-ledgers-around-the-build" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>check-cli-daemon-freshness</code> and <code>cleanStaleVendoredBundle</code> together name a <strong>known poisoning
+path and neutralise it</strong>:</p>
+<blockquote>
+<p><code>// remove the vendored daemon bundle at packages/cli/daemon before the legs run. That path is a // GITIGNORED build artifact… a stale desk leftover there poisons test:repo&#39;s freshness guard … // Removing it at gate start means a leftover can never poison a run; real package-time assembly // is still guarded, and a fresh clone with no bundle is a force:true no-op.</code></p>
+</blockquote>
+<p><strong>A self-inflicted false-signal path is named, and a <code>force:true</code> no-op runs every time to close
+it.</strong> <em>(PZ.)</em></p>
+<hr>
+<h2 id="9-divergences-rule-1">9. Divergences (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/9-divergences-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D6-1</strong></td>
+<td>the guard family looks like it might be ~10+ scripts</td>
+<td>the <code>check-*.mjs</code> <strong>guard</strong> family is exactly <strong>4</strong> (the rest are their co-located <code>.test.mjs</code>, plus shared libs and non-guard tools)</td>
+<td><strong>DIVERGED from a loose reading, HOLDS against source</strong> (counted; the 4+4 shape is exact)</td>
+</tr>
+<tr>
+<td><strong>D6-2</strong></td>
+<td>&quot;gates catch regressions&quot; is the usual (implied) claim</td>
+<td>the gate is <strong>explicit about what it does NOT catch</strong>: the web UI is not a leg <em>by dated ruling</em>; foreign load is <strong>observed, not locked</strong>; the portability report <strong>exits 0 either way</strong></td>
+<td><strong>HOLDS — and unusually precise</strong> (the gate states its own blind spots)</td>
+</tr>
+<tr>
+<td><strong>D6-3</strong></td>
+<td>the exclusion ledger reads as a mechanism that must be in use</td>
+<td>it ships <strong>EMPTY, by design</strong>, with the reason in the data file (<em>&quot;the named-6 were KILLED, not excluded, so main is truly green&quot;</em>)</td>
+<td><strong>HOLDS</strong> (a mechanism present and unused, with the reason recorded — not dead code)</td>
+</tr>
+<tr>
+<td><strong>D6-4</strong></td>
+<td><code>ARCHITECTURE.md</code> / the coordination doc&#39;s migration counts (batch 04: doc says 96, ARCHITECTURE.md 94, disk 105)</td>
+<td>re-checked here: the <strong>gate/hermeticity machinery does not depend on any migration count</strong>; the divergence is confined to prose</td>
+<td><strong>DIVERGED (carried from D4-1)</strong> — restated here so batch 07 can resolve it once</td>
+</tr>
+<tr>
+<td><strong>D6-5</strong></td>
+<td>a <code>check-*</code> guard implies a passing tripwire</td>
+<td><strong>all four guards carry a co-located test</strong> — verified one by one — so &quot;the guard has its own test&quot; holds, not merely &quot;the guard exists&quot;</td>
+<td><strong>HOLDS</strong> (verified individually, not inferred from the directory listing)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-findings-batch-06">10. Findings (batch 06)<a href="#batch-06/10-findings-batch-06" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F6-1.</strong> ★★★ <strong>★ The 4-rail exclusion ledger: the gate may be green WITH named exceptions, and no
+exception can become permanent.</strong> Green-with-exclusions (named in-band) · <strong>mechanical expiry</strong> (an
+expired resident FAILS the gate <em>even if its suite passes</em> — <em>&quot;self-dying&quot;</em>) · <strong>receipt + owner +
+expiry mandatory</strong> (an invalid ledger is a loud failure, never a silent pass) · <strong>a cut ceiling</strong> no
+expiry may outlive. <strong>Ships EMPTY, with the reason recorded.</strong> <em>(PZ — headline.)</em></p>
+<p><strong>F6-2.</strong> ★★★ <strong>&quot;A green is only as good as what could have been red&quot; — the verdict RECORDS the load
+it ran under.</strong> Per-leg wall-clock (<em>&quot;the discriminator a whole-run total hides&quot;</em>), advisory
+foreign-load observation (<em>&quot;cannot be locked, only OBSERVED&quot;</em>), and the mode it ran in — all sealed
+into the verdict, not printed and discarded. <em>(PZ — top-tier.)</em></p>
+<p><strong>F6-3.</strong> ★★★ <strong>The two-reads-of-one-flag hazard, solved by construction: &quot;Two reads of the same
+flag can diverge; one cannot.&quot;</strong> The mode flag is read ONCE, at the single choice point, and its
+<em>value</em> flows to both the executor and the verdict; <strong>and</strong> the per-leg durations are declared as an
+<strong>independent observed cross-check</strong> (<em>&quot;declared mode vs observed effect&quot;</em>). Plus: <em>&quot;hash-verifying
+the JSON proves the file authentic, never that the gate RAN.&quot;</em> <em>(PZ — top-tier; carry the pair.)</em></p>
+<p><strong>F6-4.</strong> ★★ <strong>The gate lane&#39;s non-blocking, kernel-released mutex — 74 lines, 5 pins, every
+rejected alternative on the record.</strong> The port number <em>is</em> the lock name (P3); the bind <em>is</em> the
+decision and the holder file is naming-only (P4); <strong>SO_REUSEPORT must never be set or &quot;the mutex
+silently vanishes&quot;</strong> (P2, <em>&quot;guard-tested&quot;</em>); refusal is <strong>hard, never auto-override</strong> (P5); and the
+Unix-socket alternative was <strong>rejected for a named stale-artifact reason</strong>. <em>(PZ — top-tier.)</em></p>
+<p><strong>F6-5.</strong> ★★ <strong>Refusal teaches, and distinguishes a NAMED holder from an HONEST-UNKNOWN squatter.</strong>
+A gate holder is named (<code>pid</code>, <code>startedAt</code>); a foreign process is <strong>&quot;holder UNKNOWN (no gate
+holder-info file)&quot;</strong> and the gate <strong>fails closed</strong> — <em>&quot;a gate lane must not run beside unknown load.&quot;</em>
+<em>(PZ.)</em></p>
+<p><strong>F6-6.</strong> ★★ <strong>The gate hermeticity check assumes nothing: it verifies this worktree OWNS the
+dependency root, deriving every expected target from <code>package-lock.json</code>, refusing a symlinked
+<code>node_modules</code> and any target that escapes <code>packages/</code>.</strong> Its own rule: <em>&quot;The check reports only; it
+never repairs.&quot;</em> <em>(PZ.)</em></p>
+<p><strong>F6-7.</strong> ★★ <strong>The portability report is deliberedly ADVISORY — &quot;a finding is a question, not a
+verdict&quot; — and its CI wiring refuses to leak the thing it detects.</strong> Exit 0 with or without
+findings; 2 on operational error; <code>--locations-only</code> in the public workflow <em>&quot;so this summary lists
+file and line only.&quot;</em> <em>(PZ — and it establishes the platform&#39;s three-tier advisory/enforcing
+vocabulary.)</em></p>
+<p><strong>F6-8.</strong> ★ <strong>★ The completed self-destruct, with a tombstone and a test that it stays dead.</strong> The
+<code>CLAUDE_ALIAS_MIGRATION_BRIDGE</code> <em>&quot;completed [its] arc and [is] DELETED per the bridge&#39;s own deletion
+contract&quot;</em>; a tombstone records the arc; and <code>expect(&quot;CLAUDE_ALIAS_MIGRATION_BRIDGE&quot; in monitorMod).toBe(false)</code> <strong>guards the tombstone.</strong> <em>(PZ/rule 10 — top-tier.)</em></p>
+<p><strong>F6-9.</strong> ★ <strong>The docs guard uses an EXACT PATH, not a directory allowance, and closes the hole
+explicitly:</strong> <em>&quot;a directory hole would quietly readmit exactly that.&quot;</em> Three rejected destinations,
+each with a distinct reason — including one that would <em>&quot;start distributing the brand spec to every
+operator.&quot;</em> <em>(PZ.)</em></p>
+<p><strong>F6-10.</strong> ★ <strong>Every leak finding carries a NAMED REMEDY, and the rules are data, not code.</strong>
+<code>INTERNAL_LEAK_REMEDY</code> = <em>&quot;Move the detail to an internal sidecar, fence it, genericize it, or keep
+the whole file host-only.&quot;</em> One scanner (<code>internal-leak-scanner.mjs</code>) serves two consumers, and
+allow-list escape hatches are themselves explicit fields. <em>(PZ — the guard-as-document pattern,
+natively: 4 guards, 4 co-located tests.)</em></p>
+<p><strong>F6-11.</strong> ★ <strong>Guardian lists are GENERATED from disk truth: &quot;layout = authority, disk = reality,
+regen touches only reality.&quot;</strong> A layout-demanded file missing from disk <strong>is never given a digest</strong> —
+the absence is the signal, and no value is fabricated. <em>(PZ.)</em></p>
+<p><strong>F6-12.</strong> ★★ <strong>The compiled-package probe proves the assembled artefact byte-for-byte, SHA-exact,
+under an isolated <code>OPENRIG_HOME</code>, and never touches the live daemon.</strong> Package identity (SHA,
+<code>dirty === false</code>) + the four authority hashes + the compiled startup boundary (4 files, byte-equal,
+mode 0444). <em>(PZ — the &quot;prove the shipped artefact&quot; gap, closed.)</em></p>
+<p><strong>F6-13.</strong> ★ <strong>RED-FIRST is one scenario out of 23 — and it is the loudest.</strong> <code>kill-daemon-mid-handoff</code>
+documents a real ~5-hour misdiagnosis, names its blocking deps <em>&quot;routed — never shimmed here,&quot;</em> and
+states: runs are <em>&quot;recorded as EXPECTED-RED …, NEVER massaged to green.&quot;</em> 12 of 23 scenarios carry a
+<code>seed_regression</code> class. <em>(PZ — top-tier.)</em></p>
+<p><strong>F6-14.</strong> ★ <strong>The gate states its own blind spots, with dates:</strong> the web UI is <strong>not a leg</strong> (founder
+ruling 2026-08-21, <em>&quot;it gates nothing&quot;</em>); foreign load is <strong>observed, not locked</strong>; absent/corrupt
+ledger → <strong>strict, never a silent skip</strong>; a stale vendored bundle is <strong>removed at gate start</strong> so it
+<em>&quot;can never poison a run.&quot;</em> <em>(PZ.)</em></p>
+<p><strong>F6-15.</strong> ★ <strong>A reversal history with the counter-example that killed the wrong answer.</strong> The pin
+comparison records <em>exact → whole-token alias → reversed back</em>, <strong>because token containment let one
+pin bless two models</strong> (<code>&quot;codex&quot;</code> matched <code>gpt-5.6-codex</code> AND <code>gpt-5.1-codex-mini</code>), and forbids a
+second mapping home. <em>(PZ/rule 13.)</em></p>
+<hr>
+<h2 id="11-plain-english-summary-of-batch-06">11. Plain-English summary of batch 06<a href="#batch-06/11-plain-english-summary-of-batch-06" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything outside OpenRig&#39;s three product poles is a <strong>gate culture</strong>. There are exactly <strong>four
+guard scripts</strong>, and <strong>each one has its own test sitting next to it</strong> — so the platform can prove
+every tripwire actually fires. A single shared leak-scanner serves two of them, so there is one rule
+engine, not two copies.</p>
+<p>The centrepiece is the <strong>gate lane</strong> — the thing that decides whether a change is allowed in. Three
+ideas make it unusual:</p>
+<ul>
+<li><strong>It refuses instead of queuing.</strong> A machine-wide lock is a public port number. If the port is
+taken by another gate, it says so and stops. If it is taken by something unknown, it says
+<em>&quot;holder UNKNOWN&quot;</em> and <strong>fails closed</strong>, because <em>a gate must not run beside unknown load.</em> The
+lock is 74 lines, and it documents <strong>five binding decisions</strong> — including one that would silently
+destroy the lock if anyone ever set <code>SO_REUSEPORT</code>.</li>
+<li><strong>It records what the green means.</strong> A pass does not just say &quot;all checks OK.&quot; It records how long
+each check took, what else was running on the machine, and — crucially — <strong>whether the run was a
+smoke run that skipped the real checks</strong>. The platform&#39;s own sentence for this: <em>&quot;a green is only
+as good as what could have been red.&quot;</em></li>
+<li><strong>It solved a subtle bug in the obvious way.</strong> It used to be possible to read the &quot;is this a smoke
+run?&quot; flag twice, and the two reads could disagree — sealing a skipped run as a normal pass. The
+fix reads the flag <strong>once</strong> and passes the <em>value</em> everywhere, <strong>and</strong> keeps the per-check times
+as an independent cross-check. The line that explains why it matters: <em>&quot;hash-verifying the JSON
+proves the file authentic, never that the gate RAN.&quot;</em></li>
+</ul>
+<p>The most elegant thing in the batch is the <strong>exclusion ledger</strong>. OpenRig lets the gate be <strong>green
+with exceptions</strong> — but every exception must be <strong>named, owned, receipted, and given an expiry
+date; and if the expiry passes, the gate goes red <em>even if the underlying check now passes</em>.</strong>
+Exceptions cannot rot into permanent exemptions. And the framework <strong>ships empty, on purpose</strong>,
+with the reason written into the file: the six problem suites were <em>killed</em>, not excluded, so main
+is genuinely green. <strong>The platform built the mechanism, then documented why it did not need it.</strong></p>
+<p>Two more things deserve naming. The <strong>portability report</strong> is deliberately <em>advisory</em> — <em>&quot;a finding
+is a question, not a verdict&quot;</em> — and its public CI job lists file and line only, because <em>&quot;the
+repository is public&quot;</em>: a leak-detector that refuses to leak. And one older migration bridge
+<strong>expired itself, deleted itself, left a tombstone explaining its arc, and left a test asserting it
+stays deleted</strong> — rule 10 done as far as it can be done.</p>
+<p><strong>Next: batch 07 — synthesis.</strong> Ranked mechanisms, the pole map, the decided limits, and the
+verdict — followed by the reader on port 3700.</p>
+<hr>
+<p><em>Batch 06 of 08 — out-of-pole (PZ). All claims read from source at <code>0.6.10</code>. 5 divergences;
+15 findings (F6-1..F6-15).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-the-synthesis.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-one-sentence-shape" class="toc-link">1. The one-sentence shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-guard-inventory-measured-first-rule-0b" class="toc-link">2. The guard inventory, measured first (rule 0b)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-gate-lane-a-gate-that-refuses-rather-than-queues" class="toc-link">3. The gate lane — a gate that refuses rather than queues</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-entrypoint-and-what-it-does-in-order" class="toc-link">3.1 The entrypoint, and what it does in order</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-mutex-74-lines-5-binding-pins-and-every-rejected-alternative-named" class="toc-link">3.2 The mutex: 74 lines, 5 binding pins, and every rejected alternative named</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-honesty-gap-a-green-is-only-as-good-as-what-could-have-been-red" class="toc-link">3.3 ★ The honesty gap: &quot;a green is only as good as what could have been red&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-the-two-reads-of-one-flag-hazard-solved-in-code" class="toc-link">3.4 ★★ The two-reads-of-one-flag hazard, solved in code</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-5-the-web-ui-is-deliberately-not-a-gate-leg" class="toc-link">3.5 ★ The web UI is deliberately NOT a gate leg</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-6-hermeticity-the-dependency-root-is-verified-and-the-check-only-reports-it-never-repairs" class="toc-link">3.6 Hermeticity: the dependency root is verified, and the check &quot;only reports; it never repairs&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-4-rail-exclusion-ledger-a-gate-that-can-be-green-with-named-exceptions" class="toc-link">4. ★★ The 4-rail exclusion ledger — a gate that can be green *with named exceptions*</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-portability-report-advisory-by-design" class="toc-link">5. The portability report — advisory by design</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-docs-guard-and-the-leak-guard" class="toc-link">6. The docs guard and the leak guard</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-docs-guard-an-exact-path-and-why-a-directory-would-be-wrong" class="toc-link">6.1 The docs guard: an exact path, and why a directory would be wrong</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-the-leak-guard-rule-driven-with-a-remedy-named-on-every-finding" class="toc-link">6.2 The leak guard: rule-driven, with a remedy named on every finding</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-guardian-lists-are-generated-not-hand-maintained" class="toc-link">7. Guardian lists are generated, not hand-maintained</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-self-destruct-the-scenarios-and-the-packaged-probe" class="toc-link">8. The self-destruct, the scenarios, and the packaged probe</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#8-1-the-completed-self-destruct-with-a-tombstone-and-a-test-that-it-stays-dead" class="toc-link">8.1 ★ The completed self-destruct — with a tombstone AND a test that it stays dead</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#8-2-the-scenario-harness-red-first-is-the-exception-and-the-exception-is-loud" class="toc-link">8.2 The scenario harness — RED-FIRST is the exception, and the exception is *loud*</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#8-3-the-compiled-package-probe-proving-the-assembled-artefact" class="toc-link">8.3 The compiled-package probe — proving the *assembled* artefact</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#8-4-honest-ledgers-around-the-build" class="toc-link">8.4 Honest ledgers around the build</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-rule-1" class="toc-link">9. Divergences (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-findings-batch-06" class="toc-link">10. Findings (batch 06)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-plain-english-summary-of-batch-06" class="toc-link">11. Plain-English summary of batch 06</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('openrig_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('openrig_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('openrig_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('openrig_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.OpenRigReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

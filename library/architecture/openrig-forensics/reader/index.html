@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenRig Platform Study — Executive Master Reader</title>
+  <link rel="stylesheet" href="assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <!-- Reading Progress Bar -->
+  <div id="readingProgressBar"></div>
+
+  <!-- Master App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="tool-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation" title="Toggle Documents Menu">☰</button>
+      <span class="brand-badge">Forensics</span>
+      <div class="header-title-wrap">
+        <div class="header-title">OpenRig Platform Study <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Upstream OpenRig 0.6.10 — a local daemon + CLI + TUI + MCP server that orchestrates unmodified Claude Code and Codex sessions in tmux, with no tenancy at all and the most transferable gate-honesty machinery in the study)</span></div>
+        <div class="header-subtitle">8 Unabridged Batches • 4 Packages / 105 Migrations • 69 Routes / 87 CLI Commands / 18 MCP Tools • NO Tenancy (0 tenant_id) • The Four-Rail Exclusion Ledger</div>
+      </div>
+    </div>
+
+    <!-- Header Controls -->
+    <div class="header-controls">
+      <!-- Font Size Slider Group -->
+      <div class="font-slider-group" title="Adjust reading font size relatively">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn" title="Decrease font size (A-)">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider" aria-label="Font Size">
+        <button class="font-btn" id="fontIncBtn" title="Increase font size (A+)">A+</button>
+        <button class="font-btn" id="fontResetBtn" title="Reset font size to 16px" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <!-- Font Family Switcher -->
+      <select id="fontSelect" class="tool-btn" style="cursor:pointer;" title="Switch font typography">
+        <option value="sans">Modern Sans</option>
+        <option value="serif">Classic Serif</option>
+        <option value="mono">Technical Mono</option>
+      </select>
+
+      <!-- Reading Width Switcher -->
+      <select id="widthSelect" class="tool-btn" style="cursor:pointer;" title="Adjust reading column width">
+        <option value="reading">Column: Reading (760px)</option>
+        <option value="standard" selected>Column: Standard (900px)</option>
+        <option value="wide">Column: Wide (1180px)</option>
+        <option value="full">Column: Full Width</option>
+      </select>
+
+      <!-- Theme Selector -->
+      <div class="theme-selector" title="Choose color theme">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <!-- Architecture Guides Button -->
+      <button class="tool-btn" id="headerGalleryBtn" title="Explore all 9 visual architecture guides (Press 'A')">
+        <span>🏛️</span>
+        <span>Architecture Guides</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">A</kbd>
+      </button>
+
+      <!-- Search Trigger -->
+      <button class="tool-btn" id="searchTrigger" title="Search all 8 documents (Press '/')">
+        <span>🔍</span>
+        <span>Search</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">/</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Main Layout -->
+  <div class="app-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-left" id="sidebarLeft">
+      <div class="sidebar-search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="sidebarFilterInput" class="search-input" placeholder="Filter batches...">
+      </div>
+
+      <nav class="sidebar-docs-list" id="sidebarDocsList">
+        
+    <a href="#batch-00" class="doc-nav-item active" data-id="batch-00">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 00</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Pin &amp; Method</div>
+      <div class="doc-nav-meta">
+        <span>2,492 words</span>
+        <span>•</span>
+        <span>12 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-01" class="doc-nav-item " data-id="batch-01">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 01</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Platform Overview</div>
+      <div class="doc-nav-meta">
+        <span>2,935 words</span>
+        <span>•</span>
+        <span>15 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-02" class="doc-nav-item " data-id="batch-02">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 02</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Aissistant (P1)</div>
+      <div class="doc-nav-meta">
+        <span>3,771 words</span>
+        <span>•</span>
+        <span>19 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-03" class="doc-nav-item " data-id="batch-03">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 03</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Workspace (P2)</div>
+      <div class="doc-nav-meta">
+        <span>3,192 words</span>
+        <span>•</span>
+        <span>16 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-04" class="doc-nav-item " data-id="batch-04">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 04</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Automations (P3)</div>
+      <div class="doc-nav-meta">
+        <span>3,045 words</span>
+        <span>•</span>
+        <span>15 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-05" class="doc-nav-item " data-id="batch-05">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 05</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Widgets &amp; Frontend</div>
+      <div class="doc-nav-meta">
+        <span>5,259 words</span>
+        <span>•</span>
+        <span>26 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-06" class="doc-nav-item " data-id="batch-06">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 06</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Out-of-Pole (PZ)</div>
+      <div class="doc-nav-meta">
+        <span>5,134 words</span>
+        <span>•</span>
+        <span>26 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-07" class="doc-nav-item " data-id="batch-07">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 07</span>
+        <span class="doc-nav-badge badge-complete">COMPLETE</span>
+      </div>
+      <div class="doc-nav-title">The Synthesis</div>
+      <div class="doc-nav-meta">
+        <span>4,195 words</span>
+        <span>•</span>
+        <span>21 min</span>
+      </div>
+    </a>
+  
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>8 Batches • 79 Findings</span>
+        <span>Three-Pole Frame</span>
+      </div>
+    </aside>
+
+    <!-- Workspace Main Reader -->
+    <main class="reader-workspace">
+      <!-- Sub-header bar inside reader -->
+      <div class="reader-sub-header">
+        <div class="sub-header-left">
+          <span style="font-weight: 700; color: var(--primary);">Document View:</span>
+          <div class="view-toggle-wrap">
+            <button class="view-toggle-btn active" id="viewRenderedBtn">Rendered Reading View</button>
+            <button class="view-toggle-btn" id="viewRawBtn">Verbatim Raw Markdown</button>
+          </div>
+        </div>
+
+        <div class="sub-header-right">
+          <button class="tool-btn" id="readerGalleryBtn" style="font-size:0.75rem; padding: 0.25rem 0.6rem;" title="Explore all architecture guides">
+            <span>🏛️ Architecture Explorer</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrolling Reader Canvas -->
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <!-- Document Seal & Metadata Card -->
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • ZERO CONTENT OMITTED</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">OpenRig Extract Pin</span>
+              </div>
+              <div class="seal-stats-grid" id="docSealStats">
+                
+    <div class="seal-stat-item">
+      <span class="stat-label">Document Status</span>
+      <span class="stat-value" style="color: #d97706">DONE</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Text Fidelity</span>
+      <span class="stat-value" style="color: #059669;">100% UNABRIDGED</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Word Count</span>
+      <span class="stat-value">2,492</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Est. Reading Time</span>
+      <span class="stat-value">12 min</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Source Lines</span>
+      <span class="stat-value">265</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Verified Date</span>
+      <span class="stat-value">2026-10-16</span>
+    </div>
+  
+              </div>
+            </div>
+
+            <!-- Explanatory Graphical Representation Section -->
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Document Default Architecture Guide</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <button type="button" class="tool-btn" id="openGalleryBtn" title="Explore all 9 visual architecture guides">
+                    <span>🏛️ All Guides</span>
+                  </button>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>OpenRig Platform Study Topology: a local cockpit with no tenant, and the study's most transferable gate</h4>
+    <p>Where each studied mechanism lands, and the two measured zeros that define the platform</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 470" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-master" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <text x="40" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--diagram-accent, #7c3aed)">OpenRig 0.6.10 — A LOCAL DAEMON + CLI + TUI + MCP SERVER</text>
+      <text x="40" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">One SQLite file at $OPENRIG_HOME/openrig.sqlite · daemon port 7433 · Apache-2.0 · TypeScript monorepo (4 packages)</text>
+
+      <g transform="translate(40, 72)">
+        <rect width="280" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P1 — THE AISSISTANT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">An agent is NOT OpenRig’s</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Unmodified Claude Code / Codex in tmux</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">YAML blueprint + a seat address</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">★ THE PERMISSION SEAM</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the two-surface rule</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">5 built-ins (+ a translating skill)</text>
+      </g>
+
+      <g transform="translate(340, 72)">
+        <rect width="280" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P2 — THE WORKSPACE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A rig = nodes + typed edges</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A workspace = root + named repos</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A durable queue of work</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">★ NO TENANCY AT ALL</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">0 tenant_id in 105 migrations</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">boundary = loopback / Tailscale</text>
+      </g>
+
+      <g transform="translate(640, 72)">
+        <rect width="280" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">P3 — AUTOMATIONS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A queue of obligations</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Hot-potato closure contract</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">done → one of 7 closure reasons</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">★ THE WAKE LADDER</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">obligation exactly-once</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">wake at-least-once</text>
+      </g>
+
+      <path d="M 180 222 L 180 258" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-master)"/>
+      <path d="M 480 222 L 480 258" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-master)"/>
+      <path d="M 780 222 L 780 258" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-master)"/>
+
+      <g transform="translate(40, 262)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">PX — WIDGETS & FRONTEND</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">TWO frontends, neither composable</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">TUI: 191 files / 29,473 lines / 0 .tsx</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">UI: 538 files / 88,829 lines (maintenance)</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">★ NO WIDGET MODEL (6th)</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">★ the digital-twin harness</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">stripAnsi invariant (11 tests)</text>
+      </g>
+
+      <g transform="translate(340, 262)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">PZ — THE GATE CULTURE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">4 guard scripts, each with a test</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The gate lane: refuse, not queue</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">★ THE 4-RAIL EXCLUSION LEDGER</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">green carries the load it ran under</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the completed self-destruct</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">the study’s most transferable PZ</text>
+      </g>
+
+      <g transform="translate(640, 262)">
+        <rect width="280" height="132" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">RULE 10 — RETIREMENT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">★ Self-expiring bridge + tombstone</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">★ a test asserts it stays deleted</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">BUT: rigged → openrig residue</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">284 RIGGED_* / 85 files / 22 names</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">docs document only 5</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">done for one, failed at scale</text>
+      </g>
+
+      <rect x="340" y="412" width="280" height="44" rx="8" fill="var(--surface-card, #ffffff)" stroke="#ef4444" stroke-width="1.4"/>
+      <text x="480" y="432" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#ef4444">TWO MEASURED ZEROS</text>
+      <text x="480" y="448" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no tenancy · no widget model — the strongest argument to build both</text>
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 VISUAL GUIDE</div>
+    <h4>The pin, the extraction, and the name that confuses every reader</h4>
+    <p>How the extract was pinned, where it lived, and the RIGGED rename hazard</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 1: THE EXTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">An extract, not a clone</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No .git — identity is the ZIP</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">4,147 entries / 3,685 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">md5 d9c56a29… pinned</text>
+      </g>
+      <path d="M 220 80 L 258 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 2: EXTRACTION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MAX_PATH: max 140 chars</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no limit hit on Windows</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3,685 of 3,685 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">0 missing, 0 extra</text>
+      </g>
+      <path d="M 462 80 L 500 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(504, 20)">
+        <rect width="396" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 3: THE RENAME HAZARD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The product was formerly called “rigged”</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">284 occurrences of RIGGED_* across 85 files</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#ef4444">22 distinct names — but the docs document only 5</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">the residue was never cleaned (the same class as buzz)</text>
+      </g>
+
+      <rect x="20" y="160" width="880" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+      <text x="40" y="188" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE STUDIO PIN</text>
+      <text x="40" y="212" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Zip md5 d9c56a297910cbc9055aa39014adf788 · 462 dirs + 3,685 files = 4,147 entries</text>
+      <text x="40" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Declared version 0.6.10 — while the README’s install tag still says v0.6.8 (a prose lag)</text>
+      <text x="40" y="252" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ARCHITECTURE.md’s count reconciliation: 94 → 105 migrations; 67 → 69 routes; 87 commands HOLDS; 18 MCP tools HOLDS</text>
+      <text x="40" y="278" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#059669">THE COUNT-COROLLARY: a count of a CLOSED surface holds. A count of an OPEN one drifts.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <!-- 100% Unabridged Rendered Markdown Body -->
+            <article class="markdown-body" id="renderedContent">
+              <h1 id="openrig-study-batch-00-the-pin-the-method-and-what-this-study-is">OpenRig Study — Batch 00: the pin, the method, and what this study is<a href="#batch-00/openrig-study-batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-16
+<strong>This is a clean forensic study</strong>, run the same way as <code>hermes-forensics/</code>,
+<code>paperclip-forensics/</code>, <code>crewai-forensics/</code>, <code>multica-forensics/</code>, <code>gastown-forensics/</code>,
+<code>n8n-forensics/</code> and <code>buzz-forensics/</code>. It reads ONE source tree, measures it, and verifies
+every load-bearing claim against the source code. <strong>Nothing from any earlier study is reused,
+referenced, or assumed</strong> — OpenRig is read on its own terms.</p>
+<p><strong>Why this platform is eighth.</strong> The owner&#39;s ruling was <em>&quot;one platform at a time&quot;</em>: Hermes,
+Paperclip, CrewAI, Multica, Gas Town, n8n and buzz are closed. The owner&#39;s own
+<code>platforms/references.md</code> names the remaining four in order — <strong>buzz, openrig, mattermost,
+zulip</strong> — and the workshop README lists them the same way. buzz is done; <strong>OpenRig is eighth</strong>.</p>
+<p>OpenRig is the second platform in this study that is <strong>not primarily a workflow tool or a
+workspace product</strong> (buzz was the first). It is an <strong>orchestration substrate for other
+people&#39;s coding agents</strong>: it does not implement an agent, it <em>wraps</em> existing ones — Claude
+Code and Codex — in a team with a shared daemon, a queue, a terminal UI and an MCP server.
+Seven platforms have now been measured against the three poles; <strong>OpenRig is the first whose
+stated premise is that the agents are unmodified and the product is only the coordination
+around them.</strong></p>
+<p><strong>The owner&#39;s directive carried into this study</strong> (from the n8n and buzz briefs, still in
+force): identify what fits the vision <strong>and</strong> what could be <em>taken further</em>. Per the method,
+the batches stay comparison-free — the &quot;take it further&quot; notes are <strong>observations</strong> in the
+synthesis, and the decisions stay the owner&#39;s at the mapping pass.</p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is:</strong> <code>library/architecture/platforms/_extracted/openrig-main/</code> —
+extracted from <code>library/architecture/platforms/openrig-main.zip</code>, which came from
+<code>https://github.com/mvschwarz/openrig</code>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/mvschwarz/openrig</code> (<code>main</code>)</td>
+<td>the owner&#39;s <code>platforms/references.md</code></td>
+</tr>
+<tr>
+<td><strong>Zip md5</strong></td>
+<td><strong><code>d9c56a297910cbc9055aa39014adf788</code></strong></td>
+<td><code>hashlib.md5</code></td>
+</tr>
+<tr>
+<td>Zip</td>
+<td><code>platforms/openrig-main.zip</code> — <strong>13,486,627 B</strong> (12.9 MB)</td>
+<td><code>ls -la</code></td>
+</tr>
+<tr>
+<td>Zip entries</td>
+<td><strong>4,147 = 462 directories + 3,685 files</strong></td>
+<td><code>zipfile.namelist()</code></td>
+</tr>
+<tr>
+<td>Uncompressed (on disk)</td>
+<td><strong>39,195,875 B</strong> (37.4 MB)</td>
+<td><code>du -sb</code> over the extract</td>
+</tr>
+<tr>
+<td><strong>Extraction</strong></td>
+<td><code>platforms/_extracted/openrig-main/</code> — <strong>verified exact: 3,685 of 3,685 files, 0 missing, 0 extra</strong></td>
+<td>a Python set-diff of the zip&#39;s namelist against the disk</td>
+</tr>
+<tr>
+<td><strong>MAX_PATH check</strong></td>
+<td><strong>max path = 140 characters</strong> — no limit hit</td>
+<td><code>max(len(x) for x in namelist)</code></td>
+</tr>
+<tr>
+<td><strong><code>.git</code> present?</strong></td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td><strong>Declared version</strong></td>
+<td><strong><code>0.6.10</code></strong> (the top <code>##</code> heading of <code>CHANGELOG.md</code>, and <code>package.json</code>&#39;s <code>&quot;version&quot;</code>)</td>
+<td><code>CHANGELOG.md:16</code>, <code>package.json:3</code></td>
+</tr>
+<tr>
+<td>Product one-liner</td>
+<td><em>&quot;A harness wraps a model. A rig wraps your harnesses. Define your agent team in YAML, boot it with one command.&quot;</em></td>
+<td><code>README.md:5</code></td>
+</tr>
+<tr>
+<td>Architecture one-liner</td>
+<td><em>&quot;OpenRig runs a team of coding agents on your machine as one system.&quot;</em></td>
+<td><code>ARCHITECTURE.md:11</code></td>
+</tr>
+<tr>
+<td>Toolchain</td>
+<td><strong>Node.js <code>^22 || ^24</code></strong> (<code>package.json</code> <code>engines</code>) · TS 5.x, ESM, npm workspaces · tmux required · macOS/Linux (Windows only via WSL2)</td>
+<td><code>package.json</code>, <code>README.md:426</code></td>
+</tr>
+<tr>
+<td>Licence</td>
+<td><strong>Apache-2.0</strong> (no gate, no open-core split observed)</td>
+<td><code>LICENSE</code>, <code>package.json:4</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-identity-limit-stated-not-glossed">1.1 The identity limit (stated, not glossed)<a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree. What <em>is</em>
+readable is the <strong>latest changelog release heading — <code>0.6.10</code></strong> — and <code>package.json</code>&#39;s
+<code>&quot;version&quot;: &quot;0.6.10&quot;</code>, which agree. The CHANGELOG is <strong>agent-readable by design</strong> (its own
+opening line says so) and carries <strong>4,132 lines</strong> of release history back to <code>0.5.0</code>.
+<strong>Any claim here about &quot;the latest OpenRig&quot; is a claim about this extract, at <code>0.6.10</code>.</strong></p>
+<p><strong>⚠️ The one version trap in this tree.</strong> <code>README.md</code>&#39;s copy-paste install commands pin the
+<strong><code>v0.6.8</code></strong> release in their raw-GitHub URLs (<code>README.md:25</code>, <code>:28</code>) while the tree declares
+<code>0.6.10</code>. This is a <strong>documentation lag, not a code disagreement</strong> — the README is a live
+document whose install script hardcodes a release tag. A later reader must not read
+<code>v0.6.8</code> as the study&#39;s pin. <strong>The pin is <code>0.6.10</code>; <code>v0.6.8</code> is a stale install reference.</strong></p>
+<h3 id="1-2-the-rename-hazard-and-it-is-bigger-than-buzz-s-a-pin-finding">1.2 The rename hazard — and it is bigger than buzz's (a pin finding)<a href="#batch-00/1-2-the-rename-hazard-and-it-is-bigger-than-buzz-s-a-pin-finding" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A naming hazard a later reader must be told, because it will confuse them.</strong> The product is
+called <strong>OpenRig</strong>, the CLI is <strong><code>rig</code></strong>, and the state directory is <strong><code>~/.openrig</code></strong> — but the
+code is full of a <strong>fourth name: <code>RIGGED</code>.</strong></p>
+<ul>
+<li>The <strong>legacy environment prefix is <code>RIGGED_*</code></strong> — <strong>284 occurrences across 85 files</strong>, in
+<strong>22 distinct names</strong> (measured). The heaviest are <strong><code>RIGGED_URL</code> (66)</strong>,
+<strong><code>RIGGED_HOME</code> (66)</strong> and <strong><code>RIGGED_SESSION_NAME</code> (66)</strong>.</li>
+<li>There is a <strong>legacy managed-block marker</strong> in <code>conflict-detector.ts:98-99</code>:
+<code>&lt;!-- BEGIN RIGGED MANAGED BLOCK: … --&gt;</code> / <code>&lt;!-- END RIGGED MANAGED BLOCK: … --&gt;</code>.</li>
+<li>The <strong>current</strong> prefix is <code>OPENRIG_*</code> — <strong>186 distinct names</strong> (measured) — so the two
+families coexist in the same files. <code>RIGGED_HOME</code> sits beside <code>OPENRIG_HOME</code>; <code>RIGGED_PORT</code>
+beside <code>OPENRIG_PORT</code> (<code>index.ts:247</code> reads <code>OPENRIG_PORT</code> with a <code>RIGGED_PORT</code> fallback).</li>
+</ul>
+<p><strong>The rename is documented, and the documentation is what ages.</strong> <code>CHANGELOG.md:4054</code> records
+it under <strong>0.3.0</strong>: <em>&quot;Original runtime environment aliases keep deprecated <code>RIGGED_*</code> fallbacks
+for compatibility; newer typed settings use <code>OPENRIG_*</code> only.&quot;</em> And the 0.3.0 release notes
+(<code>docs/releases/v0.3.0.md:86</code>) narrow it: <em>&quot;Deprecated <code>RIGGED_*</code> aliases remain <strong>only for the
+original runtime env keys</strong>: <code>daemon.port</code>, <code>daemon.host</code>, <code>db.path</code>, <code>transcripts.enabled</code>,
+and <code>transcripts.path</code>.&quot;</em></p>
+<blockquote>
+<p><strong>The divergence (rule 1).</strong> The release note says the legacy aliases are <strong>five</strong> documented
+runtime keys. The disk has <strong>22 distinct <code>RIGGED_*</code> names</strong>, and the <strong>top three by count
+(<code>RIGGED_SESSION_NAME</code>, <code>RIGGED_URL</code>, <code>RIGGED_HOME</code> — 66 each) are not among the five.</strong> They
+are <em>runtime-injection</em> variables (identity and endpoint handed to a seat), not the five
+config-translation aliases the note lists. So the true legacy surface is <strong>wider than the
+document that describes it</strong> — measured, not asserted. <em>(To be re-examined in batch 02,
+where the seat environment is read.)</em></p>
+</blockquote>
+<p><strong>Compare to buzz, one platform earlier.</strong> buzz&#39;s rename (<code>sprout</code>/<code>sprig</code>) left <strong>~4
+file-level residues</strong> and was <em>not</em> documented as a rename. OpenRig&#39;s is <strong>284 occurrences
+across 85 files</strong>, <em>is</em> documented, and is <em>deliberately</em> kept as a compatibility shim. <strong>The
+lesson is the same but the shape differs: an undocumented rename leaks silently; a documented
+rename leaks on a schedule — the day someone deletes the shim the doc still promises.</strong> This
+is the study&#39;s first measured rename; it is recorded here so no batch mistakes <code>RIGGED</code> for a
+second product.</p>
+<h3 id="1-3-where-the-extract-lives">1.3 Where the extract lives<a href="#batch-00/1-3-where-the-extract-lives" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Unlike n8n (which had to be extracted to <code>C:\n8n</code> because its longest paths exceeded Windows&#39;
+260-char <code>MAX_PATH</code>), <strong>OpenRig extracted cleanly into the conventional location</strong>
+<code>platforms/_extracted/openrig-main</code>. The measured reason: <strong>OpenRig&#39;s longest path is 140
+characters</strong> — far under the limit. <strong>The conventional location is correct for this study;
+nothing special is required to reproduce it.</strong></p>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-this-tree-is-code-a-typescript-monorepo">2.1 This tree is CODE — a TypeScript monorepo<a href="#batch-00/2-1-this-tree-is-code-a-typescript-monorepo" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th align="right">Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Total files (no <code>node_modules</code> in tree)</td>
+<td align="right"><strong>3,685</strong></td>
+<td>equals the zip file count; <code>.gitignore</code>d deps absent from the published archive</td>
+</tr>
+<tr>
+<td><code>.ts</code> files</td>
+<td align="right"><strong>2,585</strong></td>
+<td><code>find -name &#39;*.ts&#39;</code></td>
+</tr>
+<tr>
+<td><code>.tsx</code> files</td>
+<td align="right"><strong>348</strong></td>
+<td><code>find -name &#39;*.tsx&#39;</code></td>
+</tr>
+<tr>
+<td><code>.ts</code> + <code>.tsx</code> total lines</td>
+<td align="right"><strong>43,410</strong></td>
+<td><code>find … | xargs wc -l | tail -1</code></td>
+</tr>
+<tr>
+<td><code>.md</code> files</td>
+<td align="right"><strong>377</strong></td>
+<td><code>find -name &#39;*.md&#39;</code></td>
+</tr>
+<tr>
+<td><code>.yaml</code> / <code>.yml</code> files</td>
+<td align="right"><strong>124 / 5</strong></td>
+<td><code>find</code></td>
+</tr>
+<tr>
+<td><code>.mjs</code> files</td>
+<td align="right"><strong>93</strong></td>
+<td><code>find</code> (build + test scripts)</td>
+</tr>
+<tr>
+<td><code>.sh</code> files</td>
+<td align="right"><strong>17</strong></td>
+<td><code>find</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>The package split (npm workspaces):</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Package</th>
+<th align="right">Files (<code>.ts</code>/<code>.tsx</code>)</th>
+<th align="right">Lines</th>
+<th>Ships?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>packages/daemon</code></td>
+<td align="right">1,748</td>
+<td align="right">40,441</td>
+<td><strong>private</strong> — copied into the CLI</td>
+</tr>
+<tr>
+<td><code>packages/cli</code></td>
+<td align="right">468</td>
+<td align="right">39,451</td>
+<td><strong>the only published package</strong> (<code>@openrig/cli</code>)</td>
+</tr>
+<tr>
+<td><code>packages/ui</code></td>
+<td align="right">523</td>
+<td align="right">43,030</td>
+<td><strong>private, maintenance mode</strong> — built files copied into the CLI</td>
+</tr>
+<tr>
+<td><code>packages/tui</code></td>
+<td align="right">185</td>
+<td align="right">29,473</td>
+<td><strong>private</strong> — copied into the CLI</td>
+</tr>
+<tr>
+<td><code>packages/test-system</code></td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td>not an npm workspace; scenario library</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>The packaging fact that matters.</strong> <code>packages/cli</code> is the <em>only</em> package published to npm
+(<code>rawMarkdown</code> → <code>ARCHITECTURE.md:24</code>). The daemon, TUI and UI are <strong>copied into</strong> it at
+package time by <code>scripts/build-package.sh</code>. So what a user installs with
+<code>npm install -g @openrig/cli</code> contains four packages&#39; worth of code under one name.</p>
+</blockquote>
+<h3 id="2-2-the-architecture-in-one-measured-picture">2.2 The architecture, in one measured picture<a href="#batch-00/2-2-the-architecture-in-one-measured-picture" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>From <code>ARCHITECTURE.md:44-59</code> (a doc claim, verified against <code>server.ts</code> and <code>routes/</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>  rig (CLI)            TUI            MCP server (rig mcp serve, stdio)
+       \                |                /
+        +---- HTTP to the daemon (port 7433 by default) --------------+
+                                |
+  packages/daemon/src/server.ts   createApp(): context middleware, /healthz, app.route(&quot;/api/…&quot;)
+                                |
+  packages/daemon/src/routes/     one Hono router per area
+                                |
+  packages/daemon/src/domain/     services, repositories, orchestrators, event bus
+              /                 |                  \
+     SQLite (db/)       tmux (adapters/tmux.ts)    runtime adapters (adapters/*-adapter.ts)
+                                                     claude-code, codex, pi, omp, terminal, stub
+</code></pre>
+</div>
+<ul>
+<li><strong>State</strong> lives in <code>$OPENRIG_HOME</code> (default <code>~/.openrig</code>), database <code>openrig.sqlite</code>.</li>
+<li><strong>The daemon default port is 7433.</strong> The three clients (CLI, TUI, MCP) all talk to it over
+local HTTP; the TUI also subscribes to <code>/api/activity/events</code> (SSE).</li>
+<li><strong>The runtime adapters are the boundary to the outside world.</strong> Six of them:
+<code>claude-code</code>, <code>codex</code>, <code>pi</code>, <code>omp</code> (OMP extends Pi), <code>terminal</code>, <code>stub</code> (the test double).</li>
+</ul>
+<h3 id="2-3-the-self-declared-counts-and-where-the-doc-has-aged-rule-1-in-the-pin">2.3 The self-declared counts, and where the doc has aged (rule 1, in the pin)<a href="#batch-00/2-3-the-self-declared-counts-and-where-the-doc-has-aged-rule-1-in-the-pin" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md</code> is unusually honest: it opens <em>&quot;This map is not the territory… Where it
+disagrees with the code, the code is right&quot;</em> (<code>ARCHITECTURE.md:3-4</code>) and <strong>pins every count to
+commit <code>c750304f</code> (0.6.6 development)</strong> (<code>:6</code>). The tree is <code>0.6.10</code>. So the doc&#39;s counts are
+<strong>three releases old by construction</strong>. Measured against the disk:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>What</th>
+<th align="right"><code>ARCHITECTURE.md</code> says (at <code>c750304f</code>, 0.6.6)</th>
+<th align="right"><strong>On disk (0.6.10)</strong></th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Database migrations</td>
+<td align="right"><strong>94</strong> files (latest <code>095_…</code>; &quot;there is no 093&quot;)</td>
+<td align="right"><strong>105</strong> files (latest <strong><code>109_mode_posture_coexist.ts</code></strong>)</td>
+<td><strong>DIVERGED — doc aged</strong></td>
+</tr>
+<tr>
+<td>Files in <code>routes/</code></td>
+<td align="right">67</td>
+<td align="right"><strong>69</strong></td>
+<td><strong>DIVERGED — doc aged</strong></td>
+</tr>
+<tr>
+<td>… of which create a Hono router</td>
+<td align="right">65</td>
+<td align="right"><em>(to verify in batch 01)</em></td>
+<td>pending</td>
+</tr>
+<tr>
+<td><code>app.route(...)</code> mounts in <code>server.ts</code></td>
+<td align="right">69</td>
+<td align="right"><em>(to verify in batch 01)</em></td>
+<td>pending</td>
+</tr>
+<tr>
+<td>Top-level <code>rig</code> commands</td>
+<td align="right"><strong>87</strong></td>
+<td align="right"><strong>87</strong></td>
+<td><strong>HOLDS</strong></td>
+</tr>
+<tr>
+<td>Runtime adapters</td>
+<td align="right">6 (command counts 5 because OMP extends Pi)</td>
+<td align="right">6 names present</td>
+<td><strong>HOLDS (naming)</strong></td>
+</tr>
+<tr>
+<td>MCP tools</td>
+<td align="right"><strong>18</strong></td>
+<td align="right"><strong>18</strong></td>
+<td><strong>HOLDS</strong></td>
+</tr>
+<tr>
+<td>Daemon <code>exports</code> subpaths</td>
+<td align="right">21</td>
+<td align="right"><em>(to verify in batch 01)</em></td>
+<td>pending</td>
+</tr>
+<tr>
+<td>Library scenarios</td>
+<td align="right">15</td>
+<td align="right"><em>(to verify in batch 04)</em></td>
+<td>pending</td>
+</tr>
+</tbody></table></div>
+<p><strong>The migration gap is the pin&#39;s first sharp finding.</strong> The doc says <em>&quot;there is no 093&quot;</em> —
+<strong>true</strong>: 093 is absent. But the disk has <strong>four</strong> absent numbers, not one:</p>
+<blockquote>
+<p>migrations run <strong>001 → 109</strong>, <strong>105 files present</strong>, and the missing numbers are
+<strong>093, 100, 102, 106</strong> <em>(measured: <code>range 1–109, count 105, missing [93, 100, 102, 106]</code>)</em>.</p>
+</blockquote>
+<p>The doc&#39;s single named gap aged into a four-gap reality, and the doc&#39;s <em>latest</em> number (095)
+is <strong>14 migrations behind</strong> the disk (109). <strong>The doc is a true snapshot of 0.6.6, not a
+false claim about 0.6.10</strong> — which is exactly why the method pins to code.</p>
+<h3 id="2-4-the-documentation-surface">2.4 The documentation surface<a href="#batch-00/2-4-the-documentation-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Path</th>
+<th align="right">Files</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>docs/reference/</code></td>
+<td align="right">(of 141 total under <code>docs/</code>)</td>
+<td>user + operator reference; <strong>ships inside the npm package</strong></td>
+</tr>
+<tr>
+<td><code>docs/as-built/</code></td>
+<td align="right"><strong>10</strong></td>
+<td>module-by-module system description; <strong>being re-verified for 0.6.6</strong>; each page carries a <code>last-verified-against-source</code> commit in frontmatter</td>
+</tr>
+<tr>
+<td><code>docs/releases/</code></td>
+<td align="right"></td>
+<td>per-release notes</td>
+</tr>
+<tr>
+<td><code>docs/DESIGN.md</code></td>
+<td align="right">1</td>
+<td>the only other git-tracked doc at <code>docs/</code> root (a <strong>docs guard</strong> enforces this — see below)</td>
+</tr>
+<tr>
+<td><code>skills/</code></td>
+<td align="right"><code>_canonical/</code>, <code>rigs/</code></td>
+<td>shipped agent skills; three mirrored &quot;edges&quot; (spec / plugin / canonical)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The docs guard is a real mechanism, not a convention</strong> (<code>scripts/check-docs-guard.mjs</code>,
+<code>ARCHITECTURE.md:288</code>): under <code>docs/</code>, git may track <strong>only</strong> <code>docs/as-built/</code>,
+<code>docs/reference/</code>, <code>docs/releases/</code> and exactly <code>docs/DESIGN.md</code>; <code>.gitignore</code> ignores the
+rest. This is the study&#39;s first sighting of <strong>a repository whose documentation tree is
+enforced by a test</strong> — to be examined properly in batch 06.</p>
+<hr>
+<h2 id="3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop">3. The three poles — the frame for every batch (carried from the workshop)<a href="#batch-00/3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>What it is</th>
+<th>Where this study looks</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1 — The aissistant</strong></td>
+<td>the AI user: a versatile, integratable, rich-featured agent</td>
+<td><strong>batch 02</strong> — the runtime adapters, AgentSpec, seats, skills, permissions</td>
+</tr>
+<tr>
+<td><strong>P2 — The workspace</strong></td>
+<td>the container a person operates in</td>
+<td><strong>batch 03</strong> — rigs, pods, projects, the queue, the daemon&#39;s tenancy story</td>
+</tr>
+<tr>
+<td><strong>P3 — Automations</strong></td>
+<td>where agents work on and assign tasks</td>
+<td><strong>batch 04</strong> — the queue, message delivery, the scenario harness, continuity/restore</td>
+</tr>
+<tr>
+<td><strong>PX-W — Widgets</strong></td>
+<td>the composition surface</td>
+<td><strong>batch 05</strong></td>
+</tr>
+<tr>
+<td><strong>PX-F — Frontend wiring</strong></td>
+<td>how the surfaces are assembled</td>
+<td><strong>batch 05</strong></td>
+</tr>
+<tr>
+<td><strong>PZ — the escape hatch</strong></td>
+<td>the out-of-pole mechanisms worth stealing</td>
+<td><strong>batch 06</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Every finding is tagged with its pole</strong> so the later mapping step is a per-pole join.</p>
+<h2 id="4-the-method-inherited-binding">4. The method (inherited, binding)<a href="#batch-00/4-the-method-inherited-binding" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ol>
+<li><strong>Docs are claims; code is the authority.</strong> Where they disagree, the code wins and the
+disagreement is recorded. <em>(Already productive: §2.3.)</em></li>
+<li><strong>Every number is measured</strong> at the time of writing.</li>
+<li><strong>Claims carry their evidence</strong> (<code>file:line</code>).</li>
+<li><strong>Two value questions per capability</strong> — Q1 user value, Q2 vision value.</li>
+<li><strong>No comparison to our own platform inside a batch</strong> — that is the mapping step.</li>
+<li><strong>Every capability is named</strong>, including ones we will not use.</li>
+<li><strong>Findings are additive</strong>, never overwritten.</li>
+<li><strong>Plain words</strong> — a one-sentence gloss before any detail.</li>
+<li><strong>Every finding is tagged with its pole</strong> (P1/P2/P3/PX-W/PX-F/PZ).</li>
+<li><strong>The retirement rule</strong> — before reusing any setting from an older document, search that
+platform&#39;s migrations/config for a retirement entry (a silently-removed feature is the
+most valuable finding).</li>
+</ol>
+<h2 id="5-the-batch-plan-7-batches-this-pin">5. The batch plan (7 batches + this pin)<a href="#batch-00/5-the-batch-plan-7-batches-this-pin" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>File</th>
+<th>Question</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>00</strong></td>
+<td>this file</td>
+<td>The pin, the method, and what this study is</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><code>findings/01-platform-overview.md</code></td>
+<td>What IS OpenRig — the daemon/CLI/TUI/MCP shape, the crate map, the counts reconciled</td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td><code>findings/02-the-aissistant.md</code></td>
+<td><strong>P1</strong> — the runtime adapters, AgentSpec, seats, skills, permission modes, YOLO</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td><code>findings/03-the-workspace.md</code></td>
+<td><strong>P2</strong> — RigSpec, pods, projects, the queue, state, and the <strong>tenancy</strong> question</td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td><code>findings/04-automations.md</code></td>
+<td><strong>P3</strong> — the queue as the at-least-once baton, message delivery, continuity, restore</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td><code>findings/05-widgets-and-frontend.md</code></td>
+<td><strong>PX-W / PX-F</strong> — the TUI topology views, the UI in maintenance mode, context packs</td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td><code>findings/06-out-of-pole.md</code></td>
+<td><strong>PZ</strong> — the guards, the scenario harness, the bundle integrity, the internal-leak scanner</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td><code>findings/07-synthesis.md</code></td>
+<td>The ranked mechanisms, the pole map, the decided limits, the verdict</td>
+</tr>
+</tbody></table></div>
+<p><strong>Reader:</strong> the OpenRig reader will be built from this markdown <strong>on port 3700</strong> (after
+Hermes 3000 · Paperclip 3100 · CrewAI 3200 · Multica 3300 · Gas Town 3400 · n8n 3500 · buzz
+3600), by copying the shared engine and rebranding it — never rewriting it.</p>
+<hr>
+<p><em>Batch 00 of 08 — the pin and the method. Next: <strong>batch 01, the platform overview.</strong></em></p>
+
+            </article>
+
+            <!-- Verbatim Raw Markdown Display (for transparency & verification) -->
+            <pre class="verbatim-raw-container" id="rawContentArea"># OpenRig Study — Batch 00: the pin, the method, and what this study is
+
+**Folder:** `library/architecture/openrig-forensics/` · **Status:** OPEN — begun 2026-10-16
+**This is a clean forensic study**, run the same way as `hermes-forensics/`,
+`paperclip-forensics/`, `crewai-forensics/`, `multica-forensics/`, `gastown-forensics/`,
+`n8n-forensics/` and `buzz-forensics/`. It reads ONE source tree, measures it, and verifies
+every load-bearing claim against the source code. **Nothing from any earlier study is reused,
+referenced, or assumed** — OpenRig is read on its own terms.
+
+**Why this platform is eighth.** The owner&#039;s ruling was *&quot;one platform at a time&quot;*: Hermes,
+Paperclip, CrewAI, Multica, Gas Town, n8n and buzz are closed. The owner&#039;s own
+`platforms/references.md` names the remaining four in order — **buzz, openrig, mattermost,
+zulip** — and the workshop README lists them the same way. buzz is done; **OpenRig is eighth**.
+
+OpenRig is the second platform in this study that is **not primarily a workflow tool or a
+workspace product** (buzz was the first). It is an **orchestration substrate for other
+people&#039;s coding agents**: it does not implement an agent, it *wraps* existing ones — Claude
+Code and Codex — in a team with a shared daemon, a queue, a terminal UI and an MCP server.
+Seven platforms have now been measured against the three poles; **OpenRig is the first whose
+stated premise is that the agents are unmodified and the product is only the coordination
+around them.**
+
+**The owner&#039;s directive carried into this study** (from the n8n and buzz briefs, still in
+force): identify what fits the vision **and** what could be *taken further*. Per the method,
+the batches stay comparison-free — the &quot;take it further&quot; notes are **observations** in the
+synthesis, and the decisions stay the owner&#039;s at the mapping pass.
+
+---
+
+## 1. THE PIN — task zero, answered by measurement
+
+**The source of this study is:** `library/architecture/platforms/_extracted/openrig-main/` —
+extracted from `library/architecture/platforms/openrig-main.zip`, which came from
+`https://github.com/mvschwarz/openrig`.
+
+| Fact | Value | How measured |
+|---|---|---|
+| Origin | `https://github.com/mvschwarz/openrig` (`main`) | the owner&#039;s `platforms/references.md` |
+| **Zip md5** | **`d9c56a297910cbc9055aa39014adf788`** | `hashlib.md5` |
+| Zip | `platforms/openrig-main.zip` — **13,486,627 B** (12.9 MB) | `ls -la` |
+| Zip entries | **4,147 = 462 directories + 3,685 files** | `zipfile.namelist()` |
+| Uncompressed (on disk) | **39,195,875 B** (37.4 MB) | `du -sb` over the extract |
+| **Extraction** | `platforms/_extracted/openrig-main/` — **verified exact: 3,685 of 3,685 files, 0 missing, 0 extra** | a Python set-diff of the zip&#039;s namelist against the disk |
+| **MAX_PATH check** | **max path = 140 characters** — no limit hit | `max(len(x) for x in namelist)` |
+| **`.git` present?** | **NO** — this is an extract, not a clone | `ls -d .git` → absent |
+| **Declared version** | **`0.6.10`** (the top `##` heading of `CHANGELOG.md`, and `package.json`&#039;s `&quot;version&quot;`) | `CHANGELOG.md:16`, `package.json:3` |
+| Product one-liner | *&quot;A harness wraps a model. A rig wraps your harnesses. Define your agent team in YAML, boot it with one command.&quot;* | `README.md:5` |
+| Architecture one-liner | *&quot;OpenRig runs a team of coding agents on your machine as one system.&quot;* | `ARCHITECTURE.md:11` |
+| Toolchain | **Node.js `^22 \|\| ^24`** (`package.json` `engines`) · TS 5.x, ESM, npm workspaces · tmux required · macOS/Linux (Windows only via WSL2) | `package.json`, `README.md:426` |
+| Licence | **Apache-2.0** (no gate, no open-core split observed) | `LICENSE`, `package.json:4` |
+
+### 1.1 The identity limit (stated, not glossed)
+
+There is **no `.git`**, so the exact upstream commit cannot be read from the tree. What *is*
+readable is the **latest changelog release heading — `0.6.10`** — and `package.json`&#039;s
+`&quot;version&quot;: &quot;0.6.10&quot;`, which agree. The CHANGELOG is **agent-readable by design** (its own
+opening line says so) and carries **4,132 lines** of release history back to `0.5.0`.
+**Any claim here about &quot;the latest OpenRig&quot; is a claim about this extract, at `0.6.10`.**
+
+**⚠️ The one version trap in this tree.** `README.md`&#039;s copy-paste install commands pin the
+**`v0.6.8`** release in their raw-GitHub URLs (`README.md:25`, `:28`) while the tree declares
+`0.6.10`. This is a **documentation lag, not a code disagreement** — the README is a live
+document whose install script hardcodes a release tag. A later reader must not read
+`v0.6.8` as the study&#039;s pin. **The pin is `0.6.10`; `v0.6.8` is a stale install reference.**
+
+### 1.2 The rename hazard — and it is bigger than buzz&#039;s (a pin finding)
+
+**A naming hazard a later reader must be told, because it will confuse them.** The product is
+called **OpenRig**, the CLI is **`rig`**, and the state directory is **`~/.openrig`** — but the
+code is full of a **fourth name: `RIGGED`.**
+
+- The **legacy environment prefix is `RIGGED_*`** — **284 occurrences across 85 files**, in
+  **22 distinct names** (measured). The heaviest are **`RIGGED_URL` (66)**,
+  **`RIGGED_HOME` (66)** and **`RIGGED_SESSION_NAME` (66)**.
+- There is a **legacy managed-block marker** in `conflict-detector.ts:98-99`:
+  `&lt;!-- BEGIN RIGGED MANAGED BLOCK: … --&gt;` / `&lt;!-- END RIGGED MANAGED BLOCK: … --&gt;`.
+- The **current** prefix is `OPENRIG_*` — **186 distinct names** (measured) — so the two
+  families coexist in the same files. `RIGGED_HOME` sits beside `OPENRIG_HOME`; `RIGGED_PORT`
+  beside `OPENRIG_PORT` (`index.ts:247` reads `OPENRIG_PORT` with a `RIGGED_PORT` fallback).
+
+**The rename is documented, and the documentation is what ages.** `CHANGELOG.md:4054` records
+it under **0.3.0**: *&quot;Original runtime environment aliases keep deprecated `RIGGED_*` fallbacks
+for compatibility; newer typed settings use `OPENRIG_*` only.&quot;* And the 0.3.0 release notes
+(`docs/releases/v0.3.0.md:86`) narrow it: *&quot;Deprecated `RIGGED_*` aliases remain **only for the
+original runtime env keys**: `daemon.port`, `daemon.host`, `db.path`, `transcripts.enabled`,
+and `transcripts.path`.&quot;*
+
+&gt; **The divergence (rule 1).** The release note says the legacy aliases are **five** documented
+&gt; runtime keys. The disk has **22 distinct `RIGGED_*` names**, and the **top three by count
+&gt; (`RIGGED_SESSION_NAME`, `RIGGED_URL`, `RIGGED_HOME` — 66 each) are not among the five.** They
+&gt; are *runtime-injection* variables (identity and endpoint handed to a seat), not the five
+&gt; config-translation aliases the note lists. So the true legacy surface is **wider than the
+&gt; document that describes it** — measured, not asserted. *(To be re-examined in batch 02,
+&gt; where the seat environment is read.)*
+
+**Compare to buzz, one platform earlier.** buzz&#039;s rename (`sprout`/`sprig`) left **~4
+file-level residues** and was *not* documented as a rename. OpenRig&#039;s is **284 occurrences
+across 85 files**, *is* documented, and is *deliberately* kept as a compatibility shim. **The
+lesson is the same but the shape differs: an undocumented rename leaks silently; a documented
+rename leaks on a schedule — the day someone deletes the shim the doc still promises.** This
+is the study&#039;s first measured rename; it is recorded here so no batch mistakes `RIGGED` for a
+second product.
+
+### 1.3 Where the extract lives
+
+Unlike n8n (which had to be extracted to `C:\n8n` because its longest paths exceeded Windows&#039;
+260-char `MAX_PATH`), **OpenRig extracted cleanly into the conventional location**
+`platforms/_extracted/openrig-main`. The measured reason: **OpenRig&#039;s longest path is 140
+characters** — far under the limit. **The conventional location is correct for this study;
+nothing special is required to reproduce it.**
+
+---
+
+## 2. What the tree contains (measured)
+
+### 2.1 This tree is CODE — a TypeScript monorepo
+
+| Measure | Value | How measured |
+|---|---:|---|
+| Total files (no `node_modules` in tree) | **3,685** | equals the zip file count; `.gitignore`d deps absent from the published archive |
+| `.ts` files | **2,585** | `find -name &#039;*.ts&#039;` |
+| `.tsx` files | **348** | `find -name &#039;*.tsx&#039;` |
+| `.ts` + `.tsx` total lines | **43,410** | `find … \| xargs wc -l \| tail -1` |
+| `.md` files | **377** | `find -name &#039;*.md&#039;` |
+| `.yaml` / `.yml` files | **124 / 5** | `find` |
+| `.mjs` files | **93** | `find` (build + test scripts) |
+| `.sh` files | **17** | `find` |
+
+**The package split (npm workspaces):**
+
+| Package | Files (`.ts`/`.tsx`) | Lines | Ships? |
+|---|---:|---:|---|
+| `packages/daemon` | 1,748 | 40,441 | **private** — copied into the CLI |
+| `packages/cli` | 468 | 39,451 | **the only published package** (`@openrig/cli`) |
+| `packages/ui` | 523 | 43,030 | **private, maintenance mode** — built files copied into the CLI |
+| `packages/tui` | 185 | 29,473 | **private** — copied into the CLI |
+| `packages/test-system` | 0 | 0 | not an npm workspace; scenario library |
+
+&gt; **The packaging fact that matters.** `packages/cli` is the *only* package published to npm
+&gt; (`rawMarkdown` → `ARCHITECTURE.md:24`). The daemon, TUI and UI are **copied into** it at
+&gt; package time by `scripts/build-package.sh`. So what a user installs with
+&gt; `npm install -g @openrig/cli` contains four packages&#039; worth of code under one name.
+
+### 2.2 The architecture, in one measured picture
+
+From `ARCHITECTURE.md:44-59` (a doc claim, verified against `server.ts` and `routes/`):
+
+```
+  rig (CLI)            TUI            MCP server (rig mcp serve, stdio)
+       \                |                /
+        +---- HTTP to the daemon (port 7433 by default) --------------+
+                                |
+  packages/daemon/src/server.ts   createApp(): context middleware, /healthz, app.route(&quot;/api/…&quot;)
+                                |
+  packages/daemon/src/routes/     one Hono router per area
+                                |
+  packages/daemon/src/domain/     services, repositories, orchestrators, event bus
+              /                 |                  \
+     SQLite (db/)       tmux (adapters/tmux.ts)    runtime adapters (adapters/*-adapter.ts)
+                                                     claude-code, codex, pi, omp, terminal, stub
+```
+
+- **State** lives in `$OPENRIG_HOME` (default `~/.openrig`), database `openrig.sqlite`.
+- **The daemon default port is 7433.** The three clients (CLI, TUI, MCP) all talk to it over
+  local HTTP; the TUI also subscribes to `/api/activity/events` (SSE).
+- **The runtime adapters are the boundary to the outside world.** Six of them:
+  `claude-code`, `codex`, `pi`, `omp` (OMP extends Pi), `terminal`, `stub` (the test double).
+
+### 2.3 The self-declared counts, and where the doc has aged (rule 1, in the pin)
+
+`ARCHITECTURE.md` is unusually honest: it opens *&quot;This map is not the territory… Where it
+disagrees with the code, the code is right&quot;* (`ARCHITECTURE.md:3-4`) and **pins every count to
+commit `c750304f` (0.6.6 development)** (`:6`). The tree is `0.6.10`. So the doc&#039;s counts are
+**three releases old by construction**. Measured against the disk:
+
+| What | `ARCHITECTURE.md` says (at `c750304f`, 0.6.6) | **On disk (0.6.10)** | Verdict |
+|---|---:|---:|---|
+| Database migrations | **94** files (latest `095_…`; &quot;there is no 093&quot;) | **105** files (latest **`109_mode_posture_coexist.ts`**) | **DIVERGED — doc aged** |
+| Files in `routes/` | 67 | **69** | **DIVERGED — doc aged** |
+| … of which create a Hono router | 65 | *(to verify in batch 01)* | pending |
+| `app.route(...)` mounts in `server.ts` | 69 | *(to verify in batch 01)* | pending |
+| Top-level `rig` commands | **87** | **87** | **HOLDS** |
+| Runtime adapters | 6 (command counts 5 because OMP extends Pi) | 6 names present | **HOLDS (naming)** |
+| MCP tools | **18** | **18** | **HOLDS** |
+| Daemon `exports` subpaths | 21 | *(to verify in batch 01)* | pending |
+| Library scenarios | 15 | *(to verify in batch 04)* | pending |
+
+**The migration gap is the pin&#039;s first sharp finding.** The doc says *&quot;there is no 093&quot;* —
+**true**: 093 is absent. But the disk has **four** absent numbers, not one:
+
+&gt; migrations run **001 → 109**, **105 files present**, and the missing numbers are
+&gt; **093, 100, 102, 106** *(measured: `range 1–109, count 105, missing [93, 100, 102, 106]`)*.
+
+The doc&#039;s single named gap aged into a four-gap reality, and the doc&#039;s *latest* number (095)
+is **14 migrations behind** the disk (109). **The doc is a true snapshot of 0.6.6, not a
+false claim about 0.6.10** — which is exactly why the method pins to code.
+
+### 2.4 The documentation surface
+
+| Path | Files | What it is |
+|---|---:|---|
+| `docs/reference/` | (of 141 total under `docs/`) | user + operator reference; **ships inside the npm package** |
+| `docs/as-built/` | **10** | module-by-module system description; **being re-verified for 0.6.6**; each page carries a `last-verified-against-source` commit in frontmatter |
+| `docs/releases/` | | per-release notes |
+| `docs/DESIGN.md` | 1 | the only other git-tracked doc at `docs/` root (a **docs guard** enforces this — see below) |
+| `skills/` | `_canonical/`, `rigs/` | shipped agent skills; three mirrored &quot;edges&quot; (spec / plugin / canonical) |
+
+**The docs guard is a real mechanism, not a convention** (`scripts/check-docs-guard.mjs`,
+`ARCHITECTURE.md:288`): under `docs/`, git may track **only** `docs/as-built/`,
+`docs/reference/`, `docs/releases/` and exactly `docs/DESIGN.md`; `.gitignore` ignores the
+rest. This is the study&#039;s first sighting of **a repository whose documentation tree is
+enforced by a test** — to be examined properly in batch 06.
+
+---
+
+## 3. The three poles — the frame for every batch (carried from the workshop)
+
+| Pole | What it is | Where this study looks |
+|---|---|---|
+| **P1 — The aissistant** | the AI user: a versatile, integratable, rich-featured agent | **batch 02** — the runtime adapters, AgentSpec, seats, skills, permissions |
+| **P2 — The workspace** | the container a person operates in | **batch 03** — rigs, pods, projects, the queue, the daemon&#039;s tenancy story |
+| **P3 — Automations** | where agents work on and assign tasks | **batch 04** — the queue, message delivery, the scenario harness, continuity/restore |
+| **PX-W — Widgets** | the composition surface | **batch 05** |
+| **PX-F — Frontend wiring** | how the surfaces are assembled | **batch 05** |
+| **PZ — the escape hatch** | the out-of-pole mechanisms worth stealing | **batch 06** |
+
+**Every finding is tagged with its pole** so the later mapping step is a per-pole join.
+
+## 4. The method (inherited, binding)
+
+1. **Docs are claims; code is the authority.** Where they disagree, the code wins and the
+   disagreement is recorded. *(Already productive: §2.3.)*
+2. **Every number is measured** at the time of writing.
+3. **Claims carry their evidence** (`file:line`).
+4. **Two value questions per capability** — Q1 user value, Q2 vision value.
+5. **No comparison to our own platform inside a batch** — that is the mapping step.
+6. **Every capability is named**, including ones we will not use.
+7. **Findings are additive**, never overwritten.
+8. **Plain words** — a one-sentence gloss before any detail.
+9. **Every finding is tagged with its pole** (P1/P2/P3/PX-W/PX-F/PZ).
+10. **The retirement rule** — before reusing any setting from an older document, search that
+    platform&#039;s migrations/config for a retirement entry (a silently-removed feature is the
+    most valuable finding).
+
+## 5. The batch plan (7 batches + this pin)
+
+| Batch | File | Question |
+|---|---|---|
+| **00** | this file | The pin, the method, and what this study is |
+| **01** | `findings/01-platform-overview.md` | What IS OpenRig — the daemon/CLI/TUI/MCP shape, the crate map, the counts reconciled |
+| **02** | `findings/02-the-aissistant.md` | **P1** — the runtime adapters, AgentSpec, seats, skills, permission modes, YOLO |
+| **03** | `findings/03-the-workspace.md` | **P2** — RigSpec, pods, projects, the queue, state, and the **tenancy** question |
+| **04** | `findings/04-automations.md` | **P3** — the queue as the at-least-once baton, message delivery, continuity, restore |
+| **05** | `findings/05-widgets-and-frontend.md` | **PX-W / PX-F** — the TUI topology views, the UI in maintenance mode, context packs |
+| **06** | `findings/06-out-of-pole.md` | **PZ** — the guards, the scenario harness, the bundle integrity, the internal-leak scanner |
+| **07** | `findings/07-synthesis.md` | The ranked mechanisms, the pole map, the decided limits, the verdict |
+
+**Reader:** the OpenRig reader will be built from this markdown **on port 3700** (after
+Hermes 3000 · Paperclip 3100 · CrewAI 3200 · Multica 3300 · Gas Town 3400 · n8n 3500 · buzz
+3600), by copying the shared engine and rebranding it — never rewriting it.
+
+---
+
+*Batch 00 of 08 — the pin and the method. Next: **batch 01, the platform overview.***
+</pre>
+
+            <!-- Bottom Navigation Bar (Prev / Next Batch) -->
+            <footer class="reader-nav-footer">
+              <a href="#" class="nav-page-btn" id="prevDocBtn" style="visibility:hidden;">
+                <span class="nav-btn-sub">← Previous Batch</span>
+                <span class="nav-btn-title" id="prevDocTitle">Batch 00</span>
+              </a>
+              <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Use keyboard <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">[</kbd> and <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">]</kbd> to navigate
+              </div>
+              <a href="#batch-01" class="nav-page-btn" id="nextDocBtn" style="text-align: right;">
+                <span class="nav-btn-sub">Next Batch →</span>
+                <span class="nav-btn-title" id="nextDocTitle">Platform Overview</span>
+              </a>
+            </footer>
+
+          </div>
+        </div>
+
+        <!-- Sticky Right Table of Contents Sidebar -->
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+            <span style="font-size:0.68rem; font-weight:normal; color:var(--text-muted);">Scrollspy</span>
+          </div>
+          <ul class="toc-list" id="tocList">
+            
+    <li class="toc-item level-2">
+      <a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="toc-link" data-target="1-the-pin-task-zero-answered-by-measurement">
+        1. THE PIN — task zero, answered by measurement
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="toc-link" data-target="1-1-the-identity-limit-stated-not-glossed">
+        1.1 The identity limit (stated, not glossed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-2-the-rename-hazard-and-it-is-bigger-than-buzz-s-a-pin-finding" class="toc-link" data-target="1-2-the-rename-hazard-and-it-is-bigger-than-buzz-s-a-pin-finding">
+        1.2 The rename hazard — and it is bigger than buzz&#039;s (a pin finding)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-3-where-the-extract-lives" class="toc-link" data-target="1-3-where-the-extract-lives">
+        1.3 Where the extract lives
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/2-what-the-tree-contains-measured" class="toc-link" data-target="2-what-the-tree-contains-measured">
+        2. What the tree contains (measured)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-1-this-tree-is-code-a-typescript-monorepo" class="toc-link" data-target="2-1-this-tree-is-code-a-typescript-monorepo">
+        2.1 This tree is CODE — a TypeScript monorepo
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-2-the-architecture-in-one-measured-picture" class="toc-link" data-target="2-2-the-architecture-in-one-measured-picture">
+        2.2 The architecture, in one measured picture
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-3-the-self-declared-counts-and-where-the-doc-has-aged-rule-1-in-the-pin" class="toc-link" data-target="2-3-the-self-declared-counts-and-where-the-doc-has-aged-rule-1-in-the-pin">
+        2.3 The self-declared counts, and where the doc has aged (rule 1, in the pin)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-4-the-documentation-surface" class="toc-link" data-target="2-4-the-documentation-surface">
+        2.4 The documentation surface
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop" class="toc-link" data-target="3-the-three-poles-the-frame-for-every-batch-carried-from-the-workshop">
+        3. The three poles — the frame for every batch (carried from the workshop)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/4-the-method-inherited-binding" class="toc-link" data-target="4-the-method-inherited-binding">
+        4. The method (inherited, binding)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/5-the-batch-plan-7-batches-this-pin" class="toc-link" data-target="5-the-batch-plan-7-batches-this-pin">
+        5. The batch plan (7 batches + this pin)
+      </a>
+    </li>
+  
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Full-Text Search Modal -->
+  <div class="search-modal-backdrop" id="searchModal">
+    <div class="search-modal-card">
+      <div class="modal-search-header">
+        <span style="font-size: 1.2rem;">🔍</span>
+        <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="Search across all 8 study batches..." autofocus>
+        <button class="tool-btn" id="closeSearchBtn" style="padding: 0.25rem 0.5rem;">Esc</button>
+      </div>
+      <div class="modal-results-list" id="modalResultsList">
+        <!-- Search results list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Architecture Gallery Modal -->
+  <div class="gallery-modal-backdrop" id="galleryModal">
+    <div class="gallery-modal-card">
+      <div class="gallery-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">🏛️</span>
+          <div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">OpenRig Architectural Guides &amp; Decision Models</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">9 Interactive Study Visual Models • Call up any architecture piece on demand</div>
+          </div>
+        </div>
+        <button class="tool-btn" id="closeGalleryBtn" style="padding: 0.25rem 0.6rem;">Esc</button>
+      </div>
+
+      <!-- Detail View Area when a diagram is selected in gallery -->
+      <div class="gallery-detail-container" id="galleryDetailContainer" style="display: none;">
+        <div class="gallery-detail-bar">
+          <button class="tool-btn" id="backToGalleryGridBtn">← Back to All Guides</button>
+          <span id="galleryDetailTitle" style="font-weight: 700; color: var(--primary);"></span>
+          <button class="tool-btn active" id="galleryJumpToDocBtn">Open Batch Document →</button>
+        </div>
+        <div class="gallery-detail-svg" id="galleryDetailSvg"></div>
+      </div>
+
+      <!-- Grid of all 9 Architecture Cards -->
+      <div class="gallery-cards-grid" id="galleryCardsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Data & Controller -->
+  <script src="assets/docs-data.js"></script>
+  <script src="assets/reader.js"></script>
+</body>
+</html>

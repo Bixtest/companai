@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — OpenRig Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">OpenRig Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">5,259</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">26 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">504</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE · PX-W / PX-F</div>
+    <h4>Widgets and the frontend — a proven negative, and two first-rate ideas</h4>
+    <p>No widget model — but a digital twin and a test-pinned strip invariant</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="16" width="880" height="98" rx="8" fill="var(--surface-card, #ffffff)" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="42" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#ef4444">★ NO WIDGET MODEL — the sixth platform in the study with none</text>
+      <text x="40" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Measured: 5 files mention “widget”, and every hit is incidental — Codex’s own source filenames quoted in comments, one test fixture,</text>
+      <text x="40" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">and the OMP provider’s own setWidget extension call. 0 WidgetRegistry. 8 “composer” hits — all SERVER-SIDE TEXT composers.</text>
+      <text x="40" y="106" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#b45309">The one composition system (Context Packs) composes PROMPTS — atoms, dependencies, profiles — never UI. The tempting near-miss.</text>
+
+      <g transform="translate(20, 128)">
+        <rect width="430" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">★ THE DIGITAL-TWIN HARNESS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The REAL UI + typed fixtures → ONE file</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">seams: cache-seed · fetch · EventSource</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#475569">NOT MSW / no service worker</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">★ typechecked vs the real interfaces</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">→ a real interface change BREAKS the build</text>
+      </g>
+      <g transform="translate(470, 128)">
+        <rect width="430" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">★ THE STRIP INVARIANT (test-pinned)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">layout with NO colour, then a style pass</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">stripAnsi(styled[i]) === plain[i]</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">asserted in 11 test files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">in the graph: STRUCTURAL — two</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">projections of ONE character grid</text>
+      </g>
+
+      <rect x="20" y="260" width="880" height="106" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+      <text x="40" y="286" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TWO FRONTENDS, AND THE PRIMARY ONE IS NOT REACT</text>
+      <text x="40" y="310" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">tui: 191 files / 29,473 lines / ZERO .tsx — a HAND-ROLLED ANSI renderer (no Ink, no React), declared as a “Phase-0 substrate decision”</text>
+      <text x="40" y="330" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ui: 538 files / 88,829 lines / 348 .tsx — in MAINTENANCE MODE; the CLI is primary; 687-line globals.css, 54 tokens, Vellum/Black-Glass</text>
+      <text x="40" y="352" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#7c3aed">ONE COMMAND REGISTRY makes an undocumented action impossible by construction — a CI parity suite enforces it.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="openrig-study-batch-05-widgets-and-frontend-px-w-px-f">OpenRig Study — Batch 05: widgets and frontend (PX-W / PX-F)<a href="#batch-05/openrig-study-batch-05-widgets-and-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Batch 05 of 08</strong> · <strong>Status:</strong> OPEN
+<strong>Poles:</strong> <strong>PX-W — the widget/composition surface</strong> and <strong>PX-F — the frontend architecture</strong>
+<strong>What this batch answers:</strong> is there a <em>composition model</em> in OpenRig (a widget tree, a canvas of
+composable elements, a registry a third party can extend)? And how is the frontend actually
+architected — what the two frontends are, how the design system is enforced, and what the
+verification story is.</p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch.</p>
+<p><strong>Rule 1 reminder:</strong> every claim was read from source; divergences are in §9.</p>
+<hr>
+<h2 id="1-the-one-sentence-shape">1. The one-sentence shape<a href="#batch-05/1-the-one-sentence-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>OpenRig has TWO frontends and NEITHER is a composition surface: a hand-rolled ANSI terminal
+UI (the primary, 191 files / 29,473 lines, <em>zero</em> JSX) and a React web UI in <em>maintenance mode</em>
+(538 files / 88,829 lines) — and the question &quot;is there a widget model?&quot; answers NO: there are
+no composable UI elements, no canvas that holds them, and no registry a third party extends.
+The one composition-shaped system in the codebase is a CONTENT composition system (Context
+Packs), which composes <em>prompt text</em>, not <em>UI</em>.</strong></p>
+<p>This is the <strong>sixth platform in the study with no widget/composer model</strong> (Paperclip, Multica,
+Gas Town, buzz, and now OpenRig; n8n is the only one with a real one). But OpenRig answers the
+<em>spirit</em> of the widget question in two unusual places — a <strong>digital-twin harness</strong> that
+generates clickable mockups from the real components, and a <strong>command registry</strong> that makes an
+undocumented action impossible by construction. Both are in this batch.</p>
+<p>The nine ideas in this batch, each read from source:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>Owner</th>
+<th>§</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>the TUI is hand-rolled ANSI, no React</td>
+<td><code>packages/tui/src/render.ts</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td>the render/stylize split + its invariant</td>
+<td><code>render.ts</code> + <code>stylize.ts</code> + <code>canvas.ts</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>the <strong>command registry</strong> (one source of verbs)</td>
+<td><code>tui/src/commands/registry.ts</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>the TUI status glyphs (honest-unknown)</td>
+<td><code>tui/src/topology/glyphs.ts</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td>the web UI is in maintenance mode</td>
+<td><code>docs/reference/developing.md</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td>the design system (Vellum / Black Glass)</td>
+<td><code>docs/DESIGN.md</code> + <code>tailwind.config.ts</code></td>
+<td>7</td>
+</tr>
+<tr>
+<td><strong>★ the digital-twin harness</strong></td>
+<td><code>packages/ui/twin/**</code></td>
+<td>8</td>
+</tr>
+<tr>
+<td>Context Packs = <em>content</em> composition</td>
+<td><code>domain/context-packs/**</code></td>
+<td>8.4</td>
+</tr>
+<tr>
+<td>the as-built UI docs (self-audited)</td>
+<td><code>docs/as-built/ui/**</code></td>
+<td>7.5</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-composition-answer-measured-first-rule-0b">2. The composition answer, measured first (rule 0b)<a href="#batch-05/2-the-composition-answer-measured-first-rule-0b" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Before interpreting anything, the counts. &quot;Widget&quot; and &quot;composer&quot; are the two words that most
+often <em>look</em> like a composition model while meaning something else, so both were counted tree-wide.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Files (tree-wide, <code>.ts</code>/<code>.tsx</code>)</th>
+<th>What the hits actually are</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>widget</code></td>
+<td><strong>5</strong></td>
+<td><strong>all incidental.</strong> Three are OpenRig <em>quoting Codex&#39;s own source filenames</em> in comments (<code>chatwidget.rs</code>, <code>tui/src/chatwidget/streaming.rs</code>); one is a test fixture whose sample text is <em>&quot;approval requested for the widget refactor&quot;</em>; one is <code>setWidget</code>/<code>widgetKey:&quot;autoresearch&quot;</code> — an <strong>OMP provider extension-UI call</strong>, i.e. <em>the provider&#39;s</em> widget protocol, not OpenRig&#39;s.</td>
+</tr>
+<tr>
+<td><code>composer</code></td>
+<td>8 (in <code>packages/ui/src</code>)</td>
+<td><strong>none is a UI composer.</strong> Every hit is a <em>server-side text composer</em>: the daemon &quot;review composer&quot; that assembles a review payload, the fleet-glance composer, and <code>TerminalLauncher</code>&#39;s <em>&quot;the C3 canonical composer&quot;</em> (a <code>POST /api/terminal/open</code> endpoint). It composes <strong>strings</strong>, not elements.</td>
+</tr>
+<tr>
+<td><code>WidgetRegistry</code> / <code>widgetRegistry</code></td>
+<td><strong>0</strong></td>
+<td>no widget registry of any kind</td>
+</tr>
+<tr>
+<td><code>dashboard</code> / <code>Dashboard</code></td>
+<td>22</td>
+<td>route/page names, not a tile system</td>
+</tr>
+<tr>
+<td><code>slot</code> / <code>Slot</code></td>
+<td>15</td>
+<td>mostly <code>hsl</code> slot naming and CSS; no plugin-slot mechanism</td>
+</tr>
+</tbody></table></div>
+<p><strong>Check-then-conclude.</strong> There is no <code>CREATE TABLE widgets</code>, no <code>registerWidget</code>, no element
+schema, no drop-target model, no third-party UI extension point. <strong>OpenRig&#39;s UI is a fixed set of
+purpose-built surfaces; the product answer to &quot;add a surface&quot; is &quot;edit the app&quot;</strong> — which is exactly
+what the digital-twin harness (§8) exists to make cheap.</p>
+<hr>
+<h2 id="3-the-two-frontends-measured">3. The two frontends, measured<a href="#batch-05/3-the-two-frontends-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Files</th>
+<th><code>.ts</code> / <code>.tsx</code></th>
+<th>Lines (<code>.ts</code>+<code>.tsx</code>)</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>packages/tui</code></td>
+<td>191</td>
+<td>185 / <strong>0</strong></td>
+<td><strong>29,473</strong></td>
+<td><strong>the primary, shipped, human interface</strong></td>
+</tr>
+<tr>
+<td><code>packages/ui</code></td>
+<td>538</td>
+<td>175 / <strong>348</strong></td>
+<td><strong>88,829</strong></td>
+<td>the React web UI — <strong>in maintenance mode</strong></td>
+</tr>
+<tr>
+<td><code>packages/cli</code></td>
+<td>490</td>
+<td>468 / 0</td>
+<td>121,520</td>
+<td>the scriptable surface (not a frontend; noted for scale)</td>
+</tr>
+</tbody></table></div>
+<p><code>packages/ui</code> decomposes as: <strong>70 top-level <code>components/*.tsx</code></strong>, <strong>23 component subdirectories</strong>,
+<strong>22 UI primitives</strong> in <code>components/ui/</code>, <strong>67 hooks</strong>, <strong>30 lib modules</strong>, <strong>199 test files</strong>.</p>
+<p>The single most striking frontend fact is in the TUI row: <strong>348 <code>.tsx</code> in the web UI, zero in the
+TUI.</strong> The TUI is not React-for-terminal (no Ink, no React, no reconciler — <code>grep &#39;&quot;ink&quot;&#39;</code> on
+<code>packages/tui/package.json</code> returns nothing). It is a <strong>hand-rolled renderer over raw ANSI</strong>:</p>
+<blockquote>
+<p><code>// Hand-rolled ANSI renderer (Phase-0 substrate decision). Pure function: (state, snapshot) → {lines, hitMap, explorerRows}.</code>
+— <code>packages/tui/src/render.ts:12</code></p>
+</blockquote>
+<p><code>render.ts</code> is <strong>1,874 lines</strong> and is explicitly a <em>substrate decision</em>, reversible behind a seam:</p>
+<blockquote>
+<p><code>// Isolated seam: a substrate swap touches only this module (spike verdict revisit trigger).</code></p>
+</blockquote>
+<p>That is a <em>decided limit</em> stated as a decision with a named revisit trigger — the same discipline
+seen throughout this study (Gas Town&#39;s &quot;top 4 mechanisms are DECIDED LIMITS&quot;). <em>(PX-F.)</em></p>
+<hr>
+<h2 id="4-the-render-stylize-split-and-the-invariant-that-makes-styling-safe">4. ★ The render/stylize split, and the invariant that makes styling safe<a href="#batch-05/4-the-render-stylize-split-and-the-invariant-that-makes-styling-safe" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The TUI separates <strong>layout</strong> from <strong>ink</strong> into two passes, and the split is load-bearing:</p>
+<ol>
+<li><strong><code>render.ts</code></strong> (1,874 lines) — the <em>plain</em> layer. Pure: <code>(state, snapshot)</code> → <code>{lines, hitMap, explorerRows}</code>. No colour. This is what the tests assert against.</li>
+<li><strong><code>stylize.ts</code></strong> (238 lines) — the <em>style</em> pass, applied <strong>AFTER</strong> layout. It injects only
+zero-width SGR escape sequences.</li>
+</ol>
+<p>The invariant, test-pinned:</p>
+<blockquote>
+<p><code>// INVARIANT (test-pinned): stripAnsi(styled[i]) === plain[i] for every line — styling can // never move a hit target or shear a frame. Segment-painted (no nested wraps), so resets // never bleed.</code>
+— <code>packages/tui/src/stylize.ts:3</code></p>
+</blockquote>
+<p>This was <strong>verified, not assumed</strong>: <code>stripAnsi</code> appears in <strong>11 TUI test files</strong>, and the
+assertion is written the same way each time (<code>styled.forEach((l, i) =&gt; expect(stripAnsi(l)).toBe( screen.lines[i]))</code>). So the claim &quot;styling cannot change behaviour&quot; is <em>enforced by the test suite</em>,
+not merely intended. <em>(PX-F — the sharpest frontend discipline in the platform.)</em></p>
+<p><strong>And there is a second, stronger form of the same invariant.</strong> In the graph renderer the invariant
+is made <strong>structural</strong> rather than regex-checked:</p>
+<blockquote>
+<p><code>// Every cell carries an optional semantic token; plainLines() and paintedLines() are generated // from the SAME cells, so stripAnsi(painted) === plain holds BY CONSTRUCTION (the shipped // stylize invariant, kept structural instead of regex-matched).</code>
+— <code>packages/tui/src/topology/canvas.ts:3</code></p>
+</blockquote>
+<p><code>canvas.ts</code> is a <strong>character canvas</strong>: each <code>Cell</code> holds <code>{ch, token?, bold?, bg?}</code>; the plain text
+and the painted text are two <em>projections of one grid</em>; and mouse hit-zones (<code>CanvasZone</code>) are
+recorded <strong>in plain-character coordinates on the same grid</strong>. <strong>Colour is a projection; geometry is
+the truth.</strong> <em>(PX-F — carry this to the SRS.)</em></p>
+<hr>
+<h2 id="5-the-command-registry-an-undocumented-action-is-impossible-by-construction">5. ★ The command registry — "an undocumented action is impossible by construction"<a href="#batch-05/5-the-command-registry-an-undocumented-action-is-impossible-by-construction" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/tui/src/commands/registry.ts</code> (338 lines) is declared as <strong>the ONE command registry</strong>:</p>
+<blockquote>
+<p><code>// REGISTRY I1 (ruling 64f1dbdf) — the ONE command registry, sole source of the TUI&#39;s command // surface. A UI action cannot exist without an entry here: the grammar (grammar.ts) DERIVES its // verb table, arg validation, and error listings from this registry, so an undocumented action // is impossible BY CONSTRUCTION (PM pin 1&#39;s parity suite enforces it at CI). Render surfaces // (the CLI dump, the palette, the socket query — I2-I4) are SERIALIZED projections of these // entries, never hand-maintained (PM pin 2). &#39;context&#39; is the honest-availability qualifier // (PM pin 3): &quot;always&quot; renders in every state; &quot;standard&quot; requires the normal daemon-up shell.</code></p>
+</blockquote>
+<p>And <code>grammar.ts</code> (41 lines) obeys it:</p>
+<blockquote>
+<p><code>// the verb table is DERIVED from the ONE command registry (commands/registry.ts) — an // unregistered verb cannot parse, so an undocumented action is impossible by construction.</code></p>
+</blockquote>
+<p><strong>Why this matters (rule 6 — name the capability):</strong> this is a <strong>single-source command surface with
+a CI parity gate</strong>. Three separate render surfaces (help dump, command palette, socket query) are
+<em>generated</em> from the registry and cannot drift from it. The parity test is real —
+<code>packages/tui/test/command-registry-parity.test.ts</code> exists, alongside <code>parity.test.ts</code> and
+<code>parity-content.test.ts</code>. <strong>The TUI cannot advertise a command it cannot run, or run one it does not
+advertise.</strong> <em>(PX-W/PX-F — this is the closest OpenRig comes to a &quot;composition registry&quot;, and its
+scope is <em>commands</em>, not <em>elements</em>.)</em></p>
+<hr>
+<h2 id="6-the-tui-s-section-model-and-the-honest-unknown-glyphs">6. The TUI's section model and the honest-unknown glyphs<a href="#batch-05/6-the-tui-s-section-model-and-the-honest-unknown-glyphs" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The TUI exposes <strong>11 sections</strong> (<code>packages/tui/src/sections.ts</code>, 35 lines), each shipped with an
+explicit declaration of <strong>what it reads and how it drills</strong> — a one-line contract per section:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Declared source read</th>
+<th>Drill shape</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>topology</code></td>
+<td>(rig projection)</td>
+<td>host → rig → pod → seat</td>
+</tr>
+<tr>
+<td><code>specs</code></td>
+<td>spec-library</td>
+<td>library → spec</td>
+</tr>
+<tr>
+<td><code>scopes</code></td>
+<td>scopes projection</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>terminals</code></td>
+<td><code>GET /api/terminal/views?detail=1</code> + <code>/api/terminal/preview</code> (<strong>passive</strong>)</td>
+<td>saved/derived → view → page</td>
+</tr>
+<tr>
+<td><code>needs</code></td>
+<td>attention projection</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>system</code></td>
+<td><code>GET /api/health</code> (canonical instance findings)</td>
+<td>health/configuration/connections</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td><code>/healthz</code> + <code>/api/config?view=browser</code> + <code>/api/gateway/connections</code> (<strong>passive</strong>)</td>
+<td>category → setting</td>
+</tr>
+<tr>
+<td><code>connections</code></td>
+<td><code>/healthz</code> + <code>/api/gateway/connections</code> (<strong>passive projection</strong>)</td>
+<td>instance → human/routes → work</td>
+</tr>
+<tr>
+<td><code>usage</code></td>
+<td><code>GET /api/provider/status</code> (<strong>memory-only read; never the refresh</strong>) + <code>/api/config?view=browser</code> <em>only when usage is absent</em></td>
+<td>provider → allowance → window; seats</td>
+</tr>
+<tr>
+<td><code>usage-hosts</code></td>
+<td><code>GET /api/provider/usage/hosts</code> (<strong>memory-only reads here and on each registered host; never the refresh</strong>)</td>
+<td>hosts; allowance → host → window; seats per host</td>
+</tr>
+<tr>
+<td><code>cost</code></td>
+<td><code>GET /api/telemetry/usage/cost</code> (<strong>the daemon&#39;s stored usage samples; starts no lookup</strong>)</td>
+<td>seats</td>
+</tr>
+</tbody></table></div>
+<p>Two disciplines are visible in this table, and both are <strong>rule-6-grade</strong>:</p>
+<ol>
+<li><strong>A read is declared <em>passive</em> or <em>memory-only</em> where it matters.</strong> A <em>viewing</em> surface that must
+never <em>trigger</em> a provider lookup says so in the section&#39;s own definition
+(&quot;never the refresh&quot;). <strong>A read-only screen that cannot accidentally spend money.</strong></li>
+<li><strong><code>cost</code> reads <em>stored samples</em> and &quot;starts no lookup&quot;</strong> — the honest distinction between
+<em>what the daemon already knows</em> and <em>what would require asking a provider</em>.</li>
+</ol>
+<p><strong>The status vocabulary.</strong> <code>packages/tui/src/topology/glyphs.ts</code> (75 lines) reduces state to a
+<strong>4-glyph vocabulary</strong>, and the header states the honesty rule directly:</p>
+<blockquote>
+<p><code>// The 4 buckets COLLAPSE the richer existing states; nothing here invents state, and a // projection with no value renders honest-unknown ○ (PIN-2 as a glyph — NEVER a fabricated ●).</code></p>
+<p><code>● active/done · ◐ partial/% (amber-attention family) · ○ queued/unknown (honest-unknown) · ✕ failed</code></p>
+</blockquote>
+<p>Edge kinds map to <strong>line COLOUR, not labels</strong> (<code>delegates_to</code> = accent/teal · <code>collaborates_with</code>
+= ok/green · <code>escalates_to</code> = warn/amber), and <strong>any other served kind renders <code>dim</code> — &quot;the kind
+string is data — unknown kinds are not forced into a bucket.&quot;</strong> <em>(PX-W: a rendering vocabulary that
+refuses to fabricate a state it was not given.)</em></p>
+<hr>
+<h2 id="7-the-web-ui-in-maintenance-mode-with-a-design-system-worth-keeping">7. The web UI — in maintenance mode, with a design system worth keeping<a href="#batch-05/7-the-web-ui-in-maintenance-mode-with-a-design-system-worth-keeping" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="7-1-the-status-and-the-wording-rule">7.1 The status, and the wording rule<a href="#batch-05/7-1-the-status-and-the-wording-rule" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/reference/developing.md</code> states the status and then <strong>forbids stronger language</strong>:</p>
+<blockquote>
+<p><code>The web UI is **experimental**, in **maintenance mode**, supported **best-effort**; **the CLI is primary**. There is no scheduled removal and PRs are welcome. **Do not describe the UI with stronger end-of-life language than this section uses.**</code></p>
+</blockquote>
+<p>This is a <strong>rule-6 / rule-13 discipline encoded as a documentation policy</strong> — the repo pre-commits
+to the <em>exact</em> strength of its own status claim, and forbids drift in either direction. <em>(PZ-adjacent:
+an honesty rule that binds future contributors.)</em></p>
+<p>Consequences, stated in the same file: <strong>daemon API changes no longer require browser verification</strong>;
+<strong>the hook &quot;contract mirrors&quot; under <code>packages/ui/src/hooks/</code> are no longer proactively maintained</strong>;
+and <em>&quot;a new <code>test:ui</code> failure usually signals a moved API contract.&quot;</em> The browser suite is
+<strong>advisory locally and not part of <code>npm test</code></strong> (per <code>docs/as-built/test-layers.md</code>). <strong>The cost of
+maintenance mode is stated, not hidden.</strong></p>
+<h3 id="7-2-the-design-system-a-real-one">7.2 The design system — a real one<a href="#batch-05/7-2-the-design-system-a-real-one" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/DESIGN.md</code> (<strong>358 lines</strong>, 13 sections) is the canonical visual spec, and its own opening
+says it exists <em>&quot;so the product can be recreated, extended, or translated into other media without
+reverse-engineering the UI from code.&quot;</em></p>
+<ul>
+<li><strong>Two surface languages, deliberately distinguished.</strong> <strong>Vellum Paper</strong> (persistent surfaces:
+sidebars, cards, drawers, viewers — translucent white, <code>backdrop-blur-[8px]</code>, 1px outline, hard
+shadow on paper only, registration marks, <em>&quot;Square corners everywhere except tiny status dots&quot;</em>)
+and <strong>Black Glass</strong> (temporary previews: terminal popovers, image proof overlays — floating,
+no hard shadow <em>&quot;or black borders&quot;</em>). The rule <em>&quot;Vellum should never become fully transparent&quot;</em>
+is a stated preference with a fallback (<em>&quot;increase opacity before adding heavy borders&quot;</em>).</li>
+<li><strong>Tokens are the contract.</strong> <code>packages/ui/src/globals.css</code> (687 lines, <strong>54 custom properties</strong>)
+defines the token set; <code>tailwind.config.ts</code> maps it. The naming is <strong>Material-3-role-shaped</strong>
+(<code>--on-surface</code>, <code>--surface-container-high</code>, <code>--inverse-surface</code>, <code>--outline-variant</code>) rather
+than raw hues — so a theme swap rewrites values, not every call site.</li>
+<li><strong>Aesthetic choices encoded as config.</strong> <code>borderRadius</code> is <code>0px</code> for <strong>every</strong> step with exactly
+one documented exception (<code>full: &quot;9999px&quot; /* Exception: stamp circles only */</code>); the type scale is
+<strong>10 role-named steps</strong> (<code>display-lg</code>…<code>label-sm</code>) with line-height/weight/letter-spacing baked in;
+one named easing, <code>transitionTimingFunction.tactical</code>.</li>
+<li><strong>A &quot;Do And Do Not&quot; list that reads as a review checklist</strong>: do keep square geometry and 1px lines;
+do <em>&quot;translate raw event/state codes into human-readable labels&quot;</em>; <strong>do not</strong> <em>&quot;add new one-off
+card styles when a primitive can do the job&quot;</em>; do not <em>&quot;duplicate runtime/tool brand logic
+outside <code>runtime-brand.ts</code>, <code>tool-brand.ts</code>, and <code>RuntimeMark.tsx</code>.&quot;</em> The last one is a <strong>named
+single-source rule for brand graphics</strong> (rule 6 — a capability, not a vibe).</li>
+<li><strong>Motion is deliberate and accessible</strong>: <em>&quot;Prefer slow pulses to blinking&quot;</em>; <em>&quot;Honor
+<code>prefers-reduced-motion</code>: remove pulse/travel animation and keep static state signals.&quot;</em></li>
+</ul>
+<h3 id="7-3-the-two-themes-are-token-cascades">7.3 The two themes are token cascades<a href="#batch-05/7-3-the-two-themes-are-token-cascades" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>lib/theme.ts</code> offers <strong>Vellum Light, Vellum Dark, and System</strong> (default <code>system</code>), stored under
+<code>openrig.theme</code>; <code>applyTheme</code> toggles a <code>.dark</code> class on <code>&lt;html&gt;</code> which switches the <code>.dark {}</code> token
+block in <code>globals.css</code> (line 603). There is even a <strong>pre-paint script in <code>index.html</code></strong> mirroring the
+storage key — <strong>so the theme cannot flash before hydration</strong>. <em>(PX-F: a small detail that is a real
+care signal.)</em></p>
+<h3 id="7-4-the-topology-surface">7.4 The topology surface<a href="#batch-05/7-4-the-topology-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/as-built/ui/topology.md</code> (144 lines) documents the route family. The graph is built on
+<strong><code>@xyflow/react ^12.10.1</code></strong> (React Flow), with <code>HybridTopologyNodes.tsx</code> exporting
+<code>HybridAgentNode</code> (compact agent cards: runtime badges, context %, token totals, activity state,
+terminal preview, per-card open) and <code>HybridPodGroupNode</code> (soft dashed pod frames). <strong>One canvas
+that holds nodes and edges — a <em>graph</em>, not a <em>canvas of widgets</em>.</strong> The distinction is the whole
+point of this batch: React Flow makes the topology <em>visual</em>, but the node types are <strong>fixed in
+code</strong>, not <em>composed by a user</em>. <em>(PX-W: a graph view is not a composition surface.)</em></p>
+<h3 id="7-5-the-as-built-ui-docs-are-self-audited">7.5 The as-built UI docs are self-audited<a href="#batch-05/7-5-the-as-built-ui-docs-are-self-audited" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/as-built/ui/</code> (4 modules) is written in a house style worth naming as a capability:
+front-matter carries <strong><code>last-verified-against-source: &lt;commit SHA&gt;</code></strong> and <code>last-updated</code>; the body
+states the commit <em>and the package version</em>; and the reconciliation is explicit:</p>
+<blockquote>
+<p><code>// Verified against source at e8f0ab34; package version 0.6.7. Component and primitive names // below are reconciled against packages/ui/src/components/, NOT TAKEN ON TRUST from DESIGN.md&#39;s // lists.</code>
+— <code>docs/as-built/ui/library-specs-and-design-system.md</code></p>
+</blockquote>
+<p>It also carries a <strong>pointer-not-copy ruling (Q1 ratified)</strong>: the module <em>&quot;points to [DESIGN.md]
+rather than copying it,&quot;</em> so there is exactly one canonical design spec. And it corrects its own
+predecessors — e.g. <em>&quot;<code>SpecsTable.tsx</code> is still in the folder but nothing imports it&quot;</em>, and a
+<strong>do-not-back-attribute</strong> guard (<em>&quot;The plugin primitive is a 0.3.1 feature… Do NOT back-attribute
+… to 0.3.0&quot;</em>). <em>(Rule 1 as a documentation practice: the doc names the commit it was verified at,
+and names its own dead files.)</em></p>
+<hr>
+<h2 id="8-the-digital-twin-harness-the-platform-s-answer-to-how-do-you-prove-the-ui-changed">8. ★ The digital-twin harness — the platform's answer to "how do you prove the UI changed?"<a href="#batch-05/8-the-digital-twin-harness-the-platform-s-answer-to-how-do-you-prove-the-ui-changed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>OpenRig&#39;s most original frontend artifact is not a component — it is a <strong>verification harness</strong>.
+<code>packages/ui/twin/</code> builds the <strong>real</strong> <code>@openrig/ui</code> App with <strong>dummy data</strong> into <strong>one
+self-contained, double-clickable <code>intent.html</code></strong>.</p>
+<blockquote>
+<p><code>// Builds the real @openrig/ui App with dummy data into ONE self-contained, double-clickable // intent.html — so an agent can fork a feature-version, change the one thing a slice proposes, // and emit a clickable mockup that is 1:1 with the live UI by construction (it IS the real // components; it never needs manual re-syncing).</code>
+— <code>packages/ui/twin/README.md</code></p>
+</blockquote>
+<p><strong>The per-slice loop is three steps:</strong> change one value in <code>twin/fixtures.ts</code> (or the component) →
+<code>npm run twin:build</code> (which runs <code>tsc -p tsconfig.twin.json</code> first) → screenshot. <code>TWIN_ROUTE</code>
+targets a specific surface (<code>TWIN_ROUTE=/topology/rig/rig_delivery npm run twin:build</code>).</p>
+<p><strong>The seams are daemon-free, and named</strong> (<code>twin-main.tsx</code> installs three, <em>before any <code>@openrig/ui</code>
+module imports</em>):</p>
+<ul>
+<li><strong>cache-seed</strong> (<code>seed.ts</code>) — seeds the react-query cache from <strong>typed fixtures</strong> under the exact
+queryKeys, <code>staleTime:Infinity</code>/<code>retry:false</code>. <em>&quot;Instant first paint.&quot;</em></li>
+<li><strong>fetch stub</strong> (<code>fetch-stub.ts</code>) — a <code>globalThis.fetch</code> override answering <code>/api/*</code> from the same
+fixtures. The README explains <em>why it is needed</em>: several hooks hardcode <code>staleTime:0 + refetchInterval</code> and would background-refetch even when seeded. <strong>Explicitly NOT MSW / no service
+worker.</strong></li>
+<li><strong>EventSource stub</strong> (<code>eventsource-stub.ts</code>) — no-op for live SSE <em>except</em> it emits a seeded set of
+activity events on <code>/api/events</code> so the SSE-driven feed renders 1:1.</li>
+</ul>
+<p><strong>★ The drift guard is the point (FR-4 / D-2).</strong> <code>twin:build</code> typechecks first, and the fixtures are
+typed against the <strong>REAL exported hook interfaces</strong> (<code>RigSummary</code>, <code>NodeDetailData</code>, …):</p>
+<blockquote>
+<p><code>// so a real-interface change BREAKS the twin build = compile-time drift detection. (Proven: a // string where a number is required fails with TS2322.)</code></p>
+</blockquote>
+<p><strong>A mockup that cannot silently drift from the app, because it is compiled against the app&#39;s own
+interfaces.</strong> Six surfaces are seeded and listed as <strong>&quot;1:1 verified&quot;</strong> (Dashboard, Topology graph,
+Live node details, For-You feed, Workspace, Library), and the README honestly lists its own
+<strong>known follow-up</strong> (graph node badges read stale) and a <strong>test-invisible footgun</strong> (component-scoped
+CSS font stacks must lead with the registered <code>… Variable</code> family or fall through to the system font
+silently — <em>&quot;jsdom can&#39;t catch it in a unit test&quot;</em>). <em>(Rule 1 as a build artifact: the harness
+documents the failures its own tests cannot see.)</em></p>
+<p><strong>The capture tooling</strong> (<code>twin/capture/</code>, README + <code>twin-capture.ts</code> + <code>asciicast.ts</code> +
+<code>payload-diff.ts</code> + <code>headless-chrome.ts</code>) generalizes &quot;prove it&quot; per medium:</p>
+<ul>
+<li><strong>screenshot</strong> (intent) and <strong>screenshot</strong> (proof) — <em>the same <code>buildChromeScreenshotArgs</code>, only
+the URL differs</em> (<code>file://</code> twin vs <code>http://</code> real UI), <strong>paired by file base</strong>
+(<code>&lt;surface&gt;.intent.png</code> ↔ <code>&lt;surface&gt;.proof.png</code>) <em>&quot;so the founder can compare them directly.&quot;</em></li>
+<li><strong>asciicast v2</strong> for CLI work — <em>&quot;emits the documented asciicast v2 format directly (zero-dep)…
+asciinema is NOT required… Never fake a capture; degrade honestly.&quot;</em></li>
+<li><strong>payload-diff</strong> for data-shape slices — canonical before/after JSON + sorted changed paths.</li>
+<li><strong>Determinism is enforced, not assumed</strong>: <em>&quot;enforce D-1 determinism (shoot twice, byte-compare,
+fail loudly on drift).&quot;</em></li>
+</ul>
+<p><strong>Why this is the batch&#39;s headline.</strong> A digital twin of the UI, compiled against the UI&#39;s own
+interfaces, with a <strong>mandatory intent-vs-proof pairing</strong> and <strong>byte-level determinism enforcement</strong>,
+is a <em>verification</em> answer to the composition question. OpenRig has no widget model — <strong>but it has a
+way to prove a UI change is real that is stronger than most systems that do.</strong> <em>(PX-F; and PZ-tier.)</em></p>
+<h3 id="8-4-the-one-composition-system-and-why-it-is-not-widgets">8.4 The one composition system — and why it is *not* widgets<a href="#batch-05/8-4-the-one-composition-system-and-why-it-is-not-widgets" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>Context Packs</code> (<code>packages/daemon/src/domain/context-packs/**</code>; <strong>101</strong> <code>.ts</code>/<code>.tsx</code> files touch the
+term) are OpenRig&#39;s <strong>content</strong> composition system. A pack is a <code>manifest.yaml</code> + declared members;
+its path-like <strong>ref is the lookup identity, independently of the manifest name/version</strong>; the entry
+id is <code>context-pack:&lt;ref&gt;</code>. The doc names <strong>five separate projections</strong> over the same content:
+<em>framed preview</em> (<code>assembleBundle()</code>, with token estimates and <code>missingFiles</code>), <em>plain composition</em>
+(<code>assemblePlainFiles()</code>, present files in declared order, <strong>&quot;without framing or trimming their
+bytes&quot;</strong>), <em>addressed read</em> (<code>/library/resolve-address</code> — longest pack-ref prefix, then a declared
+file, then optional H2/H3 heading selection), <em>situation profile</em> (<code>composeProfile()</code> — select atoms,
+close dependencies, order and resolve), and <em>named profile</em> (<code>composeNamedProfile()</code>).</p>
+<p>The atom model has <strong>runtime awareness</strong> (<code>Claude | Codex</code>, with <code>any</code> atoms applicable to either),
+<strong>dependency closure that fails loudly</strong> (<em>&quot;missing dependencies or runtime-incompatible
+dependencies fail composition&quot;</em>), and honest skips (<em>&quot;Post-compaction composition skips an absent
+<code>seat:RECAP.md</code> and reports it as skipped instead of failing&quot;</em>). Packs can also carry <code>.sh</code>, <code>.ts</code>,
+<code>.py</code> helper assets — <strong>but <em>&quot;Those assets are served as text; pack assembly does not execute
+them.&quot;</em></strong></p>
+<p><strong>So OpenRig has a composition system — of PROMPTS.</strong> Atoms compose into a prompt; dependencies close;
+profiles select. <strong>Nothing composes into a UI.</strong> <em>(PX-W: the study must not mistake a content
+composition system for a widget model. This is the most tempting near-miss in the study so far.)</em></p>
+<hr>
+<h2 id="9-divergences-rule-1">9. Divergences (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/9-divergences-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D5-1</strong></td>
+<td><code>docs/DESIGN.md:7</code> says the web UI <em>&quot;is in maintenance mode&quot;</em></td>
+<td>confirmed verbatim by <code>docs/reference/developing.md:52</code>, and <strong>self-consistent</strong> with the test-layers note (advisory, not in <code>npm test</code>)</td>
+<td><strong>HOLDS</strong> (and the <em>wording rule</em> makes it unusually precise)</td>
+</tr>
+<tr>
+<td><strong>D5-2</strong></td>
+<td>earlier batches / general expectation that a modern TS monorepo&#39;s TUI uses Ink or React</td>
+<td><strong>zero React/Ink in <code>packages/tui</code></strong>; <code>render.ts</code> is a hand-rolled ANSI renderer declared as a <em>substrate decision</em></td>
+<td><strong>DIVERGED from expectation, HOLDS against source</strong> (and the seam is declared)</td>
+</tr>
+<tr>
+<td><strong>D5-3</strong></td>
+<td><code>packages/ui/README.md</code> described as the package doc in some trees</td>
+<td><strong>there is no <code>packages/ui/README.md</code></strong>; the canonical docs are <code>docs/DESIGN.md</code> + the 4 <code>docs/as-built/ui/</code> modules + <code>packages/ui/twin/README.md</code></td>
+<td><strong>DIVERGED</strong> (doc lives in <code>docs/</code>, not the package; noted so the reader does not look for it)</td>
+</tr>
+<tr>
+<td><strong>D5-4</strong></td>
+<td><code>docs/DESIGN.md</code> lists &quot;core primitives&quot; as the design system</td>
+<td>the primitive list is <strong>real</strong> — every named primitive resolves to an export at the stamped commit — <strong>but <code>DESIGN.md</code> is a <em>pointer</em>, and the as-built module is explicit that it did not take the list on trust</strong></td>
+<td><strong>HOLDS</strong> (verified by the codebase&#39;s own self-audit)</td>
+</tr>
+<tr>
+<td><strong>D5-5</strong></td>
+<td>the twin&#39;s six surfaces are described as &quot;1:1 verified&quot;</td>
+<td>accurate <em>as scoped</em>, and the README <strong>names its own exception</strong>: graph node badges read STALE/UNKNOWN because per-node live activity comes from SSE + clock-freshness, not the static graph fixture</td>
+<td><strong>HOLDS — with a self-declared exception</strong> (the harness documents what it does not yet prove)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-findings-batch-05">10. Findings (batch 05)<a href="#batch-05/10-findings-batch-05" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F5-1.</strong> ★★★ <strong>OpenRig has NO widget/composer model — the sixth platform in the study with none.</strong>
+Measured: <strong>5</strong> <code>widget</code> files (all incidental — Codex source filenames in comments, a test fixture,
+and the <em>OMP provider&#39;s</em> <code>setWidget</code>), <strong>0</strong> <code>WidgetRegistry</code>, and <strong>8</strong> <code>composer</code> hits that are all
+<em>server-side text composers</em>, not UI. The node types in the React Flow topology are <strong>fixed in code</strong>;
+there is no user-facing element registry or drag-compose surface. <em>(PX-W — the headline answer.)</em></p>
+<p><strong>F5-2.</strong> ★★ <strong>The closest thing to composition is a CONTENT composition system: Context Packs.</strong>
+A <code>manifest.yaml</code> + declared members with <strong>atoms, dependency closure, runtime selection
+(<code>Claude | Codex | any</code>), and named profiles</strong>, plus five distinct projections over the same content
+(framed / plain / addressed / situation / named). <strong>It composes prompts, never UI.</strong> Helper assets
+are <em>&quot;served as text… [and] not execute[d].&quot;</em> <em>(PX-W — the near-miss the study must name.)</em></p>
+<p><strong>F5-3.</strong> ★★★ <strong>★ The digital-twin harness: the real UI, compiled against the real hook interfaces,
+emitted as one double-clickable file — with compile-time drift detection.</strong> <code>tsc -p tsconfig.twin.json</code> runs first; a changed interface <strong>breaks the twin build</strong> (<code>TS2322</code>). Three named
+daemon-free seams (cache-seed / fetch stub / EventSource stub; <em>&quot;NOT MSW&quot;</em>). <em>(PX-F/PZ — top-tier.)</em></p>
+<p><strong>F5-4.</strong> ★★ <strong>Intent and proof are the SAME capture mechanism, paired by file base, with determinism
+enforced at runtime.</strong> <em>&quot;the same <code>buildChromeScreenshotArgs</code>, only the URL differs&quot;</em>; screenshots
+pair <code>&lt;surface&gt;.intent.png</code> ↔ <code>&lt;surface&gt;.proof.png</code>; <strong>D-1 determinism = &quot;shoot twice, byte-compare,
+fail loudly on drift.&quot;</strong> <em>(PX-F.)</em></p>
+<p><strong>F5-5.</strong> ★★★ <strong>The TUI&#39;s render/stylize split carries a TEST-PINNED invariant: styling cannot change
+behaviour.</strong> <code>stripAnsi(styled[i]) === plain[i]</code>, asserted in <strong>11 test files</strong>, with <code>stylize.ts</code>
+described as <em>segment-painted (no nested wraps)</em> so resets cannot bleed; and in the graph renderer the
+same invariant is made <strong>structural</strong> — plain and painted lines are <em>two projections of one character
+grid</em>, and hit-zones are recorded in <strong>plain-character coordinates on the same grid</strong>. <em>(PX-F —
+carry to the SRS.)</em></p>
+<p><strong>F5-6.</strong> ★★ <strong>The ONE command registry makes an undocumented action impossible by construction.</strong>
+<code>commands/registry.ts</code> is the sole source of the TUI&#39;s command surface; <code>grammar.ts</code> <strong>derives</strong> its
+verb table, arg validation and error listings from it; three render surfaces (help dump, palette,
+socket query) are <strong>serialized projections</strong> of the entries. Enforced by a <strong>parity suite at CI</strong>
+(<code>command-registry-parity.test.ts</code>). <em>(PX-W/PX-F — a registry capability, scoped to commands.)</em></p>
+<p><strong>F5-7.</strong> ★ <strong>Every TUI section declares WHAT it reads and HOW it drills — and marks a read
+&quot;passive&quot; or &quot;memory-only&quot; where it matters.</strong> <code>usage</code> reads <em>&quot;memory-only… never the refresh&quot;</em>;
+<code>cost</code> reads <em>&quot;the daemon&#39;s stored usage samples; starts no lookup.&quot;</em> <strong>A read-only surface that
+cannot accidentally spend money.</strong> <em>(PX-F — a declarative surface contract.)</em></p>
+<p><strong>F5-8.</strong> ★ <strong>The TUI&#39;s status vocabulary is 4 glyphs, collapsing existing states and rendering
+honest-unknown — &quot;NEVER a fabricated ●&quot;.</strong> Unknown <em>edge kinds</em> render <code>dim</code> rather than being forced
+into a bucket: <em>&quot;the kind string is data.&quot;</em> <em>(PX-W — a rendering vocabulary that refuses to invent
+state.)</em></p>
+<p><strong>F5-9.</strong> ★★ <strong>The web UI&#39;s status is fixed by a &quot;wording rule&quot; that BINDS FUTURE CONTRIBUTORS.</strong>
+<em>&quot;The web UI is experimental, in maintenance mode, supported best-effort; the CLI is primary… Do not
+describe the UI with stronger end-of-life language than this section uses.&quot;</em> The costs are stated
+too (no browser gate; hook &quot;contract mirrors&quot; no longer proactively maintained). <em>(PZ-adjacent — an
+honesty rule inscribed in the repo.)</em></p>
+<p><strong>F5-10.</strong> ★ <strong>The design system is a real, token-driven system with two named surface languages.</strong>
+687-line <code>globals.css</code> with <strong>54 tokens</strong> in M3-role naming; <strong>Vellum Paper</strong> (persistent) vs
+<strong>Black Glass</strong> (transient preview) as a <em>rule</em>, not a taste; <strong>zero border-radius everywhere with
+one documented exception</strong>; <strong>10 role-named type steps</strong>; a <code>tactical</code> easing; a <strong>Do-And-Do-Not
+checklist</strong> including a <strong>named single-source rule for brand graphics</strong>. <em>(PX-F.)</em></p>
+<p><strong>F5-11.</strong> ★ <strong>The web UI has a pre-paint theme script and an OS-following default</strong> (Vellum Light /
+Vellum Dark / System), so <strong>the theme cannot flash before hydration</strong>; theme is a token cascade
+(<code>.dark {}</code> block), not per-utility overrides. <em>(PX-F — a small but real care signal.)</em></p>
+<p><strong>F5-12.</strong> ★ <strong>The as-built UI docs are SELF-AUDITED: front-matter carries
+<code>last-verified-against-source: &lt;commit SHA&gt;</code>, and the body reconciles component names against source
+&quot;not taken on trust from DESIGN.md&#39;s lists&quot;.</strong> They also carry a <strong>pointer-not-copy ruling (Q1)</strong> —
+one canonical design spec — and name their own dead files (<code>SpecsTable.tsx</code>: <em>&quot;nothing imports it&quot;</em>).
+<em>(Rule 1 as documentation practice; PZ-tier.)</em></p>
+<p><strong>F5-13.</strong> ★ <strong>The UI package is honest about the failures its own tests cannot see.</strong> The twin README
+documents a <strong>test-invisible footgun</strong> (component-scoped CSS font stacks must lead with the
+registered <code>… Variable</code> family or fall through to the system font <strong>silently</strong> — <em>&quot;jsdom can&#39;t catch
+it in a unit test&quot;</em>) and a <strong>known follow-up</strong> (graph badges render stale). <em>(Rule 1; PZ-tier.)</em></p>
+<p><strong>F5-14.</strong> <strong>OpenRig has no third-party UI extension point.</strong> Unlike a plugin-slot or widget-registry
+system, &quot;add a surface&quot; means <em>edit the app</em>. <strong>This is a decided limit, not an omission</strong> — and the
+twin harness exists precisely to make that edit cheap and provable. <em>(PX-W — the negative, stated.)</em></p>
+<p><strong>F5-15.</strong> ★ <strong>The TUI, not the web UI, is the shipped primary interface, and it is deliberately
+hand-rolled</strong> — <em>&quot;Hand-rolled ANSI renderer (Phase-0 substrate decision)&quot;</em> with an <em>&quot;isolated seam&quot;</em>
+so a substrate swap <em>&quot;touches only this module,&quot;</em> and a named <em>&quot;revisit trigger.&quot;</em> <em>(PX-F — a decided
+limit with a stated reversal path.)</em></p>
+<hr>
+<h2 id="11-plain-english-summary-of-batch-05">11. Plain-English summary of batch 05<a href="#batch-05/11-plain-english-summary-of-batch-05" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>OpenRig does not have widgets — and it is not hiding any.</strong> I counted the two words that usually
+signal a composition model. <code>widget</code> appears in <strong>five files</strong>, and every hit is someone else&#39;s word
+(Codex&#39;s own source filenames quoted in comments, a test fixture, and the OMP provider&#39;s own
+<code>setWidget</code> extension call). <code>composer</code> appears eight times, and every hit is a <strong>server-side text
+composer</strong> — code that assembles a <em>string</em>, not a UI. There is no widget registry, no element
+schema, no place a user assembles a screen. <strong>That is the sixth platform in this study with no widget
+model.</strong></p>
+<p>But two things in OpenRig&#39;s frontend are genuinely first-rate, and both answer the <em>spirit</em> of the
+composition question:</p>
+<p><strong>The first is a digital twin.</strong> OpenRig builds its <strong>real</strong> UI, with dummy data, into one
+double-clickable HTML file — so anyone can change one value, rebuild, and get a <strong>clickable mockup
+that is 1:1 with the live app by construction, because it <em>is</em> the app&#39;s components.</strong> The clever
+part is the drift guard: the twin is <strong>typechecked against the real hook interfaces</strong>, so if someone
+changes a real interface, <strong>the mockup build breaks on purpose.</strong> And the capture tooling pairs an
+<em>intent</em> screenshot with a <em>proof</em> screenshot from the real running UI and <strong>refuses to accept
+nondeterminism</strong> (it shoots twice and byte-compares). This is stronger UI-change verification than
+most systems have.</p>
+<p><strong>The second is the styling invariant.</strong> The terminal UI — which is the <em>real</em> shipped interface,
+hand-written against raw ANSI with no React at all — computes its layout with <strong>no colour</strong>, then
+paints colour on in a second pass. And it <em>proves</em>, with a test repeated in eleven files, that
+<strong>stripping the colour back out gives you exactly the original</strong> (<code>stripAnsi(styled) === plain</code>).
+In the graph view it goes further: the plain and painted versions are <strong>two projections of one
+character grid</strong>, so the invariant <em>cannot</em> be violated by construction. <strong>Colour can never move a
+clickable target.</strong></p>
+<p>Alongside these: a <strong>single command registry</strong> that makes an <em>undocumented</em> action impossible (the
+grammar is generated from it, and a CI parity test enforces it); a <strong>design system</strong> with a real
+token layer and two named surface languages (translucent &quot;paper&quot; for permanent things, dark &quot;glass&quot;
+for quick previews); and a web UI whose status is written so precisely that the repo&#39;s own docs
+<strong>forbid anyone from describing it more harshly.</strong> The web UI is in <strong>maintenance mode</strong> — the CLI is
+primary — and the costs of that choice are stated, not buried.</p>
+<p>The most tempting near-miss is <strong>Context Packs</strong>: a real composition system, with atoms,
+dependencies, and profiles — <strong>but it composes <em>prompts</em>, not screens.</strong> A content composition
+system is not a widget model, and this study must not blur the two.</p>
+<p><strong>Next: batch 06 — out-of-pole (PZ).</strong> The guards (docs guard, internal-leak scanner, portability
+report), the scenario harness, bundle integrity, and the capability-registry self-destruct.</p>
+<hr>
+<p><em>Batch 05 of 08 — widgets and frontend (PX-W / PX-F). All claims read from source at <code>0.6.10</code>.
+5 divergences; 15 findings (F5-1..F5-15).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-one-sentence-shape" class="toc-link">1. The one-sentence shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-composition-answer-measured-first-rule-0b" class="toc-link">2. The composition answer, measured first (rule 0b)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-two-frontends-measured" class="toc-link">3. The two frontends, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-render-stylize-split-and-the-invariant-that-makes-styling-safe" class="toc-link">4. ★ The render/stylize split, and the invariant that makes styling safe</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-command-registry-an-undocumented-action-is-impossible-by-construction" class="toc-link">5. ★ The command registry — &quot;an undocumented action is impossible by construction&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-tui-s-section-model-and-the-honest-unknown-glyphs" class="toc-link">6. The TUI&#039;s section model and the honest-unknown glyphs</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-web-ui-in-maintenance-mode-with-a-design-system-worth-keeping" class="toc-link">7. The web UI — in maintenance mode, with a design system worth keeping</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-the-status-and-the-wording-rule" class="toc-link">7.1 The status, and the wording rule</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-2-the-design-system-a-real-one" class="toc-link">7.2 The design system — a real one</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-3-the-two-themes-are-token-cascades" class="toc-link">7.3 The two themes are token cascades</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-4-the-topology-surface" class="toc-link">7.4 The topology surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-5-the-as-built-ui-docs-are-self-audited" class="toc-link">7.5 The as-built UI docs are self-audited</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-digital-twin-harness-the-platform-s-answer-to-how-do-you-prove-the-ui-changed" class="toc-link">8. ★ The digital-twin harness — the platform&#039;s answer to &quot;how do you prove the UI changed?&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#8-4-the-one-composition-system-and-why-it-is-not-widgets" class="toc-link">8.4 The one composition system — and why it is *not* widgets</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-rule-1" class="toc-link">9. Divergences (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-findings-batch-05" class="toc-link">10. Findings (batch 05)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-plain-english-summary-of-batch-05" class="toc-link">11. Plain-English summary of batch 05</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('openrig_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('openrig_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('openrig_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('openrig_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.OpenRigReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

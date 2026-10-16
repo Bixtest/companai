@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — OpenRig Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">OpenRig Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,771</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">19 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">486</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE · POLE 1</div>
+    <h4>The aissistant — the study’s strongest permission seam</h4>
+    <p>The two-surface rule, and why it explains the whole architecture</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 370" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="180" y="14" width="560" height="52" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="460" y="36" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#7c3aed">★ THE FOUNDER’S TWO-SURFACE RULE</text>
+      <text x="460" y="54" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">“launch flags MAY be deterministic code; config-file policy may NOT”</text>
+
+      <path d="M 300 66 L 300 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <path d="M 620 66 L 620 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+
+      <g transform="translate(80, 104)">
+        <rect width="300" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">SURFACE 1: THE LAUNCH FLAG</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Stable — deterministic code may set it</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">e.g. --dangerously-skip-permissions</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">posture = flag surface</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">yolo · auto live here</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">resolved by ONE function per harness</text>
+      </g>
+      <g transform="translate(540, 104)">
+        <rect width="300" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">SURFACE 2: THE CONFIG FILE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">NOT stable — a vendor may change it</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">must go through a SKILL</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">reads the installed version, adapts</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">refuses to bypass a stricter rule</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">and ships an UNDO</text>
+      </g>
+
+      <rect x="80" y="252" width="760" height="104" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+      <text x="100" y="278" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE FIVE BUILT-IN POLICIES</text>
+      <text x="100" y="302" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">locked (the floor) · standard ⭐ (the study’s cleanest human-in-the-loop default) · open (config surface)</text>
+      <text x="100" y="322" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ yolo and auto (flag surface) — and the design CONCEDES where its own enforcement is approximate.</text>
+      <text x="100" y="344" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#7c3aed">The agent is NOT OpenRig’s — it is an unmodified Claude Code / Codex process in a YAML blueprint.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="openrig-study-batch-02-the-aissistant-p1">OpenRig Study — Batch 02: the aissistant (P1)<a href="#batch-02/openrig-study-batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Batch 02 of 08</strong> · <strong>Status:</strong> OPEN
+<strong>Pole:</strong> <strong>P1 — the aissistant</strong> (the AI user: a versatile, integratable, rich-featured agent)
+<strong>What this batch answers:</strong> what <em>is</em> an agent in OpenRig — how it is declared, launched,
+identified, given skills and context, and how much it is allowed to do. OpenRig&#39;s premise is
+that <strong>the agent is not OpenRig&#39;s</strong> (<code>ARCHITECTURE.md:15</code>: <em>&quot;the agents themselves are
+unmodified&quot;</em>), so this batch is really about <strong>the seam OpenRig builds around someone else&#39;s
+agent.</strong></p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch.</p>
+<p><strong>Rule 1 reminder:</strong> every claim was read from source; divergences are in §6.</p>
+<hr>
+<h2 id="1-the-one-sentence-shape">1. The one-sentence shape<a href="#batch-02/1-the-one-sentence-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>An OpenRig agent is a YAML <em>AgentSpec</em> (a blueprint) resolved into an <em>AgentSpec resource
+set</em>, bound to a <em>seat</em> (an address), launched by a <em>runtime adapter</em> as an unmodified
+Claude Code or Codex process inside tmux, with a small allow-listed environment and a
+permission posture that is decided on every launch path by one function per harness.</strong></p>
+<p>Six ideas do the work, and this batch reads each from code:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>The file that owns it</th>
+<th>§</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>the runtime adapter contract</td>
+<td><code>domain/runtime-adapter.ts</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td>the agent blueprint</td>
+<td><code>domain/agent-resolver.ts</code>, <code>profile-resolver.ts</code>, <code>specs/agents/**</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td>the seat (identity ≠ process)</td>
+<td><code>domain/seat-*</code>, <code>seat-identity-store.ts</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>the seat&#39;s environment</td>
+<td><code>domain/seat-launch-environment.ts</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>the permission posture</td>
+<td><code>adapters/yolo-mode.ts</code>, <code>domain/permission-policy/**</code>, <code>policies/builtin/**</code></td>
+<td>6</td>
+</tr>
+<tr>
+<td>the skill/context loadout</td>
+<td><code>domain/skill-catalog.ts</code>, <code>skill-discovery.ts</code></td>
+<td>7</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-runtime-adapter-the-p1-seam-in-full">2. The runtime adapter — the P1 seam, in full<a href="#batch-02/2-the-runtime-adapter-the-p1-seam-in-full" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>domain/runtime-adapter.ts</code> (188 lines) is the <strong>interface every agent runtime must satisfy</strong>.
+Its header comment states the contract precisely:</p>
+<blockquote>
+<p><em>&quot;The five-method runtime adapter contract. Adapters own projection, delivery, harness
+launch, reconciliation, and readiness. Startup action execution is NOT part of this
+contract — that belongs to the startup orchestrator after <code>checkReady()</code>.&quot;</em></p>
+</blockquote>
+<p>The six methods (<code>RuntimeAdapter</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>listInstalled(binding)</code></td>
+<td>what is currently projected for a node</td>
+</tr>
+<tr>
+<td><code>project(plan, binding)</code></td>
+<td>write skills/guidance/plugins to runtime target locations</td>
+</tr>
+<tr>
+<td><code>deliverStartup(files, binding, sendText?)</code></td>
+<td>deliver startup files (order, required/optional)</td>
+</tr>
+<tr>
+<td><code>launchHarness(binding, {name, resumeToken?, forkSource?})</code></td>
+<td>launch/resume/fork the harness inside tmux</td>
+</tr>
+<tr>
+<td><code>checkReady(binding)</code></td>
+<td>is the harness responsive</td>
+</tr>
+<tr>
+<td>(<code>readonly runtime</code>)</td>
+<td>its name</td>
+</tr>
+</tbody></table></div>
+<p><strong>Six implementations</strong> (<code>adapters/*-adapter.ts</code>): <code>claude-code</code> (1,130 lines),
+<code>codex</code> (1,668 — the largest), <code>pi</code>, <code>omp</code> (<strong>extends</strong> Pi), <code>terminal</code> (<strong>50 lines</strong> — the
+smallest, the reference), <code>stub</code> (the test double).</p>
+<h3 id="2-1-the-readiness-taxonomy-8-named-gate-codes">2.1 The readiness taxonomy — 8 named gate codes<a href="#batch-02/2-1-the-readiness-taxonomy-8-named-gate-codes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>runtime-adapter.ts</code> declares <strong><code>ATTENTION_REQUIRED_READINESS_CODES</code></strong>, a <strong>set of 8 gate
+codes</strong> that mean <em>a seat cannot proceed without a human</em>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>trust_gate · hook_trust_gate · update_gate · login_required ·
+mcp_gate · bypass_consent_gate · codex_auth_refusal · codex_client_incompatible
+</code></pre>
+</div>
+<blockquote>
+<p><strong>★ Finding-grade detail:</strong> OpenRig does not model &quot;the agent is blocked&quot; as a string; it
+<strong>names each gate</strong> (<code>trust_gate</code>, <code>bypass_consent_gate</code>, …) and has a predicate
+<code>isAttentionRequiredReadinessCode()</code>. A launch failure is then classified as either
+<strong><code>retry_fresh</code></strong> or <strong><code>attention_required</code></strong> (<code>HarnessLaunchRecovery</code>), and the
+<code>attention_required</code> case carries <strong><code>evidence</code></strong> (<em>&quot;the last-N pane lines&quot;</em>) so the failure
+<em>&quot;can flow honest evidence through to <code>RestoreNodeResult</code>&quot;</em>. <strong>The agent&#39;s blocked states are
+first-class, named, and evidence-bearing.</strong> <em>(P1 — a mechanism worth naming.)</em></p>
+</blockquote>
+<h3 id="2-2-the-launch-result-is-honest-about-what-it-cannot-prove">2.2 The launch result is honest about what it cannot prove<a href="#batch-02/2-2-the-launch-result-is-honest-about-what-it-cannot-prove" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>HarnessLaunchResult</code> distinguishes <code>ok: true</code> (with <code>resumeToken</code> <em>&quot;the NEW post-fork token,
+never the parent&quot;</em>) from <code>ok: false</code> (with <code>recovery</code>, <code>evidence</code>, and <code>missingConversation</code>
+<em>&quot;set only when the runtime itself reported that the requested conversation doesn&#39;t exist&quot;</em>).
+The comments are explicit about the boundary of knowledge — e.g. <code>launchedProcess</code> is <em>&quot;the
+first process the launch&#39;s own readiness check pinned as the one it started, kept even when a
+later sample saw it replaced (#1077)&quot;</em>.</p>
+<p><strong>Fork is a first-class launch mode</strong> (<code>ForkSource</code>): <code>kind: &quot;native_id&quot; | &quot;artifact_path&quot; | &quot;name&quot; | &quot;last&quot;</code>, with a <code>pendingIdAllowed</code> flag <em>&quot;set only by a seat handover: a launch whose
+new id isn&#39;t captured yet still succeeds, with the id pending, so the handover can commit the
+ready successor.&quot;</em> <strong>A seat can hand its conversation to a successor without losing the
+address</strong> — this is the same identity≠process idea, mechanised. <em>(P1.)</em></p>
+<hr>
+<h2 id="3-the-agent-blueprint-agentspec-resolved">3. The agent blueprint — AgentSpec, resolved<a href="#batch-02/3-the-agent-blueprint-agentspec-resolved" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-what-an-agentspec-is-measured-from-a-shipped-one">3.1 What an AgentSpec is (measured from a shipped one)<a href="#batch-02/3-1-what-an-agentspec-is-measured-from-a-shipped-one" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/daemon/specs/agents/development/implementer/agent.yaml</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>yaml</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-yaml">name: implementer
+version: &quot;1.0&quot;
+description: Implementation agent — implements and verifies coherent changes
+defaults:
+  runtime: claude-code
+imports:
+  - ref: local:../../shared
+profiles:
+  default:
+    uses:
+      skills: [development-team, systematic-debugging, verification-before-completion]
+      plugins: [shared:openrig-core]
+      runtime_resources: [shared:claude-default-settings, shared:claude-default-mcp,
+                          shared:codex-default-config, shared:claude-activity-hooks]
+resources:
+  guidance: [{ id: role, path: guidance/role.md }]
+startup:
+  files: [{ path: guidance/role.md, delivery_hint: send_text, required: true }]
+  actions: []
+</code></pre>
+</div>
+<p><strong>An AgentSpec has 5 resource categories</strong> (<code>ResolvedResources</code> in <code>profile-resolver.ts:38</code>):
+<code>skills · guidance · subagents · plugins · runtimeResources</code>. It has <strong><code>imports</code></strong> (composable
+specs) and <strong><code>profiles</code></strong> (named resource selections). The QA spec differs from the
+implementer in exactly two visible ways: its <code>defaults.runtime</code> is <strong><code>codex</code></strong> and its skill
+list adds <code>agent-browser, dogfood</code> — <strong>the same blueprint format spans both harnesses.</strong></p>
+<h3 id="3-2-resolution-is-real-work-and-it-reports-7-named-failure-modes">3.2 Resolution is real work, and it reports 7 named failure modes<a href="#batch-02/3-2-resolution-is-real-work-and-it-reports-7-named-failure-modes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent-resolver.ts</code> resolves a spec through <code>parseAgentSpec → validateAgentSpec → normalizeAgentSpec</code>, returning a <strong>tagged union with 7 explicit failure codes</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>not_found · parse_error · validation_failed · version_mismatch ·
+import_error (with importRef) · cycle_detected
+</code></pre>
+</div>
+<p>It also emits <strong><code>ResourceCollision</code></strong> records (<em>&quot;category, resourceId, sources[]&quot;</em>) — so when
+two imported specs claim the same resource, the resolver <strong>surfaces the collision instead of
+silently picking one.</strong> The resolved spec carries a <strong><code>hash</code></strong> (integrity). <em>(P1/PZ.)</em></p>
+<h3 id="3-3-profile-resolution-the-what-does-this-seat-get-step">3.3 Profile resolution = the "what does this seat get" step<a href="#batch-02/3-3-profile-resolution-the-what-does-this-seat-get-step" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>profile-resolver.ts</code> produces <code>ResolvedNodeConfig</code> with <code>runtime</code>, <code>model</code>, <code>effort</code>, <code>cwd</code>,
+<code>restorePolicy</code>, <strong><code>compactionStrategy</code></strong> (<em>&quot;resolved continuity mode, most-specific-wins&quot;</em>),
+<code>mechanic</code>, <code>lifecycle</code>, and <code>selectedResources</code>. Skill discovery is <strong>runtime-aware</strong>
+(<code>discoverSkillsForRuntime(..., SkillRuntime)</code>) — the same skill catalogue serves Claude Code
+and Codex, and (per the CHANGELOG section read in the pin) <em>&quot;Rig-local skill references still
+win first&quot;</em>.</p>
+<hr>
+<h2 id="4-the-seat-identity-that-outlives-the-process">4. The seat — identity that outlives the process<a href="#batch-02/4-the-seat-identity-that-outlives-the-process" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The seat vocabulary is stated in the README (<code>:339</code>): <em>&quot;a stable role and address … the
+conversation occupying it can change while its identity and authored context remain.&quot;</em>
+The code backs this with a family of <code>seat-*</code> domain files:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Concern</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>seat-identity-store.ts</code>, <code>seat-identity-reconciler.ts</code></td>
+<td>the stable identity, reconciled</td>
+</tr>
+<tr>
+<td><code>seat-lifecycle-service.ts</code></td>
+<td>launch / stop / restore</td>
+</tr>
+<tr>
+<td><code>seat-handover-service.ts</code>, <code>seat-handover-planner.ts</code></td>
+<td>handing a seat to a successor</td>
+</tr>
+<tr>
+<td><code>seat-launch-environment.ts</code></td>
+<td>the environment a seat receives (§5)</td>
+</tr>
+<tr>
+<td><code>seat-delivery-guard.ts</code></td>
+<td>whether a message may be typed into a seat</td>
+</tr>
+<tr>
+<td><code>seat-attention-reconciler.ts</code></td>
+<td>the 8 attention gates, reconciled</td>
+</tr>
+<tr>
+<td><code>seat-effort.ts</code>, <code>seat-activity-service.ts</code></td>
+<td>effort level; activity</td>
+</tr>
+</tbody></table></div>
+<p><strong>The <code>seat-delivery-guard</code> is the P1×P3 hinge</strong> and it is the <em>3-layer guard</em> the CHANGELOG
+mentions: <code>rig send</code> <strong>defaults to refuse</strong> a send when the target pane is at an interactive
+prompt or permission block — with <code>--raw</code> still guarded and
+<code>--dangerously-interact --reason &quot;…&quot;</code> an <strong>audited</strong> override. <strong>The default is fail-safe: an
+automatic message will not be typed into an agent that is waiting for a human.</strong> <em>(P1/P3.)</em></p>
+<hr>
+<h2 id="5-the-seat-s-environment-an-explicit-10-key-allow-list">5. The seat's environment — an explicit 10-key allow-list<a href="#batch-02/5-the-seat-s-environment-an-explicit-10-key-allow-list" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>seat-launch-environment.ts</code> opens with a comment that states the security stance precisely:</p>
+<blockquote>
+<p><em>&quot;Explicit public launch metadata, not a prefix/denylist over credential names. Provider
+keys and OPENRIG_ACTIVITY_HOOK_TOKEN keep their non-typed channel.&quot;</em></p>
+</blockquote>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export const SEAT_PUBLIC_ENV_KEYS = [
+  &quot;OPENRIG_HOME&quot;, &quot;OPENRIG_URL&quot;, &quot;OPENRIG_HOST&quot;, &quot;OPENRIG_PORT&quot;,
+  &quot;OPENRIG_NODE_ID&quot;, &quot;OPENRIG_SESSION_NAME&quot;, &quot;OPENRIG_RUNTIME&quot;,
+  &quot;OPENRIG_OCCUPANT_GENERATION&quot;, &quot;OPENRIG_TRANSCRIPTS_LINES&quot;,
+  &quot;OPENRIG_TRANSCRIPTS_POLL_INTERVAL_SECONDS&quot;,
+] as const;
+</code></pre>
+</div>
+<p><code>publicSeatEnvironment()</code> copies <strong>only these 10 keys</strong> into a seat&#39;s typed metadata. Then it
+<strong>re-validates <code>OPENRIG_URL</code></strong>: if the URL carries a username, password, query or hash it is
+<strong>deleted</strong> from the typed channel, with the comment <em>&quot;Never log its value.&quot;</em></p>
+<blockquote>
+<p><strong>★ The design choice, named:</strong> OpenRig does <strong>not</strong> filter by credential <em>prefix</em> (which
+would leak a differently-named secret); it <strong>projects an allow-list</strong>. Fail-closed by
+construction: a new secret is invisible to a seat until someone adds it to this array.
+<em>(P1 — a security mechanism of real interest for the mapping step.)</em></p>
+</blockquote>
+<p>The same module also <strong>locates the CLI paired with the daemon</strong> (<code>pairedCli()</code>) — <em>&quot;never a
+PATH-first global install&quot;</em> — so a seat always calls the daemon&#39;s own <code>rig</code>, not whatever is
+on <code>PATH</code>. <em>(P1.)</em></p>
+<hr>
+<h2 id="6-the-permission-posture-the-strongest-p1-surface-in-the-study">6. The permission posture — the strongest P1 surface in the study<a href="#batch-02/6-the-permission-posture-the-strongest-p1-surface-in-the-study" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the batch&#39;s centre of gravity. OpenRig&#39;s permission model has <strong>four distinct layers</strong>,
+and it is careful not to confuse them.</p>
+<h3 id="6-1-the-founder-s-two-surface-rule">6.1 The founder's two-surface rule<a href="#batch-02/6-1-the-founder-s-two-surface-rule" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>adapters/yolo-mode.ts</code> opens with a <strong>design principle stated as a comment</strong>:</p>
+<blockquote>
+<p><em>&quot;A simple deterministic setting that rides the STABLE launch-flag surface only (per the
+founder&#39;s <strong>two-surface rule: launch flags may be deterministic code; config-file policy may
+NOT</strong>).&quot;</em></p>
+</blockquote>
+<p><strong>The rule:</strong> a <em>launch flag</em> (e.g. <code>--dangerously-skip-permissions</code>) is stable enough to be
+applied by <strong>deterministic code</strong>; a <em>config-file policy</em> (a rules file whose schema a vendor
+may change) is <strong>not</strong> — it must go through a <strong>skill</strong> that reads the installed version and
+adapts. This single rule explains the whole architecture below.</p>
+<h3 id="6-2-the-posture-is-decided-by-one-function-per-harness-on-every-path">6.2 The posture is decided by one function per harness, on every path<a href="#batch-02/6-2-the-posture-is-decided-by-one-function-per-harness-on-every-path" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>yolo-mode.ts</code> exposes three pure functions — <code>claudePostureFlag</code>, <code>codexPostureArg</code>,
+<code>piTrust</code> — and their comments state the invariant:</p>
+<blockquote>
+<p><em>&quot;used on EVERY managed launch path (fresh, resume, fork) so the floor (OFF) and the
+maximally-permissive posture (ON) are uniform, <strong>never path-dependent</strong>.&quot;</em></p>
+</blockquote>
+<p>Resolution order (measured from the code):</p>
+<ol>
+<li><strong><code>launchPosture</code> from an attached policy</strong> (<code>NodeBinding.launchPosture?</code>) — <em>&quot;Present =
+authoritative for this seat (overrides the env read in <strong>BOTH directions</strong>).&quot;</em> So an
+attached <code>builtin:locked</code> keeps the floor <strong>even under global YOLO</strong>, and an attached
+<code>full_bypass</code> policy lifts a seat <strong>without</strong> the env switch.</li>
+<li>Else <strong>global <code>OPENRIG_YOLO</code></strong> env (<code>&quot;1&quot;</code>/<code>&quot;true&quot;</code>).</li>
+<li>Else the <strong>floor</strong>.</li>
+</ol>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>Floor (default)</th>
+<th>Full bypass</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Claude</td>
+<td><code>--permission-mode acceptEdits</code></td>
+<td><code>--dangerously-skip-permissions</code></td>
+</tr>
+<tr>
+<td>Codex</td>
+<td><strong><code>-s workspace-write</code></strong> (OpenRig&#39;s <em>own</em> flag, <em>&quot;NOT a harness default&quot;</em>)</td>
+<td><code>-s danger-full-access -a never</code></td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><code>--no-approve</code> (<strong>resource trust</strong>, not permissions)</td>
+<td><code>--approve</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two precision details worth stealing.</strong> (a) The Codex floor is <em>&quot;OpenRig&#39;s explicit
+workspace-only floor&quot;</em> — the platform <strong>refuses to inherit a harness default</strong> it cannot see.
+(b) <strong>Pi&#39;s <code>--approve</code> is re-labelled everywhere as RESOURCE TRUST, not a permission policy</strong> —
+<em>&quot;Pi has no permission surface&quot;</em> — a wording discipline applied consistently in code, policy
+files and the skill. <em>(P1.)</em></p>
+<h3 id="6-3-the-policy-spec-markdown-frontmatter-two-exclusive-surfaces">6.3 The policy spec — Markdown + frontmatter, two exclusive surfaces<a href="#batch-02/6-3-the-policy-spec-markdown-frontmatter-two-exclusive-surfaces" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>domain/permission-policy/policy-spec.ts</code> (188 lines) defines a policy as a <strong>Markdown file
+with a YAML frontmatter contract</strong>. Two surfaces, and <strong>the validator forbids mixing them</strong>
+(<code>validatePolicySpec</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Must carry</th>
+<th>Must NOT carry</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>flag</code></strong></td>
+<td><code>launch_posture</code> ∈ {<code>floor</code>,<code>full_bypass</code>,<code>auto</code>}</td>
+<td><code>default_posture</code>, action lists</td>
+</tr>
+<tr>
+<td><strong><code>config</code></strong></td>
+<td><code>default_posture</code> ∈ {<code>allow</code>,<code>ask</code>,<code>deny</code>} <strong>+ all four</strong> of <code>allow</code>,<code>ask</code>,<code>deny</code>,<code>destructive_class</code></td>
+<td><code>launch_posture</code></td>
+</tr>
+</tbody></table></div>
+<p>*<em>And the validation is <code>ADVISORY + fail-open</code> — <em>&quot;never enforcement&quot;</em>.</em>* The comment is
+unambiguous: <em>&quot;It NEVER validates the semantic-action vocabulary (the taxonomy owns that) and
+NEVER resolves intent to a harness format (flag surface = deterministic code elsewhere;
+config surface = the skill).&quot;</em> <strong>So the spec is a <em>declaration</em>, not a policy engine.</strong> What
+actually enforces is (a) the harness&#39;s native rules and (b) deterministic launch flags.</p>
+<h3 id="6-4-the-five-built-ins-verbatim">6.4 The five built-ins, verbatim<a href="#batch-02/6-4-the-five-built-ins-verbatim" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Exactly <strong>five</strong> built-in policies ship (<code>builtin-policy-reference.ts:20</code>:
+<code>BUILTIN_POLICY_NAMES = [&quot;locked&quot;,&quot;standard&quot;,&quot;open&quot;,&quot;yolo&quot;,&quot;auto&quot;]</code>), materialized as
+<strong>read-only (0444) inspection copies</strong> at <code>$OPENRIG_HOME/reference/policies/builtin/</code> — <em>&quot;a
+copy-to-customize affordance, not a security boundary.&quot;</em></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Surface</th>
+<th>Posture</th>
+<th>The interesting bit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>locked</strong></td>
+<td>config</td>
+<td><code>default_posture: deny</code></td>
+<td>allow-list of only <code>run_toolchain, rig_up, rig_down</code>; <em>&quot;far more usable than raw harness-default&quot;</em></td>
+</tr>
+<tr>
+<td><strong>standard</strong> ⭐</td>
+<td>config</td>
+<td><code>default_posture: allow</code></td>
+<td>allow <code>push_to_remote</code>; <strong>ask</strong> on <code>create_pr, publish_package, merge_or_release, force_push</code> — <em>&quot;the recommended default — the 80% software-factory interactive-dev posture&quot;</em></td>
+</tr>
+<tr>
+<td><strong>open</strong></td>
+<td>config</td>
+<td><code>default_posture: allow</code></td>
+<td>everything allowed <strong>except</strong> the destructive class, which asks</td>
+</tr>
+<tr>
+<td><strong>yolo</strong></td>
+<td>flag</td>
+<td><code>full_bypass</code></td>
+<td><em>&quot;APPLICATION is deterministic, NOT skill-translated&quot;</em></td>
+</tr>
+<tr>
+<td><strong>auto</strong></td>
+<td>flag</td>
+<td><code>auto</code></td>
+<td>Claude <code>--permission-mode auto</code>; <em>&quot;Codex and Pi do not have an auto mode and launch at their floor&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>The destructive class is named once</strong> (<code>destructive_class</code>): <code>delete_everything</code>,
+<code>drop_persistent_store</code>, <code>reset_or_discard_vcs</code>. And the semantic vocabulary includes
+<code>run_toolchain</code>, <code>rig_up</code>, <code>rig_down</code>, <code>push_to_remote</code>, <code>create_pr</code>, <code>publish_package</code>,
+<code>merge_or_release</code>, <code>force_push</code>, and (in the example) <code>network_egress</code>.</p>
+<h3 id="6-5-ask-deny-the-philosophy-stated-in-the-policy-file">6.5 "ASK ≠ deny" — the philosophy, stated in the policy file<a href="#batch-02/6-5-ask-deny-the-philosophy-stated-in-the-policy-file" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>From <code>standard.policy.md</code>: <em>&quot;<strong>ASK ≠ deny</strong>: OpenRig bakes no block; ASK = defer to the human
+… <code>force_push</code> is additionally best-effort on Claude (prefix rules can&#39;t reliably split <code>git push --force</code>), so ASK is the honest disposition, <strong>not a can&#39;t-enforce deny</strong>.&quot;</em></p>
+<p>And on autonomous work: <em>&quot;an <code>ask</code> freezes an autonomous seat by design — autonomous fleets use
+Open or YOLO, not Standard.&quot;</em> <strong>The design concedes where its own enforcement is approximate
+(force-push prefix matching) and prefers honesty over a false guarantee.</strong> <em>(P1.)</em></p>
+<h3 id="6-6-the-translation-skill-consent-as-executable-instructions">6.6 The translation skill — consent as executable instructions<a href="#batch-02/6-6-the-translation-skill-consent-as-executable-instructions" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The harness-format translation lives in a <strong>skill</strong>
+(<code>assets/plugins/openrig-core/skills/applying-a-permission-policy/SKILL.md</code>, 241 lines), whose
+frontmatter carries a verification caveat:</p>
+<blockquote>
+<p><code>verification_status: &quot;Verify the installed harness version and effective settings; a rule-parser result is not a native permission test.&quot;</code></p>
+</blockquote>
+<p>The skill encodes a <strong>consent discipline</strong> as instructions, and the sentences are worth
+quoting because they are a policy, not prose:</p>
+<ul>
+<li><em>&quot;A recommendation is not consent.&quot;</em></li>
+<li>*&quot;Remember an explicit Yes or No … <strong>No answer is not a remembered No.</strong>&quot;*</li>
+<li><em>&quot;An allow must not erase a stricter rule or managed requirement. Report a real conflict
+instead of silently bypassing it.&quot;</em></li>
+<li><em>&quot;Verify an ordinary matching operation twice … a <strong>command already allowed by the launch
+default does not prove a new persistent rule loaded</strong>.&quot;</em></li>
+<li><em>&quot;A parser match alone does not establish native behavior.&quot;</em></li>
+<li>It <strong>narrows scope on purpose</strong>: a whole-family allow <em>&quot;is not a read-only grant&quot;</em>; it offers
+<code>rig ps</code>, <code>rig queue list</code> and <strong>forbids</strong> widening to <code>bash</code>/<code>sh</code>/<code>node</code> <em>&quot;or generic
+wrappers&quot;</em>.</li>
+<li>It ships a <strong>reversible undo</strong>: <em>&quot;Undo the OpenRig command allowances added by this setup;
+keep my other rules.&quot;</em></li>
+</ul>
+<blockquote>
+<p><strong>★ The mechanism, named: a permission policy whose translation is a <em>skill</em> rather than
+code, because the vendor format is not stable enough to hard-code.</strong> The skill reads the
+installed version, edits the native rules file, verifies a rule actually loaded, and reports
+what it could not prove. <strong>This is the two-surface rule paying off in the hardest place:
+permission policy for two third-party harnesses with different, changing rule formats.</strong></p>
+</blockquote>
+<h3 id="6-7-drift-is-observed-not-assumed">6.7 Drift is observed, not assumed<a href="#batch-02/6-7-drift-is-observed-not-assumed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>domain/permission-drift.ts</code> defines a <strong>diagnostic that compares <em>expected</em> against
+<em>effective</em></strong>: <code>AppliedLaunchAxis = permission | sandbox | resource_trust | not_applicable</code>,
+<code>EnforcementState = aligned | drift | unknown</code>, with fields <code>expected</code>, <code>effective</code>,
+<code>sourcePath</code>, <code>reason</code>, <code>observedAt</code>. The comments repeat one discipline:</p>
+<blockquote>
+<p><em>&quot;File comparison only; neither a settings file nor an argument proves native enforcement.&quot;</em>
+<em>&quot;Emitted Codex approval argument; null/absent does not infer a native default.&quot;</em></p>
+</blockquote>
+<p><code>permission-drift-observer.ts</code> runs it. <strong>The platform treats &quot;the config says X&quot; and &quot;the
+agent is actually enforcing X&quot; as two different facts, and says so.</strong> <em>(P1.)</em></p>
+<h3 id="6-8-the-schema-three-small-migrations">6.8 The schema — three small migrations<a href="#batch-02/6-8-the-schema-three-small-migrations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>055_node_permission_policy</code></td>
+<td><code>nodes.permission_policy TEXT</code> — the per-seat REF (<code>builtin:&lt;name&gt;</code> or a relative path), <code>NULL</code> = floor</td>
+</tr>
+<tr>
+<td><code>056_rig_permission_policy</code></td>
+<td><code>rigs.permission_policy TEXT</code> — the rig-level REF, <code>NULL</code> = floor</td>
+</tr>
+<tr>
+<td><code>088_node_permission_selections</code></td>
+<td><code>node_permission_selections</code> table: <code>node_id</code> PK, <code>runtime CHECK IN (&#39;codex&#39;,&#39;claude-code&#39;)</code>, <code>mode</code>, <code>actor</code>, <code>reason</code>, <code>updated_at</code> — <strong>an audited future-launch choice</strong>; + <code>applied_launch_observations.approval_policy</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Precedence is stated once</strong> (<code>policy-ref.ts</code> / <code>standard.policy.md</code>): <strong>member policy
+overrides rig policy</strong> — the most-specific wins, exactly as in profile resolution. <em>(P1.)</em></p>
+<hr>
+<h2 id="7-the-skill-and-context-loadout">7. The skill and context loadout<a href="#batch-02/7-the-skill-and-context-loadout" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Skills are discovered per runtime</strong> (<code>skill-discovery.ts</code>, <code>SkillRuntime</code>), from
+<strong>rig-local first</strong>, then runtime/user roots; a structurally invalid <code>SKILL.md</code> is
+<strong>rejected with a named reason</strong> (<code>parseSkillFrontmatter</code>), and profile resolution <em>&quot;surfaces
+rejected-skill reasons instead of treating every broken skill as merely missing.&quot;</em> A skill
+must have frontmatter with non-empty <code>name</code>, <code>description</code> and body.</li>
+<li><strong>Skills ship from three mirrored &quot;edges&quot;</strong> (<code>spec</code> / <code>plugin</code> / <code>canonical</code>), and the
+layout is <strong>hash-pinned</strong> (<code>skill-edge-digests.generated.json</code>); <code>mirror-skills:check</code> <em>&quot;fails
+on a SKILL.md the layout does not list.&quot;</em> <code>ARCHITECTURE.md</code> claims <em>&quot;33 skills are in <code>spec</code>
+and <code>canonical</code>, 17 only in <code>plugin</code>, and 2 in all three&quot;</em>; <strong>measured on disk: 35 in
+<code>canonical</code>, 35 in <code>spec</code>, 19 in <code>plugin</code></strong> — another growing-surface drift (D2-5). <em>(P1/PZ.)</em></li>
+<li><strong>Context packs</strong> are how context reaches an agent: static packs (hand-written, <code>version: &quot;0&quot;</code>) and generated packs (built at package time from every shipped skill). The daemon serves
+them via <code>rig context get</code>.</li>
+</ul>
+<p><strong>These are read properly in batch 05 (PX-W/PX-F) and batch 06 (PZ).</strong></p>
+<hr>
+<h2 id="8-divergences-rule-1">8. Divergences (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/8-divergences-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D2-1</strong></td>
+<td><code>policies/examples/my-cautious-dev.policy.md</code> lists the built-ins as <em>&quot;(locked / standard / open / yolo)&quot;</em></td>
+<td><strong>five</strong> built-ins ship — <code>auto</code> is omitted from that prose</td>
+<td><strong>DIVERGED</strong> (example prose misses <code>auto</code>)</td>
+</tr>
+<tr>
+<td><strong>D2-2</strong></td>
+<td>the same example uses action <code>network_egress</code></td>
+<td><code>network_egress</code> appears in <strong>no</strong> built-in policy and in <strong>no</strong> daemon code — the vocabulary lives only in prose</td>
+<td><strong>UNVERIFIED-AS-ENFORCED</strong> (a declared action with no enforcement path found)</td>
+</tr>
+<tr>
+<td><strong>D2-3</strong></td>
+<td><code>ARCHITECTURE.md</code> says <em>&quot;6 runtime adapters; the command counts 5 because OmpRuntimeAdapter extends PiRuntimeAdapter&quot;</em></td>
+<td>6 names present; <code>omp-runtime-adapter</code> extends <code>pi-runtime-adapter</code> — <strong>holds</strong></td>
+<td><strong>HOLDS</strong></td>
+</tr>
+<tr>
+<td><strong>D2-4</strong></td>
+<td>batch 00 found <strong>22 distinct <code>RIGGED_*</code> names</strong> vs the release note&#39;s documented <strong>5</strong></td>
+<td>re-confirmed here: <code>SEAT_PUBLIC_ENV_KEYS</code> uses the <strong>new</strong> <code>OPENRIG_*</code> names, while <code>claude-compaction-enforcer.ts:185</code> still reads <code>OPENRIG_HOME || RIGGED_HOME</code></td>
+<td><strong>DIVERGED</strong> (carried from b00; the legacy read path is live)</td>
+</tr>
+<tr>
+<td><strong>D2-5</strong></td>
+<td><code>ARCHITECTURE.md</code> claims 33 skills in <code>spec</code>+<code>canonical</code> (2 in all three; 17 plugin-only)</td>
+<td><strong>measured: 35 <code>canonical</code>, 35 <code>spec</code>, 19 <code>plugin</code></strong></td>
+<td><strong>DIVERGED</strong> (growing surface)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-findings-batch-02">9. Findings (batch 02)<a href="#batch-02/9-findings-batch-02" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F2-1.</strong> ★ <strong>The permission model has four <em>separate</em> layers and refuses to conflate them</strong>:
+(a) the <strong>launch flag</strong> (deterministic code), (b) the <strong>harness-native rules file</strong> (translated
+by a <strong>skill</strong>), (c) the <strong>sandbox/resource-trust</strong> posture (per-harness, sometimes not a
+permission concept at all — Pi), and (d) the <strong>OpenRig operating posture</strong> (guidance, not
+enforcement). The policy-spec module says it outright: <em>&quot;recording a policy does not translate
+config rules.&quot;</em> <em>(P1.)</em></p>
+<p><strong>F2-2.</strong> ★★ <strong>The founder&#39;s two-surface rule is the load-bearing idea of this pole</strong>: <em>&quot;launch
+flags may be deterministic code; config-file policy may NOT.&quot;</em> It is why <code>yolo</code>/<code>auto</code> are
+<code>surface: flag</code> (applied directly) and why every config-surface policy must pass through a
+skill that adapts to the installed version. <strong>It is a rule about <em>which parts of a third-party
+interface you are allowed to hard-code</em>.</strong> <em>(P1 — top-tier mechanism.)</em></p>
+<p><strong>F2-3.</strong> ★ <strong>The seat&#39;s environment is an explicit 10-key allow-list, re-validated for URL
+credential leakage, with &quot;Never log its value.&quot;</strong> Fail-closed by construction — a new secret is
+invisible until added. <em>(P1.)</em></p>
+<p><strong>F2-4.</strong> <strong>Blocked states are named, not stringified.</strong> 8 <code>ATTENTION_REQUIRED_READINESS_CODES</code>
+(<code>trust_gate</code>, <code>bypass_consent_gate</code>, …) + a two-way recovery classification
+(<code>retry_fresh</code> / <code>attention_required</code>) + <strong>pane-line <code>evidence</code></strong> carried to the restore result.
+<em>(P1.)</em></p>
+<p><strong>F2-5.</strong> ★ <strong>An agent&#39;s permission posture is decided by one function per harness, called on
+every launch path, with an explicit precedence (seat &gt; rig &gt; global env &gt; floor) that overrides
+&quot;in BOTH directions.&quot;</strong> <em>(P1.)</em></p>
+<p><strong>F2-6.</strong> <strong>The Codex floor is OpenRig&#39;s own flag, &quot;NOT a harness default&quot;</strong> — the platform
+refuses to inherit an invisible default from a harness it does not control. <em>(P1.)</em></p>
+<p><strong>F2-7.</strong> <strong>Pi is consistently re-labelled as RESOURCE TRUST, &quot;not a permission policy&quot;</strong> —
+across code, policy files and the skill. <strong>The platform corrects a category error in its own
+vocabulary.</strong> <em>(P1 — a wording discipline worth naming.)</em></p>
+<p><strong>F2-8.</strong> ★ <strong>A permission policy&#39;s <em>translation</em> is a skill, not code</strong> — because the two
+harness rule formats are unstable. The skill carries a <strong>consent discipline</strong> (<em>&quot;A
+recommendation is not consent&quot;</em>, <em>&quot;No answer is not a remembered No&quot;</em>), a <strong>narrowing default</strong>
+(narrower prefixes offered; generic wrappers forbidden), <strong>conflict reporting instead of
+bypass</strong>, <strong>load verification</strong> (<em>&quot;a parser match alone does not establish native behavior&quot;</em>),
+and a <strong>reversible undo</strong>. <em>(P1 — top-tier mechanism.)</em></p>
+<p><strong>F2-9.</strong> <strong>Drift is a first-class observation, with <code>aligned \| drift \| unknown</code> per axis
+(permission, sandbox, resource_trust, not_applicable)</strong> — and the code repeats <em>&quot;neither a
+settings file nor an argument proves native enforcement.&quot;</em> <em>(P1.)</em></p>
+<p><strong>F2-10.</strong> <strong>AgentSpec resolution reports 7 named failure modes + resource collisions +
+a spec hash.</strong> An agent blueprint is resolved like a package, not read like a config. <em>(P1.)</em></p>
+<p><strong>F2-11.</strong> <strong>A seat can hand its conversation to a successor <code>ForkSource</code> without losing its
+address</strong> — identity ≠ process, mechanised (<code>pendingIdAllowed</code> commits a ready successor).
+<em>(P1.)</em></p>
+<p><strong>F2-12.</strong> <strong><code>rig send</code> defaults to refuse when a seat is at a prompt or permission block</strong>,
+with <code>--raw</code> still guarded and <code>--dangerously-interact --reason</code> an audited override. <strong>An
+automation will not type into an agent that is waiting for a human.</strong> <em>(P1/P3 — the hinge.)</em></p>
+<p><strong>F2-13.</strong> <strong>The <code>standard</code> built-in is the study&#39;s cleanest statement of a human-in-the-loop
+default</strong>: routine dev runs free, <em>outward and history-rewriting</em> acts ask, and the design
+<strong>concedes</strong> where its own enforcement is approximate (<code>force_push</code> prefix matching) rather
+than claiming a guarantee. <em>(P1.)</em></p>
+<hr>
+<h2 id="10-plain-english-summary-of-batch-02">10. Plain-English summary of batch 02<a href="#batch-02/10-plain-english-summary-of-batch-02" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>In OpenRig, <strong>an agent is not OpenRig&#39;s — it is a Claude Code or Codex process wrapped in a
+YAML blueprint and given an address.</strong> The blueprint (AgentSpec) declares imports, profiles and
+five kinds of resource; resolution reports collisions and seven named failure types and carries
+a hash. The address (a <em>seat</em>) outlives the process: a seat can fork its conversation to a
+successor and keep its name.</p>
+<p>What surrounds the agent is where the engineering is. The seat gets an <strong>explicit 10-key
+environment allow-list</strong>, fail-closed, with URL credential leakage stripped and <em>&quot;never log its
+value.&quot;</em> Its <strong>blocked states are named</strong> (8 gate codes) and its failures carry pane evidence.
+And its <strong>permissions</strong> follow a rule — <em>launch flags may be code, config-file policy may
+not</em> — which is why there are two kinds of policy (<code>flag</code> vs <code>config</code>), five built-ins
+(<code>locked</code> / <code>standard</code> / <code>open</code> / <code>yolo</code> / <code>auto</code>), and a <strong>skill</strong> that translates a
+harness-neutral intent into whichever native rules file the installed Claude or Codex expects —
+verifying the rule actually loaded, refusing to bypass a stricter rule, and shipping an undo.</p>
+<p>The result is the <strong>strongest P1 (aissistant) surface in the study so far</strong>: not a richer agent
+model than the others, but a <strong>far more careful <em>seam</em></strong> — a design that names what it can and
+cannot enforce, labels Pi&#39;s resource trust correctly, and won&#39;t type into an agent that is
+waiting for a human.</p>
+<p><strong>Next: batch 03 — the workspace (P2).</strong> RigSpec, pods/edges, projects, the queue and state,
+and the <strong>tenancy question</strong> the pin opened.</p>
+<hr>
+<p><em>Batch 02 of 08 — the aissistant (P1). All claims read from source at <code>0.6.10</code>. 5 divergences;
+13 findings (F2-1..F2-13).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-one-sentence-shape" class="toc-link">1. The one-sentence shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-runtime-adapter-the-p1-seam-in-full" class="toc-link">2. The runtime adapter — the P1 seam, in full</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-readiness-taxonomy-8-named-gate-codes" class="toc-link">2.1 The readiness taxonomy — 8 named gate codes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-launch-result-is-honest-about-what-it-cannot-prove" class="toc-link">2.2 The launch result is honest about what it cannot prove</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-agent-blueprint-agentspec-resolved" class="toc-link">3. The agent blueprint — AgentSpec, resolved</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-what-an-agentspec-is-measured-from-a-shipped-one" class="toc-link">3.1 What an AgentSpec is (measured from a shipped one)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-resolution-is-real-work-and-it-reports-7-named-failure-modes" class="toc-link">3.2 Resolution is real work, and it reports 7 named failure modes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-profile-resolution-the-what-does-this-seat-get-step" class="toc-link">3.3 Profile resolution = the &quot;what does this seat get&quot; step</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-seat-identity-that-outlives-the-process" class="toc-link">4. The seat — identity that outlives the process</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-seat-s-environment-an-explicit-10-key-allow-list" class="toc-link">5. The seat&#039;s environment — an explicit 10-key allow-list</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-permission-posture-the-strongest-p1-surface-in-the-study" class="toc-link">6. The permission posture — the strongest P1 surface in the study</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-founder-s-two-surface-rule" class="toc-link">6.1 The founder&#039;s two-surface rule</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-the-posture-is-decided-by-one-function-per-harness-on-every-path" class="toc-link">6.2 The posture is decided by one function per harness, on every path</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-the-policy-spec-markdown-frontmatter-two-exclusive-surfaces" class="toc-link">6.3 The policy spec — Markdown + frontmatter, two exclusive surfaces</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-4-the-five-built-ins-verbatim" class="toc-link">6.4 The five built-ins, verbatim</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-5-ask-deny-the-philosophy-stated-in-the-policy-file" class="toc-link">6.5 &quot;ASK ≠ deny&quot; — the philosophy, stated in the policy file</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-6-the-translation-skill-consent-as-executable-instructions" class="toc-link">6.6 The translation skill — consent as executable instructions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-7-drift-is-observed-not-assumed" class="toc-link">6.7 Drift is observed, not assumed</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-8-the-schema-three-small-migrations" class="toc-link">6.8 The schema — three small migrations</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-skill-and-context-loadout" class="toc-link">7. The skill and context loadout</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-rule-1" class="toc-link">8. Divergences (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings-batch-02" class="toc-link">9. Findings (batch 02)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-plain-english-summary-of-batch-02" class="toc-link">10. Plain-English summary of batch 02</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('openrig_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('openrig_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('openrig_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('openrig_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.OpenRigReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

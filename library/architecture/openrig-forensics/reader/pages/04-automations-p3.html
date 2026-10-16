@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — OpenRig Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">OpenRig Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,045</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">354</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: a local cockpit with no tenant, and the study’s most transferable gate</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the RIGGED rename hazard</option>
+              <option value="01">Batch 01: The monorepo — four packages, one boundary, one client</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — the two-surface rule</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — and the tenancy answer is “none”</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — obligations that must be carried</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative + two ideas</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — the gate culture</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where OpenRig sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE · POLE 3</div>
+    <h4>Automations — a queue of obligations that must be carried</h4>
+    <p>The hot-potato closure contract and the wake ladder</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="16" width="880" height="54" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="460" y="38" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#7c3aed">★ THE HOT-POTATO CLOSURE CONTRACT</text>
+      <text x="460" y="56" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">You cannot finish a task without saying where it went</text>
+
+      <path d="M 460 70 L 460 96" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+
+      <g transform="translate(20, 100)">
+        <rect width="420" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">state=done REQUIRES one of 7 reasons</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a pure, I/O-free validator owns the rule</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">and THREE of the reasons additionally</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">require a closure_target</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#7c3aed">handed_off_to · blocked_on · escalation</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">→ NO unit of work can vanish</text>
+      </g>
+      <g transform="translate(480, 100)">
+        <rect width="420" height="118" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TRANSACTIONAL HANDOFF</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the baton AND its wake-intent are staged</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">in the SAME transaction</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">delivered after commit</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">reconciled once at startup</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a crash cannot orphan a handoff</text>
+      </g>
+
+      <rect x="20" y="238" width="880" height="128" rx="8" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.6"/>
+      <text x="40" y="266" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#059669">★ THE WAKE LADDER — its invariant, stated in words</text>
+      <text x="40" y="292" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE ROW CARRIES THE OBLIGATION EXACTLY-ONCE; THE WAKE IS AT-LEAST-ONCE.</text>
+      <text x="40" y="316" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">It retries the POINTER, never the content — so a retry cannot double-deliver. State is DERIVED from the transition log,</text>
+      <text x="40" y="336" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">so a restart can neither forget a ladder nor restart its counts. A rendered-unconfirmed false negative is treated differently</text>
+      <text x="40" y="356" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">from a true failure: it never retries, but escalates directly (escalation cannot double-deliver).</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="openrig-study-batch-04-automations-p3">OpenRig Study — Batch 04: automations (P3)<a href="#batch-04/openrig-study-batch-04-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/openrig-forensics/</code> · <strong>Batch 04 of 08</strong> · <strong>Status:</strong> OPEN
+<strong>Pole:</strong> <strong>P3 — automations</strong> (where agents work on and assign tasks)
+<strong>What this batch answers:</strong> how work <em>moves</em> in OpenRig — the durable queue and its baton, the
+transactional handoff, the wake ladder that stops a handed-off task from silently parking,
+message delivery, the watchdog, and how a rig survives a reboot. In OpenRig the &quot;automation&quot;
+is not a visual workflow; it is <strong>an obligation on a row that a wake must carry.</strong></p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch.</p>
+<p><strong>Rule 1 reminder:</strong> every claim was read from source; divergences are in §8.</p>
+<hr>
+<h2 id="1-the-one-sentence-shape">1. The one-sentence shape<a href="#batch-04/1-the-one-sentence-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>OpenRig&#39;s automation is a queue of obligations.</strong> Work is a row in <code>queue_items</code>; it moves
+between <em>seats</em> (addresses) through a <strong>transactional handoff</strong>; every handoff stages a
+<strong>durable wake intent</strong> that is delivered after commit; a <strong>wake ladder</strong> retries and escalates
+so a baton never silently parks; and the row carries its obligation <strong>exactly once</strong> while the
+wake is <strong>at-least-once.</strong> There is no visual workflow canvas — the graph is the <em>topology</em> (P2)
+and the <em>transitions</em> are the automation.</p>
+<hr>
+<h2 id="2-the-coordination-primitive-five-host-scoped-tables">2. The coordination primitive — five host-scoped tables<a href="#batch-04/2-the-coordination-primitive-five-host-scoped-tables" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>docs/as-built/architecture/coordination-primitive.md</code> (396 lines) calls this layer <em>&quot;the
+SQLite-canonical durable-work layer the daemon exposes through <code>/api/stream</code> and
+<code>/api/queue</code>&quot;</em>. <strong>Five tables, one per migration <code>023</code>–<code>027</code>:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Migration</th>
+<th>Role</th>
+<th>Key property</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>stream_items</code></strong></td>
+<td><code>023</code></td>
+<td>L1 append-only intake/audit root</td>
+<td><strong>immutable after emit</strong> — only <code>archived_at</code> may be set; idempotent on <code>stream_item_id</code></td>
+</tr>
+<tr>
+<td><strong><code>queue_items</code></strong></td>
+<td><code>024</code></td>
+<td><strong>L3 owned-work queue</strong></td>
+<td>8 states; closure columns; baton columns</td>
+</tr>
+<tr>
+<td><strong><code>queue_transitions</code></strong></td>
+<td><code>025</code></td>
+<td><strong>append-only transition log</strong> — the authoritative audit trail</td>
+<td><em>&quot;Domain code never updates its rows&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>inbox_entries</code></strong></td>
+<td><code>026</code></td>
+<td>mailbox receive</td>
+<td>idempotent on <code>inbox_id</code>; 3 states (<code>pending/absorbed/denied</code>)</td>
+</tr>
+<tr>
+<td><strong><code>outbox_entries</code></strong></td>
+<td><code>027</code></td>
+<td>sender-side record <strong>+ durable wake intents + retained messages</strong></td>
+<td>idempotent on <code>outbox_id</code>; 7 delivery states</td>
+</tr>
+</tbody></table></div>
+<p><strong>Six services implement it</strong> (<code>stream-store</code>, <code>queue-repository</code>, <code>queue-transition-log</code>,
+<code>hot-potato-enforcer</code>, <code>inbox-handler</code>, <code>outbox-handler</code>) — <em>&quot;routes import these; services are
+Hono-free&quot;</em>, so the domain layer has <strong>no HTTP dependency</strong>. <em>(P3/PX-F.)</em></p>
+<blockquote>
+<p><strong>Named mechanism (rule 6): <em>the two-log pattern</em>.</strong> <code>stream_items</code> is an append-only intake
+log; <code>queue_transitions</code> is an append-only state log; both are <strong>never updated</strong> (except a
+retention move). <strong>The current state of a task is derived, and the logs are the audit.</strong></p>
+</blockquote>
+<hr>
+<h2 id="3-the-hot-potato-closure-contract-you-cannot-close-work-without-saying-where-it-went">3. ★ The hot-potato closure contract — you cannot close work without saying where it went<a href="#batch-04/3-the-hot-potato-closure-contract-you-cannot-close-work-without-saying-where-it-went" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>hot-potato-enforcer.ts</code> is a <strong>pure validator</strong> for <em>&quot;the load-bearing API contract&quot;</em>
+(<code>validateClosure</code>, <code>:59</code>). The rule:</p>
+<blockquote>
+<p><strong><code>state = done</code> requires a <code>closure_reason</code></strong>, from <strong>7 values</strong>
+(<code>CLOSURE_REASONS</code>, <code>:18</code>): <code>handed_off_to · blocked_on · denied · canceled · no-follow-on · escalation · superseded</code>.</p>
+<p><strong>And three of them <em>additionally</em> require a <code>closure_target</code></strong> (<code>:86</code>):</p>
+</blockquote>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Meaning</th>
+<th><code>closure_target</code> is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>handed_off_to</code></strong></td>
+<td>work continues with a different seat</td>
+<td>the <strong>new owner</strong></td>
+</tr>
+<tr>
+<td><strong><code>blocked_on</code></strong></td>
+<td>parked pending another item</td>
+<td>the <strong>blocker <code>qitem_id</code></strong></td>
+</tr>
+<tr>
+<td><code>denied</code></td>
+<td>receiver rejected it</td>
+<td>the reason text</td>
+</tr>
+<tr>
+<td><code>canceled</code></td>
+<td>sender/receiver withdrew</td>
+<td>a note</td>
+</tr>
+<tr>
+<td><code>no-follow-on</code></td>
+<td>terminal — nothing else needed</td>
+<td><em>(none)</em></td>
+</tr>
+<tr>
+<td><strong><code>escalation</code></strong></td>
+<td>kicked up a tier</td>
+<td>the <strong>escalation target</strong></td>
+</tr>
+<tr>
+<td><code>superseded</code></td>
+<td>replaced by cancel-and-replace</td>
+<td>the <strong>successor qitem</strong> (recorded on <code>canceled</code>, refused without it — <code>queue-repository.ts:2629</code>)</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>★★ This is the study&#39;s cleanest &quot;no-work-vanishes&quot; rule.</strong> A task cannot reach a terminal
+state without a <em>named</em> disposition, and the three reasons that imply a successor
+<strong>cannot be recorded without naming it</strong>. The enforcer is <strong>pure</strong> (no I/O, no DB), so the
+contract is testable in isolation. <em>(P3 — headline mechanism.)</em></p>
+</blockquote>
+<hr>
+<h2 id="4-the-transactional-handoff-the-baton-in-one-transaction">4. The transactional handoff — the baton, in one transaction<a href="#batch-04/4-the-transactional-handoff-the-baton-in-one-transaction" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>queue-repository.ts</code> exposes two handoff operations and the doc is precise about them:</p>
+<ul>
+<li><strong><code>handoffAndComplete</code></strong> (<code>:1833</code>) — <em>&quot;close the source as done&quot;</em> <strong>plus</strong> create the new
+owned qitem, <strong>in a single transaction</strong>.</li>
+<li><strong>transactional handoff</strong> (<code>:1656</code>) — <em>&quot;close source as <code>handed-off</code> plus create new owned
+qitem in a single transaction.&quot;</em></li>
+</ul>
+<p><strong>And the wake is staged in the same transaction</strong> (<code>:1412–1424</code>, <code>:1475–1483</code>): create,
+handoff and handoff-and-complete each <strong>stage a deterministic <code>wake-intent-&lt;qitem&gt;</code> outbox
+row inside the transaction and deliver it after commit.</strong></p>
+<blockquote>
+<p><strong>★ The durability trick, named:</strong> the baton <em>and its wake</em> are written together, so a crash
+<strong>after</strong> commit cannot leave a handed-off task with no pending wake. <strong>Startup reconciles
+and drains intents left pending by a crash once</strong> (<code>startup.ts:2361–2362</code>). If the intent
+cannot be retained, the task is <strong>still saved</strong> and the row records
+<code>failed:wake not retained: &lt;reason&gt;</code>. <em>(P3.)</em></p>
+</blockquote>
+<p><strong>Nothing in the daemon writes <code>last_heartbeat</code></strong> (<code>queue-pickup.ts:16</code>) — so a heartbeat is a
+<strong>claim by the seat</strong>, not something the platform fabricates. <em>(P3.)</em></p>
+<hr>
+<h2 id="5-the-wake-ladder-the-platform-s-answer-to-the-silent-park">5. ★ The wake ladder — the platform's answer to the *silent park*<a href="#batch-04/5-the-wake-ladder-the-platform-s-answer-to-the-silent-park" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>domain/queue-wake-ladder.ts</code> has the longest and most revealing header comment in the study so
+far. It opens by naming the problem it fixes:</p>
+<blockquote>
+<p>*&quot;S01 — WAKE OR ESCALATE ON BATONS. A handoff whose wake fails must never silently park:
+<strong>today one failed nudge is recorded and nothing follows (the measured dominant 0.5.3 failure
+class — a perfect surviving packet, a recipient never woken).</strong>&quot;*</p>
+</blockquote>
+<p>It then states <strong>a named invariant</strong>:</p>
+<blockquote>
+<h3 id="the-row-carries-the-obligation-exactly-once-the-wake-is-at-least-once">**"THE ROW CARRIES THE OBLIGATION EXACTLY-ONCE; THE WAKE IS AT-LEAST-ONCE."**<a href="#batch-04/the-row-carries-the-obligation-exactly-once-the-wake-is-at-least-once" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><em>&quot;The ladder retries the NUDGE — an envelope pointer at the row — never the content, so a
+re-attempt can never double-deliver the obligation.&quot;</em></p>
+</blockquote>
+<p><strong>The mechanism, in five measured parts:</strong></p>
+<ol>
+<li><strong>A bounded retry ladder, then named escalation rungs</strong>: destination&#39;s orchestrator
+(<em>&quot;aggregated per destination, never a duplicate row per baton&quot;</em>), then the operator surface.
+<strong>Each step is a recorded transition; none is silent.</strong></li>
+<li><strong>The transitions ARE the ladder state</strong> — <em>&quot;every tick DERIVES its position from them — a
+daemon restart can neither forget a ladder (silent park returns) nor restart its counts (cap
+violated by repetition).&quot;</em></li>
+<li><strong><code>rendered-unconfirmed</code> outcomes NEVER retry</strong> (<code>delivered-ack-pending</code>, <code>indeterminate:*</code>,
+<code>gateway-owned:*</code>) — <em>&quot;the measured false-negative class&quot;</em> — but they <strong>enter the ladder on a
+confirmation path</strong>: unconfirmed + zero pickup evidence within a window <strong>escalates directly,
+skipping the retry rung</strong>, because <em>&quot;escalation is not a re-send; it cannot double-deliver.&quot;</em></li>
+<li><strong>Suspension is DERIVED, never declared</strong>: the destination&#39;s post-handover state suspends
+wake attempts, with suspend/resume recorded; the manual override survives <em>&quot;ONLY as an
+operator override&quot;</em> (<code>OPENRIG_WAKE_SUSPEND</code>, fresh-read).</li>
+<li><strong>The rungs DELIVER, not just record</strong>: the orchestrator rung attempts a <em>real</em> wake on the
+aggregate row; a rung whose own wake fails advances after one bounded cycle. The operator
+rung&#39;s delivery leg <strong>is the delivery rules engine</strong> — <em>&quot;exactly one delivery per episode,
+never immediate-plus-deferred.&quot;</em></li>
+</ol>
+<blockquote>
+<p><strong>★★★ Why this is the batch&#39;s centre:</strong> OpenRig found its <em>dominant real-world failure</em> (&quot;a
+perfect surviving packet, a recipient never woken&quot;) and built a mechanism whose <strong>invariant is
+stated in words, whose state is derivable from a log rather than held in memory, and whose
+false-negative class is named and handled differently from the true-failure class.</strong> This is
+production-grade distributed-systems reasoning, in a local tool. <em>(P3 — top-tier.)</em></p>
+</blockquote>
+<hr>
+<h2 id="6-delivery-honesty-a-claim-isn-t-proof-that-the-body-was-read">6. Delivery honesty — "a claim isn't proof that the body was read"<a href="#batch-04/6-delivery-honesty-a-claim-isn-t-proof-that-the-body-was-read" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The doc devotes a section to <em>&quot;Which field answers &#39;did it reach them&#39;&quot;</em> and the answer is
+deliberately split:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What it honestly means</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>deliveryOutcome</code></td>
+<td>the <strong>gateway/human</strong> ledger (<code>posted</code>, <code>transport-failed</code>, <code>never-posted</code>); <strong><code>null</code> for a pane-only task</strong></td>
+</tr>
+<tr>
+<td><code>lastNudgeWireResult</code></td>
+<td>the wake send&#39;s result <strong>as stored</strong> (<code>verified</code>, <code>delivered-ack-pending</code>, <code>indeterminate:…</code>, <code>retained:…</code>, <code>failed:…</code>)</td>
+</tr>
+<tr>
+<td><code>lastNudgeResult</code></td>
+<td><strong>as presented</strong> — a claimed row whose stored result is unconfirmed reads <strong><code>claimed</code></strong></td>
+</tr>
+<tr>
+<td><code>claimedAt</code></td>
+<td>when the destination claimed it; closing does not clear it</td>
+</tr>
+<tr>
+<td><code>pickup</code></td>
+<td>derived: <code>unclaimed · working · stalled-after-claim · parked · terminal</code></td>
+</tr>
+</tbody></table></div>
+<p>And the honesty is spelled out: *&quot;A claim isn&#39;t proof that the body was read or that the
+terminal render was verified … <code>rig queue create --verify</code> says &#39;Terminal receipt unconfirmed,
+but the seat has claimed the item (claimed).&#39; … <strong>&#39;A claim shows the seat took the item; it does
+not prove the body was read.&#39;</strong>&quot;*</p>
+<blockquote>
+<p><strong>★ Named mechanism: separate <em>stored</em> from <em>presented</em> delivery state, and refuse to
+overclaim.</strong> <code>lastNudgeWireResult</code> (truth) vs <code>lastNudgeResult</code> (what a claim turns it into)
+is a UI-honesty boundary enforced in the domain layer. <em>(P3 — and see F2-9&#39;s drift discipline:
+the same &quot;prove, don&#39;t assume&quot; instinct.)</em></p>
+</blockquote>
+<hr>
+<h2 id="7-the-standing-detectors-and-the-watchdog">7. The standing detectors and the watchdog<a href="#batch-04/7-the-standing-detectors-and-the-watchdog" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="7-1-the-stuck-sweep-a-detector-with-an-evidence-contract">7.1 The stuck sweep — a detector with an evidence contract<a href="#batch-04/7-1-the-stuck-sweep-a-detector-with-an-evidence-contract" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>queue-stuck-sweep.ts</code> is a <strong>standing detector</strong> with <strong>6 finding kinds</strong> (<code>:50</code>). It creates
+findings <strong>through the queue repository</strong> (not by writing rows), each carrying
+<code>evidenceRef: rig queue show &lt;source-qitem-id&gt;</code> (<code>:605</code>) — <em>&quot;pointing to the underlying durable
+work row&quot;</em>, <em>&quot;satisf[ying] the existing human-route evidence contract.&quot;</em> Routing: <em>&quot;a finding
+goes to the destination&#39;s orchestrator when one is derivable, otherwise to the destination
+itself, and that seat may be dead.&quot;</em> Repeated detections <strong>refresh</strong> the existing finding; when
+the condition resolves, <strong>the sweep closes its own finding</strong> (<code>:612–637</code>).</p>
+<blockquote>
+<p><strong>★ The detector is a <em>participant in the same contract</em>:</strong> it opens and closes its own
+findings as queued work, with an evidence pointer, using the same closure rules. <strong>A
+self-monitoring system that obeys the rules it monitors.</strong> <em>(P3.)</em></p>
+</blockquote>
+<h3 id="7-2-the-watchdog-engine-a-4-way-action-state-machine">7.2 The watchdog engine — a 4-way action state machine<a href="#batch-04/7-2-the-watchdog-engine-a-4-way-action-state-machine" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>watchdog-policy-engine.ts</code> runs a <strong>per-evaluation state machine</strong>: resolve a policy by name
+(unknown → terminal) → parse YAML spec → evaluate → handle one of <strong><code>skip | send | terminal</code></strong>.
+Key details:</p>
+<ul>
+<li><strong>Quiet vs loud skips</strong>: a <code>skip</code> records history + emits an event <strong>only if the reason is
+&quot;loud&quot;</strong> (not in <code>QUIET_SKIP_REASONS</code>) — so the event log is not flooded.</li>
+<li><strong>An active-wake throttle</strong>: a <code>send</code> is suppressed as <code>active_wake_not_due</code> if it already
+fired within <code>active_wake_interval_seconds</code>.</li>
+<li><strong><code>not_due</code> polls are filtered upstream</strong> by the scheduler and never reach the engine.</li>
+<li><strong>Four built-in policies</strong> are registered by import: <code>artifact-pool-ready</code>,
+<code>edge-artifact-required</code>, <code>periodic-reminder</code>, <code>context-usage-threshold</code>.</li>
+</ul>
+<p>Plus a <strong>watchdog scheduler</strong>, a <strong>jobs repository</strong>, a <strong>history log</strong>, <strong>due</strong> computation,
+and <strong>auto-registration</strong> — eight files. <em>(P3.)</em></p>
+<hr>
+<h2 id="8-restore-honesty-the-reboot-story">8. Restore honesty — the reboot story<a href="#batch-04/8-restore-honesty-the-reboot-story" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>lifecycle-snapshot-restore.md</code> (398 lines) describes the <em>&quot;core product loop&quot;</em>:
+<strong><code>down</code> (auto-snapshot) → <code>up &lt;name&gt;</code> (auto-restore) → handoff</strong>, with the explicit promise
+<em>&quot;restore replays it honestly (<strong>no silent fresh-fallback</strong>)&quot;</em>.</p>
+<p>The <strong><code>NodeRestoreOutcome</code></strong> enum has <strong>9 values</strong>: <code>resumed · rebuilt · fresh · fresh-primed · awaiting-decision · failed · attention_required · operator_recovered · n-a</code> (the result itself
+has 8, without <code>n-a</code>). Where each is set is documented to the line — e.g. <code>resumed</code> is returned
+<strong>only</strong> by <code>finishJoinedResume</code> <em>&quot;after it has rebound and verified the pane; otherwise that
+becomes <code>attention_required</code>.&quot;</em></p>
+<blockquote>
+<p><strong>★ Restore does not pretend.</strong> A conversation that cannot resume becomes
+<code>awaiting-decision</code> (the original can&#39;t resume; choose <code>--fresh</code>) or <code>attention_required</code> —
+<strong>never a silent fresh start.</strong> <em>&quot;A file write does not prove that an existing conversation
+loaded it&quot;</em> (echoed from the permission skill). <em>(P3 — the platform&#39;s honesty discipline,
+third instance.)</em></p>
+</blockquote>
+<p><strong><code>restore-check</code> is a <em>separate read-only readiness probe</em></strong> — so &quot;will this restore?&quot; is a
+question you can ask <strong>without</strong> performing a restore. <em>(P3.)</em></p>
+<hr>
+<h2 id="9-the-scenario-harness-automation-tested-as-pairs">9. The scenario harness — automation tested as *pairs*<a href="#batch-04/9-the-scenario-harness-automation-tested-as-pairs" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/test-system/scenarios/</code> holds <strong>23 files, 16 declaring <code>scenario:</code></strong>. The scenario
+<strong>names are the specification</strong>, and they read like a quality bar:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>queue-baton-survives-restart.yaml          kill-daemon-mid-handoff.yaml
+locked-restore-never-permissive.yaml       one-view-state-after-mutation-storm.yaml
+send-verify-means-rendered.yaml            policy-posture-survives-structural-edit.yaml
+home-divergence-preseed-visible.yaml       clean-lifecycle-no-residue.yaml
+compaction-restore-resumes-role.yaml       stream-emit-durable-replay-live.yaml
+</code></pre>
+</div>
+<p><strong>And a scenario &quot;counts only as a pair&quot;</strong> (<code>ARCHITECTURE.md:261</code>): <em>&quot;it passes on healthy code
+and fails on the seeded run.&quot;</em> The runner uses <strong>the real CLI, daemon, tmux and SQLite with
+scripted stub agents and no model cost</strong>, in a <strong>private daemon and private tmux server</strong>
+building its environment from <code>HOME</code>, <code>PATH</code> and <code>TERM</code> only — <em>&quot;so your session&#39;s <code>TMUX</code> and
+daemon variables are dropped and it is safe to run from inside tmux, including an agent&#39;s
+pane.&quot;</em></p>
+<blockquote>
+<p><strong>★ Named mechanism: a seeded-defect scenario pair.</strong> A scenario is not a happy-path test; it
+is <strong>a test plus the fault injection that must make it fail.</strong> <code>locked-restore-never-permissive</code>
+and <code>kill-daemon-mid-handoff</code> are the platform&#39;s own statements of the invariants this batch
+found. <em>(P3/PZ.)</em></p>
+</blockquote>
+<h3 id="9-1-what-the-runner-still-cannot-bind">9.1 What the runner still cannot bind<a href="#batch-04/9-1-what-the-runner-still-cannot-bind" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md:258-260</code> is honest: <em>&quot;Today the runner binds <code>up</code>, <code>down</code>, <code>send</code>, <code>restart</code>
+and <code>daemon</code>. <code>restore</code>, <code>emit</code>, <code>mutate</code> and <code>policy</code> fail with <code>UnboundActionError</code>, and
+<code>seed_regression</code> needs a fault controller.&quot;</em> <strong>The scenario vocabulary is ahead of the runner</strong>
+— a target state declared, partially reached. <em>(P3 — a declared gap, not a hidden one.)</em></p>
+<hr>
+<h2 id="10-divergences-rule-1">10. Divergences (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/10-divergences-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D4-1</strong></td>
+<td><code>coordination-primitive.md</code> says the daemon has <strong>96</strong> migrations</td>
+<td><code>ARCHITECTURE.md</code> says <strong>94</strong>; <strong>disk has 105</strong></td>
+<td><strong>DIVERGED</strong> (a third different number — the doc set disagrees with itself <em>and</em> the disk)</td>
+</tr>
+<tr>
+<td><strong>D4-2</strong></td>
+<td>the doc&#39;s §1 says <em>&quot;later migrations add columns to these tables&quot;</em> and <code>067_i3_identity_provenance</code> adds <code>identity_provenance</code> to <code>stream_items</code></td>
+<td>confirmed in the migration list</td>
+<td><strong>HOLDS</strong> (a doc that points at a later migration and is right)</td>
+</tr>
+<tr>
+<td><strong>D4-3</strong></td>
+<td><code>ARCHITECTURE.md</code> calls <code>queue_transitions</code> <em>&quot;authoritative audit trail&quot;</em> with &quot;the one delete is the retention runner&quot;</td>
+<td>disk shows <code>054_queue_transitions_archive</code> + <code>queue-retention.ts</code> — <strong>the one delete is an archived move, in one transaction</strong></td>
+<td><strong>HOLDS</strong> (and unusually precise)</td>
+</tr>
+<tr>
+<td><strong>D4-4</strong></td>
+<td>the wake-ladder header says the 0.5.3 dominant failure was <em>&quot;a perfect surviving packet, a recipient never woken&quot;</em></td>
+<td>this is a <strong>claim about history</strong>, verifiable only against 0.5.3; the <em>mechanism</em> that responds to it is present and named</td>
+<td><strong>ACCEPTED AS STATED</strong> (a design rationale, flagged as historical)</td>
+</tr>
+<tr>
+<td><strong>D4-5</strong></td>
+<td>the scenario template and the runner disagree: the doc lists <code>restore/emit/mutate/policy</code> verbs</td>
+<td><em>&quot;the runner binds <code>up</code>, <code>down</code>, <code>send</code>, <code>restart</code> and <code>daemon</code>&quot;</em>; the others throw <code>UnboundActionError</code></td>
+<td><strong>DIVERGED — but self-declared</strong> (the doc says so itself)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="11-findings-batch-04">11. Findings (batch 04)<a href="#batch-04/11-findings-batch-04" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F4-1.</strong> ★★ <strong>The hot-potato closure contract: <code>done</code> requires one of 7 closure reasons, and
+three of them additionally require a <code>closure_target</code> naming where the work went.</strong> A pure,
+I/O-free validator owns it. <strong>No unit of work can vanish.</strong> <em>(P3 — headline.)</em></p>
+<p><strong>F4-2.</strong> ★★★ <strong>The wake ladder&#39;s stated invariant: <em>&quot;THE ROW CARRIES THE OBLIGATION
+EXACTLY-ONCE; THE WAKE IS AT-LEAST-ONCE.&quot;</em></strong> It retries the <em>pointer</em>, never the <em>content</em>, so
+a retry cannot double-deliver. <em>(P3 — top-tier.)</em></p>
+<p><strong>F4-3.</strong> ★★ <strong>The ladder&#39;s state is DERIVED from the transition log, not held in memory</strong> — <em>&quot;a
+daemon restart can neither forget a ladder (silent park returns) nor restart its counts.&quot;</em>
+<strong>Crash-safety by derivation.</strong> <em>(P3.)</em></p>
+<p><strong>F4-4.</strong> ★ <strong>OpenRig distinguishes a <em>false negative</em> (<code>rendered-unconfirmed</code>) from a <em>true
+failure</em></strong> and handles them differently: the former <strong>never retries</strong> but <strong>escalates directly</strong>
+(because escalation cannot double-deliver). <em>(P3 — the sharpest single detail in the batch.)</em></p>
+<p><strong>F4-5.</strong> <strong>The baton and its wake are staged in the SAME transaction</strong>, delivered after commit,
+and <strong>reconciled once at startup</strong>. A crash after commit cannot orphan a handed-off task. <em>(P3.)</em></p>
+<p><strong>F4-6.</strong> ★ <strong>Stored delivery state and presented delivery state are separated, and the platform
+refuses to overclaim</strong>: <em>&quot;A claim shows the seat took the item; it does not prove the body was
+read.&quot;</em> <code>lastNudgeWireResult</code> (truth) vs <code>lastNudgeResult</code> (presented). <em>(P3.)</em></p>
+<p><strong>F4-7.</strong> <strong>The two-log pattern</strong>: <code>stream_items</code> (intake, immutable) + <code>queue_transitions</code>
+(append-only, never updated) — <strong>current state is derived; the logs are the audit.</strong> <em>(P3.)</em></p>
+<p><strong>F4-8.</strong> ★ <strong>The stuck sweep is a participant in its own contract</strong> — it opens/closes findings
+as queued work with an <code>evidenceRef</code> pointer, using the same closure rules, and closes its own
+finding when the condition resolves. <em>(P3.)</em></p>
+<p><strong>F4-9.</strong> <strong>The watchdog is a 4-way action state machine</strong> (<code>skip | send | terminal</code>) with a
+<strong>quiet-vs-loud skip distinction</strong> (so the event log is not flooded) and an <strong>active-wake
+throttle</strong>; <code>not_due</code> polls never reach the engine. <em>(P3.)</em></p>
+<p><strong>F4-10.</strong> ★ <strong>Restore honesty is enforced by a 9-value outcome enum with &quot;no silent
+fresh-fallback&quot;</strong> — <code>resumed</code> is returned <strong>only</strong> after the pane is rebound and verified;
+otherwise <code>attention_required</code>. A <code>restore-check</code> probe answers the question <strong>without
+performing the restore</strong>. <em>(P3.)</em></p>
+<p><strong>F4-11.</strong> ★ <strong>A scenario counts only as a PAIR — it must pass on healthy code and fail on the
+seeded run.</strong> The names (<code>locked-restore-never-permissive</code>, <code>kill-daemon-mid-handoff</code>) are the
+platform&#39;s own invariant statements. <em>(P3/PZ.)</em></p>
+<p><strong>F4-12.</strong> <strong>The scenario vocabulary is ahead of the runner</strong>, and the doc says which verbs are
+unbound (<code>restore/emit/mutate/policy</code> → <code>UnboundActionError</code>). <strong>A declared, partial
+capability — stated, not hidden.</strong> <em>(P3.)</em></p>
+<p><strong>F4-13.</strong> <strong>Domain services are Hono-free</strong> — <em>&quot;routes import these; services are Hono-free&quot;</em> —
+so the automation core has <strong>no HTTP dependency</strong> and is testable without a server. <em>(P3/PX-F.)</em></p>
+<hr>
+<h2 id="12-plain-english-summary-of-batch-04">12. Plain-English summary of batch 04<a href="#batch-04/12-plain-english-summary-of-batch-04" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>OpenRig&#39;s automation is <strong>not a canvas — it is a queue of obligations that must be carried.</strong>
+Work lives as a row; the row moves between seats through a handoff; and the platform&#39;s central
+rule is that <strong>you cannot finish a task without saying where it went</strong>: finishing requires one
+of seven closure reasons, and three of those require you to <em>name the successor</em>. The handoff
+and the wake that announces it are written <strong>in the same transaction</strong>, so a crash cannot leave
+a task handed off with nobody told.</p>
+<p>What makes this batch notable is the <strong>wake ladder</strong> — OpenRig found its worst real failure
+(&quot;a perfect surviving packet, a recipient never woken&quot;) and built a retry-and-escalate ladder
+whose <strong>invariant is stated in words</strong> (<em>the obligation exactly-once, the wake at-least-once</em>),
+whose <strong>state is derived from the log</strong> so a restart cannot lose it, and which treats a <em>false
+negative</em> differently from a <em>true failure</em>. Around it: a stuck-detector that obeys the same
+closure rules it enforces, a watchdog state machine that keeps quiet skips out of the event log,
+and a <strong>restore</strong> that reports nine honest outcomes and never silently starts fresh. The tests
+make the philosophy explicit: a scenario only counts if it <strong>fails when the defect is seeded.</strong></p>
+<p><strong>Next: batch 05 — widgets and frontend (PX-W / PX-F).</strong> The TUI topology views, the web UI in
+maintenance mode, the design system, and context packs.</p>
+<hr>
+<p><em>Batch 04 of 08 — automations (P3). All claims read from source at <code>0.6.10</code>. 5 divergences;
+13 findings (F4-1..F4-13).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-one-sentence-shape" class="toc-link">1. The one-sentence shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-coordination-primitive-five-host-scoped-tables" class="toc-link">2. The coordination primitive — five host-scoped tables</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-hot-potato-closure-contract-you-cannot-close-work-without-saying-where-it-went" class="toc-link">3. ★ The hot-potato closure contract — you cannot close work without saying where it went</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-transactional-handoff-the-baton-in-one-transaction" class="toc-link">4. The transactional handoff — the baton, in one transaction</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-wake-ladder-the-platform-s-answer-to-the-silent-park" class="toc-link">5. ★ The wake ladder — the platform&#039;s answer to the *silent park*</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#the-row-carries-the-obligation-exactly-once-the-wake-is-at-least-once" class="toc-link">&quot;THE ROW CARRIES THE OBLIGATION EXACTLY-ONCE; THE WAKE IS AT-LEAST-ONCE.&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-delivery-honesty-a-claim-isn-t-proof-that-the-body-was-read" class="toc-link">6. Delivery honesty — &quot;a claim isn&#039;t proof that the body was read&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-standing-detectors-and-the-watchdog" class="toc-link">7. The standing detectors and the watchdog</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-the-stuck-sweep-a-detector-with-an-evidence-contract" class="toc-link">7.1 The stuck sweep — a detector with an evidence contract</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-2-the-watchdog-engine-a-4-way-action-state-machine" class="toc-link">7.2 The watchdog engine — a 4-way action state machine</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-restore-honesty-the-reboot-story" class="toc-link">8. Restore honesty — the reboot story</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-scenario-harness-automation-tested-as-pairs" class="toc-link">9. The scenario harness — automation tested as *pairs*</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#9-1-what-the-runner-still-cannot-bind" class="toc-link">9.1 What the runner still cannot bind</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-rule-1" class="toc-link">10. Divergences (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-findings-batch-04" class="toc-link">11. Findings (batch 04)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-plain-english-summary-of-batch-04" class="toc-link">12. Plain-English summary of batch 04</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('openrig_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('openrig_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('openrig_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('openrig_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.OpenRigReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
