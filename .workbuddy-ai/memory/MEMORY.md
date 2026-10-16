@@ -47,6 +47,13 @@ requirements `SR-01…SR-nn`). mattermost joins later as a **10th column** (no r
 
 ## Live code frontier (`JOURNAL.md`)
 **★ NEXT = `P2-9b`** — default-flip to Hermes + OpenCode deletion + `CC-74` retirement.
+**RULED 2026-10-16 (Option 1):** the stale-timeout gate is closed — keep the 2400 s ceiling, on-demand
+tool loading is the standard behavior (the pin ships progressive disclosure ON by default; prompt-cache
+reuse measured ON); `P2-9b` = **measure-and-configure**: one in-process re-measurement of the assembled
+prompt (the ~16,757 figure under rule-13 re-measurement vs the compose's own 10,988), config only if
+the numbers demand, then the switchover. Record: `DECISION-p2-9b-stale-timeout-trade.md` §6; the
+lesson is `WORKING-RULES.md` **rule 18** (critical analysis + expanded cloud research first; never a
+compromise menu).
 **`CC-84` (tenancy, the study's driver):** worker MCP calls run as ONE superadmin identity → a
 Hermes turn runs platform tools OUTSIDE the chat's tenant; one shared `HERMES_HOME`. Ranked:
 per-run minted credential (recommended) → interim fail-closed guard → doc-only rejected.

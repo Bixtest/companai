@@ -1,7 +1,8 @@
 # The cold-turn trade: the ceiling is a symptom, and the worker already ships the cure
 
-**Written:** 2026-10-16. **Author:** the agent (researching the owner's question). **Status:** 🔄 **OPEN —
-a written record for the owner's decision. No code is proposed or changed by this document.**
+**Written:** 2026-10-16. **Author:** the agent (researching the owner's question). **Status:** ✅
+**DECIDED 2026-10-16 — Option 1 is the owner's ruling ("Yes we follow the recommended alternative");
+see §6. No code is proposed or changed by this document.**
 
 **Parent:** `PLAN-HERMES-PHASE2-one-tenant-one-tool.md` §2.15 (the P2-9/P2-9a/P2-9b record);
 `platform_points.md` row 28 (`CC-72`, the P2-9b trigger); `MASTER-CHECKLIST.md` §2 (the frontier)
@@ -293,7 +294,7 @@ scope for the deployment plan.
 
 ---
 
-## 6. The single decision for the owner
+## 6. The single decision for the owner — and the ruling (2026-10-16)
 
 **Whether P2-9b's scope is "measure and configure what already ships" (Option 1, recommended) — or
 "change product defaults" (Options 2/3, the compromises).**
@@ -307,8 +308,38 @@ names only under budget) plus the P2-9a turn as the working precedent, and misse
 monitor, not a correctness hole.
 
 **No code is proposed by this document.** It is the written record that, by the project's own rule,
-must precede any code — and the code it would authorise is small: a configuration change and two
-measurements, both reversible.
+must precede any code — and the code it would authorise is small: a configuration change and one
+measurement (the §4.4 probe is done), both reversible.
+
+---
+
+## 6.1 The ruling, verbatim (2026-10-16)
+
+> *"1) Yes we follow the recommended alternative. 2) Make this experience a lesson you document by
+> adding rules to follow in the working rules. For any critical task, you need a critical analysis
+> first and expanded cloud researching to first identify the best, most optimized, rich fetured,
+> accurate and quality boosted way to do it. Not only you were planning to do it in a compromized
+> way, but even in a way that is worse than what we had already. That's lack of awareness of what we
+> have and lack of awareness of where the world is now."*
+
+**Part (1) — Option 1 is the decided path.** Concretely, it settles:
+
+- **The 2,400 s stale ceiling stays.** It is a hardware grace measured with 495 s of headroom over
+  the slowest prefill actually observed (the DEFAULT-toolsets run); raising it would only make every
+  cold turn wait longer and feed the #58962 streak breaker.
+- **On-demand tool loading is the standard behavior** — not a mode, not a toggle. The pinned
+  worker's progressive disclosure is already on by default and was proven live in the `P2-9a` turn.
+- **`P2-9b` is re-scoped to measure-and-configure.** Its one outstanding action is the §4.3
+  re-measurement of the assembled prompt (in-process — the live RPCs cannot expose it); the config
+  knobs (`threshold_pct`, the listing budget, `HERMES_TUI_TOOLSETS`) are touched **only if the
+  measured numbers demand it**. Then the switchover itself: the default-flip to Hermes + the OpenCode
+  deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`) — one change.
+
+**Part (2) — the process failure is now a standing rule.** [`WORKING-RULES.md`](WORKING-RULES.md)
+**rule 18** (written the same day): a critical task gets a critical analysis first and expanded cloud
+research first; what we have and where the world is must be measured, not assumed; and a compromise
+menu — or an option worse than the status quo — is never put to the owner. Its worked example is
+this decision itself.
 
 ---
 
@@ -317,7 +348,10 @@ measurements, both reversible.
 - **P2-9b is re-scoped from "pick a timeout" to "measure and configure the shipped disclosure."**
   Its deliverable becomes: the re-measured prompt size (§4.3 — the §4.4 probe verdict is already
   in), and — only if the numbers demand it — a tuned `tool_search` config or toolsets pin.
-- **`CC-72` (the P2-9b trigger on `platform_points.md` row 28) stays armed** and now points here.
+  **RULED 2026-10-16 (§6): this re-scope is the decided plan** — the ceiling stays at 2,400 s and the
+  measurement is the first action.
+- **`CC-72`'s stale-timeout leg (on `platform_points.md` row 28) is CLOSED by the ruling**; the
+  row's remaining work is the §4.3 measurement, then the switchover.
 - **The hazard paragraph in the phase-2 plan §2.15 carries a forward reference to this document**
   (added with this record); its 16,757 figure is marked "provenance open, re-measure before gating"
   until §4.3 lands.

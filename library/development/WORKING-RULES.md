@@ -19,7 +19,8 @@ owner** — how to report, what not to close, and what to do with the front end.
 These mirror the top of `workspace/COOKBOOK.md` ("The three rules that override everything", which
 now carries rules 0–5). **This file is the fuller list** — it carries every standing override, and it
 is the copy kept in step as new rules are added (rule 15 was added 2026-10-11; **rule 16 — the
-workstream-bridge rule — was added the same day**). They are
+workstream-bridge rule — was added the same day**; rule 17 — the permanent architectural-evaluation
+question — 2026-10-15; **rule 18 — the critical-task protocol — 2026-10-16**). They are
 repeated here because a rule a newcomer has to find is a rule that gets broken.
 
 0. **THE ORDER OF DEVELOPMENT IS THE VISION'S ORDER — and no task may jump ahead of it**
@@ -326,6 +327,52 @@ from the artefact, research-validate-write-then-build. Read them once, before to
     Hermes kanban/tools/plugins as nuggets callable from workspaces — *"not as it, but as an added value
     to what serves our platform best."*
 
+18. **A CRITICAL TASK GETS A CRITICAL ANALYSIS FIRST, AND EXPANDED CLOUD RESEARCH FIRST — never a
+    compromise menu, and never an option worse than what we already have** *(owner, 2026-10-16 — the
+    day he ruled on the `P2-9b` stale-timeout trade)*. **When a task is critical — one the owner will
+    decide on, or one that gates the build frontier — the work that must precede any proposal is not
+    optional:**
+    **(a) Critical analysis first, in writing.** Before an option, a menu, or a recommendation is put
+    to the owner, the task is analysed on paper: what it actually is, what it stands on, **what we
+    already have** (measured — rule 17(b)), what the field does, and which path is best and why. A
+    menu presented without that analysis behind it is a guess wearing a suit.
+    **(b) Expanded cloud research first.** Go outside our own stack: the published mechanisms,
+    libraries, papers and **current defaults** of the tools we run. Rule 9(b) says "challenge the task
+    before you execute it" — this is the research duty that makes the challenge real. **"Where the
+    world is now" is part of the task, not a footnote.**
+    **(c) Awareness of what we have.** Measure the pin, the shipped defaults and the running stack
+    FIRST (rules 17(b) and 4). The mechanism you are about to propose may already exist and already
+    be **on** — on `P2-9b` it was.
+    **(d) Never a compromise menu — and never an option worse than the status quo.** Options that all
+    lose something (raise a ceiling and slow every turn; shrink a toolset and lose capability) are a
+    failure of analysis, not a menu of trades. If every option you can see is a compromise, the
+    analysis is not finished — go back to (b) and (c).
+    **The owner's words, verbatim:** *"Make this experience a lesson you document by adding rules to
+    follow in the working rules. For any critical task, you need a critical analysis first and
+    expanded cloud researching to first identify the best, most optimized, rich fetured, accurate and
+    quality boosted way to do it. Not only you were planning to do it in a compromized way, but even
+    in a way that is worse than what we had already. That's lack of awareness of what we have and
+    lack of awareness of where the world is now."*
+    **Why it exists (the worked example — `P2-9b`, the same day; full record:
+    [`DECISION-p2-9b-stale-timeout-trade.md`](DECISION-p2-9b-stale-timeout-trade.md)).** The phase-2
+    plan's hazard paragraph offered three options — raise the worker's stale ceiling, shrink the
+    default toolset, or both — **every one a compromise, and one (raising the ceiling) strictly worse
+    than doing nothing**, because it slows every cold turn instead of shrinking the cause, and each
+    trip feeds the cross-turn streak breaker that wedges the agent. What the analysis should have
+    found first, and the research then confirmed: **(1) the pinned worker already ships the owner's
+    own proposal** — progressive tool disclosure (`tool_search`/`tool_describe`/`tool_call` with BM25
+    over the live tool catalog) **on by default**, proven live in the `P2-9a` turn; **(2) the
+    deployed model server already reuses the prompt cache by default** (measured: an identical
+    947-token prompt cost 168.7 s cold, **1.5 s warm**) — so warm turns pay only the delta and the
+    hazard is a one-time cold-start cost, not an every-turn cost; and **(3) the field's answer was
+    exactly the owner's instinct** — Anthropic's "Code execution with MCP" (2025-11-04: progressive
+    disclosure via `search_tools`) and RAG-MCP (Gan & Sun, 2025: retrieval over tool schemas) both
+    describe on-demand tool loading as the current best practice. The compromise menu was put to the
+    owner **before the analysis behind it existed** — the record had to be reconstructed after the
+    fact, once the owner asked for it. **What it forbids:** putting an option menu to the owner on a
+    critical task without the written analysis behind it; offering an option that regresses what we
+    have; and treating our own stack's defaults as unknown when they are measurable in an afternoon.
+
 ---
 
 ## 2. How to work with the owner
@@ -406,7 +453,12 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-15 — **added rule 17** — the owner's permanent architectural-evaluation rule
+*Last updated: 2026-10-16 — **added rule 18** — on the owner's instruction, the `P2-9b` lesson made
+permanent: **a critical task gets a critical analysis first and expanded cloud research first**, to
+identify the best, most optimized, rich-featured, accurate and quality-boosted way to do it; what we
+already have and where the world is must be **measured, not assumed**; and a **compromise menu — or an
+option worse than what we have — is never put to the owner**. His words verbatim in the rule; the
+worked example is the same day's stale-timeout trade. Previously 2026-10-15 — **added rule 17** — the owner's permanent architectural-evaluation rule
 (*"is what already exists the best to build on top of, under, or around — or should we change/optimise/
 upgrade it?"*), on his instruction, and restated as applying to **every** development decision, not only
 the OpenCode/Hermes transition; his words are quoted verbatim in the rule. Previously 2026-10-11 — **rule 9(a) strengthened** on the owner's instruction: ownership is of the

@@ -45,10 +45,14 @@ largely built — while the **platform skeleton underneath it is only starting**
   DONE** (the port's shape · the first engine · the chat route moved onto it · the run closed at the
   door · the exit gate). Hermes is now **wired behind the door and live-proven** (`P2-5` selectable ·
   `P2-7`/`P2-8` live turns · `P2-9a` the MCP bridge — a real Hermes turn called one of the 21 platform
-  tools). **R28-6 (deleting OpenCode, `CC-72`) waits on the `P2-9b` switchover decision** — the
-  default-flip + the deletion + the `hermes-local` retirement, one change, paused on your stale-timeout
-  ruling (the default toolset's ~16,757 tokens → a ~3000 s cold prefill vs the worker's own 2400 s
-  stale ceiling).
+  tools). **`R28-6` (deleting OpenCode, `CC-72`) — the stale-timeout gate is RULED (2026-10-16).** The
+  owner ruled Option 1 of [`DECISION-p2-9b-stale-timeout-trade.md`](DECISION-p2-9b-stale-timeout-trade.md):
+  **keep the worker's 2400 s stale ceiling**; on-demand tool loading is the **standard behavior** (the
+  pin ships progressive disclosure ON by default; prompt-cache reuse measured ON — 168.7 s cold → 1.5 s
+  warm); `P2-9b` is re-scoped to **measure-and-configure** — one in-process re-measurement of the
+  assembled prompt (the ~16,757 figure doesn't reconcile with the compose's own 10,988), config tuning
+  only if the numbers demand — then the switchover itself: the default-flip to Hermes + the deletion +
+  the `hermes-local` retirement, one change.
 - **ALSO NOW:** the architecture workshop's mapping pass is **DONE** (53 requirements,
   `SR-01`…`SR-53`); two platform studies remain (mattermost + activepieces), and the approved next
   build is the tooling set (`SR-38`/`39`/`41`/`46`) + `SR-08`.
@@ -122,8 +126,9 @@ Startable now or near-term (no hard blocker): **CC-66(2)** the history read · *
 index rebuild · **CC-63** when a command is next touched · **CC-41** on the next deploy.
 Needs you: **CC-11** (arm enforce per-tenant) · **CC-51** (team-leg go-ahead) · **CC-65** (retention
 policy). Trigger-blocked on another build: **CC-6 / CC-20 / CC-66(1)** on G-04 · **CC-32** on G-09 ·
-**CC-72 (R28-6)** on the `P2-9b` switchover decision (Hermes is wired and live-proven; what gates the
-deletion is your stale-timeout ruling, not the engine).
+**CC-72 (R28-6)** — the stale-timeout gate is **RULED 2026-10-16** (Option 1 of the decision record:
+keep the 2400 s ceiling, `P2-9b` = measure-and-configure); the deletion now waits only on `P2-9b`'s
+one in-process prompt measurement.
 
 *Closed since the first draft, verified in code and in the register: **CC-60** (done by `P2-4` — the
 runner agent `business_ir.query_runner` carries the fixed one-tool menu `business_ir.run_query`,
@@ -212,7 +217,7 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-69 | The chat route's question short-circuit — RULED: stays a named, pinned, permanent exception | ✅ closed |
 | CC-70 | The chat run's capabilityGrantId is carried but not consumed | ☐ open |
 | CC-71 | The health endpoint's direct engine reach — RULED: stays a named, pinned, permanent exception | ✅ closed |
-| CC-72 | Delete OpenCode from behind the door (R28-6) — the switchover's deletion half | ☐ open |
+| CC-72 | Delete OpenCode from behind the door (R28-6) — the switchover's deletion half — stale-timeout gate **RULED 2026-10-16** (Option 1; record: `DECISION-p2-9b-stale-timeout-trade.md` §6) | ☐ open |
 | CC-73 | The ai-assistant type gate says 0 (92 pre-existing test-only errors fixed) | ✅ closed |
 | CC-74 | hermes-local retires in P2-9b (the retirement is the switchover's content) | ☐ open |
 | CC-76 | The OpenCode adapter now honours the envelope's deadline (fixed in P2-6) | ✅ closed |
@@ -330,4 +335,6 @@ the defect** — fix it here.
 the SR register added: all 53 architecture requirements carry an address (3 HAVE · 10 BUILD ·
 38 BORROW · 2 RE-ENGINEER), read straight from `08-THE-SRS.md`; `CC-60` closed by `P2-4` and
 `CC-67` closed, both verified in code and in the callbacks register; `CC-72` is the open row-28
-item; the frontier boxes aligned across BACKLOG / platform_points / JOURNAL).
+item (its stale-timeout gate **RULED 2026-10-16** — Option 1: keep the 2400 s ceiling, `P2-9b` =
+measure-and-configure; the ruling is recorded in the decision doc §6, `platform_points.md` row 28
+and the phase-2 plan §2.15); the frontier boxes aligned across BACKLOG / platform_points / JOURNAL).
