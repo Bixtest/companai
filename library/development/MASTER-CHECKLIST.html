@@ -145,6 +145,23 @@
     <div id="openwork"></div>
   </div>
 
+  <!-- REGISTER -->
+  <div class="card">
+    <h2><span class="dot"></span>The register — every named item, closed and open</h2>
+    <p class="kick" style="margin:0 0 12px">The <code>CC-*</code> codes are the fine-grained items behind the
+      rows above — the cuts, the findings, the fixes. <b>Every one has an address here</b>: a code you meet
+      anywhere in the documents resolves on this page. <b>Closed</b> = built and proven (tests, mutations, a
+      separate-agent hostile critic — the record is in <code>COMPLETION-CALLBACKS.md</code>). States were
+      read item by item from that register, not scanned by keyword. <b>CC-75 was never assigned</b> — the
+      numbering skips it. <b id="regCount"></b></p>
+    <div class="tabs" id="regtabs"></div>
+    <table>
+      <thead><tr><th style="width:84px">Item</th><th>What it is, in plain words</th>
+        <th style="width:104px">State</th></tr></thead>
+      <tbody id="regtbody"></tbody>
+    </table>
+  </div>
+
   <!-- REQUIREMENTS + PLATFORMS -->
   <div class="two">
     <div class="card">
@@ -168,6 +185,10 @@
     &nbsp;·&nbsp; Statuses: <span class="badge b-done">done</span>
     <span class="badge b-partial">partial</span> <span class="badge b-open">open</span>
     <span class="badge b-absent">absent</span> &nbsp;·&nbsp; No code was written to build this view.
+    <br><b>Last audit 2026-10-16:</b> the register section added — all 83 <code>CC-*</code> items now carry
+    an address here (45 closed · 38 open); <code>CC-60</code> closed (done by <code>P2-4</code>, verified in
+    code — the runner agent's fixed one-tool menu); <code>CC-67</code> closed and <code>CC-72</code> is the
+    open row-28 item; the frontier boxes aligned across BACKLOG / platform_points / JOURNAL.
   </footer>
 </div>
 
@@ -211,7 +232,7 @@ const ROWS = [
  [22,5,"An AI user can run only the agents bound to it — and nothing else.","partial","CC-27 core done · CC-55/56/57 legs done"],
  [21,6,"You can see who did what, when, on which record — and export it for compliance.","done","P4 · open CC-64, CC-65"],
  ["21b",6,"Audit history is independent of the business record (you cannot edit your own past).","done","P4a (hash-chained ledger)"],
- [23,7,"You can type a request in ordinary words and the platform turns it into a typed business request.","done","G-02 / G-17 · open CC-58, CC-60"],
+ [23,7,"You can type a request in ordinary words and the platform turns it into a typed business request.","done","G-02 / G-17 · open CC-58"],
  [24,7,"The AI is structurally constrained to produce a valid request — it cannot hallucinate a table.","done","G-17"],
  [25,7,"The platform validates deterministically before anything runs.","done","G-02"],
  [26,7,"Every request ends in one of three known ways (answer, proposed change, or saved Function).","done","G-21 · open CC-13"],
@@ -259,11 +280,10 @@ const OPEN = [
  ["20","CC-42","G-22 Slice 2B — the state-machine engine's first caller is the customers deal pipeline. (Business work.)","When business work resumes."],
  ["21 / 21b","CC-64 · CC-65","The audit phase is BUILT; two cracks remain — an undo's trace bypasses the ledger, and action_logs has no retention path.","CC-64: when the ledger/undo path is next touched. CC-65: your retention policy."],
  ["23","CC-58","The Business-IR authoring wire's person-facing screen — the head + compile half are live; the screen is not.","When business work resumes."],
- ["23","CC-60","The business_ir.run_query tool is registered, but no agent whitelists it — a chat assistant cannot call it yet.","When the AI tool surface is next touched, or a general assistant agent is added."],
  ["26","CC-13","G-21's schema-mutation IR kind, its UI, and its database row are not built.","When the schema-mutation IR kind exists."],
  ["27","CC-8","tool-test-runner.ts runs a read-tool handler ungated (reachable only from the superadmin CLI).","When the tool-test CLI gains an HTTP surface."],
  ["27","CC-9","catalog/customers context calls a tool handler directly with userId: null.","When page-context hydration gains a subject."],
- ["28","CC-67","Row 28's door: R28-1…R28-5 DONE (the port, the first engine, the chat route onto it, the run closed, the exit gate). R28-6 = deleting OpenCode (CC-72) — trigger-blocked: it is still the only engine behind the door.","When a second engine (Hermes) is wired behind the door."],
+ ["28","CC-72","Delete OpenCode from behind the door (R28-6) — the switchover's deletion half. The port shape is COMPLETE (R28-1…R28-5).","When P2-9b lands — the owner's stale-timeout ruling gates the flip (the default toolset's ~16,757 tokens → a ~3000 s cold prefill vs the worker's 2400 s stale ceiling)."],
  ["27","CC-66","Row 27's four open parts — the similarity signal is BUILT; the reduced-marker, the history read, the offer, and never-acts-without-asking remain.","(1) when G-04 lands. (2) startable now. (3) the frontend. (4) after (2)+(3)."],
  ["31","CC-32","A saved Function has no persistence — so it has no delete path to guard, and cannot be loaded by id.","When G-09 gives a saved Function a durable row."],
  ["35","CC-62","The workspace build set — every requirement the B-WS design mapped as BUILD IT: the menu join, thread lifecycle, collaboration, AI-as-participant, extension routes.","Mixed — the join/lifecycle ride G-09/CC-32; AI-as-participant needs your DP-09; extensions need WS-1 + B-WS/B9."],
@@ -289,10 +309,105 @@ const PLATFORMS = [
 /* ---------- FRONTIER ---------- */
 const FRONTIER = `<b>NOW — Row 28 (Phase 8):</b> the agent runtime behind one typed door.
   Sub-rows <b>R28-1 … R28-5 are DONE</b> (the port's shape · the first engine · the chat route moved
-  onto it · the run closed at the door · the exit gate). <b>R28-6 (deleting OpenCode, CC-72) is
-  trigger-blocked</b> until a second engine — Hermes — is wired behind the door.
-  <b>ALSO NOW:</b> Row 16 team-leg (CC-51 — your go-ahead) and the B-WS/B9 widget design.
-  <b>Behind it:</b> the platform skeleton work (Phase 5 remainders).`;
+  onto it · the run closed at the door · the exit gate). Hermes is now <b>wired behind the door and
+  live-proven</b> (<code>P2-5</code> selectable · <code>P2-7</code>/<code>P2-8</code> live turns ·
+  <code>P2-9a</code> the MCP bridge — a real Hermes turn called one of the 21 platform tools).
+  <b>R28-6 (deleting OpenCode, <code>CC-72</code>) waits on the <code>P2-9b</code> switchover
+  decision</b> — the default-flip + the deletion + the <code>hermes-local</code> retirement, one change,
+  paused on your stale-timeout ruling (the default toolset's ~16,757 tokens → a ~3000 s cold prefill vs
+  the worker's own 2400 s stale ceiling).
+  <b>ALSO NOW:</b> the architecture workshop's mapping pass is <b>DONE</b> (53 requirements,
+  <code>SR-01</code>…<code>SR-53</code>); two platform studies remain (mattermost + activepieces), and the
+  approved next build is the tooling set (<code>SR-38</code>/<code>39</code>/<code>41</code>/<code>46</code>)
+  + <code>SR-08</code>.
+  <b>Behind it:</b> Row 16 team-leg (<code>CC-51</code> — your go-ahead) and the B-WS/B9 widget design.`;
+
+/* ---------- REGISTER (mirrors COMPLETION-CALLBACKS.md, states read item by item, 2026-10-16) ---------- */
+const REGISTER = [
+ ["CC-1","The permission write now lands: the gate's defaulted outcome is applied to the tenant's grant role","closed"],
+ ["CC-2","The batch route is gated at the route","closed"],
+ ["CC-3","The module-install / CLI create paths are gated, fail-closed, grants after the flush","closed"],
+ ["CC-4","A field re-type is gated on every write site that can re-type one","closed"],
+ ["CC-5","The S11 grammar ships as a setting (five verbs — SD-4 Slice C)","closed"],
+ ["CC-6","The data-axis row shape is not built (per-record view / manage)","open"],
+ ["CC-7","The catalogue is in-process for recorded surfaces — a recorded field lives for the process, not a durable row","open"],
+ ["CC-8","tool-test-runner runs a read-tool handler ungated (CLI-only today)","open"],
+ ["CC-9","catalog / customers context calls a tool handler with userId: null","open"],
+ ["CC-10","The HTTP RBAC path passes no invoker (the tool door does)","open"],
+ ["CC-11","enforce is not armed for any tenant — the operator's per-tenant decision","open"],
+ ["CC-12","The universal Resource envelope is not built (the registry half is done)","open"],
+ ["CC-13","G-21's schema-mutation IR kind, its UI and its database row are not built","open"],
+ ["CC-14","The escalation branch in the three parked modules is commented out","open"],
+ ["CC-15","No live route proves the escalation (202 + a pending_acts row) end-to-end","open"],
+ ["CC-16","The grant merge into role_acls.features_json is one atomic SQL UPDATE","closed"],
+ ["CC-17","Both halves closed: the decision carrier (request header) exists and is checked","closed"],
+ ["CC-18","The batch route names every key it is about to write","closed"],
+ ["CC-19","dynamicLoader.tsconfig.test.ts fails under the full suite (environmental, not a code defect)","open"],
+ ["CC-20","A custom field's permission is granted, but nothing reads it","open"],
+ ["CC-21","The custom-entity install primitive is gated (upsertCustomEntity, fail-closed)","closed"],
+ ["CC-22","Both HTTP reactivation paths are gated at the route","closed"],
+ ["CC-23","The create branch of the grant write is atomic too","closed"],
+ ["CC-24","A custom entity's HTTP reactivation is gated at the route (the CC-22 shape)","closed"],
+ ["CC-25","The carrier read now checks the actor (decidedBy / grantTo verified)","closed"],
+ ["CC-26","The create page carries the checkbox field","closed"],
+ ["CC-27","An AI user can run only the agents bound to it (the core leg)","closed"],
+ ["CC-28","The batch read-back inside GET is fixed","closed"],
+ ["CC-29","The deletedAt clause is pinned in both consumers; the globalThis leak became a coverage gate","closed"],
+ ["CC-30","The custom-entities storage entry corrected (the migration is unapplied on live DBs — noted)","closed"],
+ ["CC-31","The core set is marked by column, not by name (Option B, owner ruling)","closed"],
+ ["CC-32","A saved Function has no persistence — so it has no delete path to guard","open"],
+ ["CC-33","The structural guard sees row writes, not raw DDL","open"],
+ ["CC-34","The read / reference verbs are grammar postures, not write-path-enforceable","open"],
+ ["CC-35","A structural re-type labelled 'create' would escape the guard","open"],
+ ["CC-36","Several foreign guard-input builders omit actorKind","open"],
+ ["CC-37","The structural settings ship the S11 grammar as a setting","closed"],
+ ["CC-38","The escalate outcome has no approval-layer wiring — nobody files the pending act","open"],
+ ["CC-39","The actor check reads live ACL state inside a guard's validate","open"],
+ ["CC-40","auth:role is a declared kernel entity","closed"],
+ ["CC-41","update.sh fix shipped; the closing proof is a double-build","open"],
+ ["CC-42","G-22 Slice 2B — the state-machine engine's first caller (business work)","open"],
+ ["CC-43","readTenantSurfaces is the live consumer of the persisted surfaces (the read half)","closed"],
+ ["CC-44","The write-path gate is DEFAULT-DENY at the build","closed"],
+ ["CC-45","Server-side exports consult the map and MASK marked fields","closed"],
+ ["CC-46","All 53 searchable entities declare aclFeatures (+ a coverage gate)","closed"],
+ ["CC-47","The human CRUD GET / list path IS permission-gated (403)","closed"],
+ ["CC-48","The custom-entity records page's export goes through the server","closed"],
+ ["CC-49","The customer-tasks export is built by the server","closed"],
+ ["CC-50","The OWN leg of row 16 (opt-in owner scope)","closed"],
+ ["CC-51","Row 16 Option B: own + TEAM row scope — deferred by the owner","open"],
+ ["CC-52","Every table must be searchable / a read surface / allowlisted (233 tables)","closed"],
+ ["CC-53","The AI read path applies the classification column-mask (+ the presenter / aggregate leak fixes)","closed"],
+ ["CC-54","The index-time presenter can still promote any string field","open"],
+ ["CC-55","The narrowing leg: tools INTERSECT, features UNION","closed"],
+ ["CC-56","The confirm route re-checks the binding before executing","closed"],
+ ["CC-57","The in-process helper consults the binding + threads its scope (the last named leg)","closed"],
+ ["CC-58","The Business-IR screen (Stage C / B not started; Stage A in force)","open"],
+ ["CC-59","The Business-IR chain's first production caller — registered and gated","closed"],
+ ["CC-60","The tool's in-chat consumer — done by P2-4 (the runner agent's fixed one-tool menu)","closed"],
+ ["CC-61","The command contract made uniform (all six facets on the action log)","closed"],
+ ["CC-62","The workspace build set (menu join, thread lifecycle, collaboration, AI-as-participant, extensions)","open"],
+ ["CC-63","The command contract's facets are declared by 0 of ~93 production commands","open"],
+ ["CC-64","An undo's trace entry bypasses the hash-chained ledger","open"],
+ ["CC-65","action_logs has no retention path","open"],
+ ["CC-66","Row 27's remaining parts (reduced-marker, history read, offer, never-acts-without-asking)","open"],
+ ["CC-67","Row 28's door: the platform's own runtime sits behind it; both window-walkers closed","closed"],
+ ["CC-68","The non-deterministic MCP dev-key test fixed (not the product)","closed"],
+ ["CC-69","The chat route's question short-circuit — RULED: stays a named, pinned, permanent exception","closed"],
+ ["CC-70","The chat run's capabilityGrantId is carried but not consumed","open"],
+ ["CC-71","The health endpoint's direct engine reach — RULED: stays a named, pinned, permanent exception","closed"],
+ ["CC-72","Delete OpenCode from behind the door (R28-6) — the switchover's deletion half","open"],
+ ["CC-73","The ai-assistant type gate says 0 (92 pre-existing test-only errors fixed)","closed"],
+ ["CC-74","hermes-local retires in P2-9b (the retirement is the switchover's content)","open"],
+ ["CC-76","The OpenCode adapter now honours the envelope's deadline (fixed in P2-6)","closed"],
+ ["CC-77","The capability grant resolves to nothing — a label, not an authority","open"],
+ ["CC-78","The task-shaped starting menu has no machinery behind it","open"],
+ ["CC-79","The live worker bridge: the worker CAN knock on the door (P2-9a — a live turn called a platform tool)","closed"],
+ ["CC-80","The ai-assistant suite is hermetic (measured on both sides)","closed"],
+ ["CC-81","The base tool interfaces are not assignable from a narrowly-typed tool","open"],
+ ["CC-82","The port carries no settings (model / toolset / prompt are deployment constants on the Hermes path)","open"],
+ ["CC-83","P2-9b retires the only door that can write into a Hermes session","open"],
+ ["CC-84","The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority","open"],
+];
 
 /* ---------- RENDER ---------- */
 const S = {done:"Done",partial:"Partial",open:"Open",absent:"Absent"};
@@ -368,6 +483,34 @@ OPEN.forEach(o=>{
   tb2.appendChild(tr);
   const cnt=det.querySelector('.cnt');
   cnt.textContent=tb2.children.length+' item'+(tb2.children.length>1?'s':'');
+});
+
+// register — every named item, with tabs
+const rc = {closed:0,open:0};
+REGISTER.forEach(r=>rc[r[2]]++);
+document.getElementById('regCount').innerHTML =
+  `<b>${rc.closed} closed · ${rc.open} open · ${REGISTER.length} total.</b>`;
+const rtb = document.getElementById('regtbody');
+REGISTER.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.dataset.rs=r[2];
+  tr.innerHTML=`<td class="id">${r[0]}</td>
+    <td class="desc">${r[1]}</td>
+    <td><span class="badge ${r[2]==='closed'?'b-done':'b-open'}">${r[2]==='closed'?'Closed':'Open'}</span></td>`;
+  rtb.appendChild(tr);
+});
+const rtabs=[["all","All items"],["closed","Closed"],["open","Open"]];
+const rtabBox=document.getElementById('regtabs');
+rtabs.forEach(([k,label],i)=>{
+  const n = k==="all"?REGISTER.length : rc[k];
+  const el=document.createElement('span');el.className='tab'+(i===0?' on':'');
+  el.innerHTML=`${label}<span class="n">${n}</span>`;el.dataset.k=k;
+  el.onclick=()=>{rtabBox.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on');
+    rtb.querySelectorAll('tr').forEach(tr=>{
+      tr.style.display = (k==='all'||tr.dataset.rs===k)?'':'none';
+    });};
+  rtabBox.appendChild(el);
 });
 
 // platforms

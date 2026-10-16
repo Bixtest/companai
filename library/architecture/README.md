@@ -7,9 +7,15 @@ studied Hermes** — then (a later step) map each finding against what `mercato`
 final SRS.
 
 > **Where we are.** Step 1 of the owner's plan — *"ironing out the full Hermes understanding"* — is **done**
-> (the Hermes study, closed). We are now at the **platform-study step** that precedes the mapping step. The
-> owner's three poles (the aissistant / the workspace / automations) plus widgets and frontend wiring are the
-> frame for every platform study.
+> (the Hermes study, closed). **Nine platforms are studied and closed** (Hermes ✅ · Paperclip ✅ · CrewAI ✅ ·
+> Multica ✅ · Gas Town ✅ · n8n ✅ · buzz ✅ · openrig ✅ · zulip ✅ — each with its own reader and verification
+> report) and
+> **the cross-platform MAPPING PASS IS DONE**: every pole mapped across all nine platforms against mercato →
+> `mapping/findings/01`–`06` (the per-pole findings) → `07-SYNTHESIS.md` → **`08-THE-SRS.md` — the requirement
+> register, 53 requirements (SR-01…SR-53)**. **Two platform studies remain: `mattermost` + `activepieces`**
+> (the 10th and 11th platforms — activepieces added by the owner 2026-10-16); they join the mapping as new
+> columns, no rework of what is done. The owner's three poles (the aissistant / the workspace / automations)
+> plus widgets and frontend wiring are the frame for every platform study.
 
 ---
 

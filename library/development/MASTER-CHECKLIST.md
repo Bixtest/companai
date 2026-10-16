@@ -43,10 +43,16 @@ largely built — while the **platform skeleton underneath it is only starting**
 
 - **NOW — Row 28 (Phase 8):** the agent runtime behind one typed door. Sub-rows **R28-1 … R28-5 are
   DONE** (the port's shape · the first engine · the chat route moved onto it · the run closed at the
-  door · the exit gate). **R28-6 (deleting OpenCode, `CC-72`) is trigger-blocked** until a second
-  engine — Hermes — is wired behind the door.
-- **ALSO NOW:** Row 16 team-leg (`CC-51` — your go-ahead) and the `B-WS/B9` widget design.
-- **Behind it:** the platform-skeleton work (the Phase 5 remainders).
+  door · the exit gate). Hermes is now **wired behind the door and live-proven** (`P2-5` selectable ·
+  `P2-7`/`P2-8` live turns · `P2-9a` the MCP bridge — a real Hermes turn called one of the 21 platform
+  tools). **R28-6 (deleting OpenCode, `CC-72`) waits on the `P2-9b` switchover decision** — the
+  default-flip + the deletion + the `hermes-local` retirement, one change, paused on your stale-timeout
+  ruling (the default toolset's ~16,757 tokens → a ~3000 s cold prefill vs the worker's own 2400 s
+  stale ceiling).
+- **ALSO NOW:** the architecture workshop's mapping pass is **DONE** (53 requirements,
+  `SR-01`…`SR-53`); two platform studies remain (mattermost + activepieces), and the approved next
+  build is the tooling set (`SR-38`/`39`/`41`/`46`) + `SR-08`.
+- **Behind it:** Row 16 team-leg (`CC-51` — your go-ahead) and the `B-WS/B9` widget design.
 
 ---
 
@@ -80,7 +86,7 @@ resolves. The full per-row evidence is in `platform_points.md` → THE LIST.
 | 22 | 5 | An AI user can run only the agents bound to it | 🟡 | CC-27 core · CC-55/56/57 legs |
 | 21 | 6 | See who did what, when, on which record; export for compliance | ✅ | P4 · CC-64, CC-65 |
 | 21b | 6 | Audit history independent of the business record (can't edit your past) | ✅ | P4a (hash-chained ledger) |
-| 23 | 7 | Type a request in words; the platform makes a typed business request | ✅ | G-02 / G-17 · CC-58, CC-60 |
+| 23 | 7 | Type a request in words; the platform makes a typed business request | ✅ | G-02 / G-17 · CC-58 |
 | 24 | 7 | The AI is structurally constrained — it cannot hallucinate a table | ✅ | G-17 |
 | 25 | 7 | The platform validates deterministically before anything runs | ✅ | G-02 |
 | 26 | 7 | Every request ends one of three known ways | ✅ | G-21 · CC-13 |
@@ -110,17 +116,118 @@ resolves. The full per-row evidence is in `platform_points.md` → THE LIST.
 ## 4. Open work — every unfinished item, with its trigger
 
 **The trigger is the observable event that makes an item startable.** Full plain-English detail is in
-`platform_points.md` → ⏳ OPEN WORK (30 items) and in the HTML view, grouped by row.
+`platform_points.md` → ⏳ OPEN WORK (29 items) and in the HTML view, grouped by row.
 
 Startable now or near-term (no hard blocker): **CC-66(2)** the history read · **CC-54** on the next
 index rebuild · **CC-63** when a command is next touched · **CC-41** on the next deploy.
 Needs you: **CC-11** (arm enforce per-tenant) · **CC-51** (team-leg go-ahead) · **CC-65** (retention
 policy). Trigger-blocked on another build: **CC-6 / CC-20 / CC-66(1)** on G-04 · **CC-32** on G-09 ·
-**CC-72 (R28-6)** on a second engine behind the door.
+**CC-72 (R28-6)** on the `P2-9b` switchover decision (Hermes is wired and live-proven; what gates the
+deletion is your stale-timeout ruling, not the engine).
+
+*Closed since the first draft, verified in code and in the register: **CC-60** (done by `P2-4` — the
+runner agent `business_ir.query_runner` carries the fixed one-tool menu `business_ir.run_query`,
+`ai-agents.ts:197`) and **CC-67** (row 28's door is complete; the open row-28 item is `CC-72`).*
 
 ---
 
-## 5. Platform study — 11 platforms
+## 5. The register — every named item, closed and open
+
+The `CC-*` codes are the fine-grained items behind the rows above — the cuts, the findings, the fixes.
+**Every one has an address here**: a code you meet anywhere in the documents resolves on this page.
+**Closed** = built and proven (tests, mutations, a separate-agent hostile critic — the record is in
+`COMPLETION-CALLBACKS.md`). States were read item by item from that register, not scanned by keyword.
+**CC-75 was never assigned** — the numbering skips it. **45 closed · 38 open · 83 total.**
+
+| Item | What it is, in plain words | State |
+|---|---|---|
+| CC-1 | The permission write now lands: the gate's defaulted outcome is applied to the tenant's grant role | ✅ closed |
+| CC-2 | The batch route is gated at the route | ✅ closed |
+| CC-3 | The module-install / CLI create paths are gated, fail-closed, grants after the flush | ✅ closed |
+| CC-4 | A field re-type is gated on every write site that can re-type one | ✅ closed |
+| CC-5 | The S11 grammar ships as a setting (five verbs — SD-4 Slice C) | ✅ closed |
+| CC-6 | The data-axis row shape is not built (per-record view / manage) | ☐ open |
+| CC-7 | The catalogue is in-process for recorded surfaces — a recorded field lives for the process, not a durable row | ☐ open |
+| CC-8 | tool-test-runner runs a read-tool handler ungated (CLI-only today) | ☐ open |
+| CC-9 | catalog / customers context calls a tool handler with userId: null | ☐ open |
+| CC-10 | The HTTP RBAC path passes no invoker (the tool door does) | ☐ open |
+| CC-11 | enforce is not armed for any tenant — the operator's per-tenant decision | ☐ open |
+| CC-12 | The universal Resource envelope is not built (the registry half is done) | ☐ open |
+| CC-13 | G-21's schema-mutation IR kind, its UI and its database row are not built | ☐ open |
+| CC-14 | The escalation branch in the three parked modules is commented out | ☐ open |
+| CC-15 | No live route proves the escalation (202 + a pending_acts row) end-to-end | ☐ open |
+| CC-16 | The grant merge into role_acls.features_json is one atomic SQL UPDATE | ✅ closed |
+| CC-17 | Both halves closed: the decision carrier (request header) exists and is checked | ✅ closed |
+| CC-18 | The batch route names every key it is about to write | ✅ closed |
+| CC-19 | dynamicLoader.tsconfig.test.ts fails under the full suite (environmental, not a code defect) | ☐ open |
+| CC-20 | A custom field's permission is granted, but nothing reads it | ☐ open |
+| CC-21 | The custom-entity install primitive is gated (upsertCustomEntity, fail-closed) | ✅ closed |
+| CC-22 | Both HTTP reactivation paths are gated at the route | ✅ closed |
+| CC-23 | The create branch of the grant write is atomic too | ✅ closed |
+| CC-24 | A custom entity's HTTP reactivation is gated at the route (the CC-22 shape) | ✅ closed |
+| CC-25 | The carrier read now checks the actor (decidedBy / grantTo verified) | ✅ closed |
+| CC-26 | The create page carries the checkbox field | ✅ closed |
+| CC-27 | An AI user can run only the agents bound to it (the core leg) | ✅ closed |
+| CC-28 | The batch read-back inside GET is fixed | ✅ closed |
+| CC-29 | The deletedAt clause is pinned in both consumers; the globalThis leak became a coverage gate | ✅ closed |
+| CC-30 | The custom-entities storage entry corrected (the migration is unapplied on live DBs — noted) | ✅ closed |
+| CC-31 | The core set is marked by column, not by name (Option B, owner ruling) | ✅ closed |
+| CC-32 | A saved Function has no persistence — so it has no delete path to guard | ☐ open |
+| CC-33 | The structural guard sees row writes, not raw DDL | ☐ open |
+| CC-34 | The read / reference verbs are grammar postures, not write-path-enforceable | ☐ open |
+| CC-35 | A structural re-type labelled 'create' would escape the guard | ☐ open |
+| CC-36 | Several foreign guard-input builders omit actorKind | ☐ open |
+| CC-37 | The structural settings ship the S11 grammar as a setting | ✅ closed |
+| CC-38 | The escalate outcome has no approval-layer wiring — nobody files the pending act | ☐ open |
+| CC-39 | The actor check reads live ACL state inside a guard's validate | ☐ open |
+| CC-40 | auth:role is a declared kernel entity | ✅ closed |
+| CC-41 | update.sh fix shipped; the closing proof is a double-build | ☐ open |
+| CC-42 | G-22 Slice 2B — the state-machine engine's first caller (business work) | ☐ open |
+| CC-43 | readTenantSurfaces is the live consumer of the persisted surfaces (the read half) | ✅ closed |
+| CC-44 | The write-path gate is DEFAULT-DENY at the build | ✅ closed |
+| CC-45 | Server-side exports consult the map and MASK marked fields | ✅ closed |
+| CC-46 | All 53 searchable entities declare aclFeatures (+ a coverage gate) | ✅ closed |
+| CC-47 | The human CRUD GET / list path IS permission-gated (403) | ✅ closed |
+| CC-48 | The custom-entity records page's export goes through the server | ✅ closed |
+| CC-49 | The customer-tasks export is built by the server | ✅ closed |
+| CC-50 | The OWN leg of row 16 (opt-in owner scope) | ✅ closed |
+| CC-51 | Row 16 Option B: own + TEAM row scope — deferred by the owner | ☐ open |
+| CC-52 | Every table must be searchable / a read surface / allowlisted (233 tables) | ✅ closed |
+| CC-53 | The AI read path applies the classification column-mask (+ the presenter / aggregate leak fixes) | ✅ closed |
+| CC-54 | The index-time presenter can still promote any string field | ☐ open |
+| CC-55 | The narrowing leg: tools INTERSECT, features UNION | ✅ closed |
+| CC-56 | The confirm route re-checks the binding before executing | ✅ closed |
+| CC-57 | The in-process helper consults the binding + threads its scope (the last named leg) | ✅ closed |
+| CC-58 | The Business-IR screen (Stage C / B not started; Stage A in force) | ☐ open |
+| CC-59 | The Business-IR chain's first production caller — registered and gated | ✅ closed |
+| CC-60 | The tool's in-chat consumer — done by P2-4 (the runner agent's fixed one-tool menu) | ✅ closed |
+| CC-61 | The command contract made uniform (all six facets on the action log) | ✅ closed |
+| CC-62 | The workspace build set (menu join, thread lifecycle, collaboration, AI-as-participant, extensions) | ☐ open |
+| CC-63 | The command contract's facets are declared by 0 of ~93 production commands | ☐ open |
+| CC-64 | An undo's trace entry bypasses the hash-chained ledger | ☐ open |
+| CC-65 | action_logs has no retention path | ☐ open |
+| CC-66 | Row 27's remaining parts (reduced-marker, history read, offer, never-acts-without-asking) | ☐ open |
+| CC-67 | Row 28's door: the platform's own runtime sits behind it; both window-walkers closed | ✅ closed |
+| CC-68 | The non-deterministic MCP dev-key test fixed (not the product) | ✅ closed |
+| CC-69 | The chat route's question short-circuit — RULED: stays a named, pinned, permanent exception | ✅ closed |
+| CC-70 | The chat run's capabilityGrantId is carried but not consumed | ☐ open |
+| CC-71 | The health endpoint's direct engine reach — RULED: stays a named, pinned, permanent exception | ✅ closed |
+| CC-72 | Delete OpenCode from behind the door (R28-6) — the switchover's deletion half | ☐ open |
+| CC-73 | The ai-assistant type gate says 0 (92 pre-existing test-only errors fixed) | ✅ closed |
+| CC-74 | hermes-local retires in P2-9b (the retirement is the switchover's content) | ☐ open |
+| CC-76 | The OpenCode adapter now honours the envelope's deadline (fixed in P2-6) | ✅ closed |
+| CC-77 | The capability grant resolves to nothing — a label, not an authority | ☐ open |
+| CC-78 | The task-shaped starting menu has no machinery behind it | ☐ open |
+| CC-79 | The live worker bridge: the worker CAN knock on the door (P2-9a — a live turn called a platform tool) | ✅ closed |
+| CC-80 | The ai-assistant suite is hermetic (measured on both sides) | ✅ closed |
+| CC-81 | The base tool interfaces are not assignable from a narrowly-typed tool | ☐ open |
+| CC-82 | The port carries no settings (model / toolset / prompt are deployment constants on the Hermes path) | ☐ open |
+| CC-83 | P2-9b retires the only door that can write into a Hermes session | ☐ open |
+| CC-84 | The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority | ☐ open |
+
+---
+
+## 6. Platform study — 11 platforms
 
 Nine closed; two pending your ask. They join as new `SR-*` columns, **no rework**.
 
@@ -134,7 +241,7 @@ The mapping output — **53 requirements** across the poles — is in
 
 ---
 
-## 6. How this file relates to the other registers (no conflicts)
+## 7. How this file relates to the other registers (no conflicts)
 
 | Document | Role |
 |---|---|
@@ -147,12 +254,14 @@ The mapping output — **53 requirements** across the poles — is in
 
 ---
 
-## 7. Keeping it current
+## 8. Keeping it current
 
 When a status changes: update it here **and** in `platform_points.md` (the number is derived from the
 boxes, never typed), then re-open the HTML — its data block mirrors this list and is marked with the
 date it was last synced. If this index and a register disagree, **the register wins and this file is
 the defect** — fix it here.
 
-**Last synced:** 2026-10-16 (mapping pass closed at 53 requirements; activepieces added as an 11th
-platform).
+**Last synced:** 2026-10-16 (audit — the register section added: all 83 `CC-*` items carry an address;
+`CC-60` closed by `P2-4` and `CC-67` closed, both verified in code and in the callbacks register;
+`CC-72` is the open row-28 item; the frontier boxes aligned across BACKLOG / platform_points /
+JOURNAL).
