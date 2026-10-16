@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 12 — The synthesis — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-12" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 12</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis (Decision)</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/12-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,822</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">19 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">260</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 12 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 12 SYNTHESIS BLUEPRINT</div>
+    <h4>The Strategic Transfer Matrix &amp; Architectural Recommendation</h4>
+    <p>Answering the 3 owner questions: What goes where, and why we BUILD AROUND</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 270" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left Column: What Moves INTO Hermes -->
+      <g transform="translate(20, 20)">
+        <rect width="270" height="230" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="2"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">Q1: OUR STRENGTHS → INTO HERMES</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">1. Real Multi-Tenancy Key</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Hermes profiles do not isolate customers.</text>
+        <text x="15" y="95" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">2. Typed Engine Port (Row 28)</text>
+        <text x="15" y="113" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">8 typed ops keep engines replaceable.</text>
+        <text x="15" y="138" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">3. Definition-of-Done Contracts</text>
+        <text x="15" y="156" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Proof deliverables to clients, not feelings.</text>
+        <text x="15" y="181" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">4. Scoreboard Discipline</text>
+        <text x="15" y="199" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Structured engineering verification ledger.</text>
+      </g>
+
+      <!-- Center: What Moves INTO Our Platform -->
+      <g transform="translate(310, 20)">
+        <rect width="280" height="230" rx="10" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="2"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">Q2: HERMES STRENGTHS → INTO PLATFORM</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#047857">1. iron-proxy Egress Proxy (★ #1)</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Credential injection shields secrets forever.</text>
+        <text x="15" y="95" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">2. Plugin Compatibility Contract</text>
+        <text x="15" y="113" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Shrinking-core governance protects extensions.</text>
+        <text x="15" y="138" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">3. Auxiliary Task-Class Lane</text>
+        <text x="15" y="156" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Route cheap background chores off primary.</text>
+        <text x="15" y="181" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="var(--text-primary, #0f172a)">4. Secret Precedence Ladder</text>
+        <text x="15" y="199" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Strict precedence + 3-stage environment scrub.</text>
+      </g>
+
+      <!-- Right Column: Question 3 Decision -->
+      <g transform="translate(610, 20)">
+        <rect width="290" height="230" rx="10" fill="#3b82f6" fill-opacity="0.08" stroke="#3b82f6" stroke-width="2.2"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">Q3: BUILD ON, AROUND, OR UNDER?</text>
+        
+        <rect x="15" y="45" width="260" height="35" rx="6" fill="#dc2626" fill-opacity="0.1"/>
+        <text x="25" y="66" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#dc2626">Build ON? REJECTED (High cost)</text>
+
+        <rect x="15" y="90" width="260" height="48" rx="6" fill="#10b981" fill-opacity="0.18" stroke="#10b981" stroke-width="1.5"/>
+        <text x="25" y="110" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#047857">Build AROUND? RECOMMENDED ✓</text>
+        <text x="25" y="126" font-family="system-ui, sans-serif" font-size="10" fill="#047857">Hermes as Engine Adapter behind Row 28</text>
+
+        <rect x="15" y="148" width="260" height="35" rx="6" fill="#f59e0b" fill-opacity="0.1"/>
+        <text x="25" y="169" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#b45309">Build UNDER? Partial candidate</text>
+
+        <text x="15" y="205" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="var(--text-primary, #0f172a)">Verdict: Protect platform multi-tenancy &amp; port;</text>
+        <text x="15" y="220" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="var(--text-primary, #0f172a)">plug Hermes in cleanly behind the door.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-12-the-synthesis">Batch 12 — The synthesis<a href="#batch-12/batch-12-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> COMPLETE — closes the study
+<strong>Date:</strong> 2026-10-15
+<strong>Method:</strong> this document draws ONLY on batches 01–11 of this study. Every claim it makes about Hermes points back to the batch and section that measured it. Every claim it makes about our own platform is marked as <strong>judgement</strong>, not measurement, because this study did not re-measure the platform.
+<strong>Source:</strong> <code>hermes-agent-main/hermes-agent-main</code> @ pin (19,728 files; pyproject md5 <code>f57f729d4b251547a5a9e2565ce1e726</code>).</p>
+<hr>
+<h2 id="0-plain-words-what-this-document-is-and-the-three-questions-it-answers">§0 — Plain words: what this document is, and the three questions it answers<a href="#batch-12/0-plain-words-what-this-document-is-and-the-three-questions-it-answers" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Eleven batches measured a large open-source agent product (Hermes Agent, by Nous Research) doc-by-doc and file-by-file. This closing document does the one thing the batches were forbidden to do: <strong>put Hermes and our own platform side by side and say what goes where.</strong></p>
+<p>The owner asked three questions, and they are the three sections of this document:</p>
+<ol>
+<li><strong>What does our platform do <em>better</em> — things that should move <em>into</em> Hermes if we adopt it?</strong> → §2</li>
+<li><strong>What does Hermes do <em>better</em> — things that should move <em>into</em> our platform?</strong> → §3</li>
+<li><strong>What should we build <em>on</em>, <em>around</em>, or <em>under</em>?</strong> → §4</li>
+</ol>
+<p>And one framing the owner set at the start, which governs all of it:</p>
+<blockquote>
+<p>&quot;Your first analysis of hermes, you should not compare it to mercato architecture — we are not hostages of that.&quot;</p>
+</blockquote>
+<p>So §2–§4 are written as <strong>judgement calls with stated reasoning and a recommendation</strong>, not as &quot;Hermes wins / we win&quot; scoreboards. Where a Hermes mechanism is simply <em>better</em>, it is named as better. Where ours is, it is named as ours.</p>
+<p><strong>One thing to hold onto while reading:</strong> Hermes is a <strong>product for one person (or one team) to run an agent</strong>. Our platform is a <strong>business and resources planner for a company, where AI is the first-class worker</strong>. These are different shapes. Most of the synthesis is about which of Hermes&#39;s <em>parts</em> fit our shape — not about whether Hermes is &quot;good&quot;.</p>
+<hr>
+<h2 id="1-what-this-study-measured-in-one-page">§1 — What this study measured, in one page<a href="#batch-12/1-what-this-study-measured-in-one-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Nine batches carried verified findings. The honest headline numbers:</p>
+<ul>
+<li><strong>455 docs / 8.9 MB. 1,819 Python files / 698,487 lines</strong> (batch 00 §2).</li>
+<li><strong>Divergences found: 4 across eleven batches</strong>, and the docs were <strong>right far more often than wrong</strong>. Found: the API-mode count (docs say 3, code has 5 + plugins — b01); the <code>get_hermes_home()</code> file count (docs &quot;119+&quot;, code 821 — b02); the dashboard config-field count (docs &quot;150+&quot;, measured 99 sections / 816 keys — b07); the docker <code>--pids-limit</code> quote (docs &quot;256&quot;, code 2048, with the code recording that 256 was hit in normal use — b08).</li>
+<li><strong>Three corrections to my own earlier notes</strong> were made under rule 13 and are recorded where they belong: the subagent iteration cap (<code>50</code> → <strong>250</strong>, b06); <code>integrations/providers.md</code> structure (<code>~40 sections</code> → <strong>7 sections / ~90 rows</strong>, b09); the egress doc path (<code>egress/</code> → <strong><code>user-guide/egress/</code></strong>, b11).</li>
+<li><strong>One premise correction that matters most</strong> (b10 §9): <strong>&quot;OpenCode&quot; in Hermes is a model <em>provider</em>, not the OpenCode coding agent</strong> — 1,008 code references, all in the provider sense; no spawn path exists.</li>
+</ul>
+<p>The batches that carried the most transferable material, in order: <strong>11</strong> (the egress proxy), <strong>08</strong> (approvals, secrets, sandboxing), <strong>10</strong> (the plugin contract and governance), <strong>06</strong> (scheduling/delegation/the board), <strong>04</strong> (memory and context).</p>
+<hr>
+<h2 id="2-question-1-what-our-platform-does-better-candidates-to-move-into-hermes">§2 — Question 1: what OUR PLATFORM does better — candidates to move INTO Hermes<a href="#batch-12/2-question-1-what-our-platform-does-better-candidates-to-move-into-hermes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This section names the things the platform already does that Hermes does <em>not</em>, and that would have to be preserved or reintroduced if we sat on Hermes as a foundation.</p>
+<h3 id="2-1-multi-tenancy-with-a-real-tenant-key-the-clearest-one">2.1 Multi-tenancy with a real tenant key — **the clearest one**<a href="#batch-12/2-1-multi-tenancy-with-a-real-tenant-key-the-clearest-one" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What the platform has (judgement, from the standing project memory, not re-measured here):</strong> a tenant model with a per-tenant key door; every capability is scoped to a tenant by construction.</p>
+<p><strong>What Hermes has (measured, b02/b11):</strong> <strong>profiles</strong>, which are separate home directories that give you <em>isolation of files</em> — but the study was explicit: <strong>profiles are not a sandbox</strong>, and the bot/group-chat model (b02) is <em>per-installation</em>, with group rooms living in a local <code>shared-state.db</code>. Channel identity is solved rigorously (b11 §3) but at the <strong>platform-user</strong> level, not at a <strong>commercial-tenant</strong> level with billing and data-residency consequences.</p>
+<p><strong>Why it matters:</strong> Hermes isolates <em>one operator&#39;s own things from each other</em>. Our platform must isolate <em>one customer&#39;s data from another customer&#39;s</em>, and prove it. Those are different guarantees, and Hermes&#39;s model does not provide the second.</p>
+<p><strong>Recommendation (ranked):</strong></p>
+<ol>
+<li><strong>Keep our tenant door as the outermost boundary; treat Hermes profiles as an inner isolation mechanism, never as the tenant boundary.</strong> <em>(recommended)</em></li>
+<li>Wrap every Hermes home in a per-tenant container and rely on the container for tenancy — heavier, and loses the one-process-many-homes economy Hermes is built around.</li>
+<li>Adapt Hermes&#39;s profile system into a tenant system — starts by rewriting the layer Hermes is most opinionated about; highest risk.</li>
+</ol>
+<h3 id="2-2-a-typed-engine-port-row-28-the-second-clearest">2.2 A typed engine port (Row 28) — **the second clearest**<a href="#batch-12/2-2-a-typed-engine-port-row-28-the-second-clearest" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What the platform has (judgement, and the project&#39;s own record):</strong> Row 28 is COMPLETE — <em>&quot;the agent runtime sits behind one typed door — no other code talks to it directly&quot;</em>, with a typed port (<code>lib/ai-runtime-port.ts</code>), an adapter per engine, and the run closed at the door with honest status.</p>
+<p><strong>What Hermes has (measured, b01/b09/b10):</strong> engine coupling is expressed through <strong>many small seams</strong> — an ACP server (b10 §7), four middleware kinds (b10 §6), a plugin compat contract (b10 §4) — but there is <strong>no single typed port</strong> through which all engine calls pass. Provider modules live in <code>hermes_cli/</code> beside CLI concerns (b09 §4, C9-2).</p>
+<p><strong>Why it matters:</strong> our port is what makes an engine <em>replaceable by proof</em> rather than by hope. Hermes&#39;s seams make it <em>extensible</em>; they do not make the engine <em>swappable</em>.</p>
+<p><strong>Recommendation (ranked):</strong></p>
+<ol>
+<li><strong>Keep the port; if Hermes becomes an engine, it enters as one more adapter behind the same eight operations.</strong> <em>(recommended)</em></li>
+<li>Expose Hermes&#39;s ACP server to the port as the adapter&#39;s transport — elegant, but ACP&#39;s surface is narrower than the port&#39;s eight operations (see §4.4).</li>
+<li>Bypass the port for Hermes &quot;to move faster&quot; — rejected outright; it destroys the property Row 28 was built to give.</li>
+</ol>
+<h3 id="2-3-definition-of-done-as-data-completion-contracts">2.3 Definition-of-done as data (completion contracts)<a href="#batch-12/2-3-definition-of-done-as-data-completion-contracts" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What the platform has (judgement):</strong> the concept that <em>&quot;done&quot;</em> is a named, checkable thing — a completion contract with fields, not a feeling.</p>
+<p><strong>What Hermes has (measured, b06):</strong> <code>/goal</code> carries <strong>completion contracts (5 fields)</strong> and <strong>quality gates (an exit-0 command, 3 retries / 5-min timeout, run <em>before</em> the judge)</strong>; the Kanban has PR completion contracts. So Hermes has <em>a</em> version of this — but scoped to one agent&#39;s own goals, not to a company&#39;s deliverables.</p>
+<p><strong>Why it matters:</strong> for a planner, &quot;this work is done&quot; must be provable to a customer. Hermes&#39;s <code>/goal</code> gate proves it to the agent.</p>
+<p><strong>Recommendation:</strong> <strong>adopt Hermes&#39;s gate mechanics (b06 §<code>/goal</code>) as the <em>execution</em> half, and keep ours as the <em>contract</em> half.</strong> They compose; they do not compete.</p>
+<h3 id="2-4-the-scoreboard-discipline-itself">2.4 The scoreboard discipline itself<a href="#batch-12/2-4-the-scoreboard-discipline-itself" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What the platform has (judgement):</strong> a derived, never-typed scoreboard (<code>78/321 = 24%</code>), a rule that <strong>only code is evidence</strong>, and a RED-then-GREEN measurement discipline with restore-by-hash.</p>
+<p><strong>What Hermes has:</strong> excellent engineering hygiene (batch after batch found numbered issue references in code comments — <code>#85235</code>, <code>#98739</code>, <code>#4466</code>, <code>#72348</code>, <code>#44729</code>), but no equivalent <em>progress scoreboard</em> — because a product ships, it does not track a plan.</p>
+<p><strong>Why it matters:</strong> this is not a Hermes feature to adopt; it is the reason this study can be trusted. It is listed here so the reader sees that the method travelled both ways: <strong>we measured Hermes with the same discipline we hold ourselves to.</strong></p>
+<hr>
+<h2 id="3-question-2-what-hermes-does-better-candidates-to-move-into-our-platform">§3 — Question 2: what HERMES does better — candidates to move INTO our platform<a href="#batch-12/3-question-2-what-hermes-does-better-candidates-to-move-into-our-platform" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the larger section, because Hermes is a mature product and we are building. Items are ordered by transferability, not by size.</p>
+<h3 id="3-1-the-egress-credential-injection-proxy-the-single-strongest-item-b11-7-c11-6">3.1 The egress credential-injection proxy — **the single strongest item** (b11 §7, C11-6)<a href="#batch-12/3-1-the-egress-credential-injection-proxy-the-single-strongest-item-b11-7-c11-6" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> a sandbox holds only <strong>opaque proxy tokens</strong>; a host-side daemon (<code>iron-proxy</code>) termininates TLS and swaps in the real credential. Default-deny allowlist; SSRF deny CIDRs checked <strong>at connect time</strong> (so DNS rebinding fails); never binds <code>0.0.0.0</code>; pidfile with <code>O_EXCL</code>/<code>O_NOFOLLOW</code> plus a <strong>nonce written into <code>/proc/&lt;pid&gt;/environ</code></strong> so a recycled PID is never mistaken for the daemon; <strong>fail-closed by default</strong> (<code>enforce_on_docker: true</code> refuses to start a sandbox if the proxy is down); and — the part that makes it trustworthy — <strong>a written list of what it does <em>not</em> protect</strong> (host compromise, CA-key theft, raw-socket bypass, mounted credential files, allowlisted-host exfil, uncovered providers, its own in-memory secrets).</p>
+<p><strong>Why it moves to us:</strong> our platform will run model-written code near <strong>customer</strong> credentials. This is the exact threat model. The mechanism is provider-agnostic, licence-compatible (Apache-2.0 upstream), and already carries the operational detail (failure modes with exact refusal text).</p>
+<p><strong>Recommendation (ranked):</strong></p>
+<ol>
+<li><strong>Adopt the <em>model</em> — token-swap at a default-deny egress boundary, fail-closed — and adopt its documentation discipline (publish our own &quot;does not protect&quot; list).</strong> <em>(recommended)</em></li>
+<li>Adopt <code>iron-proxy</code> itself as a dependency for the Docker lane.</li>
+<li>Skip it and rely on container network policy — leaves <code>printenv</code> exfiltration inside the sandbox unsolved, which is the named threat.</li>
+</ol>
+<h3 id="3-2-the-plugin-compat-contract-the-shrinking-core-governance-policy-b10-4-5-c10-4-c10-5">3.2 The plugin compat contract + the shrinking-core governance policy (b10 §4, §5, C10-4, C10-5)<a href="#batch-12/3-2-the-plugin-compat-contract-the-shrinking-core-governance-policy-b10-4-5-c10-4-c10-5" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> a <strong>versionless, behavioural</strong> compatibility promise (no <code>PLUGIN_API_VERSION</code>; &quot;evolve additively&quot;; hook payloads are keyword payloads; <strong>manifest fields are ignored if unknown</strong>), enforced by <strong>frozen external-plugin fixtures</strong> that assert real registration outcomes; a deprecation policy requiring a replacement + a once-per-process warning + <strong>two minor releases</strong> of dual support; and a <em>dated constitution</em> (<code>plugins/AGENTS.md</code>) under which <strong>core deliberately shrinks on a schedule</strong> (memory providers, Home Assistant, Spotify all migrated out) with an automatic one-time state conversion (<code>left_core_migration.py</code>).</p>
+<p><strong>Why it moves to us:</strong> any platform that expects an ecosystem must answer &quot;how do we add capability without forking?&quot; and &quot;how do we <em>remove</em> it later without breaking customers?&quot; Hermes has answered both in writing.</p>
+<p><strong>Recommendation:</strong> <strong>adopt the <em>policy shape</em></strong> — behavioural compatibility, a two-release deprecation window, behaviour-based fixtures, and a documented migration-out path. Do <strong>not</strong> import the plugin manager itself; our extension surface is different.</p>
+<h3 id="3-3-the-auxiliary-task-class-lane-b09-7-c9-7">3.3 The auxiliary task-class lane (b09 §7, C9-7)<a href="#batch-12/3-3-the-auxiliary-task-class-lane-b09-7-c9-7" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> every <em>background</em> AI chore (compression, titling, approval classification, vision, memory-query rewrite, TTS tags, voice) is routed to its <strong>own</strong> model, independent of the main conversation model, with <code>free_only</code> able to <strong>forbid a paid lane for background traffic</strong> and a one-time warning if a non-<code>:free</code> model is engaged. Main-agent routing explicitly does <strong>not</strong> propagate to aux calls &quot;by design&quot;.</p>
+<p><strong>Why it moves to us:</strong> this is <em>literally</em> resource planning — routing a task class to the cheapest capable resource, with a spend cap expressed as policy. It is also already production-shaped, which lowers our risk.</p>
+<p><strong>Recommendation (ranked):</strong></p>
+<ol>
+<li><strong>Adopt the pattern: model-role policy per task class, with an explicit &quot;background never uses the expensive lane&quot; rule.</strong> <em>(recommended)</em></li>
+<li>Adopt the exact task classes — useful, but ours will differ.</li>
+<li>Ignore it and let everything run on one model — highest cost, no policy lever.</li>
+</ol>
+<h3 id="3-4-the-secret-source-precedence-ladder-b09-6-c9-5">3.4 The secret-source precedence ladder (b09 §6, C9-5)<a href="#batch-12/3-4-the-secret-source-precedence-ladder-b09-6-c9-5" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> multiple credential origins (Bitwarden / 1Password / command, plus plugins), a <strong>four-rule precedence ladder</strong> (preserve-existing → pre-existing env unless <code>override_existing</code> → mapped → bulk), <strong>&quot;mapped outranks bulk regardless of list order&quot;</strong>, <strong>first-claim-wins with a conflict warning — never a silent clobber</strong>, and a <strong>provenance record</strong> on every applied variable.</p>
+<p><strong>Why it moves to us:</strong> a planner holding <em>customer-owned</em> credentials needs exactly this: multiple origins, ordered precedence, no silent clobber, and an audit trail. Compare-and-adopt.</p>
+<h3 id="3-5-channel-identity-solved-once-b11-3-c11-2">3.5 Channel identity solved once (b11 §3, C11-2)<a href="#batch-12/3-5-channel-identity-solved-once-b11-3-c11-2" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> <code>dm_policy</code> ∈ {open, allowlist, disabled, <strong>pairing</strong>} and <code>group_policy</code> ∈ {open, allowlist, disabled}; pairing as a code-verified admission path; per-profile isolated allowlist reads; and <strong>mid-turn authorization re-read against the <em>admitting</em> bot&#39;s allowlist</strong> (closing a real hole where a mid-turn action was judged against a different bot&#39;s policy).</p>
+<p><strong>Why it moves to us:</strong> if our platform ever speaks through chat channels, this vocabulary and these traps are already mapped — including the traps (display-name matching bypasses an allowlist, <code>#44729</code>; an <code>npub</code> must be decoded before comparison, or the allowlist fails open).</p>
+<h3 id="3-6-the-three-stage-env-scrub-b10-2-c10-3">3.6 The three-stage env scrub (b10 §2, C10-3)<a href="#batch-12/3-6-the-three-stage-env-scrub-b10-2-c10-3" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> before model-written code runs, the environment passes (1) a <strong>secret-substring block</strong> (<code>KEY</code>, <code>TOKEN</code>, <code>SECRET</code>, <code>AUTH</code>, <code>WEBHOOK</code>, …), (2) a <strong>safe-prefix allowlist</strong>, (3) a small named allowlist for runtime-location vars. <code>HERMES_</code> as a prefix is <strong>deliberately unsafe</strong>, because it &quot;leaked config vars without a secret substring&quot;; <code>PASS</code> is deliberately absent because it false-positives.</p>
+<p><strong>Why it moves to us:</strong> portable, tiny, and the reasoning is recorded. Any worker running model-written code near credentials should do this.</p>
+<h3 id="3-7-cron-s-preflight-and-rate-limit-path-b06">3.7 Cron's preflight and rate-limit path (b06)<a href="#batch-12/3-7-cron-s-preflight-and-rate-limit-path-b06" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What it is:</strong> a <strong>preflight <code>blocked_config</code> check that makes no LLM call</strong>, a <code>quota_hold_until</code> hold, a fire-claim TTL (<code>300 s</code>), exit codes that distinguish protocol violation (<code>0</code>) from rate-limited (<code>75</code>, requeued without counting a failure) from terminal provider (<code>78</code>, circuit breaker on first occurrence, sticky), and <strong>secret redaction on every delivery lane even when <code>security.redact_secrets: false</code></strong>.</p>
+<p><strong>Why it moves to us:</strong> scheduled work is core to a planner, and the failure taxonomy (three distinct exit codes with three distinct policies) is exactly the nuance a naive scheduler omits.</p>
+<h3 id="3-8-smaller-mechanics-worth-taking">3.8 Smaller mechanics worth taking<a href="#batch-12/3-8-smaller-mechanics-worth-taking" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>PTC&#39;s governance of expansion</strong> (b10 §2, C10-1): the in-sandbox tool set is the <strong>session&#39;s own tool set ∩ a seven-tool allowlist</strong> — &quot;expand capability by composition, never beyond what the session already may do.&quot;</li>
+<li><strong>Recover-don&#39;t-rerun</strong> (b10 §2, C10-2): oversized tool output is spilled to disk and the <strong>path returned</strong>, with byte counts riding alongside the text marker.</li>
+<li><strong>Silence as a delivery decision</strong> (b11 §3, C11-3): a whole-response sentinel suppresses delivery while keeping the turn in the transcript; a <em>person&#39;s</em> message never silently vanishes; Chinese renderings handled.</li>
+<li><strong>The brokered action pattern</strong> (b11 §8, C11-8): computer-use requests go through a broker that performs and records artifacts.</li>
+<li><strong>Data-boundary routing by destination</strong> (b11 §5): public URLs → cloud browser, LAN/localhost → local.</li>
+</ul>
+<hr>
+<h2 id="4-question-3-build-on-around-or-under">§4 — Question 3: build ON, AROUND, or UNDER?<a href="#batch-12/4-question-3-build-on-around-or-under" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the decision section. Each option is stated as what it would mean, what it costs, and the risk — then one recommendation.</p>
+<h3 id="4-1-the-three-relationships-in-plain-words">4.1 The three relationships, in plain words<a href="#batch-12/4-1-the-three-relationships-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Build ON Hermes</strong> — Hermes is the engine at the bottom; we are the product above it.</li>
+<li><strong>Build AROUND Hermes</strong> — Hermes keeps running beside our platform; we call it and it calls us.</li>
+<li><strong>Build UNDER Hermes</strong> — our platform is the substrate; Hermes runs as a component inside it (the shape our own Row 28 port already anticipates).</li>
+</ul>
+<h3 id="4-2-what-build-on-would-require-and-the-honest-cost">4.2 What "build ON" would require — and the honest cost<a href="#batch-12/4-2-what-build-on-would-require-and-the-honest-cost" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>To build <strong>on</strong> Hermes as the engine, we would have to reproduce, <em>above</em> Hermes, everything Hermes does not have (§2): the <strong>tenant key door</strong>, the <strong>typed port</strong>, and our <strong>contract semantics</strong>. And we would inherit the <em>inverse</em> of Hermes&#39;s strengths: its ~35 channels, its plugin ecosystem and its memory model are built for a <strong>single-operator product</strong>, so we would be adapting a product-shaped surface into a platform-shaped one.</p>
+<p><strong>Measured cost signals:</strong> Hermes is <strong>698k lines of Python</strong>; the gateway alone is a subsystem of <strong>307 files</strong>; <code>gateway/</code> includes hosted-room machinery, a delivery ledger and drain control. Building on it means <em>depending on all of that</em>, or carefully amputating it — and amputation is exactly what its own governance policy forbids plugins doing (<code>plugins/AGENTS.md</code>: plugins must never modify core).</p>
+<p><strong>Risk:</strong> highest lock-in, highest surface to keep current, and the engine-swap freedom our port was built to give would be lost first.</p>
+<h3 id="4-3-what-build-around-would-require">4.3 What "build AROUND" would require<a href="#batch-12/4-3-what-build-around-would-require" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Hermes keeps its own life; we talk to it over a <strong>protocol</strong> it already ships. Measured: <strong>Hermes <em>is</em> an ACP server</strong> (b10 §7) — <code>hermes acp</code> speaks JSON-RPC over stdio, with <code>stopReason: cancelled</code>, real error mapping, and permissions/elicitation hooks. It also ships a <strong>REST API + dashboard</strong> (b07) and a <strong><code>hermes proxy</code> OAuth aggregator</strong>.</p>
+<p><strong>Risk:</strong> the protocol surface is narrower than our port&#39;s eight operations (b10 §7), so the adapter would be lossy; and two lifecycles to run means two things to secure, patch and observe.</p>
+<h3 id="4-4-what-build-under-would-require">4.4 What "build UNDER" would require<a href="#batch-12/4-4-what-build-under-would-require" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Our platform stays the substrate. Hermes enters as <strong>one more engine behind the port</strong> — the shape <strong>Row 28 already built and proved</strong> (<code>lib/ai-runtime-port.ts</code> + a per-engine adapter, the run closed at the door with honest status). Its egress proxy, cron, kanban and plugin machinery would be used <em>where they help</em> and left alone where they do not.</p>
+<p><strong>Risk:</strong> we own the integration layer, and the port must be genuinely engine-neutral (which Row 28&#39;s exit gate already demonstrated once). But this is the only option that keeps <strong>engine replaceability as a tested property</strong> rather than an aspiration.</p>
+<h3 id="4-5-recommendation">4.5 Recommendation <span class="seal-badge" style="background:#eff6ff; color:#2563eb; border-color:#93c5fd; font-size: 0.65em; vertical-align: middle;">★ RECOMMENDATION</span><a href="#batch-12/4-5-recommendation" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>Build UNDER — take Hermes as an engine behind the existing typed port, and take its <em>mechanisms</em> (§3) selectively, tiered.</strong></p>
+<p>Reasoning, plainly:</p>
+<ol>
+<li><strong>It preserves the one property we have already proven and Hermes does not have</strong> — a typed door with an engine behind it, round-tripped through a real run (Row 28).</li>
+<li><strong>It matches the shapes.</strong> Hermes is a product; we are a platform. Products go <em>inside</em> platforms, not the other way round.</li>
+<li><strong>It lets us take the best parts without taking the whole.</strong> The §3 list is mostly <em>patterns</em>, not code. Adopting patterns costs us reasoning; adopting a 698k-line product as our base costs us our architecture.</li>
+<li><strong>It keeps the door open in both directions.</strong> If Hermes later proves the better base, the port means the move is an adapter change, not a rewrite.</li>
+</ol>
+<p><strong>Tiered adoption within that decision</strong> — what to take first, and what to leave:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Take</th>
+<th>Why</th>
+<th>Leave</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1 — now</strong></td>
+<td>The <strong>egress model</strong> (§3.1), the <strong>env scrub</strong> (§3.6), the <strong>aux task-class lane</strong> (§3.3)</td>
+<td>Highest safety/cost value; smallest and most portable; no architecture change</td>
+<td>The <code>iron-proxy</code> daemon as a hard dependency until the port has an egress seam</td>
+</tr>
+<tr>
+<td><strong>2 — soon</strong></td>
+<td>The <strong>plugin compat <em>policy</em></strong> (§3.2), the <strong>secret precedence ladder</strong> (§3.4), <strong>cron&#39;s failure taxonomy</strong> (§3.7)</td>
+<td>Shapes our extension surface before it hardens</td>
+<td>The plugin manager itself; the cron scheduler itself</td>
+</tr>
+<tr>
+<td><strong>3 — when a channel need appears</strong></td>
+<td>The <strong>channel identity vocabulary</strong> (§3.5)</td>
+<td>Already-mapped traps, e.g. display-name matching bypassing an allowlist</td>
+<td>Hermes&#39;s ~35 platform plugins wholesale</td>
+</tr>
+<tr>
+<td><strong>4 — do not take</strong></td>
+<td>Hosted rooms, the desktop app, the ~35 channels as-is, the single-operator profile model</td>
+<td>Product-shaped; conflicts with our tenant model (§2.1)</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-what-this-study-does-not-claim-the-limits-stated">§5 — What this study does NOT claim (the limits, stated)<a href="#batch-12/5-what-this-study-does-not-claim-the-limits-stated" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Written here so no reader over-reads the study:</p>
+<ol>
+<li><strong>One tree, one date.</strong> Every figure is about the extract pinned in batch 00 — 19,728 files, <code>pyproject.toml</code> md5 <code>f57f729d…</code>, extracted 2026-10-15. There is <strong>no <code>.git</code></strong>, so the exact upstream commit is unknowable from the tree.</li>
+<li><strong>The platform side is judgement, not measurement.</strong> §2 and §4 describe our platform from the project&#39;s own records and the standing memory; <strong>this study did not re-measure the platform</strong>. Any §2 claim should be re-checked before it is acted on.</li>
+<li><strong>&quot;Better&quot; means &quot;better for our shape.&quot;</strong> Hermes&#39;s single-operator model is not a defect; it is a different product. Where §2 says we do something &quot;better&quot;, read it as <em>better for a multi-tenant planner</em>.</li>
+<li><strong>Patterns are cheap, products are expensive.</strong> §3 mostly recommends <em>patterns</em>. That distinction is deliberate and load-bearing.</li>
+<li><strong>Divergences were found in both directions.</strong> The docs were right far more often than wrong (4 divergences in 11 batches). This is evidence of a well-maintained product, and it is reported because reporting only the misses would be dishonest.</li>
+</ol>
+<hr>
+<h2 id="6-the-study-s-own-ledger">§6 — The study's own ledger<a href="#batch-12/6-the-study-s-own-ledger" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Batches complete:</strong> 00–12 (12 of 12).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>File</th>
+<th>Divergences</th>
+<th>Corrections</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>00</td>
+<td><code>00-PIN-AND-METHOD.md</code></td>
+<td>—</td>
+<td>pin re-taken (new tree)</td>
+</tr>
+<tr>
+<td>01</td>
+<td><code>01-agent-loop-and-conversation.md</code></td>
+<td>2</td>
+<td>—</td>
+</tr>
+<tr>
+<td>02</td>
+<td><code>02-bots-profiles-and-group-chats.md</code></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td>03</td>
+<td><code>03-skills-and-the-learning-loop.md</code></td>
+<td>0</td>
+<td>—</td>
+</tr>
+<tr>
+<td>04</td>
+<td><code>04-memory-and-context.md</code></td>
+<td>0</td>
+<td>—</td>
+</tr>
+<tr>
+<td>05</td>
+<td><code>05-tools-mcp-and-the-gateway.md</code></td>
+<td>0</td>
+<td>—</td>
+</tr>
+<tr>
+<td>06</td>
+<td><code>06-scheduling-delegation-and-the-board.md</code></td>
+<td>0</td>
+<td>subagent cap 50 → <strong>250</strong></td>
+</tr>
+<tr>
+<td>07</td>
+<td><code>07-sessions-dashboard-and-settings.md</code></td>
+<td>1</td>
+<td>—</td>
+</tr>
+<tr>
+<td>08</td>
+<td><code>08-security-approvals-secrets-and-sandboxing.md</code></td>
+<td>2</td>
+<td>—</td>
+</tr>
+<tr>
+<td>09</td>
+<td><code>09-models-and-providers.md</code></td>
+<td>0</td>
+<td>providers doc structure</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>10-code-execution-plugins-and-extensibility.md</code></td>
+<td>0</td>
+<td><strong>&quot;OpenCode&quot; = a provider</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>11-channels-voice-and-media.md</code></td>
+<td>0</td>
+<td>egress doc path</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><strong>this file</strong></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Totals:</strong> 4 doc-vs-code divergences; 4 corrections to my own earlier notes; 1 premise correction of consequence (OpenCode).</p>
+<p><strong>Commits:</strong> <code>edee95d</code> (00–01), <code>66ae2be</code> (02–03), <code>0a51aff</code> (04), <code>0b9c793</code> (05), <code>6575635</code> (06), <code>20d2636</code> (07), <code>139c5b2</code> (08), <code>599c4f9</code> (09), <code>ed7f0d7</code> (10), <code>6e10374</code> (11), plus 12.</p>
+<hr>
+<h2 id="7-the-single-recommendation-in-one-paragraph">§7 — The single recommendation, in one paragraph<a href="#batch-12/7-the-single-recommendation-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Adopt Hermes as an engine <em>behind</em> the port we already built (build UNDER), and take from it three mechanisms now — the egress credential-injection model, the three-stage environment scrub, and the auxiliary task-class lane — then three more as our surfaces harden (the versionless plugin compat policy, the secret-source precedence ladder, and cron&#39;s failure taxonomy).</strong> Keep our tenant key door as the outermost boundary because Hermes&#39;s profiles are isolation, not tenancy, and keep completion contracts as <em>our</em> semantics because Hermes scopes &quot;done&quot; to one agent&#39;s goal rather than a customer&#39;s deliverable. Do <strong>not</strong> adopt hosted rooms, the desktop app, the single-operator profile model, or the ~35 channels as-is — they are shaped for a product, and we are building a platform. The port is what makes this reversible: if the judgement is wrong, the correction is one adapter, not a rewrite.</p>
+<p><strong>The one thing the owner must decide:</strong> whether the first tier (egress model + env scrub + aux task-class lane) is authorised to become a <strong>written requirement</strong> — because per the standing protocol, requirement precedes code, and none of this study&#39;s findings may turn into code until it does.</p>
+<hr>
+<p><em>Batch 12 of 12 complete. The study is closed. All twelve batch documents sit in <code>library/hermes-forensics/findings/</code>, each committed as it was written, each byte-clean (0 CR), each carrying its own measurement, its divergences, and its value answers.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="11-channels-iron-proxy.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Channels &amp; iron-proxy</span>
+                </a>
+              
+
+              <a href="../index.html#batch-12" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-this-document-is-and-the-three-questions-it-answers" class="toc-link">§0 — Plain words: what this document is, and the three questions it answers</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-this-study-measured-in-one-page" class="toc-link">§1 — What this study measured, in one page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-question-1-what-our-platform-does-better-candidates-to-move-into-hermes" class="toc-link">§2 — Question 1: what OUR PLATFORM does better — candidates to move INTO Hermes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-multi-tenancy-with-a-real-tenant-key-the-clearest-one" class="toc-link">2.1 Multi-tenancy with a real tenant key — the clearest one</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-a-typed-engine-port-row-28-the-second-clearest" class="toc-link">2.2 A typed engine port (Row 28) — the second clearest</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-definition-of-done-as-data-completion-contracts" class="toc-link">2.3 Definition-of-done as data (completion contracts)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-the-scoreboard-discipline-itself" class="toc-link">2.4 The scoreboard discipline itself</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-question-2-what-hermes-does-better-candidates-to-move-into-our-platform" class="toc-link">§3 — Question 2: what HERMES does better — candidates to move INTO our platform</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-egress-credential-injection-proxy-the-single-strongest-item-b11-7-c11-6" class="toc-link">3.1 The egress credential-injection proxy — the single strongest item (b11 §7, C11-6)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-plugin-compat-contract-the-shrinking-core-governance-policy-b10-4-5-c10-4-c10-5" class="toc-link">3.2 The plugin compat contract + the shrinking-core governance policy (b10 §4, §5, C10-4, C10-5)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-auxiliary-task-class-lane-b09-7-c9-7" class="toc-link">3.3 The auxiliary task-class lane (b09 §7, C9-7)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-the-secret-source-precedence-ladder-b09-6-c9-5" class="toc-link">3.4 The secret-source precedence ladder (b09 §6, C9-5)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-5-channel-identity-solved-once-b11-3-c11-2" class="toc-link">3.5 Channel identity solved once (b11 §3, C11-2)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-6-the-three-stage-env-scrub-b10-2-c10-3" class="toc-link">3.6 The three-stage env scrub (b10 §2, C10-3)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-7-cron-s-preflight-and-rate-limit-path-b06" class="toc-link">3.7 Cron&#039;s preflight and rate-limit path (b06)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-8-smaller-mechanics-worth-taking" class="toc-link">3.8 Smaller mechanics worth taking</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-question-3-build-on-around-or-under" class="toc-link">§4 — Question 3: build ON, AROUND, or UNDER?</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-three-relationships-in-plain-words" class="toc-link">4.1 The three relationships, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-what-build-on-would-require-and-the-honest-cost" class="toc-link">4.2 What &quot;build ON&quot; would require — and the honest cost</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-what-build-around-would-require" class="toc-link">4.3 What &quot;build AROUND&quot; would require</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-what-build-under-would-require" class="toc-link">4.4 What &quot;build UNDER&quot; would require</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-5-recommendation" class="toc-link">4.5 Recommendation</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-what-this-study-does-not-claim-the-limits-stated" class="toc-link">§5 — What this study does NOT claim (the limits, stated)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-study-s-own-ledger" class="toc-link">§6 — The study&#039;s own ledger</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-single-recommendation-in-one-paragraph" class="toc-link">§7 — The single recommendation, in one paragraph</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 11 — Channels, voice and media — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-11" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 11</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Channels &amp; iron-proxy</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/11-channels-voice-and-media.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,855</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">19 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">272</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 11 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 11 VISUAL GUIDE</div>
+    <h4>The Egress Credential-Injection Proxy: iron-proxy</h4>
+    <p>The single strongest security design in Hermes: API secrets are NEVER exposed to the agent container</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 240" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Agent in Sandbox -->
+      <g transform="translate(30, 30)">
+        <rect width="240" height="170" rx="10" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b45309">SANDBOXED AGENT CONTAINER</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Untrusted Code / Tools</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Agent runs shell / code</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Wants to call External API</text>
+        <text x="15" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Has ONLY dummy token:</text>
+        <rect x="15" y="125" width="210" height="28" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+        <text x="25" y="143" font-family="monospace" font-size="11" font-weight="700" fill="#b45309">Bearer &lt;DUMMY_TOKEN&gt;</text>
+      </g>
+
+      <!-- Arrow from Agent to iron-proxy -->
+      <path d="M 270 115 L 340 115" stroke="#f59e0b" stroke-width="2" marker-end="url(#arr-b0)"/>
+      <text x="305" y="105" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#b45309">Dummy Req</text>
+
+      <!-- iron-proxy -->
+      <g transform="translate(350, 20)">
+        <rect width="250" height="190" rx="10" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="2.2"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">iron-proxy (EGRESS GUARD)</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Secure Token Interceptor</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1. Intercepts outbound request</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2. Matches target domain to whitelist</text>
+        <text x="15" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3. Swaps DUMMY with REAL SECRET</text>
+        <rect x="15" y="125" width="220" height="42" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="22" y="142" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#047857">REAL SECRET HELD ONLY HERE</text>
+        <text x="22" y="156" font-family="system-ui, sans-serif" font-size="9.5" fill="#047857">Agent never sees API key</text>
+      </g>
+
+      <!-- Arrow from iron-proxy to External Web -->
+      <path d="M 600 115 L 670 115" stroke="#10b981" stroke-width="2" marker-end="url(#arr-green)"/>
+      <text x="635" y="105" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#047857">Authenticated</text>
+
+      <!-- External API -->
+      <g transform="translate(680, 30)">
+        <rect width="210" height="170" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">EXTERNAL TARGET APIS</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">GitHub, Stripe, AWS, Slack...</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Receives valid token</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Executes permitted action</text>
+        <text x="15" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Returns response cleanly</text>
+        <rect x="15" y="125" width="180" height="28" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="22" y="143" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#047857">NO EXFILTRATION RISK ✓</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-11-channels-voice-and-media">Batch 11 — Channels, voice and media<a href="#batch-11/batch-11-channels-voice-and-media" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> COMPLETE
+<strong>Date:</strong> 2026-10-15
+<strong>Method:</strong> docs read in full against code; every claim carries a <code>file:line</code>. Docs are claims, code is authority (00-PIN-AND-METHOD.md §2).
+<strong>Source:</strong> <code>hermes-agent-main/hermes-agent-main</code> @ pin (19,728 files; pyproject md5 <code>f57f729d4b251547a5a9e2565ce1e726</code>).</p>
+<hr>
+<h2 id="0-plain-words">§0 — Plain words<a href="#batch-11/0-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This batch covers <strong>every way a person or another machine can reach Hermes, and every way Hermes can answer back in something other than text</strong>:</p>
+<ol>
+<li><strong>Channels</strong> — Hermes can live inside ~35 different chat systems (Slack, Telegram, Discord, WhatsApp, WeCom, Feishu, DingTalk, Matrix, email, SMS, …). One gateway process serves them all.</li>
+<li><strong>Voice</strong> — you can <em>talk</em> to Hermes and have it <em>talk back</em> (down to a fully local, key-free setup), including inside Telegram and Discord.</li>
+<li><strong>Media</strong> — Hermes can read images, generate images, run a browser, drive a desktop, and it exposes a credential-injecting <strong>egress proxy</strong> so a sandbox never holds your real API keys.</li>
+</ol>
+<p>The single most important finding is in §7: the <strong>egress credential-injection proxy</strong> (<code>iron-proxy</code>) is the most rigorous security design in the entire study — and its documentation states, in writing, <em>what it does not protect against</em>. A vendor that documents its own limits this precisely is telling you where the real trust boundary is.</p>
+<p>One correction first (§1): the egress docs live at <code>user-guide/egress/</code>, <strong>not</strong> at <code>egress/</code> as my carried note (C8-6) recorded. Rule 13.</p>
+<hr>
+<h2 id="1-what-was-read-and-verified">§1 — What was read and verified<a href="#batch-11/1-what-was-read-and-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Docs read in full (under <code>website/docs/</code>):</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Size</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/messaging/index.md</code></td>
+<td>59,585 B</td>
+<td>the gateway: platform comparison, security, pairing, busy-input, background sessions</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/telegram.md</code></td>
+<td>77,014 B</td>
+<td>the most complete platform guide</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/slack.md</code></td>
+<td>55,347 B</td>
+<td>incl. Slack-specific threading rules</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/discord.md</code></td>
+<td>61,788 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/whatsapp.md</code> / <code>whatsapp-cloud.md</code></td>
+<td>17,775 / 24,111 B</td>
+<td>two distinct WhatsApp paths</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/weixin.md</code></td>
+<td>18,899 B</td>
+<td>WeChat (China)</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/feishu.md</code></td>
+<td>30,694 B</td>
+<td>Feishu/Lark (China)</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/dingtalk.md</code></td>
+<td>12,086 B</td>
+<td>DingTalk (China)</td>
+</tr>
+<tr>
+<td><code>user-guide/messaging/wecom.md</code> + <code>wecom-callback.md</code></td>
+<td>13,526 + 7,339 B</td>
+<td>WeCom (China)</td>
+</tr>
+<tr>
+<td><code>user-guide/egress/iron-proxy.md</code></td>
+<td><strong>39,995 B</strong></td>
+<td>the credential-injection proxy (carried C8-6)</td>
+</tr>
+<tr>
+<td><code>user-guide/egress/network-isolation.md</code></td>
+<td>7,601 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/voice-mode.md</code></td>
+<td>33,927 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/tts.md</code></td>
+<td>47,591 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/vision.md</code></td>
+<td>14,815 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/image-generation.md</code></td>
+<td>21,106 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/browser.md</code></td>
+<td>51,760 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/computer-use.md</code></td>
+<td>33,955 B</td>
+<td></td>
+</tr>
+<tr>
+<td><code>user-guide/features/wake-word.md</code></td>
+<td>16,578 B</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>Code read and measured:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Finding</th>
+<th>Verified at</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>gateway/authz_mixin.py</code></td>
+<td><code>dm_policy</code> = open/allowlist/disabled/<strong>pairing</strong>; <code>group_policy</code> = open/allowlist/disabled</td>
+<td><code>:419</code>, <code>:731–736</code></td>
+</tr>
+<tr>
+<td><code>gateway/</code> (tree)</td>
+<td>the gateway is a <strong>large</strong> subsystem (hosted rooms, delivery ledger, drain control, …)</td>
+<td><code>ls gateway/</code></td>
+</tr>
+<tr>
+<td><code>agent/tts_registry.py</code></td>
+<td>9 TTS providers, incl. <strong>local</strong> (<code>piper</code>, <code>neutts</code>, <code>kittentts</code>)</td>
+<td><code>:26</code></td>
+</tr>
+<tr>
+<td><code>agent/transcription_registry.py</code></td>
+<td>8 STT providers, incl. <strong>local</strong></td>
+<td><code>:24</code></td>
+</tr>
+<tr>
+<td><code>agent/{tts,transcription,image_gen,browser}_provider.py</code></td>
+<td>the four media ABCs are <strong>small</strong> (57–138 lines) — providers are plugins</td>
+<td>(sizes)</td>
+</tr>
+<tr>
+<td><code>plugins/platforms/</code></td>
+<td><strong>21</strong> channel plugins</td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td><code>acp_adapter/</code></td>
+<td>Hermes is an ACP server (b10 §7)</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Correction (rule 13):</strong> carried item C8-6 said <em>&quot;the C8-6 egress read (<code>egress/iron-proxy.md</code>)&quot;</em>. Measured: the path is <strong><code>website/docs/user-guide/egress/iron-proxy.md</code></strong> — there is no top-level <code>egress/</code> doc folder. Corrected here and in the carried-item list.</p>
+<hr>
+<h2 id="2-channels-one-gateway-35-platforms">§2 — Channels: one gateway, ~35 platforms<a href="#batch-11/2-channels-one-gateway-35-platforms" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Measured — the channel plugins</strong> (<code>plugins/platforms/</code>, 21 entries): <code>a2a, buzz, dingtalk, discord, email, feishu, google_chat, irc, line, matrix, mattermost, ntfy, photon, raft, simplex, slack, sms, teams, telegram, wecom, whatsapp</code>.</p>
+<p><strong>Measured — the messaging docs</strong> (<code>user-guide/messaging/</code>, 36 files): the 21 above plus <code>bluebubbles</code> (iMessage), <code>homeassistant</code>, <code>msgraph-webhook</code>, <code>open-webui</code>, <code>qqbot</code>, <code>relay</code>, <code>signal</code>, <code>teams-meetings</code>, <code>weixin</code>, <code>whatsapp-cloud</code>, <code>wecom-callback</code>, <code>yuanbao</code>, <code>webhooks</code>, and the <code>index.md</code> hub.</p>
+<p><strong>Notable China-first coverage:</strong> <strong>WeChat</strong> (<code>weixin.md</code>, 18,899 B), <strong>WeCom</strong> (<code>wecom.md</code> + <code>wecom-callback.md</code>), <strong>Feishu/Lark</strong> (30,694 B), <strong>DingTalk</strong> (12,086 B), <strong>QQ Bot</strong> (<code>qqbot.md</code>), <strong>Yuanbao</strong> (<code>yuanbao.md</code>, 10,895 B). This is unusual breadth for a project of this kind and is directly relevant to a mainland-serving platform.</p>
+<p><strong>The gateway is a subsystem, not a script.</strong> Measured: <code>gateway/</code> contains dedicated modules for <strong>hosted rooms</strong> (peer, replicas, discussion, policy checkpoint, work lineage, authority history, execution policy), a <strong>delivery ledger</strong>, <strong>drain control</strong>, <strong>control socket</strong>, <strong>cgroup cleanup</strong>, <strong>agent cache pressure</strong>, <strong>code skew</strong>, and <strong>authz</strong>. That is the machinery of running many long-lived rooms across many platforms without losing messages or leaking state between them.</p>
+<p><strong>Q1 (user value):</strong> a user reaches their agent from whatever chat app they already use, including the ones dominant in China. Real and broad.
+<strong>Q2 (vision value):</strong> for a business platform, the channel layer is where <strong>identity</strong> enters. Hermes solved &quot;who is this person on this platform, and what are they allowed to do&quot; once, centrally — see §3.</p>
+<hr>
+<h2 id="3-channel-security-policies-pairing-and-the-silence-token">§3 — Channel security: policies, pairing, and the silence token<a href="#batch-11/3-channel-security-policies-pairing-and-the-silence-token" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Measured in <code>gateway/authz_mixin.py</code>:</strong></p>
+<ul>
+<li><strong>Two policy axes, each with enumerable values</strong> (<code>:419</code>): <code>dm_policy</code> ∈ <strong>{open, allowlist, disabled, pairing}</strong>; <code>group_policy</code> ∈ <strong>{open, allowlist, disabled}</strong>. Note that <strong><code>pairing</code> exists only for DMs</strong> — a design choice, not an omission.</li>
+<li><strong><code>pairing</code> = a code shown to the user, approved by the operator</strong> (<code>index.md</code>: <em>&quot;The user sees: Pairing code: XKGH5N7P&quot;</em>, approved with a command). This is the &quot;let strangers ask for access, and you decide&quot; path.</li>
+<li><strong>Bots bypass the human allowlist only when explicitly admitted</strong> (<code>:39</code>): &quot;Bots admitted by <code>{PLATFORM}_ALLOW_BOTS</code> bypass the human allowlist (#4466).&quot; So a bot integration is a deliberate open door, not an accident.</li>
+<li><strong>Allowlist comparison is hardened against known evasions:</strong> <code>:174</code> — matching a <em>display name</em> &quot;would bypass the allowlist (#44729)&quot;, so it matches on the id; <code>:91</code> — a Nostr <code>npub</code> must be <strong>decoded</strong> before comparing with a hex pubkey, otherwise &quot;the central allowlist comparison string-matches the raw npub against the hex pubkey&quot; and fails open. Both are recorded with issue numbers.</li>
+<li><strong>Allowlists are per-profile and isolation-safe</strong> (<code>:50</code>): &quot;Gate reads use the shared per-profile isolated reader (allowlist leak under multiplex, #72348).&quot; So one profile&#39;s allowlist cannot leak into another&#39;s.</li>
+<li><strong>Group-level sender allowlists</strong> (<code>WeCom groups.&lt;id&gt;.allow_from</code>) let a group be open at the chat level but restricted per sender (<code>:426–440</code>).</li>
+<li><strong>Per-turn authorization re-reads the <em>admitting</em> bot&#39;s allowlist</strong> (<code>:346–347</code>): &quot;every authorization decision made mid-turn (<code>/topic</code>, sibling <code>/stop</code>, plugin injection, voice, auto-resume) must read the admitting bot&#39;s allowlist instead.&quot; This closes the &quot;you were admitted by bot A, then a mid-turn action was judged against bot B&#39;s policy&quot; hole.</li>
+</ul>
+<p><strong>The intentional-silence token</strong> (<code>index.md</code>, section <em>Intentional Silence Tokens</em>) is a small but real design:</p>
+<ul>
+<li>Tokens: <code>[SILENT]</code>, <code>SILENT</code>, <code>NO_REPLY</code>, <code>NO REPLY</code>, and — notably — <strong><code>[静默]</code>/<code>静默</code> and <code>[沉默]</code>/<code>沉默</code></strong>, &quot;the Chinese renderings a model produces when it translates the sentinel instead of emitting it literally&quot;.</li>
+<li>&quot;The whole final response must be the token.&quot; A sentence <em>about</em> <code>[SILENT]</code> is delivered normally.</li>
+<li><strong>Silence is a delivery decision only</strong> — the turn is still stored in the transcript, so the conversation still alternates.</li>
+<li><strong>A bare silence token on a message <em>from a person</em> is replaced by a short notice</strong>, because &quot;a message that needed a reply must not vanish&quot;. Internal wakes (background notifications) and messages the adapter reports as not-addressed may stay silent.</li>
+<li>&quot;Failed turns still surface as errors; Hermes does not hide failures just because the text resembles a silence token.&quot;</li>
+</ul>
+<p><strong>Q1:</strong> a group-chat user is not spammed when the bot has nothing to say, but a <em>direct question</em> is never silently dropped. Good judgement.
+<strong>Q2:</strong> the silence token is a <strong>delivery-policy primitive</strong> — and the Chinese-token handling shows the model&#39;s own translation behaviour was measured and accommodated rather than assumed.</p>
+<hr>
+<h2 id="4-voice-talk-to-it-and-have-it-talk-back">§4 — Voice: talk to it, and have it talk back<a href="#batch-11/4-voice-talk-to-it-and-have-it-talk-back" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Measured TTS providers</strong> (<code>agent/tts_registry.py:26</code>): <code>edge, elevenlabs, openai, minimax, xai, mistral, gemini, neutts, kittentts</code> — <strong>9</strong>, of which <strong><code>edge</code>, <code>neutts</code>, <code>kittentts</code> need no API key</strong> (<code>voice-mode.md</code>: <em>&quot;Text-to-Speech (optional — Edge TTS and NeuTTS work without any key)&quot;</em>).</p>
+<p><strong>Measured STT providers</strong> (<code>agent/transcription_registry.py:24</code>): <code>local, local_command, groq, openai, mistral, xai, elevenlabs, deepinfra</code> — <strong>8</strong>, of which <strong><code>local</code></strong> (Faster-Whisper, prepared by the package manager) needs <strong>no key at all</strong> (<code>voice-mode.md</code>: <em>&quot;local provider needs NO key at all&quot;</em>).</p>
+<p><strong>Documented voice capabilities</strong> (<code>voice-mode.md</code>, section map): CLI voice mode, <strong>silence detection</strong>, <em>ending a voice chat by voice</em>, <strong>live transcription (streaming STT)</strong>, <strong>streaming TTS</strong>, <strong>barge-in</strong>, a <strong>hallucination filter</strong>, gateway voice reply for Telegram &amp; Discord (channels vs DMs, commands, modes, platform delivery), plus a Desktop <strong>GPT-Live full-duplex</strong> mode that &quot;delegates to Hermes&quot;.</p>
+<p><strong>Design notes worth recording:</strong></p>
+<ul>
+<li><strong>A hallucination filter exists specifically for voice.</strong> Speech models are known to invent words on silence; Hermes ships a filter for it.</li>
+<li><strong>A fully local voice loop is possible</strong> — local Whisper for input, Edge/NeuTTS for output, zero API keys. That is a genuinely offline voice assistant.</li>
+<li><strong>Streaming on both directions</strong> (live STT, streaming TTS) plus <strong>barge-in</strong> means the interaction is conversational rather than walkie-talkie.</li>
+<li>The tiny ABCs (<code>tts_provider.py</code> 114 lines, <code>transcription_provider.py</code> 66) confirm voice is <strong>plugin-extensible</strong>: &quot;STT custom command providers&quot; and &quot;Python plugin providers (STT)&quot; are documented paths.</li>
+</ul>
+<p><strong>Q1:</strong> a user can speak to their agent, hear it answer, interrupt it, and do all of it offline with no keys. Strong.
+<strong>Q2:</strong> for a resource planner, voice is a <em>modality</em>, and the fact that it is <strong>plugin-extensible with a key-free local default</strong> means a business can choose its cost/privacy posture. The hallucination filter is the kind of detail that separates a demo from a product.</p>
+<hr>
+<h2 id="5-vision-and-image-generation">§5 — Vision and image generation<a href="#batch-11/5-vision-and-image-generation" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Vision</strong> (<code>vision.md</code>, 14,815 B): image understanding, wired into the tool surface (<code>vision_analyze</code> — referenced in b09&#39;s config comment about not accidentally turning a vision model &quot;text-only&quot;). Measured: <code>agent/image_routing.py</code> decides <em>whether</em> a model supports vision from a chain — <code>models.dev</code> catalog → config overrides → hardcoded defaults — with the comment that <code>supports_vision</code>/<code>supports_reasoning</code> &quot;stay UNKNOWN (fail-open) unless the override sets them — a context_window-only entry must not turn into &#39;text-only&#39; and hide <code>vision_analyze</code>&quot;.</p>
+<p><strong>Image generation</strong> (<code>image-generation.md</code>, 21,106 B): <code>agent/image_gen_provider.py</code> (138 lines) + <code>image_gen_registry.py</code> (47 lines) — a small ABC + registry, i.e. <strong>plugin-extensible</strong>, with a documented per-kind guide (<code>image-gen-provider-plugin.md</code>, 13,318 B) and an in-tree <code>plugins/image_gen/</code>. A <code>plugins/video_gen/</code> exists too (<code>video-gen-provider-plugin.md</code>, 9,366 B).</p>
+<p><strong>Browser automation</strong> (<code>browser.md</code>, 51,760 B) — genuinely multi-backend:</p>
+<ul>
+<li><strong>Browser Use</strong> (default), <strong>Browser Use cloud</strong>, <strong>Browserbase cloud</strong>, <strong>Firecrawl cloud</strong> (or self-hosted), <strong>Camofox local</strong> (Docker, auto-detects arch).</li>
+<li><strong>Hybrid routing</strong>: &quot;cloud for public URLs, local for LAN/localhost&quot;.</li>
+<li><strong>Real profile browsing (use your own logins)</strong> — a documented path to browse <em>as the user</em>, with its own config.</li>
+<li>Session TTL configurable (default 300 s).</li>
+<li><code>browser-provider-plugin.md</code> + <code>browser-supervisor.md</code> exist, so the browser is also an extension point with a supervising process.</li>
+</ul>
+<p><strong>Computer use</strong> (<code>computer-use.md</code>, 33,955 B): desktop control (the <code>plugins/computer_use/</code> kind), with <code>gateway/browser_control_broker.py</code> and <code>browser_control_artifacts.py</code> mediating control from the gateway side — i.e. the broker pattern: the agent <em>requests</em>, a broker <em>performs</em>, and artifacts are recorded.</p>
+<p><strong>Q1:</strong> a user can point their agent at a real webpage with their own logins, or at a desktop app, and get images understood or produced. Real.
+<strong>Q2:</strong> the <strong>hybrid cloud/local routing</strong> (public → cloud, private → local) is exactly the <strong>data-boundary policy</strong> a business needs; and the <strong>broker pattern</strong> for computer control is the right shape for auditability.</p>
+<hr>
+<h2 id="6-wake-word">§6 — Wake word<a href="#batch-11/6-wake-word" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>wake-word.md</code> (16,578 B) documents a wake-word path — the &quot;say a phrase and it starts listening&quot; pattern. Combined with §4&#39;s local STT/TTS, this means a <strong>fully offline, no-key, always-listening-until-woken</strong> voice mode is within reach. Recorded because it changes the privacy story materially: nothing needs to leave the machine until the wake word fires.</p>
+<hr>
+<h2 id="7-the-egress-credential-injection-proxy-iron-proxy-the-study-s-strongest-security-design">§7 — The egress credential-injection proxy (`iron-proxy`) — the study's strongest security design<a href="#batch-11/7-the-egress-credential-injection-proxy-iron-proxy-the-study-s-strongest-security-design" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Carried item <strong>C8-6</strong>, now read in full (39,995 B). This is the most rigorous document in the tree, and the most transferable mechanism.</p>
+<p><strong>The problem it solves, in the doc&#39;s own words:</strong></p>
+<blockquote>
+<p>&quot;When Hermes runs your agent inside a Docker terminal sandbox, that sandbox normally holds your real upstream API keys (<code>OPENROUTER_API_KEY</code>, <code>OPENAI_API_KEY</code>, etc.). A prompt-injected agent in that sandbox can <code>cat ~/.config/openrouter/auth.json</code> or <code>printenv | grep -i key</code> and exfiltrate them.&quot;</p>
+</blockquote>
+<p><strong>The mechanism:</strong> the sandbox holds opaque <strong>proxy tokens</strong>, never real keys. All outbound traffic routes through a local <code>iron-proxy</code> daemon (Apache-2.0, Go) on the host, which terminates TLS, swaps the token for the real credential, and forwards upstream.</p>
+<p><strong>What it installs:</strong></p>
+<ul>
+<li>A pinned, <strong>SHA-256-verified</strong> binary in the package-manager tool store.</li>
+<li>A local CA at <code>~/.hermes/proxy/ca.crt</code> the sandbox trusts (so iron-proxy can MITM TLS and rewrite headers).</li>
+<li><code>proxy.yaml</code> (allowed hosts + secret transforms) and <code>mappings.json</code> (token ↔ real env var).</li>
+<li>The sandbox gets <code>HTTPS_PROXY</code>/<code>HTTP_PROXY</code> → <code>host.docker.internal:9090/9091</code>, plus <code>REQUESTS_CA_BUNDLE</code>, <code>SSL_CERT_FILE</code>, <code>CURL_CA_BUNDLE</code>, <code>NODE_EXTRA_CA_CERTS</code>, and <code>NODE_OPTIONS=--use-openssl-ca</code>.</li>
+</ul>
+<p><strong>Default allowed upstream hosts</strong> (verbatim from the doc):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>openrouter.ai           *.openrouter.ai
+api.openai.com          api.anthropic.com
+generativelanguage.googleapis.com
+api.x.ai                api.mistral.ai
+api.groq.com            api.together.xyz
+api.deepseek.com        inference.nousresearch.com
+</code></pre>
+</div>
+<p><strong>Default SSRF deny CIDRs</strong> — enforced &quot;regardless of allowlist&quot;, &quot;checked at connect time, not at allowlist time&quot; (this is what stops DNS rebinding):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>CIDR</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>127.0.0.0/8</code>, <code>::1/128</code></td>
+<td>loopback (v4 + v6)</td>
+</tr>
+<tr>
+<td><code>169.254.0.0/16</code>, <code>fe80::/10</code></td>
+<td>link-local — <strong>incl. AWS/GCP/Azure IMDS</strong></td>
+</tr>
+<tr>
+<td><code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code></td>
+<td>RFC1918</td>
+</tr>
+<tr>
+<td><code>fc00::/7</code></td>
+<td>IPv6 ULA</td>
+</tr>
+<tr>
+<td><code>::ffff:0:0/96</code></td>
+<td>IPv4-mapped IPv6 — closes the dual-stack IMDS bypass</td>
+</tr>
+<tr>
+<td><code>100.64.0.0/10</code></td>
+<td>RFC6598 CGNAT (AWS VPC, K8s pod nets)</td>
+</tr>
+<tr>
+<td><code>198.18.0.0/15</code></td>
+<td>RFC2544 benchmark range</td>
+</tr>
+</tbody></table></div>
+<p><strong>Bind policy — never <code>0.0.0.0</code>:</strong> Linux → the docker bridge gateway (<code>172.17.0.1</code>), reachable by containers via <code>--add-host=host.docker.internal:host-gateway</code> but <strong>not from the LAN</strong>; macOS/Windows Docker Desktop → loopback. Comment records that a hostile <code>ip</code> shim on PATH trying to inject a public/multicast/link-local bridge address still falls back to loopback, because &quot;we never bind anything we couldn&#39;t validate via <code>ipaddress.IPv4Address</code> + <code>is_*</code> checks.&quot;</p>
+<p><strong>PID and nonce defense</strong> (a genuinely careful piece of engineering):</p>
+<ul>
+<li>pidfile written with <code>O_EXCL</code> + <code>O_NOFOLLOW</code> + ownership check; concurrent <code>start</code> refuses or unlinks a stale file and retries once.</li>
+<li>A <strong>fresh random nonce</strong> planted in both the daemon&#39;s env (<code>HERMES_IRON_PROXY_NONCE</code>) and <code>~/.hermes/proxy/iron-proxy.nonce</code> (mode <code>0600</code>).</li>
+<li>On <code>stop</code>, Hermes reads <code>/proc/&lt;pid&gt;/environ</code> and looks for the nonce — so a <em>recycled PID</em> is not mistaken for the daemon. The on-disk copy is what makes this work across separate CLI invocations.</li>
+<li><code>stop_proxy</code> captures <code>/proc/&lt;pid&gt;/stat</code> <strong>starttime</strong> and re-verifies after the 5 s grace window; if starttime drifted, <strong>SIGKILL is suppressed</strong> with a warning.</li>
+</ul>
+<p><strong>The security model is stated in both directions</strong> — this is the part worth the ink:</p>
+<p><em>Protects against:</em> sandbox <code>printenv</code>/credential-file exfiltration; a compromised dependency phoning an unknown host (default-deny allowlist); cloud-metadata dialing (<code>169.254.169.254</code>, incl. the IPv4-mapped form); DNS rebinding via an allowlisted hostname; same-uid processes scraping the daemon env (only mapped var <em>names</em> are forwarded); a LAN peer with a leaked token (never bound to <code>0.0.0.0</code>).</p>
+<p><em>Does NOT protect against (verbatim intent):</em></p>
+<ul>
+<li>A compromised <strong>host</strong> process — &quot;real keys in the host&#39;s <code>~/.hermes/.env</code> are exposed regardless … a defense-in-depth feature for <em>sandbox</em> compromise, not host compromise.&quot;</li>
+<li><strong>Loss of the trusted-proxy boundary itself</strong> — &quot;If the CA private key is stolen, or sandbox egress is redirected to attacker-controlled proxy infrastructure, an adversary-in-the-middle can present a valid leaf cert and the proxy tokens are no longer a meaningful boundary&quot; (cites MITRE ATT&amp;CK <strong>T1588.004</strong>).</li>
+<li>Sandbox processes that <strong>bypass <code>HTTPS_PROXY</code> with a raw socket</strong> — &quot;The proxy can&#39;t intercept what doesn&#39;t route to it.&quot;</li>
+<li><strong>Explicitly mounted credential files</strong> — &quot;Egress protects provider env vars; it does not inspect arbitrary mounted files. Do not mount real provider credentials into an enforced egress sandbox.&quot;</li>
+<li><strong>Allowlisted-host data exfiltration</strong> — &quot;If <code>api.openai.com</code> is allowed, an agent could embed exfil data in a request body to that host. The daemon log captures the request happened but doesn&#39;t prevent it.&quot;</li>
+<li><strong>Uncovered providers</strong> (AWS Bedrock SigV4, GCP Vertex service-account OAuth) — those creds bypass the proxy entirely.</li>
+<li><strong>iron-proxy&#39;s own in-memory secrets</strong> — a core dump or <code>/proc/&lt;pid&gt;/mem</code> read from a same-uid attacker would expose them; &quot;out of scope for this layer.&quot;</li>
+</ul>
+<p><strong>Failure modes are enumerated with the exact refusal text</strong> — e.g. <code>enforce_on_docker: true</code> (default) means Docker sandbox creation <strong>refuses to start</strong> if the proxy is not running; a <code>docker_env</code>/<code>docker_forward_env</code>/<code>docker_extra_args</code> collision with a proxy-controlling key also refuses. The doc even notes that user <code>docker_extra_args</code> run <em>after</em> Hermes&#39; generated args and could bypass egress, so it is refused.</p>
+<p><strong>Q1:</strong> a user who runs the agent in a Docker sandbox can be prompt-injected and lose nothing but a useless token. This is a large, real safety gain — and the default is <strong>fail-closed</strong> (<code>enforce_on_docker: true</code>).
+<strong>Q2:</strong> <strong>this is the most transferable artifact in the whole study.</strong> A resource planner that runs model-written code near customer credentials needs exactly: default-deny allowlist, SSRF deny at connect time, never bind public, nonce-verified process identity, fail-closed on misconfiguration, and — critically — <strong>a written list of what the layer does not protect</strong>. That last item is the difference between a security feature and a security <em>claim</em>.</p>
+<hr>
+<h2 id="8-divergences-boundaries-and-corrections">§8 — Divergences, boundaries and corrections <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-11/8-divergences-boundaries-and-corrections" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Divergences found this batch: 0</strong> (channel policy values, TTS/STT provider sets, iron-proxy defaults and security model all matched code/definitions on every checked claim). <strong>One correction to a carried note</strong> (§1, rule 13).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Verdict</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>dm_policy</code> = open/allowlist/disabled/<strong>pairing</strong>; <code>group_policy</code> lacks pairing</td>
+<td><strong>TRUE</strong></td>
+<td><code>authz_mixin.py:419</code></td>
+</tr>
+<tr>
+<td>Bot admission bypasses the human allowlist only via explicit env</td>
+<td><strong>TRUE</strong></td>
+<td><code>authz_mixin.py:39</code></td>
+</tr>
+<tr>
+<td>Silence tokens include Chinese renderings; whole response must be the token</td>
+<td><strong>TRUE</strong></td>
+<td><code>messaging/index.md</code></td>
+</tr>
+<tr>
+<td>9 TTS providers incl. 3 key-free; 8 STT providers incl. local</td>
+<td><strong>TRUE</strong></td>
+<td><code>tts_registry.py:26</code>, <code>transcription_registry.py:24</code></td>
+</tr>
+<tr>
+<td>iron-proxy: default-deny allowlist, SSRF deny at connect time, never <code>0.0.0.0</code>, fail-closed</td>
+<td><strong>TRUE</strong></td>
+<td><code>egress/iron-proxy.md</code></td>
+</tr>
+<tr>
+<td>The egress doc lives at <code>user-guide/egress/</code>, not <code>egress/</code></td>
+<td><strong>CORRECTED</strong></td>
+<td><code>find website/docs -type d -iname egress</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Boundary surfaced (not a divergence):</strong> the egress proxy <strong>only covers the Docker backend</strong> — &quot;Modal, Daytona, SSH, and Singularity do <strong>not</strong> receive proxy env vars or CA mounts yet.&quot; So a sandbox on a non-Docker backend holds real keys.</p>
+<p><strong>Boundary surfaced:</strong> egress protects <strong>provider env vars</strong>, not mounted files, not allowlisted-host exfil, and not the host process. The doc says so explicitly.</p>
+<p><strong>Boundary surfaced:</strong> the proxy cannot intercept traffic that does not use <code>HTTPS_PROXY</code> (raw sockets); Node.js is only <em>partially</em> mitigated via <code>--use-openssl-ca</code>.</p>
+<hr>
+<h2 id="9-carried-items">§9 — Carried items<a href="#batch-11/9-carried-items" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C11-1</strong></td>
+<td>~35 channels, 21 as plugins, heavy China coverage (WeChat/WeCom/Feishu/DingTalk/QQ/Yuanbao).</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-2</strong></td>
+<td>Channel identity is solved once: dm_policy (4 values incl. pairing) + group_policy (3) + per-profile isolation + mid-turn re-read of the admitting bot&#39;s allowlist.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-3</strong></td>
+<td>Silence token is a delivery-policy primitive; Chinese renderings handled; a person&#39;s message never silently vanishes.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-4</strong></td>
+<td>Voice: 9 TTS (3 key-free) / 8 STT (local key-free); streaming both ways; barge-in; hallucination filter; wake word → fully offline voice loop possible.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-5</strong></td>
+<td>Browser: hybrid routing (cloud for public, local for LAN) is a data-boundary policy; real-profile browsing documented.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-6</strong></td>
+<td><strong>iron-proxy</strong> is the study&#39;s strongest security design; its &quot;does NOT protect&quot; list is the transferable template.</td>
+<td><strong>For §12 — high priority</strong></td>
+</tr>
+<tr>
+<td><strong>C11-7</strong></td>
+<td>Egress covers <strong>Docker only</strong>; other backends hold real keys.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-8</strong></td>
+<td>Computer-use uses a <strong>broker</strong> pattern (agent requests → broker performs → artifacts recorded).</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C11-9</strong></td>
+<td><strong>Correction</strong>: egress docs path is <code>user-guide/egress/</code>.</td>
+<td>Recorded</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-batch-level-value-questions-q1-user-q2-vision">§10 — Batch-level value questions (Q1 user / Q2 vision)<a href="#batch-11/10-batch-level-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a user use case?</strong>
+A user can reach their agent from almost any chat app — including the ones dominant in China — with an access policy that ranges from fully open to code-verified pairing, and with a bot&#39;s admission kept separate from a human&#39;s. They can talk to it and hear it answer, <strong>entirely offline with no API keys</strong>, interrupt it mid-sentence, and it will not invent words on silence (hallucination filter) or spam a group chat (silence token). It can read images, make images, browse with the user&#39;s own logins when needed, and drive a desktop through an auditable broker. And if the agent runs in a Docker sandbox and a malicious page prompt-injects it, <strong>the sandbox holds only useless tokens</strong> — a single command (<code>hermes egress start</code>) with <strong>fail-closed</strong> defaults.</p>
+<p><strong>Q2 — how does this serve the vision of an AI-first business/resource planner?</strong>
+Three mechanisms look directly reusable, ranked:</p>
+<ol>
+<li><strong>The iron-proxy egress model</strong> (§7) — default-deny allowlist, connect-time SSRF denial, never-bind-public, nonce-verified process identity, fail-closed on misconfiguration, and a <strong>published list of its own limits</strong>. This is the template for how a platform should hold <em>customer</em> credentials while running <em>model-written</em> code.</li>
+<li><strong>Channel identity solved once</strong> (§3) — one policy vocabulary for every transport, per-profile isolation, and mid-turn re-authorization against the <em>admitting</em> principal. A platform with many channels needs exactly this and should not re-invent it.</li>
+<li><strong>Hybrid cloud/local routing + broker pattern</strong> (§5, §8) — a <strong>data-boundary policy</strong> (public → cloud, private → local) and an <strong>auditable action broker</strong> for anything that touches a real machine.</li>
+</ol>
+<p><strong>Cross-reference:</strong> mercato-vs-Hermes placement is deferred to <code>12-SYNTHESIS.md</code> per the owner&#39;s instruction.</p>
+<hr>
+<p><strong>Batch 11 of 12 complete. Divergences found this batch: 0</strong>, and <strong>one path correction to a carried note</strong> (rule 13): the egress docs are at <code>user-guide/egress/</code>, not <code>egress/</code>. <strong>Most transferable mechanism:</strong> the <strong>iron-proxy egress credential-injection proxy</strong> — its default-deny allowlist, connect-time SSRF deny, fail-closed defaults and, above all, its <em>written list of what it does not protect</em>. <strong>Also notable:</strong> a fully offline, key-free voice loop is achievable (local Whisper + Edge/NeuTTS + wake word), and ~35 channels include deep China coverage.
+<strong>Next: <code>12-SYNTHESIS.md</code></strong> — the study&#39;s closing document, answering the owner&#39;s three questions (what mercato serves better and should move into Hermes; what Hermes does better and should move into the platform; what to build on / around / under), each grounded in the batch findings, then fed back under rule 16.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="10-plugins-extensibility.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Plugins &amp; Extensibility</span>
+                </a>
+              
+
+              <a href="../index.html#batch-11" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="12-the-synthesis-decision.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis (Decision)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words" class="toc-link">§0 — Plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-verified" class="toc-link">§1 — What was read and verified</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-channels-one-gateway-35-platforms" class="toc-link">§2 — Channels: one gateway, ~35 platforms</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-channel-security-policies-pairing-and-the-silence-token" class="toc-link">§3 — Channel security: policies, pairing, and the silence token</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-voice-talk-to-it-and-have-it-talk-back" class="toc-link">§4 — Voice: talk to it, and have it talk back</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-vision-and-image-generation" class="toc-link">§5 — Vision and image generation</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-wake-word" class="toc-link">§6 — Wake word</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-egress-credential-injection-proxy-iron-proxy-the-study-s-strongest-security-design" class="toc-link">§7 — The egress credential-injection proxy (iron-proxy) — the study&#039;s strongest security design</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-boundaries-and-corrections" class="toc-link">§8 — Divergences, boundaries and corrections</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-carried-items" class="toc-link">§9 — Carried items</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-batch-level-value-questions-q1-user-q2-vision" class="toc-link">§10 — Batch-level value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

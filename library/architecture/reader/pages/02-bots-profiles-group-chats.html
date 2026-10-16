@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — Bots, profiles and group chats — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Bots, Profiles &amp; Group Chats</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-bots-profiles-and-group-chats.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,429</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">12 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">245</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE</div>
+    <h4>Profile Isolation Boundary vs Sandbox Reality</h4>
+    <p>Profiles provide directory-level separation, NOT process or OS security sandboxing</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 250" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Profile 1 -->
+      <g transform="translate(30, 20)">
+        <rect width="260" height="200" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#2563eb">Profile: Alice (~/.hermes/profiles/alice)</text>
+        <text x="15" y="55" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• config.yaml (custom prompt, model)</text>
+        <text x="15" y="75" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• memory/ (dedicated MEMORY.md)</text>
+        <text x="15" y="95" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• skills/ (isolated local skills)</text>
+        <text x="15" y="115" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• tools/ (custom enabled toolset)</text>
+        <rect x="15" y="140" width="230" height="42" rx="6" fill="#10b981" fill-opacity="0.12"/>
+        <text x="25" y="158" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">Bot Persona: Alice</text>
+        <text x="25" y="174" font-family="system-ui, sans-serif" font-size="9.5" fill="#047857">Auto-attributed: [Agent: Alice]</text>
+      </g>
+
+      <!-- Center: Shared State & Routing -->
+      <g transform="translate(330, 45)">
+        <rect width="250" height="150" rx="10" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">Shared State &amp; Group Chat</text>
+        <text x="15" y="50" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="var(--text-primary, #0f172a)">shared-state.db</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• message_agent tool routing</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Room member rosters</text>
+        <text x="15" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• hermes peer (cross-machine)</text>
+        <rect x="15" y="116" width="220" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+        <text x="22" y="131" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#b45309">Same OS User &amp; Filesystem</text>
+      </g>
+
+      <!-- Profile 2 -->
+      <g transform="translate(620, 20)">
+        <rect width="260" height="200" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#2563eb">Profile: Bob (~/.hermes/profiles/bob)</text>
+        <text x="15" y="55" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• config.yaml (custom prompt, model)</text>
+        <text x="15" y="75" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• memory/ (dedicated MEMORY.md)</text>
+        <text x="15" y="95" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• skills/ (isolated local skills)</text>
+        <text x="15" y="115" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• tools/ (custom enabled toolset)</text>
+        <rect x="15" y="140" width="230" height="42" rx="6" fill="#10b981" fill-opacity="0.12"/>
+        <text x="25" y="158" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">Bot Persona: Bob</text>
+        <text x="25" y="174" font-family="system-ui, sans-serif" font-size="9.5" fill="#047857">Auto-attributed: [Agent: Bob]</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-02-bots-profiles-and-group-chats">Batch 02 — Bots, profiles and group chats<a href="#batch-02/batch-02-bots-profiles-and-group-chats" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-plain-words">0. What this batch is (plain words)<a href="#batch-02/0-what-this-batch-is-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The previous batch described <em>one</em> agent. This batch describes <strong>many</strong>: how Hermes runs several agents
+side by side, gives each its own identity, memory and credentials, and lets them <strong>talk to each other</strong> —
+including in shared group rooms. In the owner&#39;s frame this is the <strong>DP-09 match</strong>: AI persons that human
+staff address by name.</p>
+<p>Four words are used precisely here, and the docs define them (<code>user-guide/profiles.md:19–43</code>):</p>
+<ul>
+<li><strong>Profile</strong> — a separate Hermes home directory: its own config, keys, memory, sessions, skills, cron.</li>
+<li><strong>Agent</strong> — the running assistant that uses a profile.</li>
+<li><strong>Bot (Bot Mode)</strong> — a profile <em>presented</em> as a named entry in a roster, with an avatar and one
+permanent chat. <strong>Every Bot is a profile; not every profile is a Bot.</strong></li>
+<li><strong>Subagent</strong> — a child spawned by <code>delegate_task</code> for one task, with a fresh conversation. <em>&quot;A separate
+conversation is different from a separate profile.&quot;</em></li>
+</ul>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-02/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/multi-profile-gateways.md</code></td>
+<td align="right">77,212</td>
+</tr>
+<tr>
+<td><code>user-guide/bot-mode.md</code></td>
+<td align="right">53,509</td>
+</tr>
+<tr>
+<td><code>user-guide/profile-distributions.md</code></td>
+<td align="right">34,293</td>
+</tr>
+<tr>
+<td><code>user-guide/profiles.md</code></td>
+<td align="right">25,661</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>190,675</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>get_hermes_home()</code> path resolution</td>
+<td><strong>821 Python files</strong> reference it (grep count)</td>
+</tr>
+<tr>
+<td><code>tools/bot_mode_dm.py</code></td>
+<td><code>message_agent_tool</code> (line 201), auto-attribution (line 243)</td>
+</tr>
+<tr>
+<td><code>hermes_cli/profile_cmd.py</code>, <code>profile_channels.py</code></td>
+<td>profile list/rename/channel-strip logic</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-profiles-the-isolation-unit-in-plain-words">2. Profiles — the isolation unit, in plain words<a href="#batch-02/2-profiles-the-isolation-unit-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A profile is <strong>just a directory</strong> under <code>~/.hermes/profiles/&lt;name&gt;/</code>, holding its own <code>config.yaml</code>,
+<code>.env</code>, <code>SOUL.md</code>, memories, sessions, skills and state database. Hermes recognises a directory as a
+profile <strong>only if it carries an identity file</strong> (<code>config.yaml</code>, <code>.env</code>, <code>SOUL.md</code>, <code>profile.yaml</code>,
+<code>auth.json</code>, <code>state.db</code>); a stray directory left by logging is ignored.</p>
+<p><strong>How the isolation actually works</strong> (verified): every path resolution goes through the <code>HERMES_HOME</code>
+environment variable via <code>get_hermes_home()</code>. The docs claim <em>&quot;119+ files in the codebase resolve paths
+via <code>get_hermes_home()</code>&quot;</em> (<code>profiles.md:403</code>). <strong>DIVERGENCE (docs understate):</strong> a grep counts <strong>821
+Python files</strong> referencing it. The isolation is broader than the docs say — which is the <em>safe</em> direction
+for a divergence to point.</p>
+<h3 id="2-1-the-hard-rule-the-docs-state-worth-repeating">2.1 The hard rule the docs state, worth repeating<a href="#batch-02/2-1-the-hard-rule-the-docs-state-worth-repeating" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<blockquote>
+<p><em>&quot;Never point two agent processes at the same profile… Both write memory automatically, and each loads
+the other&#39;s writes into its system prompt at session start — so two writers on one home compound each
+other&#39;s state until it stops being anything you configured.&quot;</em> (<code>profiles.md:13–15</code>)</p>
+</blockquote>
+<p><strong>This is the exact hazard of running several agents on one home.</strong> It is the reason a per-tenant agent
+needs its <strong>own</strong> home, and it is a direct constraint on any shared-agent design.</p>
+<h3 id="2-2-profiles-are-not-a-security-sandbox-stated-by-the-docs-themselves">2.2 Profiles are NOT a security sandbox — stated by the docs themselves<a href="#batch-02/2-2-profiles-are-not-a-security-sandbox-stated-by-the-docs-themselves" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<blockquote>
+<p><em>&quot;Profiles do <strong>not</strong> sandbox the agent… On the default <code>local</code> terminal backend, the agent still has
+the same filesystem access as your user account.&quot;</em> (<code>profiles.md:234–236</code>)</p>
+</blockquote>
+<p><strong>Named, and important:</strong> a profile separates <em>state</em> (config, memory, sessions), <strong>not</strong> filesystem
+reach. Real isolation needs a terminal backend (<code>docker</code>/<code>ssh</code>), which is batch 08/11 material. This is a
+boundary a platform must not confuse.</p>
+<h3 id="2-3-what-travels-and-what-does-not-on-a-clone">2.3 What travels and what does not, on a clone<a href="#batch-02/2-3-what-travels-and-what-does-not-on-a-clone" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Clone flag</th>
+<th>Copies</th>
+<th>Leaves behind</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--clone</code></td>
+<td>config, <code>.env</code>, <code>SOUL.md</code>, skills, <code>memories/MEMORY.md</code> + <code>USER.md</code></td>
+<td>sessions, <code>state.db</code>, cron</td>
+</tr>
+<tr>
+<td><code>--clone-all</code></td>
+<td>everything incl. all memories, plugins</td>
+<td>per-profile history (can be tens of GB), <strong>cron jobs</strong> (would run twice)</td>
+</tr>
+<tr>
+<td><code>--clone-channels</code></td>
+<td>(opt-in) the source&#39;s bot tokens/allowlists</td>
+<td>— (off by default; two gateways on one token fight over the long-poll)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Verified detail:</strong> OAuth logins are <strong>not copied</strong> — they carry single-use refresh tokens, so a copy is
+the <em>same credential with two owners</em> and the first refresh revokes it for all copies (<code>profiles.md:104</code>).</p>
+<hr>
+<h2 id="3-bot-mode-profiles-as-named-persons">3. Bot Mode — profiles as named persons<a href="#batch-02/3-bot-mode-profiles-as-named-persons" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Bot Mode is a <strong>desktop UI over the profile primitive</strong> — the docs are explicit that there is <em>&quot;no new
+primitive&quot;</em>, no core patch, no daemon (<code>bot-mode.md:12–13</code>). What it adds on top of a plain profile:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Plain profile</th>
+<th>Bot Mode</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>many sessions; you pick one</td>
+<td><strong>one permanent &quot;Bot Chat&quot;</strong> per Bot; <code>/new</code> is rerouted to <code>/compact</code> to protect it</td>
+</tr>
+<tr>
+<td>switch profiles to reach a specialist</td>
+<td>every Bot in <strong>one roster</strong> with avatar, last message, unread</td>
+</tr>
+<tr>
+<td>profiles never talk</td>
+<td>Bots <strong>message each other</strong> and share <strong>group rooms</strong></td>
+</tr>
+<tr>
+<td>cron jobs live apart in <code>hermes cron</code></td>
+<td>each Bot&#39;s <strong>routines</strong> are edited beside its chat</td>
+</tr>
+</tbody></table></div>
+<p>Each Bot can carry: its <strong>own model pin</strong>, its own <code>SOUL.md</code>, per-skill / per-toolset / per-MCP-server
+enablement, and <strong>its own credential store</strong> (static keys copied; OAuth not — signed in per Bot).</p>
+<p><strong>Avatars</strong> are notable for a platform UI: deterministic &quot;blob faces&quot; derived from the name, geometric
+faces with a <em>live &quot;thinking&quot; animation</em> owned by the busy Bot, uploaded images, AI-generated portraits,
+or a pixel pet. That is a ready-made <strong>visual identity layer for AI persons</strong>.</p>
+<h3 id="3-1-verified-in-code-message-agent-is-real-with-auto-attribution">3.1 VERIFIED IN CODE — `message_agent` is real, with auto-attribution <span class="seal-badge" style="font-size: 0.65em; vertical-align: middle;">✓ CODE VERIFIED</span><a href="#batch-02/3-1-verified-in-code-message-agent-is-real-with-auto-attribution" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>tools/bot_mode_dm.py</code> defines <code>message_agent_tool</code> (line 201); the docstring (line 5) matches the doc:
+<em>&quot;target is validated against the live roster, the attribution prefix is applied automatically&quot;</em>. Line 243
+builds the literal prefix: <code>&quot;Message from 🤖 {name} (@{handle}): &quot;</code>. <strong>Doc claim: TRUE.</strong></p>
+<p><strong>The mechanism in plain words:</strong> when a Bot messages a teammate, <strong>your text is never forwarded verbatim</strong>
+— the target Bot composes its own message and replies attributed. The same command carries an
+<strong>idempotency / delivery-id</strong> contract (<code>status: queued</code> + <code>delivery_id</code> means <em>handed to the delivery
+process</em>, not <em>delivered</em>) so a send is not silently repeated.</p>
+<h3 id="3-2-a-code-level-gate-the-docs-explain-plainly-worth-keeping">3.2 A code-level gate the docs explain plainly — worth keeping<a href="#batch-02/3-2-a-code-level-gate-the-docs-explain-plainly-worth-keeping" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The docs are unusually explicit that <code>message_agent</code> requires <strong>two markers</strong> beyond the master switch:
+the session must be titled exactly <code>Bot Chat</code>, <strong>and</strong> some profile on the install must carry a
+<code>ui_meta: {hermes-bots: …}</code> block (<code>bot-mode.md:198–205</code>). <strong>Consequence they state out loud:</strong> on a
+<em>headless</em> install (gateway + Telegram, no desktop) nothing writes those markers, so <strong><code>message_agent</code> is
+unreachable</strong> even with the switch on. They give the two manual commands to satisfy both.</p>
+<p><strong>Why this belongs in the record:</strong> it is a documented case where a feature is <strong>UI-reachable only</strong>, and
+the docs give the headless workaround. That is the pattern a platform must plan for when it drives Hermes
+without a desktop.</p>
+<hr>
+<h2 id="4-group-chats-several-agents-in-one-room-in-plain-words">4. Group chats — several agents in one room, in plain words<a href="#batch-02/4-group-chats-several-agents-in-one-room-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A group room seats <strong>2–6 Bots</strong> and one visible conversation. A human message triggers <strong>up to three
+serial rounds</strong> of member turns; <strong>@-mentioned Bots respond</strong> (everyone responds when nobody is mentioned);
+<strong>each Bot decides whether to speak</strong> — a member replies only if it has something new, and otherwise
+<em>passes</em>. Hard caps (<strong>10 messages per send, 3 rounds</strong>) stop a room spinning. A member escalates a real
+judgement call to the human with <code>@user</code>, which lights a <strong>&quot;needs you&quot;</strong> badge.</p>
+<p>Each member keeps its <strong>own persistent room session</strong> — so room context survives like any conversation —
+and each turn carries the room history since that member&#39;s last turn, <strong>capped at ~200 messages or 32,000
+characters</strong>, with a single oversized message cut to an 8,000-character excerpt.</p>
+<p><strong>Rooms are durable and portable:</strong> room transcript, members, picture and name are mirrored into the
+shared profile metadata of <strong>every</strong> gateway the desktop is connected to, with per-gateway versioning so
+two desktops merge instead of overwriting. <strong>Rooms keep running when the desktop closes</strong> — when all
+members live on one gateway, that gateway drives the turns; the desktop catches up from the room log.
+Room state lives in the install&#39;s root <code>shared-state.db</code>.</p>
+<p><strong>Rooms can span machines</strong> — a member on this device plus one on another gateway is enough. Each
+member&#39;s turns run on its own machine; a <strong>device badge</strong> and a device-qualified <code>@name-device</code> handle
+keep same-named agents apart.</p>
+<p><strong>Plugins can watch the room</strong> via the <code>on_room_member_activity</code> hook with room/member/turn coordinates
+(<code>bot-mode.md:175</code>) — i.e. <strong>an outside system can render live &quot;who is doing what&quot; UI</strong> without reading
+Hermes internals. That is directly relevant to a platform front-end.</p>
+<h3 id="4-1-cross-machine-messaging-without-a-desktop-hermes-peer">4.1 Cross-machine messaging without a desktop — `hermes peer`<a href="#batch-02/4-1-cross-machine-messaging-without-a-desktop-hermes-peer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Bots on one machine can reach Bots on another machine&#39;s gateway with <strong>no desktop in the loop</strong>: register
+the other gateway as a <em>peer</em> (API-server URL + key), then <code>hermes peer dm</code> / <code>peer run</code> / <code>peer status</code> /
+<code>peer stop</code>. A stable <code>--idempotency-key</code> makes a retry return the original run instead of duplicating
+work. <strong>A documented limit:</strong> reachability is one-way across NAT — a gateway behind home NAT can dial out
+but cannot be dialled into (use Tailscale/VPN or put authority on the reachable host).</p>
+<hr>
+<h2 id="5-the-capability-table-the-owner-s-two-questions">5. The capability table — the owner's two questions<a href="#batch-02/5-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="5-1-isolation-and-identity">5.1 Isolation and identity<a href="#batch-02/5-1-isolation-and-identity" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Profile = one home per agent</strong></td>
+<td>each agent has its own config, memory, keys, skills</td>
+<td>a staff member&#39;s assistant remembers <em>their</em> work, not a neighbour&#39;s</td>
+<td>the per-tenant / per-employee boundary the platform needs</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>The one-writer rule</strong></td>
+<td>two processes on one home corrupt each other&#39;s memory</td>
+<td>(a correctness rule, not a feature)</td>
+<td>a <strong>hard constraint</strong>: a per-tenant agent must own its home</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Profiles are not a sandbox</strong></td>
+<td>state is separated; <strong>filesystem reach is not</strong></td>
+<td>—</td>
+<td>names exactly where real isolation must be added (batch 08)</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Per-Bot model pin</td>
+<td>each Bot runs its own model</td>
+<td>a fast cheap Bot for chores, a strong one for analysis</td>
+<td>per-agent cost shaping</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td>Per-Bot credentials</td>
+<td>each Bot its own keys</td>
+<td>—</td>
+<td>per-tenant key ownership (the owner&#39;s &quot;I add my keys&quot;)</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="5-2-ai-persons-as-workers">5.2 AI persons as workers<a href="#batch-02/5-2-ai-persons-as-workers" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Bot = named person with avatar</strong></td>
+<td>AI colleagues with a face, a title, a permanent chat</td>
+<td>staff address an AI by name, not a tool</td>
+<td><strong>the DP-09 shape</strong>: AI persons like human staff</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Bot Chat (forever-conversation)</strong></td>
+<td>one continuous thread per AI person</td>
+<td>&quot;my conversation with the analyst&quot; never resets</td>
+<td>the durable relationship a workspace thread models</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Routines per Bot</strong></td>
+<td>each Bot&#39;s scheduled work lives with it</td>
+<td>&quot;my analyst reports every morning&quot;</td>
+<td>automated staff functions</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Bot-to-bot <code>message_agent</code></strong></td>
+<td>agents message each other, attributed</td>
+<td>an agent can hand work to a specialist without the human relaying it</td>
+<td>an <strong>AI org</strong> that coordinates itself</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td>Capability scoping per Bot</td>
+<td>tick exactly the skills/tools/MCP a Bot may use</td>
+<td>a focused assistant, fewer surprises</td>
+<td>least privilege per AI person</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="5-3-rooms-and-multi-agent-work">5.3 Rooms and multi-agent work<a href="#batch-02/5-3-rooms-and-multi-agent-work" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Group chats (2–6 Bots)</strong></td>
+<td>several agents in one visible room</td>
+<td>a team of AI specialists discusses a problem; the human watches and steps in</td>
+<td>the <strong>workspace thread</strong> the owner described, already real</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>@mention routing / <code>@user</code> escalation</strong></td>
+<td>address one agent; escalate to the human</td>
+<td>precise control; the AI asks when it should</td>
+<td>human-in-the-loop by design</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Bots decide to speak or pass</strong></td>
+<td>no agent floods the room</td>
+<td>a readable room, not noise</td>
+<td>quality control on multi-agent output</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Durable rooms (survive desktop close)</strong></td>
+<td>rooms run on the gateway</td>
+<td>work continues when the human leaves</td>
+<td>unattended multi-agent work</td>
+<td><code>later</code></td>
+</tr>
+<tr>
+<td><strong>Cross-machine rooms + <code>hermes peer</code></strong></td>
+<td>agents on different machines, one room</td>
+<td>a distributed team of agents</td>
+<td>horizontal scale of the AI org</td>
+<td><code>long-run</code></td>
+</tr>
+<tr>
+<td><strong>Room activity hook for plugins</strong></td>
+<td>outside systems can watch members work</td>
+<td>live &quot;who is doing what&quot; UI</td>
+<td>a platform front-end can render the room <strong>without forking Hermes</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Headless limitation</strong></td>
+<td><code>message_agent</code> needs UI-written markers</td>
+<td>—</td>
+<td>a documented gotcha: a driven-without-desktop setup must satisfy two markers by hand</td>
+<td><code>now</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-items-carried-forward">6. Items carried forward<a href="#batch-02/6-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C2-1</td>
+<td>The one-writer rule — a per-tenant agent must own its home; measure what &quot;own&quot; requires</td>
+<td>batch 07 / synthesis</td>
+</tr>
+<tr>
+<td>C2-2</td>
+<td>Profiles isolate state, not filesystem — measure the real sandbox options</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C2-3</td>
+<td>Bot Chat is a forever-thread — direct model for the platform&#39;s workspace thread</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C2-4</td>
+<td><code>message_agent</code> attribution + delivery-id contract — the shape for AI-to-AI handoff</td>
+<td>batch 06</td>
+</tr>
+<tr>
+<td>C2-5</td>
+<td>Group-room 2–6 / 3-rounds / pass-or-speak rules — measure the actual constants in code</td>
+<td>batch 06</td>
+</tr>
+<tr>
+<td>C2-6</td>
+<td><code>on_room_member_activity</code> hook — the seam for a platform front-end to render rooms</td>
+<td>batch 07</td>
+</tr>
+<tr>
+<td>C2-7</td>
+<td><code>hermes peer</code> + idempotency keys — the cross-machine pattern</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C2-8</td>
+<td>The headless marker gotcha — what a platform must do to enable agent-to-agent without a desktop</td>
+<td>batch 07</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-the-two-value-questions-answered-at-the-batch-level">7. The two value questions, answered at the batch level<a href="#batch-02/7-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High, and it goes to the heart of the owner&#39;s DP-09. A staff member gets <strong>named AI
+colleagues</strong> with a face and a permanent conversation, whom they address with <code>@</code>, who can be given
+capabilities, who run their own routines, and who <strong>hand work to each other</strong> — the human does not relay
+between agents. Groups let several specialists work a problem in one room the human can watch, with a
+&quot;needs you&quot; badge when one escalates. This is a working answer to &quot;AI persons, called by <code>@</code>, like human
+staff.&quot;</p>
+<p><strong>Q2 — VISION VALUE.</strong> Load-bearing, and it comes with two hard constraints the docs state:
+(a) <strong>one profile must have one writer</strong> (shared homes corrupt memory), and (b) <strong>a profile is not a
+sandbox</strong> (state is separated, filesystem is not). Both are honest boundaries the platform must build
+inside, not around. The upside: rooms are <strong>durable, portable and plugin-observable</strong>, and cross-machine
+<code>peer</code> links let an AI org scale beyond one box. <strong>Versatility (many agents, many models) and
+integratability (a room-activity hook, a delivery-id contract) are present already.</strong></p>
+<p><strong>Learning lens.</strong> Each Bot has <strong>its own memory and skills</strong> (<code>profiles.md:11</code>), so learning is
+per-person by construction — a specialist Bot deepens in its own domain. The room is where those separate
+learnings meet; the <code>on_room_member_activity</code> hook is what would let the platform <em>see</em> that happening.</p>
+<hr>
+<p><em>Batch 02 of 12 complete. Divergences found this batch: 1 (the <code>get_hermes_home()</code> count — docs say
+119+, code shows 821). Next: <code>03-skills-and-the-learning-loop.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-agent-loop-conversation.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Agent Loop &amp; Conversation</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-skills-learning-loop.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Skills &amp; Learning Loop</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-plain-words" class="toc-link">0. What this batch is (plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-profiles-the-isolation-unit-in-plain-words" class="toc-link">2. Profiles — the isolation unit, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-hard-rule-the-docs-state-worth-repeating" class="toc-link">2.1 The hard rule the docs state, worth repeating</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-profiles-are-not-a-security-sandbox-stated-by-the-docs-themselves" class="toc-link">2.2 Profiles are NOT a security sandbox — stated by the docs themselves</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-what-travels-and-what-does-not-on-a-clone" class="toc-link">2.3 What travels and what does not, on a clone</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-bot-mode-profiles-as-named-persons" class="toc-link">3. Bot Mode — profiles as named persons</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-verified-in-code-message-agent-is-real-with-auto-attribution" class="toc-link">3.1 VERIFIED IN CODE — message_agent is real, with auto-attribution</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-a-code-level-gate-the-docs-explain-plainly-worth-keeping" class="toc-link">3.2 A code-level gate the docs explain plainly — worth keeping</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-group-chats-several-agents-in-one-room-in-plain-words" class="toc-link">4. Group chats — several agents in one room, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-cross-machine-messaging-without-a-desktop-hermes-peer" class="toc-link">4.1 Cross-machine messaging without a desktop — hermes peer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-capability-table-the-owner-s-two-questions" class="toc-link">5. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-isolation-and-identity" class="toc-link">5.1 Isolation and identity</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-ai-persons-as-workers" class="toc-link">5.2 AI persons as workers</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-rooms-and-multi-agent-work" class="toc-link">5.3 Rooms and multi-agent work</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-items-carried-forward" class="toc-link">6. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-two-value-questions-answered-at-the-batch-level" class="toc-link">7. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

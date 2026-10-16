@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — Skills and the learning loop — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Skills &amp; Learning Loop</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-skills-and-the-learning-loop.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,136</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">229</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE</div>
+    <h4>The Three-Way Self-Improving Learning Loop</h4>
+    <p>How the agent extracts experience, proposes skills, undergoes human review, and cures the library</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 230" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1: Experience -->
+      <g transform="translate(30, 40)">
+        <circle cx="50" cy="50" r="45" fill="#3b82f6" fill-opacity="0.15" stroke="#3b82f6" stroke-width="2"/>
+        <text x="50" y="46" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">LIVE</text>
+        <text x="50" y="62" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">EXPERIENCE</text>
+      </g>
+
+      <!-- Arrow 1 -->
+      <path d="M 135 90 L 190 90" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+      <text x="162" y="80" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">/learn</text>
+
+      <!-- Step 2: Skill Proposal -->
+      <g transform="translate(200, 30)">
+        <rect width="180" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">Skill Proposal</text>
+        <text x="12" y="48" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• YAML metadata block</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Trigger patterns</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Step-by-step instructions</text>
+        <text x="12" y="104" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">Synthesized from session</text>
+      </g>
+
+      <!-- Arrow 2 -->
+      <path d="M 390 90 L 440 90" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Step 3: Human Approval Gate -->
+      <g transform="translate(450, 30)">
+        <rect width="170" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.8"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b45309">Human Write Gate</text>
+        <text x="12" y="48" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Explicit diff review</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Cannot write silently</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Human in the loop</text>
+        <rect x="10" y="94" width="150" height="18" rx="3" fill="#10b981" fill-opacity="0.15"/>
+        <text x="18" y="106" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#047857">SAFETY GUARANTEE</text>
+      </g>
+
+      <!-- Arrow 3 -->
+      <path d="M 630 90 L 680 90" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Step 4: Library & Curator -->
+      <g transform="translate(690, 30)">
+        <rect width="195" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">Skill Library &amp; Curator</text>
+        <text x="12" y="48" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• ~/.hermes/skills/*.md</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Background curator job</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Deduplication &amp; pruning</text>
+        <text x="12" y="104" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#2563eb">Prompt Injection on match</text>
+      </g>
+
+      <!-- Loop feedback -->
+      <path d="M 780 160 L 780 190 L 90 190 L 90 140" stroke="#10b981" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#arr-green)"/>
+      <text x="450" y="205" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#047857">The continuous cycle: Execution → Learning → Human Approval → Curator → Improved Execution</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-03-skills-and-the-learning-loop">Batch 03 — Skills and the learning loop<a href="#batch-03/batch-03-skills-and-the-learning-loop" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-plain-words">0. What this batch is (plain words)<a href="#batch-03/0-what-this-batch-is-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is <strong>the owner&#39;s learning lens</strong>, and Hermes&#39; headline claim: <em>&quot;the only agent with a built-in
+learning loop — it creates skills from experience, improves them during use, nudges itself to persist
+knowledge, searches its own past conversations, and builds a deepening model of who you are.&quot;</em> (README)</p>
+<p>A <strong>skill</strong> here is not a plugin or a program. It is a <strong>written document</strong> — a <code>SKILL.md</code> file — holding
+the steps for doing a class of task well: the procedure in order, the commands that work, how the result
+should look, and the pitfalls. The agent <strong>writes these documents itself</strong> when it works out a non-trivial
+workflow, and <strong>loads them on demand</strong> later. That is what &quot;learns by design&quot; means concretely.</p>
+<p>Two halves: <strong>how a skill is stored and loaded</strong>, and <strong>the loop that creates and maintains skills</strong>.</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-03/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/features/skills.md</code></td>
+<td align="right">58,162</td>
+</tr>
+<tr>
+<td><code>user-guide/features/curator.md</code></td>
+<td align="right">27,195</td>
+</tr>
+<tr>
+<td><code>developer-guide/creating-skills.md</code></td>
+<td align="right">20,734</td>
+</tr>
+<tr>
+<td><code>reference/skills-catalog.md</code></td>
+<td align="right">12,337</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>118,428</strong></td>
+</tr>
+</tbody></table></div>
+<p>Plus the per-skill pages under <code>user-guide/skills/bundled/**</code> (a bundled catalogue; the catalog doc
+lists ~82 rows).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/skill_manager_tool.py</code></td>
+<td><code>skill_manage</code> at line 768</td>
+</tr>
+<tr>
+<td><code>agent/curator.py</code></td>
+<td>the background curator; constants at line 31–32</td>
+</tr>
+<tr>
+<td><code>agent/background_review.py</code></td>
+<td>the self-improvement review fork</td>
+</tr>
+<tr>
+<td>~26 <code>tools/skill*.py</code> modules</td>
+<td>ledger, linter, provenance, usage, guards, hub, sync</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-how-a-skill-is-stored-and-loaded-in-plain-words">2. How a skill is stored and loaded, in plain words<a href="#batch-03/2-how-a-skill-is-stored-and-loaded-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Storage.</strong> All skills live in <strong><code>~/.hermes/skills/</code></strong> — <em>the primary directory and source of truth</em>
+(<code>skills.md:11</code>). Bundled skills are copied there on install; hub-installed and <strong>agent-created</strong> skills
+go there too. The agent can modify or delete any skill. A skill can also live in an <strong>external directory</strong>
+or be <strong>project-local</strong> (inside a repo).</p>
+<p><strong>Loading — progressive disclosure</strong> (<code>skills.md:172–180</code>), a three-level scheme designed to save tokens:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>Level 0: skills_list()          -&gt; [{name, description, category}]   (~3k tokens)   &lt;- always cheap
+Level 1: skill_view(name)       -&gt; the full SKILL.md                  (varies)      &lt;- load when relevant
+Level 2: skill_view(name, path) -&gt; one reference file                 (varies)      &lt;- load only if needed
+</code></pre>
+</div>
+<p><strong>Why this matters:</strong> the agent can hold <strong>hundreds of skills</strong> without paying for them, because only the
+names and one-line descriptions sit in the prompt until a skill is actually needed. This is the mechanism
+that makes a large private knowledge library affordable.</p>
+<h3 id="2-1-skills-are-also-commands">2.1 Skills are also commands<a href="#batch-03/2-1-skills-are-also-commands" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every installed skill is <strong>automatically a slash command</strong> — <code>/gif-search funny cats</code>, <code>/github-pr-workflow create a PR</code>, or bare <code>/excalidraw</code>. Up to <strong>5 skills can be stacked</strong> in one message by leading slash
+commands. <strong>A skill is thus both something the AI reaches for and something the human invokes</strong> — the same
+artifact, two doors.</p>
+<h3 id="2-2-learn-turning-anything-into-a-skill">2.2 `/learn` — turning anything into a skill<a href="#batch-03/2-2-learn-turning-anything-into-a-skill" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>/learn</code> is the fast path from &quot;material you already have&quot; to a reusable skill without hand-writing
+<code>SKILL.md</code>. It accepts <em>&quot;anything you can describe&quot;</em>: a local SDK folder, an online doc page, the workflow
+you just walked the agent through, pasted notes, or <strong>a whole book or paper stack</strong>. The agent gathers the
+material with its normal tools and authors a skill following house standards.</p>
+<p><strong>For large sources it does not summarise lossily</strong> — it authors an <em>expansive knowledge-base skill</em>: a
+lean <code>SKILL.md</code> with the core mental models plus an index, and <strong>one distilled file per chapter/topic under
+<code>references/</code></strong>, loaded on demand. <em>&quot;Reference files cost nothing until a question needs one.&quot;</em> Re-running
+<code>/learn</code> on the same topic <strong>folds into the existing skill</strong> rather than duplicating.</p>
+<p><strong>Named-and-important limit the docs state:</strong> the distillation <em>&quot;synthesizes structure — frameworks,
+definitions, decision rules, anti-patterns — and never reproduces passages of the source text.&quot;</em></p>
+<hr>
+<h2 id="3-the-learning-loop-in-plain-words">3. The learning loop, in plain words<a href="#batch-03/3-the-learning-loop-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-agent-writes-its-own-skills">3.1 The agent writes its own skills<a href="#batch-03/3-1-the-agent-writes-its-own-skills" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>skill_manage</code> (verified: <code>tools/skill_manager_tool.py:768</code>) lets the agent <strong>create, patch, delete</strong> its
+own skills. The docs call this <em>&quot;the agent&#39;s procedural memory&quot;</em>: <em>&quot;when it figures out a non-trivial
+workflow, it saves the approach as a skill for future reuse.&quot;</em> The system prompt <strong>asks</strong> the agent to
+record when: it worked out a repeatable multi-step workflow; it hit errors and found the working path; or
+<strong>the user corrected its approach</strong>.</p>
+<p><strong>A design rule worth quoting</strong> — a skill captures <em>&quot;lessons, not logs&quot;</em>: a pitfall is <em>&quot;a generalizable
+rule plus one clause of why, attached to the step it affects, stated once.&quot;</em> Incident narration, PR
+numbers, dates and quoted chat are explicitly <strong>not</strong> skill content. Three advisory linters exist for
+exactly this shape (incident-log-shape, references-sprawl, oversized-body) — <strong>they warn, never block</strong>.</p>
+<h3 id="3-2-the-three-way-loop-memory-skills-background-review">3.2 The three-way loop: memory + skills + background review<a href="#batch-03/3-2-the-three-way-loop-memory-skills-background-review" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<blockquote>
+<p><em>&quot;Skills and memory work together in the self-improvement loop: memory stores small durable facts that
+should always be in context, while skills store longer procedures that should load only when relevant.
+The background review can suggest or stage skill changes after a session.&quot;</em> (<code>skills.md:610–614</code>)</p>
+</blockquote>
+<p>So learning happens in <strong>two shapes</strong> (always-visible facts → memory, batch 04; on-demand procedures →
+skills, this batch), and a <strong>background review</strong> runs <em>after</em> a turn to propose changes.</p>
+<h3 id="3-3-the-curator-keeping-the-library-clean">3.3 The curator — keeping the library clean<a href="#batch-03/3-3-the-curator-keeping-the-library-clean" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Left alone, agent-created skills would pile up into <em>&quot;dozens of narrow near-duplicates.&quot;</em> The <strong>curator</strong>
+(<code>agent/curator.py</code>, VERIFIED) is a background maintenance pass that prevents that. <strong>It is
+inactivity-triggered, not a cron job</strong> (<code>curator.py:3</code>): it runs when the agent has been idle and enough
+time has passed. Constants <strong>verified in code</strong> (<code>curator.py:31–32</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>DEFAULT_INTERVAL_HOURS</code></td>
+<td><strong>7 days</strong></td>
+<td>minimum time between curator runs</td>
+</tr>
+<tr>
+<td><code>DEFAULT_MIN_IDLE_HOURS</code></td>
+<td><strong>2 hours</strong></td>
+<td>how idle the agent must be</td>
+</tr>
+<tr>
+<td><code>DEFAULT_STALE_AFTER_DAYS</code></td>
+<td><strong>14 days</strong></td>
+<td>unused this long → marked <code>stale</code></td>
+</tr>
+<tr>
+<td><code>DEFAULT_ARCHIVE_AFTER_DAYS</code></td>
+<td><strong>30 days</strong></td>
+<td>unused this long → moved to <code>.archive/</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two safety properties the docs state and the code upholds:</strong> the curator <strong>never auto-deletes</strong> — the
+worst outcome is archival into <code>~/.hermes/skills/.archive/</code>, recoverable; and it is <strong>deterministic for
+the transitions</strong> (no model cost) with an optional short auxiliary-model review that proposes
+consolidations. <strong>Pinned skills and skills referenced by any cron job are skipped entirely.</strong></p>
+<p><strong>First-run behaviour is deliberately conservative:</strong> on a fresh install the curator <strong>does not run
+immediately</strong> — the first observation seeds <code>last_run_at</code> to now and defers the first real pass by a full
+interval, <em>&quot;so you have a full interval to review your skill library, pin anything important, or opt out.&quot;</em>
+<code>hermes curator run --dry-run</code> shows what it <em>would</em> do.</p>
+<h3 id="3-4-the-write-approval-gate-the-human-s-hand-on-the-loop">3.4 The write-approval gate — the human's hand on the loop<a href="#batch-03/3-4-the-write-approval-gate-the-human-s-hand-on-the-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>By default the agent writes skills freely, <strong>including from the background review</strong>. If you want to review
+first, <code>skills.write_approval: true</code> <strong>stages</strong> every <code>skill_manage</code> write instead of committing it —
+<em>&quot;a SKILL.md is too large to review inline, so staging applies regardless&quot;</em> of where the write came from.
+Staged writes survive restarts under <code>~/.hermes/pending/skills/</code> and are reviewed with the same
+approve/deny flow as dangerous commands (<code>/skills pending</code>, <code>/skills diff &lt;id&gt;</code>, <code>/skills approve</code>).
+Memory writes have the <strong>same gate</strong> under <code>memory.write_approval</code>.</p>
+<p><strong>This is the single most important governance control in the batch:</strong> the self-improvement loop can be
+made <strong>human-gated</strong> without switching it off.</p>
+<hr>
+<h2 id="4-the-capability-table-the-owner-s-two-questions">4. The capability table — the owner's two questions<a href="#batch-03/4-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="4-1-the-skill-library">4.1 The skill library<a href="#batch-03/4-1-the-skill-library" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SKILL.md documents</strong></td>
+<td>a written procedure the AI loads when relevant</td>
+<td>the AI does a recurring job <em>this company&#39;s</em> way, not generically</td>
+<td>the platform&#39;s own <strong>house knowledge</strong>, portable and reviewable</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Progressive disclosure</strong> (3 levels)</td>
+<td>only names load; bodies load when needed</td>
+<td>hundreds of skills without slow or costly chats</td>
+<td>a large private knowledge base at near-zero standing cost</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Skill = slash command</strong></td>
+<td>every skill is also a typed command</td>
+<td>the human can invoke a procedure directly</td>
+<td>same artifact, two doors — a natural UI affordance</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Stacking up to 5 skills</strong></td>
+<td>combine procedures in one message</td>
+<td>compose a workflow (&quot;PR workflow + TDD&quot;) in one line</td>
+<td>composable capabilities</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>External + project-local dirs</strong></td>
+<td>skills can live in a repo or shared folder</td>
+<td>a company&#39;s own docs become the AI&#39;s procedures</td>
+<td>integratability: point it at existing knowledge</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Skill bundles</strong></td>
+<td>a named set of skills under one command</td>
+<td>&quot;backend work&quot; loads the right five</td>
+<td>packaged expertise per role</td>
+<td><code>later</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="4-2-the-learning-loop">4.2 The learning loop<a href="#batch-03/4-2-the-learning-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>skill_manage</code> (self-authored skills)</strong></td>
+<td>the agent writes its own procedures</td>
+<td>the AI gets better at <em>this user&#39;s</em> recurring tasks, unaided</td>
+<td><strong>the compounding asset</strong> — the platform&#39;s value grows with use</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Learning triggers</strong></td>
+<td>learns from worked-out flows, errors, <strong>and user corrections</strong></td>
+<td>correcting the AI once makes it stick</td>
+<td>quality improves from human feedback without a build</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>/learn</code> (any source → skill)</strong></td>
+<td>turn a doc, a folder, a book into a skill</td>
+<td>staff capture expertise without writing it</td>
+<td>ingest a company&#39;s knowledge into its AI, cheaply</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Knowledge-base skills (author + references)</strong></td>
+<td>big sources become an indexed skill</td>
+<td>a whole handbook is queryable</td>
+<td>deep expertise at proportional cost</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Background review</strong></td>
+<td>proposes skill/memory changes after a session</td>
+<td>the AI tidies itself up</td>
+<td>unattended improvement</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Curator (7d/2h/14d/30d, archive-only)</strong></td>
+<td>keeps the library from bloating</td>
+<td>the AI stays sharp, not cluttered</td>
+<td>long-run health without manual pruning</td>
+<td><code>later</code></td>
+</tr>
+<tr>
+<td><strong><code>write_approval</code> gate</strong></td>
+<td>stage every skill/memory write for review</td>
+<td>&quot;show me what it learned&quot;</td>
+<td><strong>governance over the learning loop</strong> — critical for a business</td>
+<td><code>now</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-divergence-and-boundary-notes">5. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/5-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No divergence found</strong> between the skills docs and the code on the load-bearing numbers: the curator
+constants in <code>curator.py:31–32</code> match the docs exactly (7 days / 2 hours / 14 / 30). That is a <em>positive</em>
+finding — the docs are accurate here.</li>
+<li><strong>Boundary restated by the docs (honest):</strong> <code>/learn</code> <em>&quot;synthesizes structure… and never reproduces
+passages of the source text&quot;</em> (<code>skills.md:157–158</code>). So a knowledge-base skill is <strong>a distilled guide,
+not a copy of the book</strong> — a real limit on what &quot;ingest our documents&quot; yields.</li>
+<li><strong>The loop is default-ON.</strong> Free writing is the default; the gate is opt-in. A business adopting this
+must decide the gate&#39;s state deliberately (batch 08).</li>
+</ul>
+<hr>
+<h2 id="6-items-carried-forward">6. Items carried forward<a href="#batch-03/6-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C3-1</td>
+<td><code>write_approval</code> (skills + memory) is the governance control over learning — measure exactly what it stages</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C3-2</td>
+<td>Memory + skills are two shapes of one loop — read them together</td>
+<td>batch 04</td>
+</tr>
+<tr>
+<td>C3-3</td>
+<td>The curator&#39;s archive-only guarantee and its skip rules (pinned / cron-referenced)</td>
+<td>batch 06</td>
+</tr>
+<tr>
+<td>C3-4</td>
+<td>Project-local + external dirs = how a company&#39;s own repo becomes procedures</td>
+<td>batch 04 / synthesis</td>
+</tr>
+<tr>
+<td>C3-5</td>
+<td><code>/learn</code> distillation never copies source text — bounds any &quot;ingest the docs&quot; plan</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C3-6</td>
+<td>Skill bundles as packaged per-role expertise</td>
+<td>batch 07</td>
+</tr>
+<tr>
+<td>C3-7</td>
+<td>The background review fork (<code>background_review.py</code>) — when it runs, what it may write</td>
+<td>batch 04</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-the-two-value-questions-answered-at-the-batch-level">7. The two value questions, answered at the batch level<a href="#batch-03/7-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High and concrete. A staff member&#39;s recurring work gets <strong>done their way</strong> because the
+AI writes and reuses procedures (skills) captured from real sessions — including from the user&#39;s own
+corrections. The same skill is a <strong>slash command</strong> the human can call directly, so the artifact is shared
+between the person and the AI. <code>/learn</code> lets staff turn any source they already have — a folder, a page, a
+book — into a capability, without writing code.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the owner&#39;s <strong>learning lens</strong>, and the loop is exactly what &quot;learns by
+design&quot; means: <strong>the more the AI works, the more skills it writes</strong>, and the platform&#39;s value compounds
+with use rather than staying flat. Two things make it platform-grade, not academic: (1) <strong>progressive
+disclosure</strong> means a large house library costs almost nothing when idle; (2) the <strong><code>write_approval</code> gate</strong>
+puts a human hand on every change the AI makes to its own knowledge — the governance a business requires.
+The curator keeps the library from degenerating, <strong>archive-only, never delete</strong>.</p>
+<p><strong>Learning lens (explicit).</strong> Skills are the <strong>procedures</strong> half of learning; memory (batch 04) is the
+<strong>facts</strong> half. Both are written by the agent, both are gated by the same approval switch, and both feed
+the &quot;deepening model of who you are and how we work.&quot;</p>
+<hr>
+<p><em>Batch 03 of 12 complete. Divergences found this batch: 0 (the curator constants match the code exactly —
+a positive finding). Next: <code>04-memory-and-context.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-bots-profiles-group-chats.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Bots, Profiles &amp; Group Chats</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-memory-context.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Memory &amp; Context</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-plain-words" class="toc-link">0. What this batch is (plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-how-a-skill-is-stored-and-loaded-in-plain-words" class="toc-link">2. How a skill is stored and loaded, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-skills-are-also-commands" class="toc-link">2.1 Skills are also commands</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-learn-turning-anything-into-a-skill" class="toc-link">2.2 /learn — turning anything into a skill</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-learning-loop-in-plain-words" class="toc-link">3. The learning loop, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-agent-writes-its-own-skills" class="toc-link">3.1 The agent writes its own skills</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-three-way-loop-memory-skills-background-review" class="toc-link">3.2 The three-way loop: memory + skills + background review</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-curator-keeping-the-library-clean" class="toc-link">3.3 The curator — keeping the library clean</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-the-write-approval-gate-the-human-s-hand-on-the-loop" class="toc-link">3.4 The write-approval gate — the human&#039;s hand on the loop</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-capability-table-the-owner-s-two-questions" class="toc-link">4. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-skill-library" class="toc-link">4.1 The skill library</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-learning-loop" class="toc-link">4.2 The learning loop</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-divergence-and-boundary-notes" class="toc-link">5. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-items-carried-forward" class="toc-link">6. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-two-value-questions-answered-at-the-batch-level" class="toc-link">7. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Memory and context — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Memory &amp; Context</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-memory-and-context.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,107</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">255</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE</div>
+    <h4>The 4-Tier Memory &amp; Context Pipeline</h4>
+    <p>From immediate token budget compression to permanent vector recall and /journey</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Tier 1 -->
+      <g transform="translate(20, 30)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">TIER 1: WORKING CONTEXT</text>
+        <text x="12" y="50" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="var(--text-primary, #0f172a)">Active Context Window</text>
+        <text x="12" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Live token budget</text>
+        <text x="12" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Dynamic tail sizing</text>
+        <text x="12" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Provider prompt cache</text>
+        <rect x="12" y="120" width="176" height="20" rx="4" fill="#3b82f6" fill-opacity="0.12"/>
+        <text x="18" y="134" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#1d4ed8">Hot Memory (per-turn)</text>
+      </g>
+
+      <!-- Tier 2 -->
+      <g transform="translate(245, 30)">
+        <rect width="205" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">TIER 2: COMPRESSOR</text>
+        <text x="12" y="50" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="var(--text-primary, #0f172a)">context_compressor.py</text>
+        <text x="12" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 335 KB compressor code</text>
+        <text x="12" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Triggers &gt; 50% window</text>
+        <text x="12" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Prunes older exchanges</text>
+        <rect x="12" y="120" width="181" height="20" rx="4" fill="#8b5cf6" fill-opacity="0.12"/>
+        <text x="18" y="134" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">Mid-turn guard</text>
+      </g>
+
+      <!-- Tier 3 -->
+      <g transform="translate(475, 30)">
+        <rect width="205" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">TIER 3: PERSISTENT MEM</text>
+        <text x="12" y="50" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="var(--text-primary, #0f172a)">MEMORY.md (2KB Cap)</text>
+        <text x="12" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Fails loudly if exceeded</text>
+        <text x="12" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Frozen snapshot pattern</text>
+        <text x="12" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• High-signal facts only</text>
+        <rect x="12" y="120" width="181" height="20" rx="4" fill="#10b981" fill-opacity="0.12"/>
+        <text x="18" y="134" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#047857">Intentional tight budget</text>
+      </g>
+
+      <!-- Tier 4 -->
+      <g transform="translate(705, 30)">
+        <rect width="195" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b45309">TIER 4: SEARCH &amp; JOURNEY</text>
+        <text x="12" y="50" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="var(--text-primary, #0f172a)">Unlimited Recall</text>
+        <text x="12" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• /journey timeline</text>
+        <text x="12" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Vector similarity search</text>
+        <text x="12" y="106" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Session history SQLite</text>
+        <rect x="12" y="120" width="171" height="20" rx="4" fill="#f59e0b" fill-opacity="0.12"/>
+        <text x="18" y="134" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b45309">Indexed on demand</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-04-memory-and-context">Batch 04 — Memory and context<a href="#batch-04/batch-04-memory-and-context" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-in-plain-words">0. What this batch is (in plain words)<a href="#batch-04/0-what-this-batch-is-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 03 covered the AI&#39;s <strong>procedures</strong> (skills). This batch covers the AI&#39;s <strong>memory</strong> — how it
+remembers <em>facts</em> across sessions — and the <strong>context</strong> that shapes every turn: project instruction files,
+<code>@</code>-references to files/URLs, and the compression that keeps a long conversation within the model&#39;s window.
+Together with skills, this is the other half of the learning loop.</p>
+<p>Four separate mechanisms, which the batch keeps distinct:</p>
+<ol>
+<li><strong>Persistent memory</strong> — two small always-loaded files (<code>MEMORY.md</code>, <code>USER.md</code>).</li>
+<li><strong>Session search</strong> — full-text search over every past conversation.</li>
+<li><strong>Context files</strong> — project instruction documents auto-loaded into every conversation.</li>
+<li><strong>Context management</strong> — <code>@</code>-references, compression, prompt caching.</li>
+</ol>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-04/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>developer-guide/context-compression-and-caching.md</code></td>
+<td align="right">47,308</td>
+</tr>
+<tr>
+<td><code>user-guide/features/memory-providers.md</code></td>
+<td align="right">47,604</td>
+</tr>
+<tr>
+<td><code>user-guide/features/memory.md</code></td>
+<td align="right">32,069</td>
+</tr>
+<tr>
+<td><code>user-guide/features/context-files.md</code></td>
+<td align="right">12,549</td>
+</tr>
+<tr>
+<td><code>user-guide/features/context-references.md</code></td>
+<td align="right">5,390</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>144,920</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/memory_tool_store.py</code></td>
+<td>the two limits at line 186</td>
+</tr>
+<tr>
+<td><code>tools/memory_tool.py</code></td>
+<td>tool wiring, lines 56</td>
+</tr>
+<tr>
+<td><code>agent/agent_init.py</code></td>
+<td>limit defaults at 1335–1336</td>
+</tr>
+<tr>
+<td><code>tools/session_search_tool.py</code></td>
+<td>FTS5-backed search (lines 5, 358, 382)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-persistent-memory-in-plain-words">2. Persistent memory, in plain words<a href="#batch-04/2-persistent-memory-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two files, both injected into the system prompt at session start:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MEMORY.md</code></td>
+<td>the agent&#39;s own notes — environment facts, conventions, lessons</td>
+<td><strong>2,200 chars</strong> (~800 tokens)</td>
+</tr>
+<tr>
+<td><code>USER.md</code></td>
+<td>the user&#39;s profile — preferences, style, expectations</td>
+<td><strong>1,375 chars</strong> (~500 tokens)</td>
+</tr>
+</tbody></table></div>
+<p>Stored in <code>~/.hermes/memories/</code>. <strong>VERIFIED IN CODE</strong> (<code>tools/memory_tool_store.py:186</code>):
+<code>def __init__(self, memory_char_limit: int = 2200, user_char_limit: int = 1375, …)</code>. <strong>Doc claim: TRUE.</strong></p>
+<h3 id="2-1-the-size-limit-is-a-design-choice-and-it-fails-loudly">2.1 The size limit is a design choice, and it fails loudly<a href="#batch-04/2-1-the-size-limit-is-a-design-choice-and-it-fails-loudly" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Memory is <strong>bounded on purpose</strong> — <em>&quot;character limits keep memory focused.&quot;</em> It does <strong>not</strong> auto-compact:
+when a write would exceed the limit, the tool <strong>returns an error</strong> and the agent must <strong>make room itself</strong>
+(consolidate or remove entries in one batch) before retrying. <strong>Why this matters:</strong> memory is a <em>curated</em>
+asset, not a dumping ground — the discipline is enforced by the mechanism, not by hope.</p>
+<h3 id="2-2-the-frozen-snapshot-pattern">2.2 The frozen-snapshot pattern<a href="#batch-04/2-2-the-frozen-snapshot-pattern" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Memory is captured <strong>once at session start</strong> and <strong>never changes mid-session</strong> — deliberately, to preserve
+the model&#39;s prefix cache. Writes during a session are <strong>persisted to disk immediately</strong> but appear in the
+prompt only <strong>next session</strong>. Tool responses show the live state.</p>
+<p><strong>A consequence the docs spell out honestly:</strong> the whole memory system is built around the moment a
+session <strong>ends</strong>. Inside one session the machinery <em>&quot;has a reason to run&quot;</em> only rarely. So the docs
+advise running <code>/new</code> at natural boundaries — the moment memory pays off is the moment a session closes.</p>
+<h3 id="2-3-the-two-targets-and-how-writes-work">2.3 The two targets, and how writes work<a href="#batch-04/2-3-the-two-targets-and-how-writes-work" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every <code>memory</code> call carries a top-level <code>target</code>: <code>&quot;memory&quot;</code> (agent notes) or <code>&quot;user&quot;</code> (user profile).
+Actions are <strong>add / patch / remove</strong> — and <strong>there is deliberately no <code>replace</code></strong> (it used to wipe the
+other facts in a multi-fact entry; a <code>replace</code> call now returns an error pointing at <code>patch</code>). Substring
+matching means the agent does not need the full entry text.</p>
+<p><strong><code>write_approval</code></strong> works exactly as it did for skills (batch 03): <code>false</code> (default) = write freely;
+<code>true</code> = require approval — <strong>inline prompting in the interactive CLI</strong> (memory entries are small enough
+to read in full), <strong>staging everywhere else</strong> (messaging, scripts, the background review). This is the
+<strong>same governance switch</strong> applied to the facts half of learning.</p>
+<h3 id="2-4-security-scanning">2.4 Security scanning<a href="#batch-04/2-4-security-scanning" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Memory entries are <strong>scanned for injection and exfiltration patterns before acceptance</strong>, <em>&quot;since they&#39;re
+injected into the system prompt.&quot;</em> Content matching threat patterns (prompt injection, credential
+exfiltration, SSH backdoors) or containing <strong>invisible Unicode characters</strong> is <strong>blocked</strong>.</p>
+<p><strong>Why this is worth naming:</strong> memory is a <strong>write-to-the-system-prompt</strong> channel — a natural attack
+target — and Hermes treats it as one.</p>
+<hr>
+<h2 id="3-session-search-the-unlimited-half">3. Session search — the unlimited half<a href="#batch-04/3-session-search-the-unlimited-half" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>session_search</code> searches <strong>every past conversation</strong>. All CLI and messaging sessions are stored in
+<strong>SQLite</strong> (<code>~/.hermes/state.db</code>) with <strong>FTS5 full-text search</strong> (VERIFIED: <code>tools/session_search_tool.py</code>
+references FTS5 at lines 5/358/382). <strong>Search returns actual messages from the DB — no LLM summarisation,
+no truncation.</strong> It supports discovery, scrolling within a session, and browsing; time bounds
+(<code>after</code>/<code>before</code>, <code>7d</code>, <code>24h</code>, <code>2w</code>) and session exclusion are supported.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th></th>
+<th>Persistent memory</th>
+<th>Session search</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Capacity</td>
+<td>~1,300 tokens total</td>
+<td>unlimited (all sessions)</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>instant (in the prompt)</td>
+<td>~20 ms FTS5 query</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>a token cost in <em>every</em> prompt</td>
+<td><strong>free — no LLM calls</strong></td>
+</tr>
+<tr>
+<td>Management</td>
+<td>curated by the agent</td>
+<td>automatic (all sessions kept)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The key insight for a platform:</strong> the small, always-loaded facts are the <strong>index</strong>; the entire history is
+the <strong>archive</strong>, free to search. That pairing is what lets an AI remember a fortnight-old decision without
+carrying a fortnight of tokens in every prompt.</p>
+<h3 id="3-1-journey-the-learning-timeline-and-where-you-prune-it">3.1 `/journey` — the learning timeline, and where you prune it<a href="#batch-04/3-1-journey-the-learning-timeline-and-where-you-prune-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>/journey</code> renders a <strong>timeline of everything Hermes has learned</strong> — saved skills and memory entries over
+time — with a scrubber that replays the build-up. Crucially it is also the <strong>prune-and-correct surface</strong>:
+<code>hermes journey list</code> / <code>delete &lt;node&gt;</code> / <code>edit &lt;node&gt;</code>. Skills are <strong>archived</strong> (restorable); memory
+chunks are <strong>removed</strong>; <code>edit</code> opens the content in <code>$EDITOR</code>.</p>
+<p><strong>This is the human-facing window onto the learning loop</strong> — the thing a business needs to <em>see</em> what its
+AI has learned and to correct it.</p>
+<hr>
+<h2 id="4-context-files-the-project-s-own-instructions">4. Context files — the project's own instructions<a href="#batch-04/4-context-files-the-project-s-own-instructions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Hermes auto-discovers context files that shape behaviour, from the working directory upward
+(<code>context-files.md:15–20</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.hermes.md</code> / <code>HERMES.md</code></td>
+<td>project instructions (<strong>highest priority</strong>)</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>project conventions, architecture</td>
+</tr>
+<tr>
+<td><code>AGENTS.override.md</code></td>
+<td>personal per-directory override</td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code></td>
+<td>Claude Code context files (also detected)</td>
+</tr>
+<tr>
+<td><code>SOUL.md</code></td>
+<td><strong>global</strong> personality — loaded from <code>HERMES_HOME</code> only</td>
+</tr>
+<tr>
+<td><code>.cursorrules</code></td>
+<td>Cursor IDE conventions</td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this matters:</strong> a company can drop its own conventions file into a folder and the AI follows them —
+and the same discovery already understands the formats other tools (Claude Code, Cursor) use. That is
+<strong>integratability with the tools a team already has</strong>.</p>
+<p><strong><code>@</code>-references</strong> (<code>context-references.md</code>) let a user type <code>@</code> plus a file, folder, git diff or URL and
+have Hermes <strong>expand and append the content inline</strong> to the message — a precise, per-message way to put
+exactly the right material in front of the AI.</p>
+<hr>
+<h2 id="5-context-management-compression-and-caching">5. Context management — compression and caching<a href="#batch-04/5-context-management-compression-and-caching" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Compression was partly measured in Batch 01 (§2.7); this section adds the doc&#39;s account and the caching
+side. Compression triggers <strong>preflight</strong> (&gt;50 % of the window, before a call) and, more aggressively,
+between turns in the gateway (&gt;85 %). During compression, memory is flushed to disk first, middle turns
+are summarised, the recent tail is protected, and tool-call/result pairs are never split. <strong>Prompt caching</strong>
+is a cross-session 1-hour prefix cache (always on).</p>
+<hr>
+<h2 id="6-external-memory-providers">6. External memory providers<a href="#batch-04/6-external-memory-providers" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Beyond the two built-in files, Hermes can plug in an <strong>external memory backend</strong> via <code>memory.provider</code> —
+documented providers include <strong>Honcho, OpenViking, Mem0, Hindsight, Holographic, RetainDB, ByteRover,
+Supermemory, Memori</strong> (<code>memory-providers.md</code>). Turning both built-in stores off (<code>memory_enabled: false</code>
+<strong>and</strong> <code>user_profile_enabled: false</code>) drops the built-in tool but <strong>leaves an external provider&#39;s own
+tools working</strong> — <em>&quot;use this when you want a third-party memory backend instead of the built-in files.&quot;</em></p>
+<p><strong>Why this matters for a platform:</strong> the built-in memory is small and local by design; a serious
+cross-session <em>user model</em> — the &quot;deepening model of who you are&quot; — is where a provider plugs in. Honcho in
+particular is described as dialectic user modelling with <strong>per-profile AI peers sharing a user workspace</strong>
+(relevant to batch 02).</p>
+<hr>
+<h2 id="7-the-capability-table-the-owner-s-two-questions">7. The capability table — the owner's two questions<a href="#batch-04/7-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="7-1-memory">7.1 Memory<a href="#batch-04/7-1-memory" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MEMORY.md + USER.md</strong></td>
+<td>two small always-loaded fact files</td>
+<td>the AI knows this user and this environment from turn one</td>
+<td>a cheap, portable <strong>core memory</strong> every tenant owns</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Bounded + fails loudly</strong></td>
+<td>full memory errors instead of silently dropping</td>
+<td>the AI stays sharp, not cluttered</td>
+<td>memory quality enforced by design</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Frozen snapshot</strong></td>
+<td>memory loads once per session</td>
+<td>consistent behaviour within a session</td>
+<td>predictable prompt caching (cost)</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>add / patch / remove (no replace)</strong></td>
+<td>safe, targeted edits</td>
+<td>the AI can&#39;t wipe facts by accident</td>
+<td>data safety in the learning loop</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>write_approval</code> on memory</strong></td>
+<td>gate every memory write</td>
+<td>&quot;show me what it remembers&quot;</td>
+<td><strong>governance</strong> over what the AI believes</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Injection/exfiltration scanning</strong></td>
+<td>memory is scanned before acceptance</td>
+<td>protection from a poisoned memory</td>
+<td><strong>security</strong> of a prompt-write channel</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>External memory providers</strong></td>
+<td>plug in a richer cross-session memory</td>
+<td>genuinely personalised over months</td>
+<td>&quot;the deepening model of who you are&quot;</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="7-2-recall-and-context">7.2 Recall and context<a href="#batch-04/7-2-recall-and-context" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>session_search</code> (FTS5, free)</strong></td>
+<td>search every past conversation</td>
+<td>&quot;what did we decide last week?&quot; answered from the source</td>
+<td><strong>unlimited memory at zero token cost</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>/journey</code> timeline + prune</strong></td>
+<td>see and correct what it learned</td>
+<td>the human can audit and fix the AI&#39;s knowledge</td>
+<td><strong>visibility</strong> into the learning loop</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Context files (.hermes.md / AGENTS.md / …)</strong></td>
+<td>project instructions auto-loaded</td>
+<td>the AI follows <em>this team&#39;s</em> conventions</td>
+<td>house conventions as data, not code</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>@</code>-references</strong></td>
+<td>inject a file/folder/diff/URL inline</td>
+<td>point the AI at exactly the right material</td>
+<td>precise, per-message context control</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Compression + prompt caching</strong></td>
+<td>keep long chats bounded and cheap</td>
+<td>long sessions don&#39;t break or cost too much</td>
+<td>long-lived workstreams</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>External recall with a safety ceiling</strong></td>
+<td>provider recall capped and spillable</td>
+<td>richer memory without overflow</td>
+<td>a runaway provider can&#39;t break the window</td>
+<td><code>later</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-divergence-and-boundary-notes">8. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/8-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No divergence on the memory limits</strong>: <code>tools/memory_tool_store.py:186</code> matches the docs exactly
+(2,200 / 1,375). A second positive finding in a row.</li>
+<li><strong>Boundary the docs state (a real limit, not a defect):</strong> the built-in memory is <strong>tiny</strong> (~1,300 tokens
+total) and <strong>frozen per session</strong> — so it is a <em>core</em>, not an archive. Anything large belongs in
+<code>session_search</code>, a skill, or an external provider.</li>
+<li><strong>The one-writer rule reappears here</strong> (<code>memory.md:22–23</code>) — the same hazard as batch 02, because memory
+is written automatically and loaded into the prompt. It is the <em>same</em> constraint stated twice, which
+raises its standing.</li>
+</ul>
+<hr>
+<h2 id="9-items-carried-forward">9. Items carried forward<a href="#batch-04/9-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C4-1</td>
+<td>The same <code>write_approval</code> switch gates memory and skills — one governance lever over all learning</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C4-2</td>
+<td>Memory is a prompt-write channel; injection scanning is the defence — check the scanner&#39;s coverage</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C4-3</td>
+<td><code>session_search</code> is free (no LLM) — a cost lever for long-lived recall</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C4-4</td>
+<td><code>/journey</code> is the audit window on learning — a candidate platform surface</td>
+<td>batch 07</td>
+</tr>
+<tr>
+<td>C4-5</td>
+<td>External providers (Honcho per-profile peers) tie to the profile/tenant model</td>
+<td>batch 09 / synthesis</td>
+</tr>
+<tr>
+<td>C4-6</td>
+<td>Context files already speak Claude Code / Cursor formats — reuse for the company&#39;s own docs</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C4-7</td>
+<td>External recall safety ceiling (10x <code>hooks.output_spill.max_chars</code>) — a bound to respect</td>
+<td>batch 08</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-the-two-value-questions-answered-at-the-batch-level">10. The two value questions, answered at the batch level<a href="#batch-04/10-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High. The AI remembers <em>this user and this environment</em> from turn one (the two
+files), can recall <em>anything ever discussed</em> on demand for free (<code>session_search</code>), follows the team&#39;s own
+conventions automatically (context files), and can be shown exactly the right material with <code>@</code>. The
+user-facing <code>/journey</code> lets a person <strong>see and correct</strong> what the AI has learned — trust through
+visibility.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the <strong>facts half</strong> of the owner&#39;s learning lens, and it is deliberately
+<strong>small and bounded</strong> with an <strong>unbounded, free archive</strong> beside it — a reading of memory that fits a
+platform: pay tokens only for the essentials, search the rest on demand. Three properties are
+platform-grade: the <strong>fails-loudly</strong> limit (memory stays curated), the <strong>same approval gate</strong> as skills
+(one lever governs all learning), and <strong>injection scanning</strong> on a prompt-write channel. External providers
+are the documented route to a genuinely long-run user model.</p>
+<p><strong>Learning lens (explicit).</strong> Batch 03 = procedures; batch 04 = facts; both written by the agent, both
+gated by one switch, both feeding the &quot;deepening model of who you are.&quot; <code>/journey</code> is the seam where a
+human sees the loop working.</p>
+<hr>
+<p><em>Batch 04 of 12 complete. Divergences found this batch: 0 (memory limits match the code exactly). Next:
+<code>05-tools-mcp-and-the-gateway.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-skills-learning-loop.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Skills &amp; Learning Loop</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-tools-mcp-gateway.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Tools, MCP &amp; Gateway</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-in-plain-words" class="toc-link">0. What this batch is (in plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-persistent-memory-in-plain-words" class="toc-link">2. Persistent memory, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-size-limit-is-a-design-choice-and-it-fails-loudly" class="toc-link">2.1 The size limit is a design choice, and it fails loudly</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-frozen-snapshot-pattern" class="toc-link">2.2 The frozen-snapshot pattern</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-two-targets-and-how-writes-work" class="toc-link">2.3 The two targets, and how writes work</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-security-scanning" class="toc-link">2.4 Security scanning</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-session-search-the-unlimited-half" class="toc-link">3. Session search — the unlimited half</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-journey-the-learning-timeline-and-where-you-prune-it" class="toc-link">3.1 /journey — the learning timeline, and where you prune it</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-context-files-the-project-s-own-instructions" class="toc-link">4. Context files — the project&#039;s own instructions</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-context-management-compression-and-caching" class="toc-link">5. Context management — compression and caching</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-external-memory-providers" class="toc-link">6. External memory providers</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-capability-table-the-owner-s-two-questions" class="toc-link">7. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-memory" class="toc-link">7.1 Memory</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-2-recall-and-context" class="toc-link">7.2 Recall and context</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergence-and-boundary-notes" class="toc-link">8. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-items-carried-forward" class="toc-link">9. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-the-two-value-questions-answered-at-the-batch-level" class="toc-link">10. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

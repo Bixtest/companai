@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Tools, MCP and the gateway — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Tools, MCP &amp; Gateway</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-tools-mcp-and-the-gateway.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,021</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">239</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE</div>
+    <h4>Tool Registry, MCP Door &amp; Context-Saving Tool Search</h4>
+    <p>How Hermes routes requests between built-in tools, MCP servers, and the Nous Tool Gateway</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Agent Core -->
+      <g transform="translate(30, 60)">
+        <rect width="180" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#2563eb">Agent Core</text>
+        <text x="15" y="50" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="var(--text-primary, #0f172a)">Tool Search Filter</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Injects only matching tools</text>
+      </g>
+
+      <path d="M 210 105 L 260 105" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Tool Registry -->
+      <g transform="translate(270, 45)">
+        <rect width="190" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">Tool Registry</text>
+        <text x="15" y="50" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Platform toolsets</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Dynamic capability check</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Trust level verification</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">353 tool files (125k lines)</text>
+      </g>
+
+      <!-- Three Destinations -->
+      <path d="M 460 75 L 520 40" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b0)"/>
+      <path d="M 460 105 L 520 105" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)"/>
+      <path d="M 460 135 L 520 170" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-b0)"/>
+
+      <!-- Destination 1: In-Tree Python -->
+      <g transform="translate(530, 15)">
+        <rect width="360" height="52" rx="6" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)"/>
+        <text x="12" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">1. Built-in Python Tools</text>
+        <text x="12" y="40" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">File ops, bash, python exec, web scrape, search (in-tree)</text>
+      </g>
+
+      <!-- Destination 2: MCP Door -->
+      <g transform="translate(530, 80)">
+        <rect width="360" height="55" rx="6" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="12" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">2. Model Context Protocol (MCP)</text>
+        <text x="12" y="42" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">JSON-RPC, catalog, external tools running in isolated processes</text>
+      </g>
+
+      <!-- Destination 3: Nous Tool Gateway -->
+      <g transform="translate(530, 148)">
+        <rect width="360" height="52" rx="6" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)"/>
+        <text x="12" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b45309">3. Nous Tool Gateway</text>
+        <text x="12" y="40" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Hosted convenience proxy for external API tools</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-05-tools-mcp-and-the-gateway">Batch 05 — Tools, MCP and the gateway<a href="#batch-05/batch-05-tools-mcp-and-the-gateway" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-in-plain-words">0. What this batch is (in plain words)<a href="#batch-05/0-what-this-batch-is-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 01 named the tools; this batch is <strong>how the tools work and how Hermes reaches outside itself</strong>.</p>
+<p>Three things, kept distinct:</p>
+<ol>
+<li><strong>The tool registry</strong> — the built-in set, and how it is grouped into <em>toolsets</em> you switch on/off.</li>
+<li><strong>MCP</strong> — the open standard for plugging in <em>external</em> tools (GitHub, a database, your own API)
+without writing any Hermes code.</li>
+<li><strong>Tool Search</strong> — the layer that stops a large tool collection from eating the context window.</li>
+</ol>
+<p><strong>Why this batch matters for the platform:</strong> the owner&#39;s &quot;nuggets&quot; idea — capabilities that can be called
+inside a workspace — is, mechanically, <strong>a tool</strong>. How Hermes registers, groups, filters and defers tools
+is therefore the seam where the platform&#39;s own functions would attach.</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-05/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/features/mcp.md</code></td>
+<td align="right">52,316</td>
+</tr>
+<tr>
+<td><code>reference/mcp-config-reference.md</code></td>
+<td align="right">22,795</td>
+</tr>
+<tr>
+<td><code>user-guide/features/tool-search.md</code></td>
+<td align="right">18,089</td>
+</tr>
+<tr>
+<td><code>user-guide/features/tool-gateway.md</code></td>
+<td align="right">16,609</td>
+</tr>
+<tr>
+<td><code>developer-guide/adding-tools.md</code></td>
+<td align="right">6,704</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>116,513</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/</code></td>
+<td><strong>278</strong> tool modules; <strong>26</strong> dedicated <code>mcp_*.py</code> modules</td>
+</tr>
+<tr>
+<td><code>tools/registry.py</code></td>
+<td>the tool registry and <code>register_toolset_alias</code> (line 569)</td>
+</tr>
+<tr>
+<td><code>toolsets.py</code></td>
+<td><code>_HERMES_CORE_TOOLS</code> (imported by <code>agent/memory_manager.py:471</code>,<code>:689</code>)</td>
+</tr>
+<tr>
+<td><code>tools/mcp_tool.py</code>, <code>mcp_tool_config.py</code>, <code>mcp_tool_discovery.py</code></td>
+<td>MCP registration/discovery</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-tool-registry-and-toolsets-in-plain-words">2. The tool registry and toolsets, in plain words<a href="#batch-05/2-the-tool-registry-and-toolsets-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Every tool belongs to <strong>exactly one toolset</strong> — a named bundle. Toolsets come in four kinds
+(<code>toolsets-reference.md</code>):</p>
+<ul>
+<li><strong>Core</strong> — one logical group (<code>file</code> bundles <code>read_file</code>/<code>write_file</code>/<code>patch</code>/<code>search_files</code>).</li>
+<li><strong>Composite</strong> — several core toolsets for a scenario (<code>debugging</code> = file + terminal + web;
+<code>coding</code> = a large bundle for software work).</li>
+<li><strong>Platform</strong> — a full configuration for a deployment (<code>hermes-cli</code>, <code>hermes-acp</code>, <code>hermes-api-server</code>,
+<code>hermes-webhook</code>, <code>hermes-gateway</code>).</li>
+<li><strong>Dynamic</strong> — generated at runtime: <strong>every MCP server produces a <code>mcp-&lt;server&gt;</code> toolset</strong>; plugins can
+register their own; users can define custom bundles in <code>config.yaml</code>.</li>
+</ul>
+<p><strong>Switching:</strong> per session (<code>hermes chat --toolsets web,file</code>), per platform (<code>config.yaml</code>), or
+interactively (<code>hermes tools</code>, a curses UI at <em>tool</em> granularity). <code>all</code>/<code>*</code> expands to every registered
+toolset — <strong>except</strong> a few deliberately opt-in ones.</p>
+<p><strong>Two gating classes the docs name precisely</strong> (<code>toolsets-reference.md:164–167</code>):
+<strong>capability-gated</strong> tools appear only when their backend/credential is configured (browser,
+<code>computer_use</code>, <code>code_execution</code>, cronjob); and <strong>workflow-gated</strong> tools — the <code>kanban</code> toolset — are
+<strong>not</strong> turned on by <code>all</code>, <em>&quot;because kanban tools mutate shared board state, so they stay off by default
+even under <code>all</code>.&quot;</em> That is a considered safety default, not an oversight.</p>
+<h3 id="2-1-platform-toolsets-one-product-many-doors">2.1 Platform toolsets — one product, many doors<a href="#batch-05/2-1-platform-toolsets-one-product-many-doors" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The <strong>platform toolsets</strong> show how the same engine is tuned per surface. <code>hermes-acp</code> (the door this
+platform uses) <strong>drops</strong> <code>clarify</code>, <code>cronjob</code>, <code>image_generate</code>, <code>text_to_speech</code>, <code>computer_use</code> and the
+kanban tools — <em>&quot;focused on coding tasks in IDE context.&quot;</em> <code>hermes-webhook</code> is a <strong>restricted safe
+subset</strong>: only <code>web_search</code>, <code>web_extract</code>, <code>vision_analyze</code>, <code>clarify</code> — <em>&quot;no terminal, file, or browser
+access.&quot;</em></p>
+<p><strong>Why this matters:</strong> Hermes has a <strong>built-in notion of a reduced tool surface per entry point.</strong> A
+platform that exposes its AI through one door can point at a matching platform toolset rather than
+hand-restricting tools itself.</p>
+<hr>
+<h2 id="3-mcp-reaching-outside-hermes-in-plain-words">3. MCP — reaching outside Hermes, in plain words<a href="#batch-05/3-mcp-reaching-outside-hermes-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>MCP (Model Context Protocol)</strong> lets Hermes connect to <em>external tool servers</em> — GitHub, databases, file
+systems, internal APIs — so the agent can use tools that live elsewhere, <strong>without writing a native Hermes
+tool first</strong>. Two transport kinds: <strong>stdio</strong> (a local process) and <strong>HTTP</strong> (remote; OAuth-capable). Tools
+are discovered and registered <strong>automatically at startup</strong>.</p>
+<p><strong>What you get</strong> (<code>mcp.md:21–27</code>): access to external tool ecosystems; local and remote servers in one
+config; automatic discovery; <strong>per-server filtering</strong> so only chosen tools are visible. Config lives under
+<code>mcp_servers:</code> in <code>config.yaml</code>; the server&#39;s name produces a <code>mcp-&lt;server&gt;</code> toolset referenceable like any
+other.</p>
+<h3 id="3-1-the-catalog-and-the-trust-model">3.1 The catalog and the trust model<a href="#batch-05/3-1-the-catalog-and-the-trust-model" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Hermes ships a <strong>catalog of Nous-approved MCP servers</strong> with one-click install. The catalog is
+<strong>manifest-versioned</strong>, supports runtime <code>${ENV_VAR}</code> substitution (so credentials are injected at runtime,
+not stored in the manifest), and has a <strong>trust model</strong> and <strong>tool selection at install time</strong>
+(<code>mcp.md:58–311</code>). Servers needing your own OAuth app (no Dynamic Client Registration) are handled
+explicitly.</p>
+<p><strong>Per-server filtering has a documented precedence rule</strong> (whitelist / blacklist / glob patterns, with
+utility tools filterable too, <code>mcp.md:619–740</code>) — and the docs answer the edge case <em>&quot;what happens if
+everything is filtered out?&quot;</em>.</p>
+<p><strong>Why the trust model matters:</strong> plugging in an external tool server is <strong>giving the agent new powers</strong>.
+Hermes models that as a decision with a manifest, a version and a scan — not as a convenience.</p>
+<hr>
+<h2 id="4-tool-search-the-context-window-fix">4. Tool Search — the context-window fix<a href="#batch-05/4-tool-search-the-context-window-fix" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The problem, stated by the docs in one sentence: with many MCP servers or plugin tools attached, <em>&quot;their
+JSON schemas can consume a substantial fraction of the context window on every turn — even when only a few
+of them are relevant.&quot;</em> (<code>tool-search.md:5–9</code>)</p>
+<p><strong>Tool Search</strong> is Hermes&#39; <strong>opt-in progressive-disclosure layer</strong> for tools. When it activates, the MCP
+and plugin tools are <strong>replaced in the model-visible array by three bridge tools</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>tool_search(queries, limit?)   search the deferred-tool catalog
+tool_describe(names)           load the full schemas for chosen tools
+tool_call(calls)               invoke deferred tools
+</code></pre>
+</div>
+<p>The model <strong>searches for the tool it needs, loads that tool&#39;s schema, then calls it</strong> — so an install with
+hundreds of external tools pays almost nothing until a tool is wanted. <strong>Hermes keeps its core working-set
+tools eager by default</strong> (<code>terminal</code>, <code>read_file</code>, <code>write_file</code>, <code>patch</code>, <code>search_files</code>, <code>todo</code>, <code>memory</code>,
+<code>browser_*</code>, <code>web_search</code>, <code>web_extract</code>, <code>clarify</code>, <code>execute_code</code>, <code>delegate_task</code>, and the rest of
+<code>_HERMES_CORE_TOOLS</code>) — <strong>only cold, event-triggered tools are deferred.</strong></p>
+<p><strong>This is the same idea as skill progressive disclosure (batch 03), applied to tools</strong> — and it is the
+mechanism that makes the owner&#39;s &quot;nuggets as callable widgets&quot; affordable: <strong>many capabilities installed,
+almost no standing context cost.</strong></p>
+<h3 id="4-1-a-verification-note-structure-not-numbers">4.1 A verification note (structure, not numbers)<a href="#batch-05/4-1-a-verification-note-structure-not-numbers" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>_HERMES_CORE_TOOLS</code> is real: <code>agent/memory_manager.py:471</code> and <code>:689</code> import it from <code>toolsets.py</code> and use
+it to decide which tools stay eager. The three bridge tools are wired through the standard tool path, so a
+deferred call gets <strong>its own scope check, schema validation, hooks, approval and result</strong> — <em>&quot;each entry
+gets its own scope check&quot;</em> (<code>tool-search.md:41–44</code>). Deferral is a <strong>context optimisation, not a security
+bypass</strong>.</p>
+<hr>
+<h2 id="5-the-nous-tool-gateway-a-hosted-convenience">5. The Nous Tool Gateway (a hosted convenience)<a href="#batch-05/5-the-nous-tool-gateway-a-hosted-convenience" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Separate from MCP: paid Nous Portal subscribers can use <strong>web search, image generation, TTS and browser
+automation through the Tool Gateway — no separate API keys</strong> (<code>tool-gateway.md</code>). It is an enablement path
+with an eligibility checklist and an FAQ; it does not change the tool model. <strong>Named here</strong> so it is
+accounted for, and marked as a <em>vendor-convenience</em>, not a platform dependency.</p>
+<hr>
+<h2 id="6-the-capability-table-the-owner-s-two-questions">6. The capability table — the owner's two questions<a href="#batch-05/6-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="6-1-the-tool-system">6.1 The tool system<a href="#batch-05/6-1-the-tool-system" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Toolsets (core/composite/platform/dynamic)</strong></td>
+<td>named bundles you switch on/off</td>
+<td>the right powers, no more</td>
+<td>a <strong>per-tenant, per-role tool surface</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Platform toolsets (hermes-acp, hermes-webhook…)</strong></td>
+<td>a reduced tool surface per door</td>
+<td>safer default surfaces</td>
+<td><strong>built-in least privilege per entry point</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Capability-gated + workflow-gated tools</strong></td>
+<td>some tools appear only when configured / explicitly asked</td>
+<td>no accidental danger</td>
+<td>safety defaults a platform inherits</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Custom toolsets in config</strong></td>
+<td>define your own named bundles</td>
+<td>&quot;our platform&#39;s tools&quot; as one switch</td>
+<td>packaged capability sets</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>278 tool modules, one registry</strong></td>
+<td>a single place tools are registered</td>
+<td>wide built-in reach</td>
+<td>one integration point for our own tools</td>
+<td><code>now</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="6-2-mcp-the-external-tool-door">6.2 MCP — the external-tool door<a href="#batch-05/6-2-mcp-the-external-tool-door" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MCP (stdio + HTTP)</strong></td>
+<td>plug in external tools without writing Hermes code</td>
+<td>the AI reaches GitHub, a DB, an internal API</td>
+<td><strong>the main integratability door</strong> for a platform</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Auto-discovery → <code>mcp-&lt;server&gt;</code></strong></td>
+<td>a server&#39;s tools become a normal toolset</td>
+<td>new tools appear by configuration</td>
+<td>add capability without a deployment</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Catalog + manifest versioning + trust model</strong></td>
+<td>vetted servers, one-click, versioned</td>
+<td>safe, quick adoption</td>
+<td>governance over what the AI can reach</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Per-server filtering (whitelist/blacklist/glob)</strong></td>
+<td>expose only chosen tools</td>
+<td>control the blast radius</td>
+<td><strong>least privilege per integration</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Runtime <code>${ENV_VAR}</code> substitution</strong></td>
+<td>credentials injected at runtime</td>
+<td>keys stay out of config files</td>
+<td>secret handling done right</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>OAuth / mTLS / per-user identity header</strong></td>
+<td>authenticated servers</td>
+<td>the AI acts as <em>the right user</em></td>
+<td><strong>per-user identity</strong> on external calls</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="6-3-tool-search-and-the-gateway">6.3 Tool Search and the gateway<a href="#batch-05/6-3-tool-search-and-the-gateway" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Tool Search (three bridge tools)</strong></td>
+<td>load tool schemas on demand</td>
+<td>many capabilities, fast chats</td>
+<td><strong>many nuggets installed at ~no standing cost</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Eager core set (<code>_HERMES_CORE_TOOLS</code>)</strong></td>
+<td>the everyday tools stay loaded</td>
+<td>the common case stays fast</td>
+<td>predictable core behaviour</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Deferral preserves scope checks/approvals</strong></td>
+<td>deferred calls are still gated</td>
+<td>no safety regression for a speed win</td>
+<td>deferral is not a bypass</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Nous Tool Gateway</strong></td>
+<td>hosted search/image/TTS/browser, no keys</td>
+<td>fewer keys to manage</td>
+<td>a convenience, <strong>not</strong> a dependency</td>
+<td><code>later</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-divergence-and-boundary-notes">7. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/7-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No numeric divergence</strong> in this batch; the toolset structure and the three bridge tools are stated
+consistently and the code modules exist as named (<code>tools/mcp_tool*.py</code>, <code>tools/registry.py</code>,
+<code>toolsets._HERMES_CORE_TOOLS</code>).</li>
+<li><strong>Boundary the docs state plainly:</strong> Tool Search is <strong>opt-in</strong> and <strong>JSON-schema-driven</strong>. It buys
+context back; it does not change what a tool can do. The safety machinery (scope check, approval) is
+applied on the deferred path exactly as on the eager one.</li>
+<li><strong><code>all</code>/<code>*</code> is not &quot;everything&quot;.</strong> Capability-gated and workflow-gated tools stay off. A platform must
+not assume <code>all</code> means <em>all</em>.</li>
+</ul>
+<hr>
+<h2 id="8-items-carried-forward">8. Items carried forward<a href="#batch-05/8-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C5-1</td>
+<td>Platform toolsets give a <strong>ready-made reduced surface per door</strong> — the platform&#39;s door should name one</td>
+<td>batch 07 / synthesis</td>
+</tr>
+<tr>
+<td>C5-2</td>
+<td>MCP is the main external-tool door; per-server filtering is the least-privilege lever</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C5-3</td>
+<td>Tool Search makes many nuggets affordable — measure the defer flag behaviour</td>
+<td>batch 07 / synthesis</td>
+</tr>
+<tr>
+<td>C5-4</td>
+<td><code>mcp-&lt;server&gt;</code> toolsets are <strong>dynamic</strong> — new tools without a Hermes change</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C5-5</td>
+<td>Deferred calls still get scope checks/approvals — confirm on the platform door</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C5-6</td>
+<td>Runtime <code>${ENV_VAR}</code> substitution for MCP credentials — the secret pattern to copy</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C5-7</td>
+<td>Custom toolsets = &quot;our platform&#39;s tools&quot; as a named bundle</td>
+<td>synthesis</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-the-two-value-questions-answered-at-the-batch-level">9. The two value questions, answered at the batch level<a href="#batch-05/9-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High and broad. A staff member&#39;s AI can <strong>reach the systems they already use</strong>
+(GitHub, a database, an internal API) through MCP, <strong>without anyone writing glue code</strong> — and can be given
+only the specific tools that role needs. Tool Search keeps a richly-equipped AI <em>fast</em>: hundreds of
+abilities installed, none of them taxing the conversation until used.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the <strong>integratability</strong> the owner named, and it is the strongest evidence
+yet that the platform&#39;s &quot;nuggets&quot; concept has a <strong>native seam</strong>: a capability the platform wants callable
+inside a workspace is, mechanically, a <strong>tool</strong> — registered in one place, grouped in a toolset, optionally
+deferred behind Tool Search, and reachable over MCP if it lives outside Hermes. Three platform-grade
+properties: <strong>dynamic toolsets</strong> (new capability by configuration, not deployment), <strong>per-server
+filtering</strong> (least privilege per integration), and <strong>platform toolsets</strong> (a reduced surface per door).</p>
+<p><strong>Learning lens.</strong> Tools are the AI&#39;s <strong>hands</strong> — what it can <em>do</em> while learning. Tool Search matters to
+the lens because it removes the cost penalty for a large capability set, which is what lets an AI (and the
+skills it writes) grow without the chat getting slower and more expensive.</p>
+<hr>
+<p><em>Batch 05 of 12 complete. Divergences found this batch: 0. Next: <code>06-scheduling-delegation-and-kanban.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-memory-context.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Memory &amp; Context</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-scheduling-delegation.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Scheduling &amp; Delegation</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-in-plain-words" class="toc-link">0. What this batch is (in plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-tool-registry-and-toolsets-in-plain-words" class="toc-link">2. The tool registry and toolsets, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-platform-toolsets-one-product-many-doors" class="toc-link">2.1 Platform toolsets — one product, many doors</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-mcp-reaching-outside-hermes-in-plain-words" class="toc-link">3. MCP — reaching outside Hermes, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-catalog-and-the-trust-model" class="toc-link">3.1 The catalog and the trust model</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-tool-search-the-context-window-fix" class="toc-link">4. Tool Search — the context-window fix</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-a-verification-note-structure-not-numbers" class="toc-link">4.1 A verification note (structure, not numbers)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-nous-tool-gateway-a-hosted-convenience" class="toc-link">5. The Nous Tool Gateway (a hosted convenience)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-capability-table-the-owner-s-two-questions" class="toc-link">6. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-tool-system" class="toc-link">6.1 The tool system</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-mcp-the-external-tool-door" class="toc-link">6.2 MCP — the external-tool door</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-tool-search-and-the-gateway" class="toc-link">6.3 Tool Search and the gateway</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-divergence-and-boundary-notes" class="toc-link">7. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-items-carried-forward" class="toc-link">8. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-two-value-questions-answered-at-the-batch-level" class="toc-link">9. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

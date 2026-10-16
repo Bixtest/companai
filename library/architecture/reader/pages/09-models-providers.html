@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 09 — Models and providers — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-09" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 09</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Models &amp; Providers</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/09-models-and-providers.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,674</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">18 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">269</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 09 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 09 VISUAL GUIDE</div>
+    <h4>Model Routing, Credential Pools &amp; Fallback Grid</h4>
+    <p>The primary vs auxiliary model split and the critical clarification: OpenCode is a provider API</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 230" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Primary Model Lane -->
+      <g transform="translate(30, 25)">
+        <rect width="250" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">PRIMARY MODEL LANE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Heavy Reasoning &amp; Code</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Claude 3.5, GPT-4o, Hermes 3</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Multi-step planning &amp; tools</text>
+      </g>
+
+      <!-- Auxiliary Model Lane -->
+      <g transform="translate(30, 125)">
+        <rect width="250" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">AUXILIARY MODEL LANE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Cheap &amp; Fast Chores</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Compression, title generation,</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#047857">Cron preflights, heartbeat</text>
+      </g>
+
+      <path d="M 280 70 L 330 115" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-b0)"/>
+      <path d="M 280 170 L 330 125" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr-green)"/>
+
+      <!-- Center: Credential Pools & Fallback Grid -->
+      <g transform="translate(340, 30)">
+        <rect width="280" height="175" rx="10" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">CREDENTIAL POOLS &amp; FALLBACK</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Multi-Key Round Robin</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Many keys per provider</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Ranked provider fallback grid</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Auto-switch on rate limit (429)</text>
+        <rect x="15" y="125" width="250" height="35" rx="6" fill="#8b5cf6" fill-opacity="0.1"/>
+        <text x="22" y="142" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">Secret precedence: CLI arg → env →</text>
+        <text x="22" y="154" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">keyring → profiles.yaml</text>
+      </g>
+
+      <path d="M 620 120 L 665 120" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-loop)"/>
+
+      <!-- Right: OpenCode Clarification -->
+      <g transform="translate(675, 30)">
+        <rect width="215" height="175" rx="10" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.8"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#b45309">PREMISE CORRECTION</text>
+        <text x="12" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">"OpenCode" in Hermes</text>
+        <text x="12" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="#dc2626">NOT a coding agent!</text>
+        <text x="12" y="90" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 1,008 code references checked</text>
+        <text x="12" y="108" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• It is an API PROVIDER name</text>
+        <text x="12" y="126" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• No spawn or agent path exists</text>
+        <rect x="10" y="140" width="195" height="22" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+        <text x="16" y="155" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#b45309">Rule 13 Premise Fixed</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-09-models-and-providers">Batch 09 — Models and providers<a href="#batch-09/batch-09-models-and-providers" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> COMPLETE
+<strong>Date:</strong> 2026-10-15
+<strong>Method:</strong> docs read in full against code; every claim carries a <code>file:line</code>. Docs are claims, code is authority (00-PIN-AND-METHOD.md §2).
+<strong>Source:</strong> <code>hermes-agent-main/hermes-agent-main</code> @ pin (19,728 files; pyproject md5 <code>f57f729d4b251547a5a9e2565ce1e726</code>).</p>
+<hr>
+<h2 id="0-plain-words">§0 — Plain words<a href="#batch-09/0-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A <strong>model</strong> is the &quot;brain&quot; Hermes thinks with. A <strong>provider</strong> is the company or local program that actually runs that brain and sends the words back. Hermes does not have its own brain — it borrows one. So this batch answers three practical questions:</p>
+<ol>
+<li><strong>How does Hermes choose, connect to, and pay for a brain?</strong> (§2, §3)</li>
+<li><strong>What happens when the chosen brain is busy, rate-limited, or the key runs out of money?</strong> (§4, §5, §6)</li>
+<li><strong>How does Hermes keep the <em>background</em> work (summarising, titling, classifying a risky command) cheap, so it is not billed at the same rate as the main conversation?</strong> (§7)</li>
+</ol>
+<p>The short version: Hermes treats a model like a <strong>utility with a failover grid</strong>. It can hold <strong>several keys for the same provider</strong> and rotate between them; it can keep a <strong>ranked list of backup providers</strong>; and it splits <strong>background chores onto a cheap &quot;auxiliary&quot; lane</strong> so the expensive model is reserved for the actual conversation. Almost none of this is unique to Hermes — but the <em>degree of measured care</em> in the failover machinery is the interesting finding, and it maps onto platform value (§10).</p>
+<hr>
+<h2 id="1-what-was-read-and-verified">§1 — What was read and verified<a href="#batch-09/1-what-was-read-and-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Docs read in full (paths under <code>website/docs/</code>):</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Size</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/configuring-models.md</code></td>
+<td>28,853 B</td>
+<td>the main &quot;how to pick a model&quot; guide</td>
+</tr>
+<tr>
+<td><code>user-guide/features/credential-pools.md</code></td>
+<td>21,305 B</td>
+<td>many keys per provider</td>
+</tr>
+<tr>
+<td><code>user-guide/features/fallback-providers.md</code></td>
+<td>26,982 B</td>
+<td>ranked backup providers</td>
+</tr>
+<tr>
+<td><code>user-guide/features/provider-routing.md</code></td>
+<td>6,923 B</td>
+<td>OpenRouter routing prefs</td>
+</tr>
+<tr>
+<td><code>user-guide/local-models.md</code></td>
+<td>10,111 B</td>
+<td>running a model on your own machine</td>
+</tr>
+<tr>
+<td><code>reference/model-catalog.md</code></td>
+<td>6,659 B</td>
+<td>the remote list of model names</td>
+</tr>
+<tr>
+<td><code>integrations/providers.md</code></td>
+<td>(large)</td>
+<td>the provider table + two-command boundary</td>
+</tr>
+</tbody></table></div>
+<p><strong>Code read and measured:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Finding</th>
+<th>Verified at</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent/credential_pool.py</code></td>
+<td>4 rotation strategies; cooldown TTLs</td>
+<td><code>:121–129</code>, <code>:135–146</code></td>
+</tr>
+<tr>
+<td><code>agent/secret_sources/registry.py</code></td>
+<td>4-rule precedence ladder; provenance</td>
+<td><code>:384–414</code>, <code>:33–37</code></td>
+</tr>
+<tr>
+<td><code>agent/secret_sources/{bitwarden,onepassword,command}.py</code></td>
+<td>3 bundled secret backends</td>
+<td>registry <code>:47–51</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/models.py</code></td>
+<td><code>PREFERRED_SILENT_DEFAULT_MODEL</code> use</td>
+<td><code>:37, 473, 481</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/models_catalog_static.py</code></td>
+<td>the actual default model id</td>
+<td><code>:545</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/model_catalog.py</code></td>
+<td>remote manifest URL + TTL + fallback URL</td>
+<td><code>:26, :30, :33</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/config_defaults.py</code></td>
+<td><code>model_catalog</code> block; <code>auxiliary</code> block</td>
+<td><code>:2040–2051</code>, <code>:738–791</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/fallback_config.py</code></td>
+<td>effective chain + alias collapse</td>
+<td><code>:16–37</code>, <code>:52–78</code></td>
+</tr>
+<tr>
+<td><code>agent/credential_pool.py</code> + <code>tools/delegate_tool.py</code></td>
+<td>children share the pool</td>
+<td><code>delegate_tool.py:321–326, :360</code></td>
+</tr>
+<tr>
+<td><code>agent/chat_completion_helpers.py</code></td>
+<td>routing prefs merged per-model</td>
+<td><code>:471–485</code></td>
+</tr>
+<tr>
+<td><code>agent/secret_scope.py</code></td>
+<td>profile-scoped secret read</td>
+<td>(referenced)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Honesty note on my own earlier note:</strong> in the pre-summary working notes I described <code>integrations/providers.md</code> as &quot;<del>40 provider sections&quot;. Measured: it has <strong>7 <code>##</code> sections</strong> and a **</del>90-row** provider table (120 pipe-lines including header/separator). The <em>count of providers</em> is roughly right; the <em>structure</em> was mis-stated. Correction recorded under rule 13.</p>
+<hr>
+<h2 id="2-the-two-commands-boundary-setup-vs-switch">§2 — The two commands boundary (setup vs switch)<a href="#batch-09/2-the-two-commands-boundary-setup-vs-switch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The docs draw a clean line, and the code honours it:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Where it runs</th>
+<th>What it does</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hermes model</code></td>
+<td>your terminal, <strong>outside</strong> a session</td>
+<td>the full wizard — add a provider, run OAuth, paste keys, configure an endpoint, download a local model</td>
+<td><code>hermes_cli/main.py:1867</code> <code>def cmd_model(args)</code></td>
+</tr>
+<tr>
+<td><code>/model</code></td>
+<td><strong>inside</strong> a chat session</td>
+<td>quick switch among providers/models that are <strong>already configured</strong></td>
+<td><code>hermes_cli/cli_model_switch_mixin.py:874</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this matters:</strong> the boundary is not cosmetic. Setup (network I/O, OAuth browser flows, schema writes) is deliberately kept out of the live session so that switching a model mid-conversation is a <em>local</em> operation. The corollary is a real limitation: <strong>you cannot add a brand-new provider from inside a session</strong> — a user who hits &quot;my provider is down&quot; mid-task must leave the session to add a backup.</p>
+<p><strong>Q1 (user value):</strong> a non-technical user gets a guided wizard once, then a one-word switch forever. Good.
+<strong>Q2 (vision value):</strong> a business-resource planner wants model choice to be an <em>operational</em> decision (cost lane, capability lane). The setup/switch split is the right shape; what is missing is <em>policy</em> — &quot;use the cheap model for this task class, the strong model for that one&quot; is expressed in config, not as a first-class user-facing concept (§7 is the closest thing).</p>
+<hr>
+<h2 id="3-the-provider-surface-what-hermes-can-actually-talk-to">§3 — The provider surface (what Hermes can actually talk to)<a href="#batch-09/3-the-provider-surface-what-hermes-can-actually-talk-to" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured from the provider table in <code>integrations/providers.md</code>: roughly <strong>90 provider rows</strong>, each naming the provider, the env var / command, and any aliases. Representative spread (not exhaustive):</p>
+<ul>
+<li><strong>Subscriptions via OAuth:</strong> Nous Portal, OpenAI Codex (ChatGPT plan), GitHub Copilot (+ ACP), Anthropic (Claude Max), xAI Grok (SuperGrok), Qwen OAuth, MiniMax OAuth, Google Vertex AI (service account).</li>
+<li><strong>Key-in-env API providers:</strong> OpenRouter, Fireworks, NovitaAI, z.ai/GLM, Kimi/Moonshot (+ China), Arcee, GMI Cloud, Nebius, MiniMax (+ China), xAI, Alibaba DashScope (+ Coding/Token plans, each with a mainland-China endpoint), Kilo Code, Xiaomi MiMo, Tencent TokenHub / TokenPlan, OpenCode Zen / OpenCode Go, DeepSeek, Hugging Face, Google Gemini, OpenAI direct, NVIDIA Build, StepFun, Ramp Router, AI Gateway, Actual Computer.</li>
+<li><strong>Self-hosted / local:</strong> Ollama Cloud, Ollama, vLLM, SGLang, llama.cpp, LM Studio, LiteLLM, ClawRouter, Custom Endpoint.</li>
+</ul>
+<p><strong>Note the China-region duality throughout:</strong> several providers ship a <em>separate</em> provider id and env var for the mainland-China endpoint (<code>kimi-coding-cn</code>, <code>minimax-cn</code>, <code>alibaba-cn</code>, <code>alibaba-coding-plan-cn</code>, <code>alibaba-token-plan-cn</code>). This is a deliberate, measured accommodation, not an afterthought.</p>
+<p><strong>Two API-shape facts that matter for integration:</strong></p>
+<ol>
+<li><strong>API modes diverge from docs</strong> — carried from Batch 01: docs describe 3 modes; <code>agent/agent_init.py:381–384</code> defines <strong>5</strong> (<code>chat_completions</code>, <code>codex_responses</code>, <code>anthropic_messages</code>, <code>bedrock_converse</code>, <code>codex_app_server</code>) plus plugin-registered transports. The <code>auxiliary.review</code> block re-states the 3 transport names (<code>chat_completions | anthropic_messages | codex_responses</code>) — so the aux path admits fewer transports than the main path. <strong>This is a boundary, not a bug</strong>, but it is worth knowing: a provider reachable on the main lane may not be reachable on the review lane.</li>
+<li><strong>Credential resolution is profile-scoped.</strong> <code>fallback_config.py:52–78</code> reads <code>key_env</code> through <code>agent.secret_scope.get_secret</code>, <strong>not</strong> raw <code>os.getenv</code>, with an explicit comment that a bare env read &quot;ignores the active profile&#39;s scope and can return another profile&#39;s credential&quot;. This is the same isolation discipline Batch 02 found in <code>HERMES_HOME</code>.</li>
+</ol>
+<p><strong>Q1:</strong> a user can bring literally any brain they already pay for. Strong.
+<strong>Q2:</strong> for a resource planner, the <em>value</em> here is not &quot;we also support provider X&quot; — it is that Hermes has already solved <strong>the adapter problem</strong> (many shapes, one internal contract). A platform that plans <em>and buys</em> resources needs exactly that contract.</p>
+<hr>
+<h2 id="4-credential-pools-many-keys-for-one-provider">§4 — Credential pools (many keys for one provider)<a href="#batch-09/4-credential-pools-many-keys-for-one-provider" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Verified in <code>agent/credential_pool.py</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>STRATEGY_FILL_FIRST   = &quot;fill_first&quot;
+STRATEGY_ROUND_ROBIN  = &quot;round_robin&quot;
+STRATEGY_RANDOM       = &quot;random&quot;
+STRATEGY_LEAST_USED   = &quot;least_used&quot;
+SUPPORTED_POOL_STRATEGIES = { the four above }        # :121–129
+</code></pre>
+</div>
+<ul>
+<li><strong>Storage:</strong> pool entries persist to <code>auth.json</code> (read/write via <code>read_credential_pool</code> / <code>write_credential_pool</code>, imported at <code>:51–52</code>). The docs&#39; &quot;Storage&quot; section matches.</li>
+<li><strong>Cooldowns</strong> (measured, not in the docs&#39; headline): <code>EXHAUSTED_TTL_401_SECONDS = 5 * 60</code>, <code>EXHAUSTED_TTL_429_SECONDS = 60 * 60</code>, <code>EXHAUSTED_TTL_DEFAULT_SECONDS = 60 * 60</code>, and — the careful one — <code>EXHAUSTED_TTL_SOLE_CREDENTIAL_SECONDS = 60</code>. The comment explains it: if the benched key is your <em>only</em> key, an hour-long bench means an hour of hard failures, so a sole credential cools down for <strong>60 seconds</strong> instead. (<code>:135–146</code>)</li>
+<li><strong>Delegation shares the pool.</strong> <code>tools/delegate_tool.py:321–326</code> resolves a <strong>child</strong> credential pool and assigns it to the child agent, with the comment <em>&quot;Shared pool lets children rotate credentials on rate limits.&quot;</em> Line <code>:360</code> leases a specific credential to the child. So a fleet of subagents does not stampede a single key.</li>
+<li><strong>Providers are registered through <code>hermes_cli/</code>, not <code>providers/</code>.</strong> Measured: <code>providers/</code> contains only <code>README.md</code>, <code>__init__.py</code>, <code>base.py</code> (a contract), while the ~70 model/provider modules live under <code>hermes_cli/</code> (<code>model_switch.py</code> 97 KB, <code>models.py</code> 143 KB, <code>runtime_provider.py</code> 74 KB, etc.). This is an architectural smell worth recording: the <em>base class</em> lives in <code>providers/</code> but the <em>implementations</em> live in <code>hermes_cli/</code>, which mixes CLI concerns with provider logic.</li>
+</ul>
+<p><strong>Q1:</strong> a user with two OpenRouter keys gets automatic failover with zero code. Real.
+<strong>Q2:</strong> for a planner that <em>reserves and spends</em> resources, &quot;hold N credentials, rotate on exhaustion, and let shared workers lease from the same pool&quot; is precisely the resource-management primitive such a platform needs — see §10.</p>
+<hr>
+<h2 id="5-fallback-providers-the-ranked-backup-grid">§5 — Fallback providers (the ranked backup grid)<a href="#batch-09/5-fallback-providers-the-ranked-backup-grid" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>hermes_cli/fallback_config.py</code> implements the &quot;effective fallback chain&quot;. Two details are worth the ink:</p>
+<ol>
+<li><strong>Alias collapse before dedup.</strong> <code>_normalize_provider_id</code> (<code>:16–37</code>) collapses aliases to a canonical id, with an explicit comment: <em>&quot;Without normalization, two fallback entries naming the same backend under different ids are kept as separate slots, shifting the chain and letting an alias slip past the same-backend skip (#85235).&quot;</em> This is a <strong>measured, previously-bitten bug</strong> (issue #85235) encoded as a fix.</li>
+<li><strong>Identity preservation.</strong> <code>effective_runtime_provider</code> (<code>:52–78</code>) fixes the case where a resolved fallback is reported as the bare billing class <code>&quot;custom&quot;</code> instead of the configured provider name — with the comment that fallback resolvers <em>&quot;therefore label sessions/billing rows <code>custom</code> instead of the configured provider name — while the manual <code>/model</code> switch path correctly persists the named id (#98739).&quot;</em></li>
+</ol>
+<p>The docs&#39; <code>fallback-providers.md</code> (26,982 B) enumerates six fallback surfaces: <strong>Primary Model Fallback, Auxiliary Task Fallback, Auxiliary Capacity-Error Fallback, Context Compression Fallback, Delegation Provider Override, Cron Job Providers.</strong> So fallback is not one mechanism — it is a <em>policy applied per traffic class</em>. Cron jobs can be pinned to a provider that nobody is using interactively; delegation can be pinned differently from the parent.</p>
+<p><strong>Q1:</strong> a turn survives a provider outage without the user retyping anything. Strong.
+<strong>Q2:</strong> this is the skeleton of <strong>provider-level service continuity</strong>, which a resource planner that brokers capacity would need. But note: the chain is <em>configured</em>, not <em>learned</em>. Nobody decides at runtime &quot;provider A is degraded, shift 20% of load to B by measured latency&quot;. That is the gap to watch.</p>
+<hr>
+<h2 id="6-credential-sources-where-secrets-come-from-distinct-from-pools">§6 — Credential *sources* (where secrets come from) — distinct from pools<a href="#batch-09/6-credential-sources-where-secrets-come-from-distinct-from-pools" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Do not confuse two mechanisms:</p>
+<ul>
+<li><strong>Credential pool</strong> (§4) = many keys <em>for the same provider</em>, rotated for rate limits.</li>
+<li><strong>Secret sources</strong> (§6) = the <em>origin</em> of any secret, fetched by a backend, with a strict precedence ladder.</li>
+</ul>
+<p>Verified in <code>agent/secret_sources/registry.py</code>:</p>
+<ul>
+<li><strong>Three bundled backends</strong> (<code>_BUILTIN_SOURCES</code>, <code>:47–51</code>): <strong>Bitwarden</strong>, <strong>1Password</strong>, <strong>command</strong> (run a shell command, take its stdout). Plugins register more via <code>PluginContext.register_secret_source()</code>.</li>
+<li><strong>The precedence ladder is four rules</strong> (docstring <code>:384–393</code>, enforced <code>:408–414</code>), most-specific intent first:<ol>
+<li><code>secrets.preserve_existing</code> names always keep a pre-existing value — <strong>even against</strong> <code>override_existing: true</code>.</li>
+<li>A pre-existing <code>.env</code>/shell value, <strong>unless</strong> the winning source has <code>override_existing: true</code>.</li>
+<li><strong>mapped</strong> sources in configured order.</li>
+<li><strong>bulk</strong> sources in configured order.</li>
+</ol>
+</li>
+<li><strong>&quot;Mapped outranks bulk regardless of list order&quot;</strong> (<code>:413–414</code>) — a hard rule, not a sort.</li>
+<li><strong>First claim wins:</strong> a later source carrying the same variable gets <code>skipped_claimed</code> plus a <strong>conflict warning</strong> — &quot;never a silent clobber, and <code>override_existing</code> never applies across sources&quot; (<code>:390–392</code>).</li>
+<li><strong>Provenance is first-class:</strong> every applied variable produces an <code>AppliedVar</code> record naming source, shape, whether it overrode the environment, and whether it is <code>authoritative</code> (<code>:47–59</code>).</li>
+<li><strong>Profile aliasing:</strong> under a named profile, an applied <code>FOO_&lt;PROFILE&gt;</code> (credential-shaped suffixes only) also hydrates canonical <code>FOO</code> — disabled with <code>secrets.profile_alias: false</code> (<code>:395–398</code>).</li>
+</ul>
+<p><strong>Q1:</strong> a user can keep keys in their password manager, never on disk. Real, and the precedence ladder means it never silently clobbers what they set by hand.
+<strong>Q2:</strong> <strong>this is the most transferable mechanism in the batch.</strong> A resource planner that must hold <em>customer-owned</em> credentials needs exactly: multiple origins, a documented precedence ladder, conflict-never-clobber, and a provenance record. Hermes has shipped all four.</p>
+<hr>
+<h2 id="7-the-auxiliary-lane-cheap-models-for-background-chores">§7 — The auxiliary lane (cheap models for background chores)<a href="#batch-09/7-the-auxiliary-lane-cheap-models-for-background-chores" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured in <code>hermes_cli/config_defaults.py:738–791</code>. The <code>auxiliary</code> block routes every <em>background</em> AI chore to its own model, independent of the main conversation model. Per-task blocks share one shape (<code>_aux(timeout, ...)</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Aux task</th>
+<th>Default timeout</th>
+<th>Notes (from code comments)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>vision</code></td>
+<td>120 s (+30 s image download)</td>
+<td>image understanding</td>
+</tr>
+<tr>
+<td><code>compression</code></td>
+<td>120 s</td>
+<td>context summarising; <code>no_progress_timeout</code> separate from overall timeout</td>
+</tr>
+<tr>
+<td><code>skills_hub</code></td>
+<td>30 s</td>
+<td></td>
+</tr>
+<tr>
+<td><code>approval</code></td>
+<td>30 s</td>
+<td>the risk classifier — &quot;a fast/cheap model is recommended&quot;</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>—</td>
+<td>full subagent on the delegation rail; credentials resolved like delegation pins</td>
+</tr>
+<tr>
+<td><code>mcp</code></td>
+<td>30 s</td>
+<td></td>
+</tr>
+<tr>
+<td><code>title_generation</code></td>
+<td>30 s</td>
+<td><code>model_upgrade_enabled</code> — can skip the model entirely</td>
+</tr>
+<tr>
+<td><code>memory_query_rewrite</code></td>
+<td>8 s</td>
+<td><code>reasoning_effort=False</code></td>
+</tr>
+<tr>
+<td><code>tts_audio_tags</code></td>
+<td>30 s</td>
+<td></td>
+</tr>
+<tr>
+<td><code>voice_chat</code></td>
+<td>120 s</td>
+<td><code>reasoning_effort: &quot;none&quot;</code></td>
+</tr>
+</tbody></table></div>
+<p>Three guard-rails stand out:</p>
+<ol>
+<li><strong><code>free_only: False</code> + a one-time warning.</strong> &quot;When true, the auto-chain&#39;s OpenRouter step is skipped unless the fallback model ends in <code>:free</code> — a <strong>PAID lane is never used for background aux traffic even with <code>OPENROUTER_API_KEY</code> set</strong>.&quot; And: <em>&quot;A one-time WARNING is logged whenever a non-<code>:free</code> model is engaged.&quot;</em> So background traffic can be forced onto a free tier and proactively announced if it is not.</li>
+<li><strong>Main-agent routing does NOT propagate.</strong> Comment at <code>:736–737</code>: <em>&quot;Each task is independent — main-agent <code>provider_routing</code> and <code>openrouter.min_coding_score</code> do NOT propagate to aux calls by design.&quot;</em> The expensive model&#39;s tuning cannot leak cost into background chores.</li>
+<li><strong><code>web_extract</code> and <code>session_search</code> no longer use an aux LLM</strong> (<code>:760–761</code>; and <code>#27590</code>) — leftover config blocks are ignored. So the aux lane has been <em>deliberately shrunk</em> over time to cut hidden spend.</li>
+</ol>
+<p>Default aux chain fallback: <code>openrouter:google/gemini-3-flash-preview</code> when the configured provider is unavailable (<code>:727–728</code>).</p>
+<p><strong>Q1:</strong> the user&#39;s main bill is not spent on titling or summarising. Real, and measurable.
+<strong>Q2:</strong> <strong>this is the clearest &quot;AI-first resource planning&quot; pattern in the whole study so far.</strong> It is, literally, <em>routing a task class to the cheapest capable resource</em> — which is what a resource planner does for compute, storage and people. The <code>free_only</code> / &quot;never use a paid lane for background&quot; rule is a <em>policy</em> a business would want to set for itself.</p>
+<hr>
+<h2 id="8-the-model-catalog-the-remote-list-of-model-names">§8 — The model catalog (the remote list of model names)<a href="#batch-09/8-the-model-catalog-the-remote-list-of-model-names" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured in <code>hermes_cli/model_catalog.py</code> and <code>config_defaults.py:2040–2051</code>:</p>
+<ul>
+<li><strong>Remote manifest:</strong> <code>https://hermes-agent.nousresearch.com/docs/api/model-catalog.json</code> (<code>model_catalog.py:26</code>) — &quot;so picker lists update without a release&quot;.</li>
+<li><strong>Fallback URL:</strong> <code>https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website/static/api/model-catalog.json</code> (<code>:30–32</code>), with the reason recorded in a comment: <em>&quot;The Docusaurus site sits behind Vercel, which occasionally 403s non-browser clients (bot challenge); the raw GitHub copy is the same manifest and is not bot-gated.&quot;</em> A measured, previously-bitten workaround.</li>
+<li><strong>TTL:</strong> <code>ttl_minutes: 20</code> (<code>:33</code>; config <code>:2046</code>). Legacy <code>ttl_hours</code> honoured only if the user set it and <code>ttl_minutes</code> is still default (<code>:60–69</code>).</li>
+<li><strong>Cache per profile:</strong> <code>&lt;home&gt;/cache/model_catalog.json</code> — the in-process cache is keyed by &quot;path + mtime and TTL&quot;, with the comment that under a multiplexed gateway &quot;each profile has its own … and mtime alone cannot tell two profiles&#39; files apart&quot; (<code>:40–46</code>).</li>
+<li><strong>Per-provider override URLs:</strong> <code>model_catalog.providers</code> lets a self-hoster point at their own curation list with the same schema (config <code>:2049–2050</code>).</li>
+<li><strong>Default model id (measured):</strong> <code>PREFERRED_SILENT_DEFAULT_MODEL = &quot;z-ai/glm-5.2&quot;</code> (<code>models_catalog_static.py:545</code>), used as the silent fallback when no model is configured and no network is available (<code>models.py:473–481</code>).</li>
+</ul>
+<p><strong>Q1:</strong> the model list stays current without the user updating the app. Good.
+<strong>Q2:</strong> for a planner, a <strong>remotely-curated, per-tenant-overridable capability catalog</strong> is a reusable pattern — it is the same shape as a &quot;resource catalogue&quot; where the vendor curates defaults and the tenant overlays their own.</p>
+<hr>
+<h2 id="9-local-models-running-the-brain-on-your-own-machine">§9 — Local models (running the brain on your own machine)<a href="#batch-09/9-local-models-running-the-brain-on-your-own-machine" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>From <code>local-models.md</code> (Desktop availability, llama-server, requirements/limits) — the model runs under <strong>llama-server</strong> (llama.cpp) downloaded and managed by the Desktop app:</p>
+<ul>
+<li><strong>Backend selection:</strong> <code>backend: auto</code> prefers CUDA for NVIDIA, Vulkan for AMD/Intel, then CPU (<code>## Requirements and limits</code>).</li>
+<li><strong>Sizing:</strong> &quot;A GPU with 8 GB+ of memory runs the small catalog models comfortably; 16 GB+ runs the 27–35B models at high quality.&quot;</li>
+<li><strong>Integrity:</strong> &quot;Engine archives are SHA-256 verified before use&quot;; &quot;Model completeness is checked against the server&#39;s response, not catalog size estimates&quot;; interrupted transfers keep partials for resume.</li>
+<li><strong>Cleanup:</strong> &quot;Deleting a model removes every file it staged, including vision adapters and speculative-decoding companions.&quot;</li>
+<li><strong>Bring your own server:</strong> <code>## Using your own llama-server</code> — you can point Hermes at a server you run.</li>
+</ul>
+<p><strong>Q1:</strong> a user with a decent GPU runs free and offline. Real, and the integrity checks mean a half-downloaded model cannot silently produce garbage.
+<strong>Q2:</strong> for a business planner, local inference is the <strong>own-vs-rent</strong> decision on compute — precisely a resource-planning trade-off. Hermes gives the <em>mechanism</em> (download, verify, size, serve) but not the <em>policy</em> (when is local cheaper than rented, given this workload?). That is platform-side territory.</p>
+<hr>
+<h2 id="10-divergences-boundaries-and-corrections">§10 — Divergences, boundaries and corrections <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-09/10-divergences-boundaries-and-corrections" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Divergences found this batch: 0</strong> (docs matched code on every checked claim — credential-pool strategies, catalog TTL/URL, secret-source backends and ladder, aux task list). Listed honestly alongside the confirmed-match items:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Verdict</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>provider_routing</code> is OpenRouter-only</td>
+<td><strong>TRUE</strong></td>
+<td><code>batch_runner.py:913</code> &quot;(OpenRouter only)&quot;; <code>plugins/model-providers/nous/__init__.py:34</code> &quot;routing is decided centrally per model&quot;; docs state it is ignored on Nous Portal</td>
+</tr>
+<tr>
+<td>4 credential-pool strategies</td>
+<td><strong>TRUE</strong></td>
+<td><code>credential_pool.py:121–129</code></td>
+</tr>
+<tr>
+<td>Catalog TTL 20 min, remote URL + fallback</td>
+<td><strong>TRUE</strong></td>
+<td><code>model_catalog.py:26,30,33</code>; <code>config_defaults.py:2046</code></td>
+</tr>
+<tr>
+<td>3 secret backends (Bitwarden/1Password/command)</td>
+<td><strong>TRUE</strong></td>
+<td><code>registry.py:47–51</code></td>
+</tr>
+<tr>
+<td>Memory limits / sessions defaults / MCP safe-env / SSRF list (earlier batches)</td>
+<td><strong>TRUE</strong></td>
+<td>reported in b04/b05/b07/b08</td>
+</tr>
+</tbody></table></div>
+<p><strong>Correction under rule 13 (my own earlier note):</strong> &quot;<code>integrations/providers.md</code>: <del>40 provider sections&quot; → measured <strong>7 sections</strong>, **</del>90-row provider table**. The structure was mis-stated; the provider <em>count</em> was in the right order of magnitude. Corrected here and in §1.</p>
+<p><strong>New boundary surfaced (not a divergence):</strong> the <strong>aux transport list is narrower than the main transport list</strong>. <code>auxiliary.review.api_mode</code> admits <code>chat_completions | anthropic_messages | codex_responses</code> (<code>config_defaults.py:770–771</code>), while the main agent admits 5 modes (<code>agent_init.py:381–384</code>). A provider reachable on the main lane may be unreachable on an aux lane.</p>
+<p><strong>Architectural smell recorded:</strong> provider implementations live in <code>hermes_cli/</code> (~70 modules, some &gt;90 KB) while the base contract lives in <code>providers/base.py</code>. CLI concerns and provider logic are mixed.</p>
+<hr>
+<h2 id="11-carried-items">§11 — Carried items<a href="#batch-09/11-carried-items" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C9-1</strong></td>
+<td>Aux transport list (3) narrower than main transport list (5 + plugins) — a provider reachable on one may not be on the other.</td>
+<td>Watch for Batch 10/12</td>
+</tr>
+<tr>
+<td><strong>C9-2</strong></td>
+<td>Provider implementations live in <code>hermes_cli/</code> not <code>providers/</code>; base contract is separate from implementations.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-3</strong></td>
+<td>Fallback chain is <strong>static/config-driven</strong>, never learned from measured provider health.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-4</strong></td>
+<td><code>/model</code> cannot add a new provider mid-session; setup requires leaving the session.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-5</strong></td>
+<td>Secret-source precedence ladder (4 rules + provenance + never-clobber) is the most transferable single mechanism; verify against platform&#39;s secret handling in §12.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-6</strong></td>
+<td>China-region dual endpoints are first-class (separate ids + env vars for kimi/minimax/alibaba). Relevant to a platform serving mainland users.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-7</strong></td>
+<td>The <code>auxiliary</code> block is a working model of &quot;task class → resource class&quot; policy; <code>free_only</code> is a spend cap.</td>
+<td>For §12 synthesis</td>
+</tr>
+<tr>
+<td><strong>C9-8</strong></td>
+<td><code>PREFERRED_SILENT_DEFAULT_MODEL = &quot;z-ai/glm-5.2&quot;</code> — the shipped default; a platform pinning a model should note the default is remote-catalog-influenced, not fixed.</td>
+<td>Note</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="12-batch-level-value-questions-q1-user-q2-vision">§12 — Batch-level value questions (Q1 user / Q2 vision)<a href="#batch-09/12-batch-level-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a user use case?</strong>
+A user can bring any brain they already pay for (subscription via OAuth, or a key), keep several keys so a rate limit does not stop their work, keep ranked backups so a provider outage does not stop their work, keep keys in a password manager rather than on disk, and run entirely locally on their own GPU if they prefer. Background chores never spend the same money as the main conversation. <strong>The user-visible promise: &quot;your work does not stop because a provider hiccupped, and your bill is not spent on bookkeeping.&quot;</strong></p>
+<p><strong>Q2 — how does this serve the vision of an AI-first business/resource planner?</strong>
+Three mechanisms look directly reusable, in order of clarity:</p>
+<ol>
+<li><strong>The auxiliary lane</strong> (§7) — routing a <em>task class</em> to the <em>cheapest capable resource</em>, with an explicit &quot;never use a paid lane for background&quot; policy switch. This is resource planning in miniature, and it is already production-shaped.</li>
+<li><strong>Credential pools + fallback chain</strong> (§4, §5) — hold N credentials, rotate on exhaustion, lease to shared workers, fail over along a ranked chain. This is the primitive for <strong>availability across a fleet</strong>.</li>
+<li><strong>Secret sources + precedence ladder</strong> (§6) — multiple origins, ordered precedence, never-silent-clobber, provenance on every applied secret. This is the primitive for <strong>holding customer-owned credentials safely</strong>.</li>
+</ol>
+<p>What Hermes does <strong>not</strong> do, and therefore what the platform would own: decide <em>where a task should go</em> from measured cost/latency/capability at runtime (the chain is configured, not learned — C9-3), and let a user <strong>add</strong> a provider mid-task without leaving the session (C9-4).</p>
+<p><strong>Cross-reference:</strong> the mercato-vs-Hermes placement debate (what to adopt, build on, or build around) is deliberately deferred to <code>12-SYNTHESIS.md</code>. Per the owner&#39;s instruction, batches do not compare architectures.</p>
+<hr>
+<p><strong>Batch 09 of 12 complete. Divergences found this batch: 0</strong> (docs matched code on every checked claim — credential-pool strategies, catalog TTL/URL, secret-source backends and ladder, aux task list). <strong>One correction to my own earlier note</strong> (rule 13): <code>integrations/providers.md</code> has <strong>7 sections / ~90 provider rows</strong>, not &quot;~40 sections&quot;. <strong>One new boundary:</strong> the aux transport list (3) is narrower than the main transport list (5 + plugins). <strong>Most transferable mechanism:</strong> the secret-source precedence ladder (§6) and the auxiliary task-class lane (§7).
+<strong>Next: <code>10-code-execution-plugins-and-extensibility.md</code></strong> — including the OpenCode question.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="08-security-sandboxing.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Security &amp; Sandboxing</span>
+                </a>
+              
+
+              <a href="../index.html#batch-09" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="10-plugins-extensibility.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Plugins &amp; Extensibility</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words" class="toc-link">§0 — Plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-verified" class="toc-link">§1 — What was read and verified</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-two-commands-boundary-setup-vs-switch" class="toc-link">§2 — The two commands boundary (setup vs switch)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-provider-surface-what-hermes-can-actually-talk-to" class="toc-link">§3 — The provider surface (what Hermes can actually talk to)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-credential-pools-many-keys-for-one-provider" class="toc-link">§4 — Credential pools (many keys for one provider)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-fallback-providers-the-ranked-backup-grid" class="toc-link">§5 — Fallback providers (the ranked backup grid)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-credential-sources-where-secrets-come-from-distinct-from-pools" class="toc-link">§6 — Credential *sources* (where secrets come from) — distinct from pools</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-auxiliary-lane-cheap-models-for-background-chores" class="toc-link">§7 — The auxiliary lane (cheap models for background chores)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-model-catalog-the-remote-list-of-model-names" class="toc-link">§8 — The model catalog (the remote list of model names)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-local-models-running-the-brain-on-your-own-machine" class="toc-link">§9 — Local models (running the brain on your own machine)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-boundaries-and-corrections" class="toc-link">§10 — Divergences, boundaries and corrections</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-items" class="toc-link">§11 — Carried items</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-batch-level-value-questions-q1-user-q2-vision" class="toc-link">§12 — Batch-level value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

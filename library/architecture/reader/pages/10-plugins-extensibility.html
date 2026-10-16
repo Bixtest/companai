@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 10 — Code execution, plugins and extensibility — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-10" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 10</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Plugins &amp; Extensibility</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/10-code-execution-plugins-and-extensibility.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,178</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">21 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">317</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 10 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 10 VISUAL GUIDE</div>
+    <h4>Plugin Contract, Middleware Hooks &amp; ACP Server Mode</h4>
+    <p>17 plugin kinds governed by a shrinking-core policy, request middleware, and Agent Control Protocol</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 230" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- 17 Plugin Kinds -->
+      <g transform="translate(30, 25)">
+        <rect width="250" height="175" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">17 PLUGIN KINDS (1 CONTRACT)</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Compatibility Contract</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Version handshake protocol</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Shrinking-core governance</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Tools, providers, channels,</text>
+        <text x="15" y="122" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  evaluators, memory providers...</text>
+        <rect x="15" y="138" width="220" height="22" rx="4" fill="#3b82f6" fill-opacity="0.12"/>
+        <text x="22" y="153" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#1d4ed8">Survives upstream upgrades</text>
+      </g>
+
+      <!-- Center: Middleware & PTC -->
+      <g transform="translate(310, 25)">
+        <rect width="280" height="175" rx="10" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">MIDDLEWARE &amp; PTC EXECUTION</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Programmatic Tool Calling</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 4 middleware hook kinds</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Pre/post request modification</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• execute_code (PTC) calls refund</text>
+        <text x="15" y="122" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  iteration budget!</text>
+        <rect x="15" y="138" width="250" height="22" rx="4" fill="#10b981" fill-opacity="0.12"/>
+        <text x="22" y="153" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#047857">3-Stage Environment Scrubbing</text>
+      </g>
+
+      <!-- Right: ACP Adapter -->
+      <g transform="translate(620, 25)">
+        <rect width="270" height="175" rx="10" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">HERMES AS SERVER: ACP</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Agent Control Protocol</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 19 files / 5,846 LOC in acp_adapter</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Standardized RPC interface</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Exposes Hermes as headless agent</text>
+        <rect x="15" y="138" width="240" height="22" rx="4" fill="#8b5cf6" fill-opacity="0.12"/>
+        <text x="22" y="153" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">Potential Engine Transport (§4.4)</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-10-code-execution-plugins-and-extensibility">Batch 10 — Code execution, plugins and extensibility<a href="#batch-10/batch-10-code-execution-plugins-and-extensibility" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> COMPLETE
+<strong>Date:</strong> 2026-10-15
+<strong>Method:</strong> docs read in full against code; every claim carries a <code>file:line</code>. Docs are claims, code is authority (00-PIN-AND-METHOD.md §2).
+<strong>Source:</strong> <code>hermes-agent-main/hermes-agent-main</code> @ pin (19,728 files; pyproject md5 <code>f57f729d4b251547a5a9e2565ce1e726</code>).</p>
+<hr>
+<h2 id="0-plain-words">§0 — Plain words<a href="#batch-10/0-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three separate ideas live in this batch. Keeping them apart is most of the work:</p>
+<ol>
+<li><strong>Code execution</strong> — the model does not just <em>call tools one at a time</em>; it can <em>write a small program</em> that calls several tools in a loop and hand back only the printed answer. Hermes calls this <strong>Programmatic Tool Calling (PTC)</strong>. The win: a five-step data shuffle becomes one round trip instead of five.</li>
+<li><strong>Plugins</strong> — an outside developer can add a new capability (a memory backend, a messaging channel, an image generator, a model provider) <em>without editing Hermes&#39; own source</em>. Hermes enforces this with a written contract and a governance policy.</li>
+<li><strong>Extensibility seams</strong> — middleware and observer hooks. Middleware can <em>change</em> a request or a tool call (wrap it, rewrite it, block it). Observer hooks can only <em>watch and report</em> (with four documented exceptions that can alter behaviour).</li>
+</ol>
+<p>And one <strong>premise correction</strong> that matters more than any of them — §9: <strong>&quot;OpenCode&quot; in Hermes is a model <em>provider</em>, not the OpenCode coding agent.</strong> The word appears 1,008 times in the Python, all in the provider sense. This is a rule-13 correction to an assumption carried from the earlier (pre-forensics) material.</p>
+<hr>
+<h2 id="1-what-was-read-and-verified">§1 — What was read and verified<a href="#batch-10/1-what-was-read-and-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Docs read in full (under <code>website/docs/</code>):</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc</th>
+<th>Size</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>developer-guide/plugins/index.md</code></td>
+<td>117,774 B</td>
+<td>the canonical plugin authoring + compat contract</td>
+</tr>
+<tr>
+<td><code>developer-guide/plugins/catalog-submission.md</code></td>
+<td>15,061 B</td>
+<td>how a plugin enters the official catalog</td>
+</tr>
+<tr>
+<td><code>developer-guide/plugins/application-declarations.md</code></td>
+<td>8,475 B</td>
+<td>what a plugin must declare</td>
+</tr>
+<tr>
+<td><code>developer-guide/middleware.md</code></td>
+<td>9,946 B</td>
+<td>the four middleware kinds</td>
+</tr>
+<tr>
+<td><code>developer-guide/observer-hooks.md</code></td>
+<td>13,706 B</td>
+<td>the observer event families</td>
+</tr>
+<tr>
+<td><code>developer-guide/adding-tools.md</code></td>
+<td>6,704 B</td>
+<td>adding a built-in tool (the in-tree path)</td>
+</tr>
+<tr>
+<td><code>developer-guide/tools-runtime.md</code></td>
+<td>12,084 B</td>
+<td>how the tool runtime loads and dispatches</td>
+</tr>
+<tr>
+<td><code>developer-guide/acp-internals.md</code></td>
+<td>6,849 B</td>
+<td>Hermes <strong>as</strong> an ACP server</td>
+</tr>
+<tr>
+<td><code>developer-guide/extending-the-cli.md</code></td>
+<td>7,412 B</td>
+<td>CLI extension path</td>
+</tr>
+<tr>
+<td><code>plugins/AGENTS.md</code> (in-tree)</td>
+<td>14,098 B</td>
+<td>the <strong>plugin governance policy</strong>, dated</td>
+</tr>
+</tbody></table></div>
+<p><strong>Per-kind plugin guide docs</strong> (one each): <code>memory-provider-plugin.md</code> (26,045 B), <code>model-provider-plugin.md</code> (42,203 B), <code>context-engine-plugin.md</code> (20,317 B), <code>image-gen-provider-plugin.md</code> (13,318 B), <code>video-gen-provider-plugin.md</code> (9,366 B), <code>browser-provider-plugin.md</code> (6,852 B), <code>web-search-provider-plugin.md</code> (11,544 B), <code>terminal-environment-plugin.md</code> (5,517 B), <code>secret-source-plugin.md</code> (10,783 B), <code>plugin-llm-access.md</code> (21,974 B).</p>
+<p><strong>Code read and measured:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Finding</th>
+<th>Verified at</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/code_execution_tool.py</code></td>
+<td>PTC; sandbox allowed tools; resource limits</td>
+<td><code>:1–48</code>, <code>:43–51</code></td>
+</tr>
+<tr>
+<td><code>tools/code_kernel.py</code></td>
+<td>911-line persistent session kernel</td>
+<td>(size)</td>
+</tr>
+<tr>
+<td><code>tools/code_execution_env.py</code></td>
+<td>env-scrub: prefixes + secret substrings + Windows essentials</td>
+<td><code>:20–53</code></td>
+</tr>
+<tr>
+<td><code>plugins/plugin_loader.py</code></td>
+<td>directory-plugin loader; deadlock-aware</td>
+<td><code>:1–60</code></td>
+</tr>
+<tr>
+<td><code>plugins/AGENTS.md</code></td>
+<td>governance policy (dated decisions)</td>
+<td><code>:1–50</code></td>
+</tr>
+<tr>
+<td><code>plugins/</code> (tree)</td>
+<td><strong>17 plugin kinds</strong>; 4 example plugins moved out</td>
+<td><code>ls plugins/</code></td>
+</tr>
+<tr>
+<td><code>acp_adapter/</code> (19 files)</td>
+<td>Hermes <strong>is</strong> an ACP stdio server</td>
+<td><code>entry.py:95, 208</code></td>
+</tr>
+<tr>
+<td><code>hermes_cli/auth.py</code></td>
+<td><code>opencode-zen</code> / <code>opencode-go</code> are <strong>providers</strong></td>
+<td><code>:226–231</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-code-execution-programmatic-tool-calling-ptc">§2 — Code execution: Programmatic Tool Calling (PTC)<a href="#batch-10/2-code-execution-programmatic-tool-calling-ptc" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The module docstring states the design in one paragraph (<code>tools/code_execution_tool.py:1–13</code>, verbatim intent):</p>
+<blockquote>
+<p>&quot;The LLM writes a Python script that calls Hermes tools via RPC, collapsing multi-step tool chains into one inference turn; only the script&#39;s stdout returns to the LLM.&quot;</p>
+</blockquote>
+<p><strong>Two backends:</strong></p>
+<ul>
+<li><strong>Local:</strong> &quot;a persistent per-conversation session kernel (<code>tools/code_kernel.py</code>) over a Unix socket (<strong>loopback TCP on Windows</strong>)&quot;. Measured: <code>code_kernel.py</code> is <strong>911 lines</strong>; <code>code_execution_tool.py</code> is <strong>969 lines</strong>; plus <code>code_execution_rpc.py</code> (255) and <code>code_execution_env.py</code> (304).</li>
+<li><strong>Remote:</strong> &quot;a remote session kernel (<code>tools/code_kernel_remote.py</code>) falling open to a per-call script ship, tool calls as request files polled via <code>env.execute()</code> (needs Python 3 on the backend).&quot;</li>
+</ul>
+<p><strong>What the script is allowed to touch</strong> (measured <code>:43–45</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">SANDBOX_ALLOWED_TOOLS = frozenset([
+    &quot;web_search&quot;, &quot;web_extract&quot;, &quot;read_file&quot;, &quot;write_file&quot;, &quot;search_files&quot;, &quot;patch&quot;, &quot;terminal&quot;,
+])
+</code></pre>
+</div>
+<p>…and crucially: &quot;<strong>∩ the session&#39;s enabled tools</strong> decides which stubs are generated.&quot; The sandbox is not a separate universe — it is the session&#39;s own toolset, narrowed to a safe seven.</p>
+<p><strong>Resource limits (measured <code>:47–51</code>), all overridable via <code>config.yaml → code_execution.*</code>:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>DEFAULT_TIMEOUT</code></td>
+<td>300 s (5 min)</td>
+</tr>
+<tr>
+<td><code>DEFAULT_MAX_TOOL_CALLS</code></td>
+<td>50</td>
+</tr>
+<tr>
+<td><code>MAX_STDOUT_BYTES</code></td>
+<td>50,000 (50 KB)</td>
+</tr>
+<tr>
+<td><code>MAX_STDERR_BYTES</code></td>
+<td>10,000 (10 KB)</td>
+</tr>
+<tr>
+<td><code>MAX_SPILLED_STDOUT_BYTES</code></td>
+<td>5,000,000 (5 MB) — &quot;a runaway print loop must not fill the disk&quot;</td>
+</tr>
+</tbody></table></div>
+<p><strong>Truncation is recover-don&#39;t-rerun</strong> (<code>_truncate_stdout_text</code>, <code>:56–70</code>): stdout over 50 KB is cut 40 % head / 60 % tail, the omitted middle is <strong>spilled to <code>cache/exec</code></strong>, and the result carries the file path plus byte-count metadata — &quot;because a client layer can miss or re-truncate it&quot;. So a user (or the model) can <em>read the full output</em> instead of re-running the script.</p>
+<p><strong>Environment scrubbing (measured <code>tools/code_execution_env.py:20–53</code>)</strong> — a three-stage gate with the reasoning recorded in comments:</p>
+<ol>
+<li><strong>Secret-substring block first.</strong> <code>_SECRET_SUBSTRINGS = (&quot;KEY&quot;,&quot;TOKEN&quot;,&quot;SECRET&quot;,&quot;PASSWORD&quot;,&quot;CREDENTIAL&quot;,&quot;PASSWD&quot;,&quot;AUTH&quot;,&quot;DSN&quot;,&quot;WEBHOOK&quot;,&quot;CREDS&quot;,&quot;BEARER&quot;,&quot;APIKEY&quot;)</code>. Note the comment: <code>&quot;PASS&quot;</code> is <strong>deliberately absent</strong> because it false-positives on <code>BYPASS_CACHE</code> / <code>COMPASS_DIR</code> / <code>PASSENGER_HOST</code>, while <code>PASSWORD</code>/<code>PASSWD</code> already cover credentials.</li>
+<li><strong>Whatever survives must match a safe prefix</strong> — <code>_SAFE_ENV_PREFIXES = (&quot;PATH&quot;,&quot;HOME&quot;,&quot;USER&quot;,&quot;LANG&quot;,&quot;LC_&quot;,&quot;TERM&quot;,&quot;TMPDIR&quot;,&quot;TMP&quot;,&quot;TEMP&quot;,&quot;SHELL&quot;,&quot;LOGNAME&quot;,&quot;XDG_&quot;,&quot;PYTHONPATH&quot;,&quot;VIRTUAL_ENV&quot;,&quot;CONDA&quot;)</code>.</li>
+<li><strong>The broad <code>HERMES_</code> prefix is deliberately NOT safe</strong> — the comment records <em>why</em>: it &quot;leaked config vars without a secret substring (<code>HERMES_BASE_URL</code>, <code>HERMES_KANBAN_DB</code>, <code>*_WEBHOOK</code>)&quot;. Only a small named allowlist rides: <code>_HERMES_CHILD_ALLOWED = {HERMES_HOME, HERMES_PROFILE, HERMES_CONFIG, HERMES_ENV, HERMES_DELEGATED_CHILD_CONTEXT}</code>, with the recorded reason that <code>HERMES_DELEGATED_CHILD_CONTEXT</code> must ride along or a child loses the Kanban mutation guard.</li>
+</ol>
+<p>Windows-essential vars are separately allowlisted because otherwise the CRT fails (<code>WinError 10106</code>, Winsock cannot find <code>mswsock.dll</code>).</p>
+<p><strong>Q1 (user value):</strong> a user gets a multi-step data job done in one inference turn, and if the output is huge, the <em>whole</em> output is recoverable from disk rather than lost or re-run. Both are real, felt improvements.
+<strong>Q2 (vision value):</strong> PTC is the mechanism that turns &quot;the agent calls tools&quot; into &quot;the agent <em>programs against</em> its own tools&quot;. For a resource planner, that is the difference between an assistant that asks for each datum and one that composes a plan across many sources. The <strong>intersect-with-session-tools</strong> rule is also directly reusable governance: <em>expand capability by composition, never beyond what the session already may do.</em></p>
+<hr>
+<h2 id="3-the-plugin-surface-17-kinds-one-contract">§3 — The plugin surface: 17 kinds, one contract<a href="#batch-10/3-the-plugin-surface-17-kinds-one-contract" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Measured — the in-tree plugin kinds</strong> (<code>ls plugins/</code>):</p>
+<p><code>browser</code>, <code>computer_use</code>, <code>context_engine</code>, <code>cron_providers</code>, <code>dashboard_auth</code>, <code>disk-cleanup</code>, <code>google_meet</code>, <code>hermes-achievements</code>, <code>image_gen</code>, <code>kanban</code>, <code>memory</code>, <code>model-providers</code>, <code>platforms</code>, <code>security-guidance</code>, <code>teams_pipeline</code>, <code>video_gen</code>, <code>web</code>.</p>
+<p>Note <code>plugins/platforms/</code> alone contains <strong>21 messaging/channel plugins</strong>: <code>a2a, buzz, dingtalk, discord, email, feishu, google_chat, irc, line, matrix, mattermost, ntfy, photon, raft, simplex, slack, sms, teams, telegram, wecom, whatsapp</code>.</p>
+<p><strong>Each kind has its own authoring guide</strong> (§1 table): memory, model-provider, context-engine, image-gen, video-gen, browser, web-search, terminal-environment, secret-source. So the plugin system is not one blob — it is <strong>nine documented extension points</strong>, each with a stable ABC.</p>
+<p><strong>Loading</strong> (<code>plugins/plugin_loader.py:1–5</code>): &quot;import <code>__init__.py</code> by path with siblings pre-registered so relative imports work, then extract the provider via <code>register(ctx)</code> or an ABC-subclass fallback.&quot; The loader is written to be <strong>concurrency-safe</strong>: it tracks <code>_LOAD_OWNERS</code>, <code>_LOAD_WAITERS</code>, <code>_STALLED_LOADS</code>, and walks both the <em>loader</em> lock graph and <em>importlib&#39;s</em> module-lock graph to detect a deadlock that importlib alone cannot see (<code>_load_would_deadlock</code>, <code>:36–47</code>). <code>bounded_load_wait()</code> lets a per-turn caller give up after <code>_CONCURRENT_LOAD_WAIT_SECS = 10.0</code> rather than stall on another thread&#39;s hung import (<code>:26, :50–54</code>).</p>
+<p><strong>This is a measured, mature concern</strong> — the plugin loader is written by people who have been bitten by a hung third-party import taking down a turn.</p>
+<p><strong>Q1:</strong> a user can install a capability the Hermes team never wrote (a memory backend, a chat channel) and it works after a normal upgrade. Real.
+<strong>Q2:</strong> seventeen plugin kinds is effectively a <strong>capability marketplace shape</strong>. A platform can extend in nine documented directions without forking the engine.</p>
+<hr>
+<h2 id="4-the-compatibility-contract-how-a-plugin-survives-an-upgrade">§4 — The compatibility contract (how a plugin survives an upgrade)<a href="#batch-10/4-the-compatibility-contract-how-a-plugin-survives-an-upgrade" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured from <code>developer-guide/plugins/index.md</code>, section <em>Native plugin compatibility contract</em>. The headline is a <strong>deliberate refusal</strong>:</p>
+<blockquote>
+<p>&quot;Hermes does not expose a <code>PLUGIN_API_VERSION</code>, require a manifest-wide <code>api:</code> match, or attach an API version to unrelated values. A plugin that uses a documented behavior should continue to work after a normal Hermes upgrade.&quot;</p>
+</blockquote>
+<p>Instead, <strong>six behavioural rules</strong>:</p>
+<ol>
+<li><strong>Evolve additively</strong> — documented <code>PluginContext</code> methods are not removed or renamed; new parameters are optional, defaulted, keyword-only; return fields are not removed or silently retyped.</li>
+<li><strong>Hook payloads are keyword payloads</strong> — new hook data is added as keyword fields, never by changing position/meaning; Hermes <strong>inspects callback signatures</strong>, so a legacy callback gets the fields it declares while a <code>**kwargs</code> callback gets everything.</li>
+<li><strong>Manifests are open to additions</strong> — unknown <code>plugin.yaml</code> fields are ignored, so an older release can load a newer plugin&#39;s manifest.</li>
+<li><strong>Provider interfaces grow through defaults</strong> — a new abstract method or an unconditionally-forwarded argument requires a <strong>migration window</strong>, not a flag-day signature change.</li>
+<li><strong>Version the contract that crosses a boundary</strong> — a capability may carry its own schema version for a <em>wire or persisted format</em> (observer payloads, secret-source state), but &quot;do not add version literals to unrelated callback or context values&quot;.</li>
+<li><strong>The contract covers documented surfaces only</strong> — replacing or wrapping core functions at runtime (assigning <code>AIAgent.&lt;method&gt;</code>, <code>setattr</code> on a Hermes module, writing into <code>sys.modules</code> or a core dict) is <strong>not a supported extension point</strong>, and the catalog refuses it at admission (<code>hermes plugins validate</code>, a <code>no core override</code> check).</li>
+</ol>
+<p><strong>The deprecation policy is unusually strict</strong> (measured, verbatim structure): a documented behaviour may be deprecated only with (1) replacement + migration instructions in the guide <em>and</em> release notes, (2) a warning emitted <strong>at most once per process</strong> naming the replacement and earliest removal release, (3) support for <strong>at least two subsequent minor releases</strong>, and (4) behaviour-based compatibility coverage for <strong>both</strong> the legacy path and the replacement through that window. And: <em>&quot;In practice, additive aliases and adapters are preferred to removal.&quot;</em></p>
+<p><strong>Enforcement is by behaviour, not symbols:</strong> &quot;Hermes enforces this contract with frozen external-plugin fixtures discovered from an isolated <code>HERMES_HOME</code>. Those tests load and invoke the plugin through <code>PluginManager</code>; they assert real registration and callback outcomes <strong>rather than internal symbol lists or source-code shape</strong>.&quot;</p>
+<p><strong>Q1:</strong> a user&#39;s installed plugin does not break on an update. This is the single most user-visible property of a plugin system, and it is contractually promised with a two-release window.
+<strong>Q2:</strong> for a platform, this is a <strong>worked model of ecosystem trust</strong>. The refusal to ship an API version — because it would let semantics drift behind a stable number — is a design position worth recording. The &quot;no core override&quot; admission check is the enforcement that keeps it honest.</p>
+<hr>
+<h2 id="5-the-plugin-governance-policy-a-dated-written-constitution">§5 — The plugin governance policy (a dated, written constitution)<a href="#batch-10/5-the-plugin-governance-policy-a-dated-written-constitution" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>plugins/AGENTS.md</code> (14 KB, in-tree) is not a coding guide — it is <strong>policy with dates and named decisions</strong>. Measured highlights:</p>
+<ul>
+<li><strong>Explicit authorship:</strong> <em>&quot;Plugins never touch core (Teknium, May 2026).&quot;</em> A plugin MUST NOT modify <code>run_agent.py</code>, <code>cli.py</code>, <code>gateway/run.py</code>, <code>hermes_cli/main.py</code>, etc. If it needs a missing capability, <strong>widen the generic plugin surface</strong> (a new hook or <code>ctx</code> method) and let the plugin use it — &quot;never hardcode plugin-specific logic into core&quot;. Cited precedent: &quot;PR #5295 removed 95 lines of hardcoded honcho argparse from <code>main.py</code>.&quot;</li>
+<li><strong>A hook with no concrete consumer is rejected as speculative infrastructure.</strong> A rule against building for imagined users.</li>
+<li><strong>Migration-out policy:</strong> in-tree memory providers were closed (May 2026); hindsight, honcho, supermemory, mem0, openviking, holographic <strong>moved to the plugin catalog</strong> (<code>plugin-catalog/&lt;name&gt;.yaml</code>), auto-installed by <code>hermes_cli/memory_provider_migration.py</code> for homes still configured for them. Home Assistant and Spotify likewise leave core (Oct 2026) with a row in <code>hermes_cli/left_core_migration.py::LEFT_CORE</code>.</li>
+<li><strong>No new third-party-product plugins (June 2026)</strong> — observability backends, vendor SaaS connectors, analytics dashboards and paid-service tie-ins ship as <strong>standalone plugin repos</strong>, because &quot;every absorbed product is our maintenance burden against a fast-moving core for a backend we don&#39;t own&quot;. And an explicit note that closing such a PR &quot;is a coupling decision, not a quality judgment&quot;.</li>
+<li><strong>Reference plugins live outside the tree</strong> (<code>hermes-example-plugins</code> repo), not in <code>plugins/</code>.</li>
+</ul>
+<p><strong>This is the most surprising find of the batch.</strong> The project is actively <em>shrinking its own core</em> on a written schedule, deliberately pushing capability outward into a catalog. For a platform builder this is a strong signal: the boundary between &quot;engine&quot; and &quot;ecosystem&quot; has been argued and decided, in public, with dates.</p>
+<p><strong>Q1:</strong> users get new capabilities installed automatically when they update (the <code>LEFT_CORE</code> auto-install), and the core stays small enough to stay fast.
+<strong>Q2:</strong> for a resource planner, <code>left_core_migration.py</code> is a reusable pattern — <strong>&quot;a capability that used to be core is now a plugin, and here is the one-time state conversion for homes that used it.&quot;</strong> That is exactly the migration machinery a maturing platform needs.</p>
+<hr>
+<h2 id="6-middleware-change-the-request-and-observer-hooks-watch-it">§6 — Middleware (change the request) and observer hooks (watch it)<a href="#batch-10/6-middleware-change-the-request-and-observer-hooks-watch-it" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two distinct seams, and the docs are careful about the difference.</p>
+<p><strong>Middleware</strong> (<code>developer-guide/middleware.md</code>) — <strong>four kinds</strong>, each able to <em>replace</em>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Payload</th>
+<th>Can return</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>llm_request</code></td>
+<td><code>request</code>, <code>original_request</code></td>
+<td><code>{&quot;request&quot;: {...}}</code></td>
+<td>Replace effective provider kwargs before execution</td>
+</tr>
+<tr>
+<td><code>tool_request</code></td>
+<td><code>tool_name</code>, <code>args</code>, <code>original_args</code></td>
+<td><code>{&quot;args&quot;: {...}}</code></td>
+<td>Replace tool args <strong>before hooks, guardrails, approvals and execution</strong></td>
+</tr>
+<tr>
+<td><code>llm_execution</code></td>
+<td><code>request</code>, <code>original_request</code>, <code>next_call</code></td>
+<td>any provider response</td>
+<td>Wrap or replace the actual provider call</td>
+</tr>
+<tr>
+<td><code>tool_execution</code></td>
+<td><code>tool_name</code>, <code>args</code>, <code>original_args</code>, <code>next_call</code></td>
+<td>any tool result</td>
+<td>Wrap or replace the actual tool call</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>Schema versions: <code>telemetry_schema_version = &quot;hermes.observer.v1&quot;</code>, <code>middleware_schema_version = &quot;hermes.middleware.v1&quot;</code>.</li>
+<li><strong>Multiple plugins chain in registration order</strong> (&quot;Hermes runs them as a nested chain in registration order&quot;).</li>
+<li><strong>Fail-open:</strong> &quot;Middleware failures are fail-open: Hermes logs a warning and continues with the next middleware or the base runtime path.&quot;</li>
+<li><strong>A mis-declared callback is reported once at WARNING, then repeats go to DEBUG</strong>, &quot;so a mis-declared middleware cannot flood the log; a plugin reload resets the report.&quot;</li>
+<li>Request middleware may attach trace: <code>{&quot;request&quot;: …, &quot;source&quot;: …, &quot;reason&quot;: …}</code> → stored in later hook payloads as <code>middleware_trace</code>. <strong>So a middleware can explain why it changed a request.</strong></li>
+</ul>
+<p><strong>Observer hooks</strong> (<code>developer-guide/observer-hooks.md</code>) — <strong>watch-only, with four documented exceptions</strong>:</p>
+<ul>
+<li>Registered via <code>ctx.register_hook(&quot;pre_api_request&quot;, …)</code>, etc. But <code>ctx.register_middleware(...)</code> is the middleware path — note the two different registration methods in the two docs.</li>
+<li><strong>Hook callbacks are fail-open:</strong> &quot;Hermes catches callback exceptions, logs a warning, and keeps the agent loop running.&quot;</li>
+<li><strong>&quot;Most observer hook return values are ignored.&quot;</strong> The four that can change behaviour:</li>
+</ul>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Hook</th>
+<th>Return behaviour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pre_llm_call</code></td>
+<td>may return a string / <code>{&quot;context&quot;: &quot;...&quot;}</code> → inject ephemeral context into the current user message</td>
+</tr>
+<tr>
+<td><code>pre_tool_call</code></td>
+<td>may return <code>{&quot;action&quot;:&quot;block&quot;, message}</code> to <strong>block</strong>, or <code>{&quot;action&quot;:&quot;modify&quot;, args}</code> to transform args</td>
+</tr>
+<tr>
+<td><code>transform_tool_result</code></td>
+<td>may return a replacement tool result string after <code>post_tool_call</code></td>
+</tr>
+<tr>
+<td><code>transform_llm_output</code></td>
+<td>may return a replacement final assistant text string</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>Eight documented event families: Session Lifecycle, Turn-Scoped LLM, Request-Scoped API, Tool Lifecycle, Human Input Lifecycle, Approval Lifecycle, Subagent Lifecycle (+ correlation IDs and payload safety).</li>
+</ul>
+<p><strong>The ordering fact that matters most:</strong> <code>tool_request</code> middleware rewrites args <strong>before</strong> hooks, guardrails and approvals. So an approval decision is made on the <em>final</em> arguments — a plugin cannot smuggle a call past the approval gate by mutating it afterwards. That ordering is a security property, not a convenience.</p>
+<p><strong>Q1:</strong> a user can install a plugin that adds cost tracking, redaction or a policy, and it applies to every call without the model cooperating. Real.
+<strong>Q2:</strong> for a platform, these two seams are exactly where <strong>tenancy policy, spend control and audit</strong> would live: middleware to enforce (block/rewrite), observer hooks to record (audit trail) — and the <code>middleware_trace</code> field is a ready-made &quot;why did this request look like that&quot; record.</p>
+<hr>
+<h2 id="7-hermes-as-a-server-the-acp-adapter">§7 — Hermes as a server: the ACP adapter<a href="#batch-10/7-hermes-as-a-server-the-acp-adapter" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured: <code>acp_adapter/</code> holds <strong>19 files</strong> (<code>entry.py</code>, <code>server.py</code>, <code>session.py</code>, <code>events.py</code>, <code>permissions.py</code>, <code>tools.py</code>, <code>auth.py</code>, <code>edit_approval.py</code>, <code>elicitation.py</code>, <code>provenance.py</code>, …). Its docstring (<code>acp-internals.md</code>):</p>
+<blockquote>
+<p>&quot;The ACP adapter wraps Hermes&#39; synchronous <code>AIAgent</code> in an async JSON-RPC <strong>stdio server</strong>.&quot;</p>
+</blockquote>
+<p>Boot flow (measured <code>entry.py:95, 180, 208</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>hermes acp / hermes-acp / python -m acp_adapter
+  -&gt; acp_adapter.entry.main()
+  -&gt; parse --version/--check/--setup before server startup
+  -&gt; load ~/.hermes/.env
+  -&gt; configure stderr logging
+  -&gt; construct HermesACPAgent
+  -&gt; acp.run_agent(agent, use_unstable_protocol=True)
+</code></pre>
+</div>
+<p>&quot;<strong>Stdout is reserved for ACP JSON-RPC transport. Human-readable logs go to stderr.</strong>&quot; And <code>acp_adapter/gateway_server.py</code> maps a cancelled admission to <code>stopReason: cancelled</code> and a failed one to an ACP request error &quot;rather than reporting <code>end_turn</code>&quot;.</p>
+<p><strong>Direction matters here:</strong> Hermes is the <strong>ACP server</strong> — so an editor or client (Zed, and per <code>server.py:590,597</code>, clients like Claude Code / OpenCode / Pi) can drive Hermes over ACP. This is the <em>reverse</em> of the earlier project tree&#39;s arrangement, where Hermes sat <em>behind</em> an ACP client. Recording it because it is the same interface seen from the other side.</p>
+<p><strong>Q1:</strong> a user can run Hermes from inside their editor. Real.
+<strong>Q2:</strong> the ACP adapter is a <strong>ready-made protocol face</strong> for a platform — Hermes can be a <em>service</em> rather than only an app.</p>
+<hr>
+<h2 id="8-adding-a-built-in-tool-the-in-tree-path-distinct-from-plugins">§8 — Adding a *built-in* tool (the in-tree path, distinct from plugins)<a href="#batch-10/8-adding-a-built-in-tool-the-in-tree-path-distinct-from-plugins" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>developer-guide/adding-tools.md</code> (211 lines) documents the other route: a tool that ships with Hermes. The steps — create <code>tools/&lt;name&gt;_tool.py</code>, add it to a toolset, mark discovery (now automatic — &quot;Step 3 … No longer needed&quot;), handle async, accept <code>task_id</code>, register an agent-loop-intercepted tool. Sections include <em>Async Handlers</em>, <em>Handlers That Need task_id</em>, <em>Agent-Loop Intercepted Tools</em>, <em>Optional: Setup Wizard Integration</em>, <em>Checklist</em>.</p>
+<p>So Hermes has <strong>two tool-adding paths</strong>: in-tree (a file + a toolset row) and out-of-tree (a plugin with a manifest). The governance policy (§5) is the stated reason the second is preferred for anything not core.</p>
+<hr>
+<h2 id="9-premise-correction-rule-13-opencode-is-a-provider-not-the-coding-agent">§9 — **PREMISE CORRECTION (rule 13): "OpenCode" is a provider, not the coding agent** <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-10/9-premise-correction-rule-13-opencode-is-a-provider-not-the-coding-agent" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the batch&#39;s most important finding, and it corrects an assumption carried from earlier material.</p>
+<p><strong>Measured:</strong> <code>&quot;opencode&quot;</code> appears <strong>1,008 times</strong> in the Python and <strong>88 times</strong> in the docs. Every reviewed instance is in the <strong>model-provider</strong> sense:</p>
+<ul>
+<li><code>hermes_cli/auth.py:226–231</code> defines two providers (verbatim):
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">(&quot;opencode-zen&quot;, &quot;OpenCode Zen&quot;, &quot;https://opencode.ai/zen/v1&quot;, (&quot;OPENCODE_ZEN_API_KEY&quot;,), &quot;OPENCODE_ZEN_BASE_URL&quot;),
+# OpenCode Go mixes API surfaces by model (GLM/Kimi: OpenAI chat under /v1; MiniMax and
+# Qwen 3.7: Anthropic Messages under /v1/messages). Keep the base at /v1; api_mode is per-model.
+(&quot;opencode-go&quot;, &quot;OpenCode Go&quot;, &quot;https://opencode.ai/zen/go/v1&quot;, (&quot;OPENCODE_GO_API_KEY&quot;,), &quot;OPENCODE_GO_BASE_URL&quot;),
+</code></pre>
+</div>
+</li>
+<li><code>agent/opencode_affinity.py</code> (150 lines) sends <code>x-opencode-session</code> so <strong>OpenCode&#39;s relay</strong> &quot;pins requests that share this value to the same upstream backend, which keeps its prompt cache warm&quot;.</li>
+<li><code>agent/models_dev.py:118–119</code> maps <code>&quot;opencode-zen&quot;: &quot;opencode&quot;</code>, <code>&quot;opencode-go&quot;: &quot;opencode-go&quot;</code>.</li>
+<li><code>agent/model_metadata.py:452</code> maps the host <code>opencode.ai</code> → provider <code>opencode-go</code>.</li>
+<li><code>agent/prompt_caching.py:110</code> lists them in a provider family alongside <code>alibaba</code>.</li>
+<li><code>hermes_cli/auth.py:1399–1402</code> records that the keyless <code>opencode-free</code> provider was <strong>removed</strong> because OpenCode &quot;discontinued anonymous free-tier access outside its own client&quot;.</li>
+</ul>
+<p><strong>And the coding agent, where referenced at all, is a <em>client of Hermes</em>, not a component:</strong> <code>acp_adapter/server.py:590</code> — <em>&quot;(Codex/Claude Code/OpenCode/Zed rely on this; deferring via <code>call_soon</code> broke them).&quot;</em> There is <strong>no</strong> spawn, subprocess, npm install, or binary lookup of an <code>opencode</code> CLI anywhere in the tree.</p>
+<p><strong>What this corrects:</strong> any earlier statement that Hermes &quot;integrates OpenCode&quot; as a coding engine, or that its module-loading story maps onto OpenCode&#39;s, is <strong>wrong for this tree</strong>. Hermes does not wrap OpenCode. &quot;OpenCode&quot; here is a <strong>relay provider you can pay</strong> (<code>OPENCODE_ZEN_API_KEY</code>, <code>OPENCODE_GO_API_KEY</code>), and separately an ACP <em>client</em> that may connect <em>into</em> Hermes. The two must not be conflated. Recorded per rule 13 so the correction propagates everywhere the earlier assumption was used.</p>
+<hr>
+<h2 id="10-divergences-boundaries-and-corrections">§10 — Divergences, boundaries and corrections <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-10/10-divergences-boundaries-and-corrections" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Divergences found this batch: 0</strong> (the plugin contract, governance policy, middleware kinds, ACP boot flow and PTC limits all matched code on every checked claim). <strong>One correction to earlier material</strong> (§9, rule 13).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Verdict</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Plugin contract has no <code>PLUGIN_API_VERSION</code></td>
+<td><strong>TRUE</strong> (stated as a deliberate refusal)</td>
+<td><code>plugins/index.md</code> compat contract</td>
+</tr>
+<tr>
+<td>Middleware = 4 kinds, fail-open, ordered chain</td>
+<td><strong>TRUE</strong></td>
+<td><code>middleware.md</code></td>
+</tr>
+<tr>
+<td>Observer hooks watch-only except 4 documented</td>
+<td><strong>TRUE</strong></td>
+<td><code>observer-hooks.md</code></td>
+</tr>
+<tr>
+<td><code>tool_request</code> runs before hooks/guardrails/approvals</td>
+<td><strong>TRUE</strong></td>
+<td><code>middleware.md</code> payload table + purpose text</td>
+</tr>
+<tr>
+<td>Hermes is an ACP <strong>server</strong> (stdio JSON-RPC)</td>
+<td><strong>TRUE</strong></td>
+<td><code>entry.py:95,208</code>; <code>acp-internals.md</code></td>
+</tr>
+<tr>
+<td>17 in-tree plugin kinds; 9 documented extension points</td>
+<td><strong>TRUE</strong></td>
+<td><code>ls plugins/</code>; per-kind guides</td>
+</tr>
+<tr>
+<td><strong>&quot;OpenCode&quot; = the coding agent inside Hermes</strong></td>
+<td><strong>FALSE — corrected</strong></td>
+<td>1,008 code refs, all provider-relay; no spawn path (§9)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Boundary surfaced (not a divergence):</strong> the sandbox&#39;s tool set is not the session&#39;s tool set exactly — <code>SANDBOX_ALLOWED_TOOLS</code> is a <strong>seven-tool allowlist intersected with</strong> the session&#39;s enabled tools. A session that lacks <code>terminal</code> cannot gain it via PTC.</p>
+<p><strong>Boundary surfaced:</strong> plugins may <strong>change</strong> requests (middleware) or <strong>watch</strong> them (hooks), but the policy forbids wrapping core internals (§4.6). So a platform wanting a hard tenancy gate has a middleware seam but <strong>not</strong> a licence to patch the agent.</p>
+<hr>
+<h2 id="11-carried-items">§11 — Carried items<a href="#batch-10/11-carried-items" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C10-1</strong></td>
+<td>PTC intersects its allowlist with session tools — capability expands by composition, never beyond the session. Reusable governance rule.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-2</strong></td>
+<td>PTC spills oversized stdout to disk and returns the path (&quot;recover-don&#39;t-rerun&quot;). Reusable pattern for any tool output.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-3</strong></td>
+<td>Env-scrub three-stage gate (secret substrings → safe prefixes → named allowlist); <code>HERMES_</code> deliberately unsafe. Directly reusable in the platform&#39;s worker env.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-4</strong></td>
+<td>Plugin compat contract is <strong>behavioural, versionless</strong>, with a 2-minor-release deprecation window + frozen external-plugin fixtures.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-5</strong></td>
+<td><code>plugins/AGENTS.md</code> governance policy: core shrinks on a schedule; capability moves to a catalog; <code>left_core_migration.py</code> does one-time state conversion.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-6</strong></td>
+<td>Middleware (enforce) + observer hooks (audit) + <code>middleware_trace</code> = ready-made tenancy/spend/audit seams.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-7</strong></td>
+<td>Hermes is an ACP <strong>server</strong> — a protocol face for being driven, inverse of the earlier tree&#39;s arrangement.</td>
+<td>For §12</td>
+</tr>
+<tr>
+<td><strong>C10-8</strong></td>
+<td><strong>§9 correction</strong>: &quot;OpenCode&quot; = a model provider (zen/go), not the coding agent. Must propagate.</td>
+<td>For §12</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="12-batch-level-value-questions-q1-user-q2-vision">§12 — Batch-level value questions (Q1 user / Q2 vision)<a href="#batch-10/12-batch-level-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a user use case?</strong>
+A user gets a machine that <em>programs against its own tools</em> (one turn instead of five), whose oversized outputs are <strong>recoverable from disk rather than lost or re-run</strong>, whose secret environment is scrubbed by a three-stage gate before any script runs, who can install a capability a stranger wrote and have it keep working across upgrades, and whose new capabilities arrive <strong>automatically</strong> when a formerly-core feature migrates to a plugin. The user-visible promise: <strong>&quot;my extensions do not break, and my secrets do not leak into code.&quot;</strong></p>
+<p><strong>Q2 — how does this serve the vision of an AI-first business/resource planner?</strong>
+Four mechanisms look directly reusable, ranked:</p>
+<ol>
+<li><strong>The plugin compat contract + governance policy</strong> (§4, §5) — a written, dated, <em>shrinking-core</em> constitution with behavioural compatibility and an automatic migration path. This is the single most valuable item for a platform that expects an ecosystem, because it answers &quot;how do we add capability without forking?&quot; and &quot;how do we later remove it safely?&quot;.</li>
+<li><strong>The middleware + observer seams</strong> (§6) — with the ordering fact that arg-rewriting precedes the approval gate. Tenancy enforcement, spend caps and audit trails can attach here without patching the engine.</li>
+<li><strong>PTC&#39;s governance of expansion</strong> (§2) — new capability by <em>composition inside the session&#39;s existing rights</em>, plus recover-don&#39;t-rerun output handling.</li>
+<li><strong>The three-stage env scrub</strong> (§2) — a directly portable, well-reasoned rule set for any worker that runs model-written code near credentials.</li>
+</ol>
+<p><strong>Cross-reference:</strong> mercato-vs-Hermes placement is deferred to <code>12-SYNTHESIS.md</code> per the owner&#39;s instruction.</p>
+<hr>
+<p><strong>Batch 10 of 12 complete. Divergences found this batch: 0</strong>, and <strong>one premise correction under rule 13</strong>: &quot;OpenCode&quot; in this tree is a <strong>model provider</strong> (OpenCode Zen / OpenCode Go relay), referenced 1,008 times in code — the coding agent named OpenCode is at most an ACP <em>client</em> of Hermes, never spawned. <strong>Most transferable mechanisms:</strong> the versionless behavioural plugin contract with its 2-release deprecation window (§4), the dated shrinking-core governance policy with automatic migration (§5), and the middleware/hook seams with <code>middleware_trace</code> (§6).
+<strong>Next: <code>11-channels-voice-and-media.md</code></strong> — messaging platforms, voice mode, TTS, vision, image generation, browser — including the carried <code>egress/iron-proxy.md</code> read (C8-6).</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="09-models-providers.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Models &amp; Providers</span>
+                </a>
+              
+
+              <a href="../index.html#batch-10" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="11-channels-iron-proxy.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Channels &amp; iron-proxy</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words" class="toc-link">§0 — Plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-verified" class="toc-link">§1 — What was read and verified</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-code-execution-programmatic-tool-calling-ptc" class="toc-link">§2 — Code execution: Programmatic Tool Calling (PTC)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-plugin-surface-17-kinds-one-contract" class="toc-link">§3 — The plugin surface: 17 kinds, one contract</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-compatibility-contract-how-a-plugin-survives-an-upgrade" class="toc-link">§4 — The compatibility contract (how a plugin survives an upgrade)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-plugin-governance-policy-a-dated-written-constitution" class="toc-link">§5 — The plugin governance policy (a dated, written constitution)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-middleware-change-the-request-and-observer-hooks-watch-it" class="toc-link">§6 — Middleware (change the request) and observer hooks (watch it)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-hermes-as-a-server-the-acp-adapter" class="toc-link">§7 — Hermes as a server: the ACP adapter</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-adding-a-built-in-tool-the-in-tree-path-distinct-from-plugins" class="toc-link">§8 — Adding a *built-in* tool (the in-tree path, distinct from plugins)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-premise-correction-rule-13-opencode-is-a-provider-not-the-coding-agent" class="toc-link">§9 — PREMISE CORRECTION (rule 13): &quot;OpenCode&quot; is a provider, not the coding agent</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-boundaries-and-corrections" class="toc-link">§10 — Divergences, boundaries and corrections</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-items" class="toc-link">§11 — Carried items</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-batch-level-value-questions-q1-user-q2-vision" class="toc-link">§12 — Batch-level value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

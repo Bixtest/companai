@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 08 — Security, approvals, secrets and sandboxing — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-08" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 08</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Security &amp; Sandboxing</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/08-security-approvals-secrets-and-sandboxing.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,314</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">17 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">364</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 08 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 08 VISUAL GUIDE</div>
+    <h4>Hermes 4-Tier Security &amp; Sandboxing Defense Matrix</h4>
+    <p>From the non-overridable Hardline Floor down to Docker containerization and secret scrubbing</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 230" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Tier 1 -->
+      <g transform="translate(20, 30)">
+        <rect width="200" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#dc2626" stroke-width="2"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#dc2626">TIER 1: HARDLINE FLOOR</text>
+        <text x="12" y="46" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Always-On Blacklist</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• No override possible</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• HERMES_WRITE_SAFE_ROOT</text>
+        <text x="12" y="102" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Blocks rm -rf, raw dd</text>
+        <rect x="12" y="125" width="176" height="22" rx="4" fill="#dc2626" fill-opacity="0.12"/>
+        <text x="18" y="140" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" fill="#b91c1c">Zero bypass permitted</text>
+      </g>
+
+      <!-- Tier 2 -->
+      <g transform="translate(245, 30)">
+        <rect width="205" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#b45309">TIER 2: APPROVAL MODES</text>
+        <text x="12" y="46" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Context-Aware Gate</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 3 modes: Ask, Auto, YOLO</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• YOLO switch shows in UI</text>
+        <text x="12" y="102" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Approvals history logged</text>
+        <rect x="12" y="125" width="181" height="22" rx="4" fill="#f59e0b" fill-opacity="0.12"/>
+        <text x="18" y="140" font-family="system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#b45309">Interactive operator check</text>
+      </g>
+
+      <!-- Tier 3 -->
+      <g transform="translate(475, 30)">
+        <rect width="205" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">TIER 3: DOCKER SANDBOX</text>
+        <text x="12" y="46" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Container Isolation</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">• --pids-limit 2048 (in code)</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Docs said 256 (hit limit!)</text>
+        <text x="12" y="102" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Drop net &amp; linux caps</text>
+        <rect x="12" y="125" width="181" height="22" rx="4" fill="#3b82f6" fill-opacity="0.12"/>
+        <text x="18" y="140" font-family="system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#1d4ed8">Isolated command exec</text>
+      </g>
+
+      <!-- Tier 4 -->
+      <g transform="translate(705, 30)">
+        <rect width="195" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#047857">TIER 4: SECRETS SCRUB</text>
+        <text x="12" y="46" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Secrets Sanitizer</text>
+        <text x="12" y="66" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Scrubs child env vars</text>
+        <text x="12" y="84" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Subagents receive no keys</text>
+        <text x="12" y="102" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• SSRF &amp; egress checks</text>
+        <rect x="12" y="125" width="171" height="22" rx="4" fill="#10b981" fill-opacity="0.12"/>
+        <text x="18" y="140" font-family="system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#047857">Credentials shielded</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-08-security-approvals-secrets-and-sandboxing">Batch 08 — Security, approvals, secrets and sandboxing<a href="#batch-08/batch-08-security-approvals-secrets-and-sandboxing" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-in-plain-words">0. What this batch is (in plain words)<a href="#batch-08/0-what-this-batch-is-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything so far assumed the AI is <em>ours</em>. This batch covers what happens when it isn&#39;t — or when it
+simply makes a mistake. Four layers, from the smallest switch to the strongest wall:</p>
+<ol>
+<li><strong>Approvals</strong> — a dangerous shell command must be approved (or is refused).</li>
+<li><strong>A hardline floor</strong> — a short list of catastrophic commands is refused <em>no matter what</em>, even with
+every switch turned off.</li>
+<li><strong>Write safety</strong> — <code>write_file</code> / <code>patch</code> refuse protected paths and can be confined to a sandbox root.</li>
+<li><strong>Isolation</strong> — running the agent&#39;s commands in a container instead of on your machine.</li>
+<li><strong>Secrets</strong> — where credentials live, how they reach a child process, and how they are kept out of one.</li>
+</ol>
+<p>Plus the gateway&#39;s <strong>user authorization</strong> (who may talk to the bot at all).</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-08/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/security.md</code></td>
+<td align="right">62,501</td>
+</tr>
+<tr>
+<td><code>user-guide/egress/iron-proxy.md</code></td>
+<td align="right">39,995</td>
+</tr>
+<tr>
+<td><code>user-guide/egress/network-isolation.md</code></td>
+<td align="right">7,601</td>
+</tr>
+<tr>
+<td><code>user-guide/secrets/index.md</code></td>
+<td align="right">5,045</td>
+</tr>
+<tr>
+<td><code>user-guide/secrets/bitwarden.md</code></td>
+<td align="right">10,243</td>
+</tr>
+<tr>
+<td><code>user-guide/secrets/onepassword.md</code></td>
+<td align="right">11,219</td>
+</tr>
+<tr>
+<td><code>user-guide/secrets/command.md</code></td>
+<td align="right">3,283</td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tools/approval.py</code></td>
+<td>the approval tool (1,000+ lines)</td>
+</tr>
+<tr>
+<td><code>tools/approval_detection.py</code></td>
+<td><strong><code>HARDLINE_PATTERNS</code></strong> (line 107) — the always-on floor</td>
+</tr>
+<tr>
+<td><code>hermes_cli/approval_mode.py</code></td>
+<td><code>VALID_APPROVAL_MODES = (&quot;manual&quot;, &quot;smart&quot;, &quot;off&quot;)</code> (line 16)</td>
+</tr>
+<tr>
+<td><code>hermes_cli/config_defaults.py</code></td>
+<td>the <code>approvals</code> block</td>
+</tr>
+<tr>
+<td><code>tools/environments/docker.py</code></td>
+<td><code>_BASE_SECURITY_ARGS</code> (307), <code>_NO_NEW_PRIVILEGES_ARGS</code>, <code>_DEFAULT_PIDS_LIMIT = &quot;2048&quot;</code> (322)</td>
+</tr>
+<tr>
+<td><code>tools/mcp_tool_config.py</code></td>
+<td><code>_SAFE_ENV_KEYS</code> (147)</td>
+</tr>
+<tr>
+<td><code>tools/code_execution_env.py</code></td>
+<td><code>_SAFE_ENV_PREFIXES</code> (25)</td>
+</tr>
+<tr>
+<td><code>tools/file_tools_write_guards.py</code></td>
+<td>protected-instruction basenames (189)</td>
+</tr>
+<tr>
+<td><code>tools/url_safety.py</code></td>
+<td>SSRF blocklist (99–120)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-approvals-the-everyday-gate">2. Approvals — the everyday gate<a href="#batch-08/2-approvals-the-everyday-gate" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-three-modes">2.1 Three modes<a href="#batch-08/2-1-three-modes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>approvals.mode</code> is one of <strong><code>smart</code></strong> (default) · <strong><code>manual</code></strong> · <strong><code>off</code></strong> — <strong>VERIFIED</strong> exactly:
+<code>hermes_cli/approval_mode.py:16</code> <code>VALID_APPROVAL_MODES = (&quot;manual&quot;, &quot;smart&quot;, &quot;off&quot;)</code>.</p>
+<ul>
+<li><strong>smart</strong> — an auxiliary LLM assesses risk: low-risk commands auto-approved <em>for that command only</em>,
+genuinely dangerous ones auto-denied, uncertain ones escalated to a person.</li>
+<li><strong>manual</strong> — always ask.</li>
+<li><strong>off</strong> — no checks at all (equivalent to <code>--yolo</code>).</li>
+</ul>
+<p>The mode is <strong>profile-scoped configuration, not conversation state</strong> — a nice detail from the code&#39;s own
+docstring (<code>approval_mode.py:3–6</code>): changing it takes effect immediately because <code>approval.py</code> reloads
+config on every check, and it <strong>must not</strong> rebuild the live agent or mutate its system prompt — which
+would break the prompt cache.</p>
+<h3 id="2-2-the-mode-is-context-aware-this-is-the-design-point">2.2 The mode is context-aware — this is the design point<a href="#batch-08/2-2-the-mode-is-context-aware-this-is-the-design-point" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A dangerous command in a <em>waiting</em> conversation and the same command in an <em>unattended</em> run are different
+problems. Hermes has <strong>four</strong> separate answers, all defaulting to <code>deny</code>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Default</th>
+<th>Context</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mode</code></td>
+<td><code>smart</code></td>
+<td>interactive sessions</td>
+</tr>
+<tr>
+<td><code>cron_mode</code></td>
+<td><code>deny</code></td>
+<td>scheduled jobs (nobody is watching)</td>
+</tr>
+<tr>
+<td><code>single_query_mode</code></td>
+<td><code>deny</code></td>
+<td><code>hermes chat -q</code> one-shot runs</td>
+</tr>
+<tr>
+<td><code>unattended_mode</code></td>
+<td><code>deny</code></td>
+<td>webhook / msgraph_webhook / api_server</td>
+</tr>
+</tbody></table></div>
+<p><strong>VERIFIED</strong> (<code>config_defaults.py</code> <code>approvals</code> block): all three non-interactive keys are <code>&quot;deny&quot;</code>.
+<strong>Why <code>deny</code> and not &quot;approve&quot;:</strong> the code comment says it plainly — an unattended prompt has <em>&quot;nobody to
+answer&quot;</em>, so it just blocks for the full timeout and the agent is forced to route around the block (often
+via <code>execute_code</code>). <code>deny</code> blocks <strong>instantly</strong> and the agent must find another way. There is one
+documented exception: an <code>api_server</code> client that <em>can</em> answer the card still gets asked.</p>
+<p>The <strong>timeout is 300 s</strong>, and the doc explains why it is not smaller: <em>&quot;60s proved too tight on
+Telegram/Discord (the prompt expired before the user reached their phone).&quot;</em> <strong>VERIFIED</strong>: <code>timeout: 300</code>.</p>
+<h3 id="2-3-yolo-a-switch-that-shows-itself">2.3 YOLO — a switch that shows itself<a href="#batch-08/2-3-yolo-a-switch-that-shows-itself" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>/yolo</code> (or <code>--yolo</code>, or <code>HERMES_YOLO_MODE=1</code>) bypasses all approval prompts for <strong>the current session</strong>.
+It is saved with the session (so it survives a restart), and <code>/new</code> / <code>/resume</code> turn approvals back on.
+Two visual reminders are permanent while it is on: a red banner at session start and a <code>⚠ YOLO</code> status-bar
+fragment — <strong>the switch is designed to be hard to forget</strong>.</p>
+<h3 id="2-4-mining-your-own-approval-history">2.4 Mining your own approval history<a href="#batch-08/2-4-mining-your-own-approval-history" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>hermes approvals suggest</code> reads the approval history and suggests allowlist rules (<code>security.md:308</code>).
+A small but telling feature: the system helps you <strong>stop being asked</strong> for the things you always allow.</p>
+<hr>
+<h2 id="3-the-hardline-floor-always-on-no-override">3. The hardline floor — always on, no override<a href="#batch-08/3-the-hardline-floor-always-on-no-override" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A short list of commands is refused <strong>regardless of</strong> <code>--yolo</code>, <code>approvals.mode: off</code>, cron&#39;s <code>approve</code>
+mode, or clicking &quot;allow always.&quot; <strong>VERIFIED</strong>: <code>tools/approval_detection.py:107</code> <code>HARDLINE_PATTERNS</code>.
+The floor trips <strong>before</strong> the approval layer sees the command.</p>
+<p>The doc&#39;s table and the code agree on the <em>substance</em>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc says</th>
+<th>Code (<code>HARDLINE_PATTERNS</code>)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rm -rf /</code> and variants</td>
+<td><code>&quot;recursive delete of root filesystem&quot;</code> (+ system dirs, + home dir)</td>
+</tr>
+<tr>
+<td>bash fork bomb <code>:(){ :|:&amp; };:</code></td>
+<td><code>&quot;fork bomb&quot;</code></td>
+</tr>
+<tr>
+<td><code>mkfs.*</code></td>
+<td><code>&quot;format filesystem (mkfs)&quot;</code></td>
+</tr>
+<tr>
+<td><code>dd if=/dev/zero of=/dev/sd*</code></td>
+<td><code>&quot;dd to raw block device&quot;</code></td>
+</tr>
+<tr>
+<td>pipe untrusted URL to <code>sh</code></td>
+<td>(covered by the general detection layer, not this list)</td>
+</tr>
+</tbody></table></div>
+<p>The code&#39;s floor is actually <strong>wider</strong> than the doc&#39;s table: it also includes <code>kill -1</code>, <code>shutdown</code>/
+<code>reboot</code>/<code>halt</code>/<code>poweroff</code>, <code>init 0|6</code>, <code>systemctl poweroff|reboot|halt|kexec</code>, <code>telinit 0|6</code>, and a
+<code>&gt; /dev/sd*</code> redirect rule.</p>
+<p><strong>What the code shows that the doc only implies:</strong> this is not a naive regex list. It is <strong>paranoid about
+quoting</strong>, and the comments say why. Every command-name rule is <code>_CMDPOS</code>-anchored so that <em><code>git commit -m &quot;…rm -rf /…&quot;</code></em> — the string as <strong>data</strong> — does <strong>not</strong> trip the floor; but a command handed to another
+shell to execute (<code>sh -c</code> / <code>bash -c</code> / <code>eval</code>) <strong>is</strong> scanned raw, <em>&quot;quoting is not a bypass.&quot;</em> The two
+positionless rules (the <code>&gt;</code> redirect and the fork bomb) are matched against a <strong>quote-masked</strong> variant.
+The floor also <strong>fails closed</strong> on a command whose shell quoting can&#39;t be parsed: the error is
+<code>malformed executable payload</code>.</p>
+<p><strong>Why this is worth naming:</strong> the floor is the floor <em>below</em> the off-switch. It is the one thing that
+cannot be turned off from the chat, by design — and it is engineered against the obvious evasions rather
+than declared.</p>
+<hr>
+<h2 id="4-write-safety-no-prompt-just-a-refusal">4. Write safety — no prompt, just a refusal<a href="#batch-08/4-write-safety-no-prompt-just-a-refusal" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Before <code>write_file</code> / <code>patch</code> touch disk, the path is checked against a denylist and an optional sandbox
+root. A blocked write returns an <strong>error immediately — there is no approval prompt and no chat override</strong>
+(<code>security.md:352</code>).</p>
+<p><strong>Always-blocked categories</strong> (even with no sandbox set): OS credential stores (<code>~/.ssh/</code>, <code>~/.aws/</code>,
+<code>~/.kube/</code>, <code>/etc/sudoers</code>, <code>~/.netrc</code>); Hermes secret stores (<code>.env</code>, OAuth token files, the Bitwarden
+cache, <code>vault/</code>, <code>browser-profile/</code>, <code>mcp-tokens/</code>, <code>pairing/</code>); and <strong>Windows NT/device-namespace paths</strong>
+(<code>\??\…</code>, <code>\\.\…</code>, <code>\\?\UNC\…</code>).</p>
+<p><strong>The Windows row is a real security finding, and the doc explains the mechanism:</strong> merely <em>resolving</em> a
+path like <code>\??\UNC\host\share</code> triggers outbound SMB authentication and can leak the user&#39;s <strong>NTLM
+hash</strong> — so those prefixes are rejected for <strong>reads too</strong>, on every platform, <em>before</em> anything resolves
+them. Ordinary <code>\\?\C:\…</code> and plain <code>\\server\share</code> are unaffected. <strong>VERIFIED</strong>: the guards file exists
+and holds the protected-basename set (<code>file_tools_write_guards.py:189</code>).</p>
+<h3 id="4-1-the-honest-limit-stated-by-the-docs">4.1 The honest limit, stated by the docs<a href="#batch-08/4-1-the-honest-limit-stated-by-the-docs" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<blockquote>
+<p><em>&quot;The <code>terminal</code> tool runs as the same OS user and can still <code>cat</code> or overwrite denied paths via shell
+commands. The denylist reduces accidental damage and gives models a clear stop signal; it does not
+sandbox a hostile or compromised agent.&quot;</em> — <code>security.md:392</code></p>
+</blockquote>
+<p>This is exactly the right framing: <strong>write guards are defense-in-depth, not a boundary.</strong> A real boundary
+is §5 (a container) or OS permissions.</p>
+<h3 id="4-2-hermes-write-safe-root">4.2 `HERMES_WRITE_SAFE_ROOT`<a href="#batch-08/4-2-hermes-write-safe-root" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>When set, writes may only target paths inside the listed prefix(es); anything outside is <strong>hard-blocked</strong>
+(not routed through approval). Set automatically in the official Docker image
+(<code>HERMES_WRITE_SAFE_ROOT=/opt/data</code>). The docs give a genuinely useful operational warning: <em>&quot;Do not add to
+<code>~/.hermes/.env</code> casually&quot;</em> — pin it to a project directory and the agent can no longer write
+<code>~/.hermes/cron/jobs.json</code> or profile skills.</p>
+<h3 id="4-3-one-sensible-exception">4.3 One sensible exception<a href="#batch-08/4-3-one-sensible-exception" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>~/.ssh/config</code> is <strong>approval-gated, not hard-blocked</strong> — it holds no key material and editing it (host
+aliases, <code>ProxyJump</code>) is routine; but since it can carry <code>ProxyCommand</code> / <code>Match exec</code> directives that
+<em>run</em> commands, the write is never silent, and non-interactive callers (background jobs, ACP file bridge)
+<strong>fail closed</strong>. Private keys and <code>authorized_keys</code> stay hard-blocked. That is a well-drawn line.</p>
+<hr>
+<h2 id="5-isolation-the-container">5. Isolation — the container<a href="#batch-08/5-isolation-the-container" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The <code>docker</code> terminal backend hardens every container. The doc quotes <code>_BASE_SECURITY_ARGS</code>, and here the
+code and the doc <strong>disagree in three ways</strong> (recorded in §7) — but the <em>substance</em> is stronger than the
+doc&#39;s abbreviated list:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--cap-drop ALL</code></td>
+<td>drop every Linux capability</td>
+</tr>
+<tr>
+<td><code>--cap-add DAC_OVERRIDE</code> / <code>CHOWN</code> / <code>FOWNER</code></td>
+<td>the minimum package managers and bind-mounts need</td>
+</tr>
+<tr>
+<td><code>--security-opt no-new-privileges</code></td>
+<td>block privilege escalation (in a <strong>separate</strong> list)</td>
+</tr>
+<tr>
+<td><code>--tmpfs /tmp:rw,nosuid,size=512m</code></td>
+<td>a size-limited <code>/tmp</code></td>
+</tr>
+<tr>
+<td><code>--tmpfs /var/tmp:rw,noexec,nosuid,size=256m</code></td>
+<td>no-exec <code>/var/tmp</code></td>
+</tr>
+<tr>
+<td><code>--pids-limit</code></td>
+<td>a fork-bomb guard, <strong>default 2048</strong> (see §7)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The most instructive comment in this whole study</strong> is at <code>docker.py:_DEFAULT_PIDS_LIMIT</code>. The old limit
+was <strong>256</strong>, and <em>&quot;measured on <code>hermes-sandbox:desktop</code>, the idle container is 2 tasks, Xvnc + Xfce + dbus
+44, one Chromium with one tab 212, plus the agent&#39;s own agent-browser Chromium with two tabs 488. The old
+256 was hit in normal use and every further <code>docker exec</code> … died with runc&#39;s &#39;procReady not received&#39;.&quot;</em>
+The new <strong>2048</strong> is chosen from a measurement, and is still three orders of magnitude under <code>pid_max</code>.
+<strong>This is the study&#39;s method vindicated in one comment:</strong> a plausible-looking bound (256) was wrong in
+practice, and the code carries the measurement that corrects it.</p>
+<p><code>SETUID</code>/<code>SETGID</code> are added <strong>conditionally</strong> (only when the container starts as root and an init must drop
+privileges); <code>/run</code> is mounted per-image (hardened noexec by default, exec only for s6-overlay images);
+and the <code>no-new-privileges</code> flag is <strong>dropped</strong> when snap-packaged Docker&#39;s AppArmor profile would turn it
+into <code>exec: operation not permitted</code> (#9730). Every one of those is a real-world exception carried in the
+code with its reason.</p>
+<p><strong>Resource limits</strong> (<code>container_cpu</code> 1, <code>container_memory</code> 5120 MB, <code>container_disk</code> 51200 MB,
+<code>container_persistent</code> true) and the backend comparison table (local / ssh / docker / singularity / modal /
+daytona / vercel_sandbox) are in the doc. The comparison&#39;s key column: for the <strong>local</strong> and <strong>ssh</strong>
+backends the dangerous-command check runs; for every <strong>container/cloud</strong> backend it is <strong>skipped</strong> because
+<em>the container is the boundary</em>.</p>
+<hr>
+<h2 id="6-secrets-and-credentials">6. Secrets and credentials<a href="#batch-08/6-secrets-and-credentials" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-external-secret-managers">6.1 External secret managers<a href="#batch-08/6-1-external-secret-managers" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Hermes can pull keys from an external manager at startup instead of storing them in <code>.env</code> — <strong>Bitwarden</strong>
+(<code>bws</code>), <strong>1Password</strong> (<code>op://</code>), and a <strong>Command helper</strong> for any CLI vault (<code>pass</code>, <code>keepassxc-cli</code>, …)
+(<code>secrets/index.md</code>). The <strong>bootstrap token</strong> stays in <code>.env</code>; every other key can rotate centrally.</p>
+<p>Multiple sources compose with a <strong>three-rule precedence ladder</strong> the doc states precisely: (1) your
+<code>.env</code>/shell wins <strong>unless</strong> a source sets <code>override_existing: true</code>; (2) <strong>mapped</strong> sources outrank
+<strong>bulk</strong> sources; (3) first source wins, later claims skipped <strong>with a startup warning, never silently</strong>.
+Two safety properties are named: <code>override_existing</code> never lets one source clobber a value another already
+claimed, and <strong>no source can ever overwrite another source&#39;s bootstrap token</strong>.</p>
+<p>Every injected credential is <strong>labelled with its origin</strong> (<code>(from Bitwarden)</code>), and two profile knobs make
+a shared vault safe across profiles: <code>secrets.preserve_existing</code> (named vars whose local value always
+wins) and <strong>profile aliasing</strong> (a vault secret named <code>FOO_&lt;PROFILE&gt;</code> also hydrates the canonical <code>FOO</code> —
+so a shared project can hold <code>TELEGRAM_BOT_TOKEN_MILLA</code> and the <code>milla</code> profile&#39;s adapter, which reads the
+fixed name <code>TELEGRAM_BOT_TOKEN</code>, gets the right value automatically).</p>
+<h3 id="6-2-keeping-credentials-out-of-children-the-sanitizer">6.2 Keeping credentials out of children — the sanitizer<a href="#batch-08/6-2-keeping-credentials-out-of-children-the-sanitizer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the security spine, and it appears in <strong>four</strong> places, consistently:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Child</th>
+<th>Mechanism</th>
+<th>Verified</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MCP stdio subprocesses</td>
+<td>only <code>PATH, HOME, USER, LANG, LC_ALL, TERM, SHELL, TMPDIR</code> (+ <code>XDG_*</code>) pass through; everything else <strong>stripped</strong></td>
+<td><code>tools/mcp_tool_config.py:147</code> <code>_SAFE_ENV_KEYS = frozenset({&quot;PATH&quot;,&quot;HOME&quot;,&quot;USER&quot;,&quot;LANG&quot;,&quot;LC_ALL&quot;,&quot;TERM&quot;,&quot;SHELL&quot;,&quot;TMPDIR&quot;})</code></td>
+</tr>
+<tr>
+<td><code>execute_code</code> / <code>terminal</code></td>
+<td>same idea by <strong>prefix</strong> (<code>_SAFE_ENV_PREFIXES</code>)</td>
+<td><code>tools/code_execution_env.py:25</code></td>
+</tr>
+<tr>
+<td>cron <code>no_agent</code> scripts</td>
+<td>environment sanitized (<code>_sanitize_subprocess_env</code>)</td>
+<td>(batch 06)</td>
+</tr>
+<tr>
+<td>subagents</td>
+<td>inherit the parent&#39;s <strong>credential pool</strong> but not un-declared env</td>
+<td>(batch 06)</td>
+</tr>
+</tbody></table></div>
+<p><strong>VERIFIED — a genuine positive:</strong> the MCP safe-env set in the doc (<code>PATH, HOME, USER, LANG, LC_ALL, TERM, SHELL, TMPDIR</code> <strong>plus any <code>XDG_*</code></strong>) matches <code>_SAFE_ENV_KEYS</code> <strong>exactly</strong>, and the code adds a
+Windows launcher set (<code>APPDATA</code>, <code>SYSTEMROOT</code>, …) so Docker Desktop-style MCP plugins still discover their
+tools — a documented-by-code exception the doc doesn&#39;t mention but which is correct.</p>
+<p><strong>A declared variable is forwarded with the <em>owning profile&#39;s</em> value</strong> — from that profile&#39;s <code>.env</code> or its
+secret sources — even when the profile is served by a multi-profile gateway and <em>&quot;its secrets never entered
+the process environment&quot;</em>. A profile&#39;s declared value <strong>never reaches another profile&#39;s children</strong>, and
+the launch profile&#39;s <code>.env</code> credentials are dropped from children running for a served profile. <strong>Provider
+credentials cannot be declared at all</strong> (the sanitizer rejects <code>OPENAI_API_KEY</code> etc.).</p>
+<h3 id="6-3-mcp-credential-hygiene">6.3 MCP credential hygiene<a href="#batch-08/6-3-mcp-credential-hygiene" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Error messages from MCP tools are <strong>redacted</strong> before reaching the LLM — GitHub PATs (<code>ghp_…</code>),
+OpenAI-style (<code>sk-…</code>), Bearer tokens, and <code>token=</code> / <code>key=</code> / <code>API_KEY=</code> / <code>password=</code> / <code>secret=</code>
+parameters are replaced with <code>[REDACTED]</code> (<code>security.md:723</code>).</p>
+<h3 id="6-4-egress-and-ssrf">6.4 Egress and SSRF<a href="#batch-08/6-4-egress-and-ssrf" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Website blocklist</strong> — <code>security.website_blocklist</code> restricts which domains the web/browser tools may
+reach, enforced across <code>web_search</code>, <code>web_extract</code>, <code>browser_navigate</code> and all URL-capable tools
+(<code>security.md:732</code>).</li>
+<li><strong>SSRF protection</strong> — all URL-capable tools validate before fetching, blocking private nets (RFC 1918),
+loopback, link-local (<code>169.254.0.0/16</code>), <strong>CGNAT/RFC 6598</strong> (<code>100.64.0.0/10</code> — Tailscale/WireGuard),
+and cloud metadata hostnames. <strong>VERIFIED</strong> (<code>tools/url_safety.py</code>): <code>_ALWAYS_BLOCKED_NETWORKS</code> includes
+<code>169.254.0.0/16</code> and the IPv6-mapped form, and the code names the exact metadata endpoints —
+<code>169.254.169.254</code> (AWS/GCP/Azure/DO/Oracle), <code>169.254.170.2</code> (ECS task IAM creds), <code>169.254.169.253</code>
+(Azure IMDS). The doc&#39;s SSRF list matches the code.</li>
+<li><strong><code>iron-proxy</code> / network-isolation</strong> (egress docs, ~48 KB combined) — a dedicated egress-control layer.
+Too large to treat fully here; carried as C8-6.</li>
+</ul>
+<h3 id="6-5-gateway-user-authorization">6.5 Gateway user authorization<a href="#batch-08/6-5-gateway-user-authorization" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Who may talk to the bot is checked in a fixed order (<code>security.md:412</code>):
+<strong>per-platform allow-all → DM pairing approved list → platform allowlist → global allowlist → global
+allow-all.</strong> The <strong>DM pairing</strong> system issues a code, an operator approves it, and access can be listed /
+approved / revoked / cleared. This is the same &quot;verified operator vs everyone else&quot; idea seen in batch 07&#39;s
+session attribution.</p>
+<hr>
+<h2 id="7-divergence-and-boundary-notes">7. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-08/7-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>DIVERGENCE 1 (docker flags — the doc quotes the wrong list).</strong> <code>security.md:538</code> quotes
+<code>_BASE_SECURITY_ARGS</code> as containing <code>--security-opt no-new-privileges</code> and <code>--pids-limit 256</code>. In
+<code>tools/environments/docker.py</code>:<ul>
+<li><code>no-new-privileges</code> is in a <strong>separate</strong> list <code>_NO_NEW_PRIVILEGES_ARGS</code>, and is <strong>conditionally
+dropped</strong> for snap-packaged Docker (<code>snap_compat</code>).</li>
+<li><code>--pids-limit</code> is <strong>not in the base list at all</strong> — it lives in <code>resource_args</code>, and
+<code>_DEFAULT_PIDS_LIMIT = &quot;2048&quot;</code>, <strong>not 256</strong>. The code&#39;s own comment records that <strong>256 was hit in
+normal use</strong> (a single Chromium with two tabs measured 488 tasks) and killed every further
+<code>docker exec</code>.
+So the doc&#39;s quote is a <strong>stale snapshot of an older list</strong>, and its <code>256</code> is a value the code
+<strong>deliberately abandoned after measurement</strong>. The doc&#39;s <em>intent</em> (capabilities dropped, escalation
+blocked, tmpfs sized) is correct; its <em>quoted list and number</em> are not.</li>
+</ul>
+</li>
+<li><strong>DIVERGENCE 2 (minor, ordering).</strong> The doc&#39;s approval-key table lists <code>smart_policy</code>,
+<code>denial_breaker_threshold</code>, and <code>destructive_slash_confirm</code> in some places; the config block also carries
+<code>denial_breaker_threshold: 3</code> and <code>mcp_reload_confirm: true</code>, which the doc covers — <strong>no contradiction</strong>,
+just a note that the config block is the fuller list.</li>
+<li><strong>Positive findings:</strong> <code>VALID_APPROVAL_MODES</code> matches the doc&#39;s three modes exactly; the MCP
+<code>_SAFE_ENV_KEYS</code> matches the doc&#39;s safe list exactly; the SSRF blocklist matches the doc&#39;s list exactly;
+all four approval-mode defaults (<code>smart</code>/<code>deny</code>/<code>deny</code>/<code>deny</code>) match the doc.</li>
+<li><strong>The doc&#39;s own honest boundaries (three, all worth repeating):</strong> write guards are <em>&quot;defense-in-depth,
+not a hard boundary&quot;</em> (the <code>terminal</code> tool can still <code>cat</code> a denied path); <code>approvals.deny</code> is <em>&quot;a
+shell-command policy, not a complete shell interpreter or an OS capability sandbox&quot;</em> — <em>&quot;do not use a
+basename deny rule as a guarantee that a capability cannot be reached by other means&quot;</em>; and the
+supervised-gateway lifecycle guard is <em>&quot;non-overridable&quot;</em> — user approval, YOLO and <code>force=True</code> do not
+bypass it.</li>
+</ul>
+<hr>
+<h2 id="8-items-carried-forward">8. Items carried forward<a href="#batch-08/8-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C8-1</td>
+<td><strong>Four context-aware approval modes</strong>, all defaulting to <code>deny</code> (cron / single-query / unattended) — a direct model for the platform&#39;s own agent-approval policy</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C8-2</td>
+<td>The <strong>hardline floor below the off-switch</strong> (no override, quoting-aware, fails closed) — the platform&#39;s own always-on floor to define</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C8-3</td>
+<td><strong>Per-profile credential scoping</strong> — a declared var resolves to the owning profile and never crosses — the exact pattern the platform&#39;s per-company isolation needs</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C8-4</td>
+<td><strong>Env sanitization by allowlist, in four places</strong> (MCP, code exec, cron scripts, subagents) — copy this uniformly</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C8-5</td>
+<td><strong>Write-vs-read asymmetry</strong>: credential stores read-denied AND write-denied; project <code>.env</code> read-denied but writable — a useful, subtle policy shape</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C8-6</td>
+<td><strong>Egress control (<code>iron-proxy</code>, network isolation)</strong> — read in full; a whole subsystem this batch only sampled</td>
+<td>batch 11 / synthesis</td>
+</tr>
+<tr>
+<td>C8-7</td>
+<td>The <strong>measured pids limit</strong> story (256 → 2048, with the Chromium task count in the comment) is the study&#39;s method in miniature — a caution against plausible-looking bounds</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C8-8</td>
+<td><strong>External secret managers with a labelled precedence ladder</strong> — the platform&#39;s credential story should mirror the &quot;origin label + first-wins + warning on conflict&quot; design</td>
+<td>batch 09</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-the-two-value-questions-answered-at-the-batch-level">9. The two value questions, answered at the batch level<a href="#batch-08/9-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High, and <em>felt</em> rather than configured: a dangerous command stops and asks; a
+catastrophic one is refused whatever you typed; a write into <code>~/.ssh</code> or a <code>.env</code> is refused silently and
+immediately; a command in an unattended cron run is denied by default instead of hanging; a leaked key in
+an MCP error comes back redacted. The user does not have to <em>know</em> any of the mechanism — but every one of
+these is the difference between an assistant you can leave alone and one you cannot. <code>/yolo</code> plus
+<code>approvals.deny</code> (&quot;let it do everything, except these, ever&quot;) is a usable power dial, and
+<code>hermes approvals suggest</code> teaches the system your own habits.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the <strong>safety and trust foundation</strong> of the platform vision, and it is the
+batch most directly reusable by an AI-company OS. Three things map almost one-to-one: (1) <strong>four
+context-aware approval modes</strong> with <code>deny</code> as the unattended default are exactly the policy an autonomous
+workforce needs — an agent running a scheduled job or a webhook must fail closed, not wait forever;
+(2) <strong>the hardline floor</strong> (a small, fixed, non-overridable set of catastrophes, engineered against quoting
+evasions and failing closed on unparseable input) is the pattern for &quot;some things are never allowed,
+regardless of who asks&quot;; (3) <strong>per-profile credential scoping with origin-labelled sources</strong> is the
+mechanism by which many companies can share infrastructure without sharing secrets — the same isolation
+question the platform answers with per-company keys. The docs&#39; insistence on naming what each layer is
+<strong>not</strong> (write guards are not a boundary; deny rules are not a sandbox) is itself the design principle to
+carry: <em>state the threat model, then let the user choose the wall.</em></p>
+<p><strong>Learning lens (explicit).</strong> Batch 06 = execution; batch 07 = the record; <strong>batch 08 = the brake.</strong> Where
+the earlier batches asked what the AI can <em>do</em>, this one asks what it may <em>never</em> do — and how the system
+proves it, rather than promising it.</p>
+<hr>
+<p><em>Batch 08 of 12 complete. Divergences found this batch: 2 (the docker <code>--pids-limit 256</code> /
+<code>no-new-privileges</code> quote is stale — code uses a separate list and a measured 2048). Next:
+<code>09-models-and-providers.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="07-sessions-dashboard.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Sessions &amp; Dashboard</span>
+                </a>
+              
+
+              <a href="../index.html#batch-08" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="09-models-providers.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Models &amp; Providers</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-in-plain-words" class="toc-link">0. What this batch is (in plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-approvals-the-everyday-gate" class="toc-link">2. Approvals — the everyday gate</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-three-modes" class="toc-link">2.1 Three modes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-mode-is-context-aware-this-is-the-design-point" class="toc-link">2.2 The mode is context-aware — this is the design point</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-yolo-a-switch-that-shows-itself" class="toc-link">2.3 YOLO — a switch that shows itself</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-mining-your-own-approval-history" class="toc-link">2.4 Mining your own approval history</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-hardline-floor-always-on-no-override" class="toc-link">3. The hardline floor — always on, no override</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-write-safety-no-prompt-just-a-refusal" class="toc-link">4. Write safety — no prompt, just a refusal</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-honest-limit-stated-by-the-docs" class="toc-link">4.1 The honest limit, stated by the docs</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-hermes-write-safe-root" class="toc-link">4.2 HERMES_WRITE_SAFE_ROOT</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-one-sensible-exception" class="toc-link">4.3 One sensible exception</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-isolation-the-container" class="toc-link">5. Isolation — the container</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-secrets-and-credentials" class="toc-link">6. Secrets and credentials</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-external-secret-managers" class="toc-link">6.1 External secret managers</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-keeping-credentials-out-of-children-the-sanitizer" class="toc-link">6.2 Keeping credentials out of children — the sanitizer</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-mcp-credential-hygiene" class="toc-link">6.3 MCP credential hygiene</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-4-egress-and-ssrf" class="toc-link">6.4 Egress and SSRF</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-5-gateway-user-authorization" class="toc-link">6.5 Gateway user authorization</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-divergence-and-boundary-notes" class="toc-link">7. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-items-carried-forward" class="toc-link">8. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-two-value-questions-answered-at-the-batch-level" class="toc-link">9. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

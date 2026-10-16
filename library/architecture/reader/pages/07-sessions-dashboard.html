@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — Sessions and the dashboard surface — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Sessions &amp; Dashboard</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-sessions-dashboard-and-settings.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,813</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">14 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">290</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE</div>
+    <h4>24-Platform Unified Session Pipeline &amp; Dashboard</h4>
+    <p>One unified taxonomy across 24 message sources, SQLite storage, and 99 config sections / 816 keys</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- 24 Platforms -->
+      <g transform="translate(30, 30)">
+        <rect width="220" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">INCOMING PLATFORMS</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">~24 Source Platforms</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">CLI, Web, TUI, Telegram,</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Discord, Slack, WhatsApp,</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Signal, Matrix, Email, REST...</text>
+        <rect x="15" y="125" width="190" height="22" rx="4" fill="#3b82f6" fill-opacity="0.12"/>
+        <text x="22" y="140" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#1d4ed8">Normalized Session Model</text>
+      </g>
+
+      <path d="M 250 110 L 300 110" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Session Engine -->
+      <g transform="translate(310, 30)">
+        <rect width="260" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">SESSION LIFECYCLE ENGINE</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">SQLite Durable Store</text>
+        <text x="15" y="68" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Resume, naming &amp; fork lineage</text>
+        <text x="15" y="86" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Automatic retention &amp; prune</text>
+        <text x="15" y="104" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Guards fail closed</text>
+        <rect x="15" y="125" width="230" height="22" rx="4" fill="#10b981" fill-opacity="0.12"/>
+        <text x="22" y="140" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#047857">Repairs ask operator first</text>
+      </g>
+
+      <path d="M 570 110 L 620 110" stroke="#10b981" stroke-width="2" marker-end="url(#arr-green)"/>
+
+      <!-- Dashboard Surface -->
+      <g transform="translate(630, 30)">
+        <rect width="260" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="15" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">ADMIN DASHBOARD</text>
+        <text x="15" y="48" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">Configuration Surface</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#dc2626">Divergence Measured:</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Docs said: "150+ config fields"</text>
+        <text x="15" y="106" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#059669">Code has: 99 sections / 816 keys</text>
+        <rect x="15" y="125" width="230" height="22" rx="4" fill="#8b5cf6" fill-opacity="0.12"/>
+        <text x="22" y="140" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#6d28d9">Full REST management API</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-07-sessions-and-the-dashboard-surface">Batch 07 — Sessions and the dashboard surface<a href="#batch-07/batch-07-sessions-and-the-dashboard-surface" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-in-plain-words">0. What this batch is (in plain words)<a href="#batch-07/0-what-this-batch-is-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 06 covered <strong>what the AI runs over time</strong>. This batch covers <strong>the record of what it did</strong> and
+<strong>the surface a human uses to see and change it</strong> — the durable session store, and the browser dashboard
+that administers the whole installation (config, keys, sessions, cron, skills, MCP, channels).</p>
+<p>It is deliberately <strong>not</strong> a tour of every CLI command (<code>reference/cli-commands.md</code> is 133 KB of flags, a
+reference not a capability). This batch reads the two <em>capabilities</em>: a <strong>session system</strong> and an
+<strong>admin surface</strong>.</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-07/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/sessions.md</code></td>
+<td align="right">(1,237 lines)</td>
+</tr>
+<tr>
+<td><code>user-guide/features/web-dashboard.md</code></td>
+<td align="right">82,422</td>
+</tr>
+<tr>
+<td><code>user-guide/features/extending-the-dashboard.md</code></td>
+<td align="right">41,422</td>
+</tr>
+<tr>
+<td><code>reference/slash-commands.md</code></td>
+<td align="right">48,570</td>
+</tr>
+<tr>
+<td><code>reference/cli-commands.md</code></td>
+<td align="right">133,259 (skimmed — reference)</td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hermes_cli/config_defaults.py</code></td>
+<td><code>DEFAULT_CONFIG</code> at line 33; the <code>sessions</code> block; <strong>counted</strong>: 99 sections / 816 leaf keys</td>
+</tr>
+<tr>
+<td><code>hermes_cli/main_dashboard.py</code></td>
+<td><code>port = 9119</code> (line 57)</td>
+</tr>
+<tr>
+<td><code>hermes_cli/dashboard_procs.py</code></td>
+<td>the headless-serve PID matching (line 776)</td>
+</tr>
+<tr>
+<td><code>tools/session_search_tool.py</code></td>
+<td>the four calling shapes (FTS5)</td>
+</tr>
+<tr>
+<td><code>hermes_cli/dashboard_auth/</code>, <code>plugins/dashboard_auth/</code></td>
+<td>the auth provider implementation</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-sessions-the-durable-record">2. Sessions — the durable record<a href="#batch-07/2-sessions-the-durable-record" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-one-store-every-surface">2.1 One store, every surface<a href="#batch-07/2-1-one-store-every-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every conversation — CLI, TUI, Desktop, Telegram, Discord, Slack, WhatsApp, Signal, Matrix, Teams, cron,
+kanban, ACP — is a <strong>session</strong> in one SQLite database: <code>~/.hermes/state.db</code>, with <strong>FTS5 full-text
+search</strong> (<code>sessions.md:15–27, 1091–1135</code>). The schema is three tables: <code>sessions</code> (metadata, with a
+<strong>unique index on non-NULL titles</strong>), <code>messages</code> (full history), <code>messages_fts</code> (the FTS5 index).</p>
+<p><strong>Why this is the right shape:</strong> there is <strong>one</strong> store, so <code>hermes sessions list</code>, <code>/sessions</code>, the
+dashboard and the agent&#39;s own <code>session_search</code> tool all read the same truth. The doc explicitly warns
+about the common misreading: <code>~/.hermes/sessions/sessions.json</code> is a <strong>legacy gateway-routing mirror</strong>,
+not the session list (<code>sessions.md:1102</code>) — seeing only Telegram entries there does <strong>not</strong> mean CLI
+sessions are missing.</p>
+<h3 id="2-2-sources-24-platforms-one-taxonomy">2.2 Sources — ~24 platforms, one taxonomy<a href="#batch-07/2-2-sources-24-platforms-one-taxonomy" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>sessions.md:111–142</code> enumerates every source tag: <code>cli</code>, <code>oneshot</code>, <code>telegram</code>, <code>discord</code>, <code>slack</code>,
+<code>whatsapp</code>, <code>signal</code>, <code>matrix</code>, <code>mattermost</code>, <code>email</code>, <code>sms</code>, <code>dingtalk</code>, <code>feishu</code>, <code>wecom</code>, <code>weixin</code>,
+<code>bluebubbles</code>, <code>qqbot</code>, <code>homeassistant</code>, <code>webhook</code>, <code>api-server</code>, <code>acp</code>, <code>cron</code>, <code>batch</code>, <code>kanban</code>,
+<code>tool</code>. Two of them are <strong>hidden from pickers by design</strong> (<code>oneshot</code>, <code>kanban</code>, <code>tool</code>) because they are
+<em>machinery, not conversations</em> — the same judgement the config makes with <code>show_subagents: false</code>.</p>
+<h3 id="2-3-resume-naming-and-the-lineage">2.3 Resume, naming and the lineage<a href="#batch-07/2-3-resume-naming-and-the-lineage" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Resume</strong> by ID, by title, or <code>latest</code>; <code>-c</code> is <strong>terminal-aware</strong> — a breadcrumb under
+<code>~/.hermes/terminal-sessions/</code> means two side-by-side panes each continue <em>their own</em> conversation
+instead of both grabbing the newest (<code>sessions.md:165</code>).</li>
+<li><strong>Titles</strong> are auto-generated (3–7 words, background aux model, once per session) or set manually;
+they are <strong>unique</strong>, <strong>max 100 chars</strong>, and <strong>sanitized</strong> (control chars, zero-width chars, RTL
+overrides stripped) (<code>sessions.md:328–333</code>). That sanitization is a small security detail worth
+noticing: a title can end up in a terminal listing, so it is treated as untrusted text.</li>
+<li><strong>Auto-lineage on compression</strong> — a compressed session&#39;s continuation gets a numbered title
+(<code>&quot;my project&quot;</code> → <code>&quot;my project #2&quot;</code>), and resume-by-name picks the newest (<code>sessions.md:335–343</code>).</li>
+</ul>
+<h3 id="2-4-the-lifecycle-management-set-this-is-the-capability">2.4 The lifecycle management set (this is the capability)<a href="#batch-07/2-4-the-lifecycle-management-set-this-is-the-capability" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>hermes sessions</code> is a full lifecycle surface, and the breadth is the point:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>What it does</th>
+<th>Design detail worth naming</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>list</code></td>
+<td>filter by source/workspace; capped pages print <code>… more not shown</code></td>
+<td>a capped page is <em>never</em> mistaken for the full list</td>
+</tr>
+<tr>
+<td><code>export</code></td>
+<td>one surface, <strong>4 formats</strong>: <code>jsonl</code> (backup) · <code>md</code>/<code>qmd</code> · <code>html</code> · <code>trace</code> (HF Agent Trace Viewer)</td>
+<td><code>--redact</code> scrubs secrets on any format</td>
+</tr>
+<tr>
+<td><code>import</code></td>
+<td>pull in <strong>Claude Code</strong> and <strong>Codex CLI</strong> transcripts</td>
+<td>foreign files are <strong>only read</strong>, never modified</td>
+</tr>
+<tr>
+<td><code>delete</code> / <code>prune</code></td>
+<td>remove ended sessions by any of ~20 filters</td>
+<td>refuses mid-turn; <strong>active sessions are never pruned</strong></td>
+</tr>
+<tr>
+<td><code>archive</code></td>
+<td>soft-hide (same flag as the Desktop sidebar)</td>
+<td>returns on its own when the chat goes live again</td>
+</tr>
+<tr>
+<td><code>pin</code></td>
+<td>durable &quot;keep&quot; — exempt from the stale sweep</td>
+<td>machine-readable <code>--json</code> for nightly pin backups</td>
+</tr>
+<tr>
+<td><code>optimize</code></td>
+<td>merge FTS5 segments + VACUUM, <strong>non-destructive</strong></td>
+<td>the recommended <em>first</em> answer to a large DB</td>
+</tr>
+<tr>
+<td><code>repair-routing</code> / <code>repair-prompts</code> / <code>repair-profiles</code></td>
+<td>three separate, evidence-gated repairs</td>
+<td>see §2.6</td>
+</tr>
+<tr>
+<td><code>stats</code></td>
+<td>totals by source, DB size</td>
+<td>deeper analytics live in <code>hermes insights</code></td>
+</tr>
+<tr>
+<td><code>discard</code></td>
+<td>acknowledge a turn lost in a gateway crash</td>
+<td>refuses <code>without --yes</code> when stdin isn&#39;t a TTY</td>
+</tr>
+<tr>
+<td><code>set-journal-mode</code></td>
+<td>convert WAL ↔ DELETE safely</td>
+<td>refuses while any process holds the file</td>
+</tr>
+</tbody></table></div>
+<p><strong>The export honesty is notable.</strong> A <code>jsonl</code> backup holds <strong>every stored row</strong> — including turns archived
+by compaction and messages removed by rewind/edit. The doc says so plainly: <em>&quot;Treat a backup as holding
+everything the session ever contained.&quot;</em> To <strong>share</strong> a conversation you export a <em>display</em> format
+(<code>md</code> / <code>html</code>) with <code>--redact</code> (<code>sessions.md:425</code>). Backup vs share are different operations with
+different truth, and the docs keep them apart.</p>
+<h3 id="2-5-automatic-cleanup-with-the-reasoning-shown">2.5 Automatic cleanup — with the reasoning shown<a href="#batch-07/2-5-automatic-cleanup-with-the-reasoning-shown" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Auto-prune is <strong>on by default</strong> (<code>sessions.auto_prune: true</code>, <code>retention_days: 90</code>) and the doc explains
+<em>why the default changed</em>: without it, <code>state.db</code> grows unbounded — <em>&quot;multi-GB files within weeks were
+reported on gateway + cron installs&quot;</em>, and the observed failure mode is named (<code>sessions.md:1148, 1235</code>).</p>
+<p>Two mechanics show the care:</p>
+<ul>
+<li><strong>VACUUM is gated twice</strong> — only after a prune that <em>actually</em> deleted rows, only when at least
+<code>min_vacuum_interval_days</code> (<strong>30</strong>) have passed, <strong>and</strong> only when &gt;25 % of pages are reclaimable. <em>&quot;A
+dense database never pays for a full rewrite to reclaim a few MB&quot;</em> (<code>sessions.md:1145</code>).</li>
+<li><strong>Stale automation sessions are <em>closed</em>, not deleted.</strong> Cron/kanban/subagent/one-shot rows whose
+process died without ending the session are closed (<code>end_reason: startup_orphan_reap</code>), then get a
+<strong>further full retention window</strong> before removal. Closing is non-destructive — the session stays
+resumable (<code>sessions.md:1170–1183</code>).</li>
+</ul>
+<p><strong>VERIFIED</strong> (<code>config_defaults.py</code> <code>sessions</code> block): <code>auto_prune</code> True, <code>retention_days</code> 90,
+<code>auto_archive</code> False, <code>auto_archive_days</code> 3, <code>show_subagents</code> False, <code>vacuum_after_prune</code> True,
+<code>min_vacuum_interval_days</code> 30, <code>min_interval_hours</code> 24. <strong>Doc claim: TRUE across the board.</strong></p>
+<h3 id="2-6-guards-that-fail-closed-and-repairs-that-ask-first">2.6 Guards that fail closed, and repairs that ask first<a href="#batch-07/2-6-guards-that-fail-closed-and-repairs-that-ask-first" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Oversized-transcript guards</strong> — <code>max_resume_messages</code> / <code>max_export_messages</code> (both default
+<strong>20,000</strong>; <code>0</code> disables) stop a runaway transcript being loaded into memory at once. A refused resume
+returns error code <strong>4130</strong> naming the scope it was measured against (<code>across its lineage</code> vs
+<code>in its tip segment</code>) — a precise error, not a bare failure (<code>sessions.md:1185–1218</code>).</li>
+<li><strong>Three repairs, all evidence-gated and all refusing ambiguity:</strong><ul>
+<li><code>repair-routing</code> adopts orphaned gateway rows <strong>only</strong> on <em>lineage</em> (a recorded parent fact) or
+<em>contiguity</em> (exactly one candidate). <em>&quot;Anything ambiguous … is reported with a reason and left
+untouched — a wrong adoption would splice one conversation into another chat.&quot;</em> It is deliberately
+<strong>not automatic</strong> (<code>sessions.md:693–733</code>).</li>
+<li><code>repair-prompts</code> proposes a repair only on a <strong>conjunction</strong> — the stored prompt is missing the
+<code>## Skill Safety</code> guidance <strong>and</strong> the persisted <code>tools[]</code> pin contains <code>skill_manage</code>. Rows that
+can&#39;t be proven are reported <strong>unverifiable</strong> and left unchanged (<code>sessions.md:735–781</code>).</li>
+<li><code>repair-profiles</code> moves crossed state between profile stores, and <strong>explicitly reports two cases it
+will not auto-repair</strong> because <em>&quot;the rows themselves cannot tell the two apart&quot;</em> (<code>sessions.md:783–827</code>).</li>
+</ul>
+</li>
+</ul>
+<p>This is the same discipline that runs through the whole study: when the evidence can&#39;t distinguish two
+causes, the tool <strong>says so and stops</strong>.</p>
+<h3 id="2-7-session-hygiene-the-docs-own-honest-criticism">2.7 Session hygiene — the docs' own honest criticism<a href="#batch-07/2-7-session-hygiene-the-docs-own-honest-criticism" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The doc makes an argument most products would hide: because gateway conversations <strong>never expire on their
+own</strong>, it is easy to run one session for weeks — and that <em>&quot;quietly defeats the learning loop and inflates
+costs&quot;</em> (<code>sessions.md:1045</code>). Memory is injected at session start; in a never-ending session everything is
+still in context, so the agent never consults memory and memory distillation never runs. The advice:
+end a session at natural stopping points, optionally nudging the agent to &quot;remember anything worth
+keeping.&quot; <strong>Restarting the machine is not a boundary.</strong></p>
+<hr>
+<h2 id="3-the-dashboard-the-human-admin-surface">3. The dashboard — the human admin surface<a href="#batch-07/3-the-dashboard-the-human-admin-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-what-it-is">3.1 What it is<a href="#batch-07/3-1-what-it-is" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A <strong>browser-based</strong> admin panel, running entirely on the machine (<code>hermes dashboard</code> →
+<code>http://127.0.0.1:9119</code>) — <em>&quot;no data leaves localhost&quot;</em> (<code>web-dashboard.md:7–17</code>). <strong>VERIFIED</strong>: default
+port <code>9119</code> at <code>hermes_cli/main_dashboard.py:57</code>.</p>
+<p>Two design decisions stand out:</p>
+<ul>
+<li><strong>It is machine-level, not single-profile.</strong> One server manages <strong>every profile on the machine</strong>, with a
+sidebar profile switcher; while a non-own profile is selected an <strong>amber banner names the managed
+profile</strong> so <em>&quot;the write target is never ambiguous&quot;</em> (<code>web-dashboard.md:44–60</code>). The selection lives in
+the URL (<code>?profile=worker</code>), so deep links land preselected.</li>
+<li><strong>A public bind always requires auth.</strong> <code>--insecure</code> is a <strong>deprecated no-op</strong> — it no longer disables
+authentication; binding off-loopback requires a password or OAuth provider (<code>web-dashboard.md:23–32</code>).</li>
+</ul>
+<h3 id="3-2-pages">3.2 Pages<a href="#batch-07/3-2-pages" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Status · Chat · Config · API Keys · Sessions · Logs · Analytics · Cron · Profiles · Skills · MCP ·
+Webhooks · Pairing · Channels · System (<code>web-dashboard.md:107–434</code>). The <strong>Status</strong> page carries a
+<strong>resource-pressure banner</strong>: memory (elevated &lt;128 MiB / critical &lt;64 MiB), disk (&lt;512 MB / &lt;256 MB), and
+<strong>a suspected-OOM restart notice</strong> read from the lifecycle ledger — severity-ordered, dismissal scoped to
+the current gateway boot (<code>web-dashboard.md:120–140</code>).</p>
+<h3 id="3-3-the-config-page-and-the-divergence">3.3 The Config page — and the divergence <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-07/3-3-the-config-page-and-the-divergence" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The dashboard renders <code>config.yaml</code> as <strong>auto-discovered</strong> form fields: dropdowns for known valid values,
+toggles for booleans, text inputs otherwise, with Save / Reset / Export / Import, and changes taking
+effect on the next session or gateway restart (<code>web-dashboard.md:229–258</code>).</p>
+<p><strong>DIVERGENCE FOUND.</strong> The doc says the Config page covers <em>&quot;All <strong>150+</strong> configuration fields.&quot;</em> I
+<strong>counted</strong> <code>DEFAULT_CONFIG</code> in <code>hermes_cli/config_defaults.py</code> (line 33) with an AST walk:
+<strong>99 top-level sections, 816 leaf keys.</strong> The doc&#39;s &quot;150+&quot; understates the real surface by more than
+<strong>5×</strong>. Code wins — the number is <strong>≥800 configurable leaves</strong>, and the doc&#39;s figure is stale. This matters
+for the platform: the settings surface is <strong>much</strong> larger than the doc implies, which is itself a finding
+about the size of the configuration space (and its cost of ownership).</p>
+<h3 id="3-4-the-rest-api-and-extension">3.4 The REST API and extension<a href="#batch-07/3-4-the-rest-api-and-extension" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The dashboard exposes a <strong>REST API</strong> (<code>GET /api/status</code>, <code>/api/sessions</code>, <code>/api/config</code>, <code>PUT /api/config</code>,
+<code>/api/env</code>, <code>/api/logs</code>, <code>/api/analytics/usage</code>, the <code>/api/cron/*</code> family, <code>/api/skills</code>, …)
+(<code>web-dashboard.md:445–601</code>), and is <strong>extensible</strong> (<code>extending-the-dashboard.md</code>, 41 KB) — the same
+plugin-style surface seen in batch 05.</p>
+<hr>
+<h2 id="4-the-capability-table-the-owner-s-two-questions">4. The capability table — the owner's two questions<a href="#batch-07/4-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="4-1-sessions">4.1 Sessions<a href="#batch-07/4-1-sessions" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>One SQLite store for every surface</strong></td>
+<td>all conversations in one searchable DB</td>
+<td>&quot;where did I say that?&quot; works across every channel</td>
+<td><strong>one record of all work</strong>, by construction</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>session_search</code> (FTS5, free)</strong></td>
+<td>agent recalls past conversations itself</td>
+<td>the AI remembers what was discussed, unprompted</td>
+<td><strong>unlimited recall at zero token cost</strong> (batch 04)</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Resume / naming / lineage</strong></td>
+<td>pick up any past conversation by name</td>
+<td>continuity without bookkeeping</td>
+<td>long-lived workstreams</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Export in 4 formats + <code>--redact</code></strong></td>
+<td>backup vs share kept distinct</td>
+<td>take your history with you safely</td>
+<td><strong>data portability / no lock-in</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Import from Claude Code / Codex</strong></td>
+<td>pull in another agent&#39;s transcript</td>
+<td>keep history when switching tools</td>
+<td><strong>integratability</strong> — reads rivals&#39; formats</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Auto-prune + gated VACUUM</strong></td>
+<td>disk never grows without bound</td>
+<td>the install stays healthy</td>
+<td><strong>operational hygiene as a default</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Evidence-gated repairs (3)</strong></td>
+<td>safe fixes that refuse ambiguity</td>
+<td>no silent corruption of history</td>
+<td><strong>trust through conservatism</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Pinning / archiving</strong></td>
+<td>keep, or soft-hide, without deleting</td>
+<td>control over what you see</td>
+<td>retention policy as data</td>
+<td><code>now</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="4-2-the-dashboard">4.2 The dashboard<a href="#batch-07/4-2-the-dashboard" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Local browser admin panel</strong></td>
+<td>configure everything without YAML</td>
+<td>a non-technical owner can run it</td>
+<td><strong>a control room for the AI organisation</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Config auto-discovered from defaults</strong></td>
+<td>every setting has a form field</td>
+<td>nothing hidden from the owner</td>
+<td><strong>full config transparency</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Machine-level, multi-profile switcher</strong></td>
+<td>one panel manages all profiles</td>
+<td>one place for the whole machine</td>
+<td><strong>operator console</strong> over many tenants</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Sessions page (browse/search/export/prune)</strong></td>
+<td>see and manage every conversation</td>
+<td>visibility + control</td>
+<td><strong>the record, human-readable</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Cron / Skills / MCP / Channels pages</strong></td>
+<td>manage autonomy from a UI</td>
+<td>no CLI needed</td>
+<td><strong>the same surfaces the agent uses, exposed</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>REST API</strong></td>
+<td>automate the admin panel</td>
+<td>script the operations</td>
+<td><strong>headless / embedded administration</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Resource-pressure + OOM banner</strong></td>
+<td>tells you when the host is failing</td>
+<td>fewer silent deaths</td>
+<td><strong>self-diagnosing infrastructure</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Dashboard extension (plugins)</strong></td>
+<td>add your own pages</td>
+<td>fit it to your business</td>
+<td><strong>an admin surface you can extend</strong></td>
+<td><code>later</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-divergence-and-boundary-notes">5. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-07/5-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>DIVERGENCE (documented above):</strong> the dashboard doc&#39;s <em>&quot;All 150+ configuration fields&quot;</em> is wrong —
+the measured <code>DEFAULT_CONFIG</code> holds <strong>99 sections / 816 leaf keys</strong>. Code wins; the settings surface is<blockquote>
+<p>5× larger than the doc states.</p>
+</blockquote>
+</li>
+<li><strong>Positive finding:</strong> every session-lifecycle default in the docs matches <code>config_defaults.py</code> exactly
+(auto_prune True · 90 · 30 · 24 · auto_archive False/3 · show_subagents False). Same as batches 03/04 —
+the config defaults block is consistently the best-kept doc.</li>
+<li><strong>The doc&#39;s own honest boundaries:</strong> <code>sessions.json</code> is a <strong>legacy mirror</strong>, not the session list;
+<code>--insecure</code> is a <strong>deprecated no-op</strong>; reindexing/repairs <strong>refuse while a gateway owns the store</strong>
+(it holds state in memory); <code>--delete-after-verified</code> is deliberately limited to one explicit session
+with <code>--yes</code>.</li>
+<li><strong>A cost/consistency note worth carrying:</strong> the dashboard&#39;s Sessions page <strong>streams</strong> rows on export and
+is <strong>not capped</strong> by <code>max_export_messages</code>, whereas <code>hermes sessions export</code> <strong>is</strong> — the same
+operation has different bounds on different surfaces (stated in the doc).</li>
+<li><strong><code>show_subagents</code> / hidden sources</strong> (<code>oneshot</code>, <code>kanban</code>, <code>tool</code>) are the same judgement applied
+twice: machinery is <em>not</em> shown as a conversation by default.</li>
+</ul>
+<hr>
+<h2 id="6-items-carried-forward">6. Items carried forward<a href="#batch-07/6-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C7-1</td>
+<td>A machine-level admin panel with a <strong>profile switcher + amber write-target banner</strong> is a good model for a multi-tenant operator console</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C7-2</td>
+<td>The dashboard&#39;s <strong>REST API</strong> is the headless administration seam — compare against the platform&#39;s own admin surface</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C7-3</td>
+<td><strong>Evidence-gated repairs that refuse ambiguity</strong> are a trust pattern to reuse in the platform&#39;s own data migrations</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C7-4</td>
+<td><strong>Backup vs share</strong> are different exports (jsonl vs redacted display) — a distinction the platform should keep</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C7-5</td>
+<td>Config surface is <strong>816 leaf keys</strong> — the cost of configuration is real; the platform should measure its own</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C7-6</td>
+<td>Session <strong>auto-prune + gated VACUUM</strong> is the operational-hygiene default the platform should copy for its run/audit history</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C7-7</td>
+<td>Importing <strong>rival agent transcripts</strong> (Claude Code, Codex) is an integratability pattern</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C7-8</td>
+<td>Session hygiene (= ending sessions to make learning fire) ties directly to how the platform&#39;s own learning loop is triggered</td>
+<td>batch 12</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-the-two-value-questions-answered-at-the-batch-level">7. The two value questions, answered at the batch level<a href="#batch-07/7-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High: the user gets <strong>one searchable record of everything</strong> the AI has done on every
+channel, can resume any of it by name, export it (in a shareable, redacted form), and — on the dashboard —
+<strong>see and change every setting without editing YAML</strong>. The honesty is again the differentiator: an
+oversized resume returns a <em>precise</em> error (code 4130, with the scope), a repair refuses to guess a
+conversation&#39;s lineage, and the docs openly tell you the one habit (<code>/new</code> at boundaries) that keeps cost
+down and the learning loop working.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the <strong>record-and-control half</strong> of the platform vision. Three things map
+directly onto an &quot;AI-first business and resource planner&quot;: (1) <strong>one store, every surface</strong> means the
+business has a single, queryable history of all work — the raw material for planning; (2) the
+<strong>machine-level dashboard with a profile switcher and an unambiguous write-target banner</strong> is a working
+model of an <strong>operator console over many tenants</strong> — exactly the seat a business owner needs over a fleet
+of agents; (3) the <strong>REST API + config auto-discovery + plugin extension</strong> make that console
+<em>scriptable and extensible</em>, which is what turns an admin panel into a platform surface. The measured
+<strong>816-key config surface</strong> is a caution as much as a capability: power this broad has a real cost of
+ownership, and the platform should size its own settings surface deliberately rather than by accretion.</p>
+<p><strong>Learning lens (explicit).</strong> Batch 06 = execution; <strong>batch 07 = the record and the console</strong>. Where batch
+06 asked &quot;what does it run?&quot;, this batch asks &quot;<em>what does it keep, and who can see and change it?</em>&quot;</p>
+<hr>
+<p><em>Batch 07 of 12 complete. Divergences found this batch: 1 (the dashboard doc&#39;s &quot;150+ config fields&quot; —
+measured 99 sections / 816 leaf keys). Next: <code>08-security-approvals-secrets-and-sandboxing.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-scheduling-delegation.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Scheduling &amp; Delegation</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="08-security-sandboxing.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Security &amp; Sandboxing</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-in-plain-words" class="toc-link">0. What this batch is (in plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-sessions-the-durable-record" class="toc-link">2. Sessions — the durable record</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-one-store-every-surface" class="toc-link">2.1 One store, every surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-sources-24-platforms-one-taxonomy" class="toc-link">2.2 Sources — ~24 platforms, one taxonomy</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-resume-naming-and-the-lineage" class="toc-link">2.3 Resume, naming and the lineage</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-the-lifecycle-management-set-this-is-the-capability" class="toc-link">2.4 The lifecycle management set (this is the capability)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-automatic-cleanup-with-the-reasoning-shown" class="toc-link">2.5 Automatic cleanup — with the reasoning shown</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-6-guards-that-fail-closed-and-repairs-that-ask-first" class="toc-link">2.6 Guards that fail closed, and repairs that ask first</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-7-session-hygiene-the-docs-own-honest-criticism" class="toc-link">2.7 Session hygiene — the docs&#039; own honest criticism</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-dashboard-the-human-admin-surface" class="toc-link">3. The dashboard — the human admin surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-what-it-is" class="toc-link">3.1 What it is</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-pages" class="toc-link">3.2 Pages</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-config-page-and-the-divergence" class="toc-link">3.3 The Config page — and the divergence</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-the-rest-api-and-extension" class="toc-link">3.4 The REST API and extension</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-capability-table-the-owner-s-two-questions" class="toc-link">4. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-sessions" class="toc-link">4.1 Sessions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-dashboard" class="toc-link">4.2 The dashboard</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-divergence-and-boundary-notes" class="toc-link">5. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-items-carried-forward" class="toc-link">6. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-two-value-questions-answered-at-the-batch-level" class="toc-link">7. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The agent loop and the conversation model — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Agent Loop &amp; Conversation</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-agent-loop-and-conversation.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,906</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">214</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The Hermes Agent Loop Execution Sequence</h4>
+    <p>Verified code flow inside agent/conversation_loop.py and agent/tool_executor.py</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-b1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#3b82f6"/>
+        </marker>
+        <marker id="arr-loop" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#8b5cf6"/>
+        </marker>
+      </defs>
+
+      <!-- Step 1: Input & Alternation Repair -->
+      <g transform="translate(20, 20)">
+        <rect width="150" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)" stroke-width="1.5"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">1. MESSAGE INGEST</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Alternation Repair</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10" fill="var(--text-secondary, #475569)">agent_runtime_helpers</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10" fill="#059669">Merges consecutive roles</text>
+      </g>
+
+      <path d="M 170 65 L 200 65" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b1)"/>
+
+      <!-- Step 2: Preflight Gate -->
+      <g transform="translate(210, 20)">
+        <rect width="150" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)" stroke-width="1.5"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">2. PREFLIGHT GATE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Context Compressor</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10" fill="var(--text-secondary, #475569)">Runs if history &gt; 50% ctx</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10" fill="#059669">Dynamic tail sizing</text>
+      </g>
+
+      <path d="M 360 65 L 390 65" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b1)"/>
+
+      <!-- Step 3: LLM API Call -->
+      <g transform="translate(400, 20)">
+        <rect width="150" height="90" rx="8" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#2563eb">3. INTERRUPTIBLE API</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Provider Dialect</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10" fill="var(--text-secondary, #475569)">Converted to shape</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10" fill="#059669">Streaming + Abort hook</text>
+      </g>
+
+      <path d="M 550 65 L 590 65" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b1)"/>
+
+      <!-- Step 4: Decision: Plain Text vs Tools -->
+      <g transform="translate(600, 25)">
+        <polygon points="65,0 130,40 65,80 0,40" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="38" y="38" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#6d28d9">Has Tool</text>
+        <text x="44" y="52" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#6d28d9">Calls?</text>
+      </g>
+
+      <!-- Branch: No -> Answer & Save -->
+      <path d="M 730 65 L 770 65" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b1)"/>
+      <g transform="translate(775, 20)">
+        <rect width="125" height="90" rx="8" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-width="1.5"/>
+        <text x="12" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#047857">ANSWER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="600" fill="var(--text-primary, #0f172a)">Save Session</text>
+        <text x="12" y="62" font-family="system-ui, sans-serif" font-size="10" fill="var(--text-secondary, #475569)">Post-turn hooks</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10" fill="#059669">Turn Complete ✓</text>
+      </g>
+
+      <!-- Branch: Yes -> Tool Executor -->
+      <path d="M 665 105 L 665 150" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-loop)"/>
+      <g transform="translate(480, 160)">
+        <rect width="370" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="15" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">TOOL EXECUTOR (agent/tool_executor.py)</text>
+        <rect x="15" y="38" width="165" height="42" rx="4" fill="var(--bg-main, #f8fafc)" stroke="var(--border-color, #e2e8f0)"/>
+        <text x="22" y="55" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="var(--text-primary, #0f172a)">Parallel Execution</text>
+        <text x="22" y="70" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">DaemonThreadPoolExecutor</text>
+
+        <rect x="190" y="38" width="165" height="42" rx="4" fill="var(--bg-main, #f8fafc)" stroke="var(--border-color, #e2e8f0)"/>
+        <text x="198" y="55" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="var(--text-primary, #0f172a)">Sequential Exception</text>
+        <text x="198" y="70" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">Single or interactive calls</text>
+
+        <rect x="15" y="88" width="340" height="22" rx="4" fill="#3b82f6" fill-opacity="0.1"/>
+        <text x="22" y="103" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#1d4ed8">Budget Check: 500 max • IterationBudget.refund() for execute_code</text>
+      </g>
+
+      <!-- Loopback arrow -->
+      <path d="M 480 220 L 285 220 L 285 120" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="5,4" fill="none" marker-end="url(#arr-loop)"/>
+      <text x="310" y="240" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">Loop back with tool results (think → act → observe)</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-01-the-agent-loop-and-the-conversation-model">Batch 01 — The agent loop and the conversation model<a href="#batch-01/batch-01-the-agent-loop-and-the-conversation-model" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> every doc claim below was checked against the Python source. Code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-plain-words">0. What this batch is (plain words)<a href="#batch-01/0-what-this-batch-is-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the <strong>base layer</strong>: what an agent <em>is</em> inside Hermes, and what happens step by step when a person
+types a message. Everything above it — bots, skills, memory, tools, scheduling — runs on this loop. Two
+halves: <strong>the loop</strong> (message → thinking → tool use → answer) and <strong>the conversation model</strong> (how the
+exchange is stored, ordered and remembered).</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-01/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (pinned, under <code>website/docs/</code>)</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/features/overview.md</code></td>
+<td align="right">7,374</td>
+</tr>
+<tr>
+<td><code>user-guide/features/tools.md</code></td>
+<td align="right">15,180</td>
+</tr>
+<tr>
+<td><code>reference/toolsets-reference.md</code></td>
+<td align="right">14,877</td>
+</tr>
+<tr>
+<td><code>reference/tools-reference.md</code></td>
+<td align="right">45,775</td>
+</tr>
+<tr>
+<td><code>developer-guide/agent-loop.md</code></td>
+<td align="right">11,537</td>
+</tr>
+<tr>
+<td><strong>Docs total</strong></td>
+<td align="right"><strong>94,743</strong></td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th align="right">Lines</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agent/conversation_loop.py</code></td>
+<td align="right">94,997 bytes</td>
+</tr>
+<tr>
+<td><code>agent/tool_executor.py</code></td>
+<td align="right">97,533 bytes</td>
+</tr>
+<tr>
+<td><code>agent/agent_init.py</code></td>
+<td align="right">(read at lines 378–423)</td>
+</tr>
+<tr>
+<td><code>agent/iteration_budget.py</code></td>
+<td align="right">59 lines</td>
+</tr>
+<tr>
+<td><code>agent/agent_runtime_helpers.py</code></td>
+<td align="right">(read at lines 387–771)</td>
+</tr>
+<tr>
+<td><code>agent/context_compressor.py</code></td>
+<td align="right">335,782 bytes</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-loop-in-plain-words">2. The loop, in plain words<a href="#batch-01/2-the-loop-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>One turn, as the docs describe it: append the user message → build the system prompt → compress if the
+conversation is past half the context window → convert to the provider&#39;s shape → make an <strong>interruptible</strong>
+API call → if the reply contains <strong>tool calls</strong>, run them, append their results, and loop; if it is plain
+text, save the session and finish.</p>
+<p>So the shape is <strong>think → (act → observe → think) × N → answer</strong> — an <em>agent</em>, not a chatbot.</p>
+<h3 id="2-1-verified-in-code-the-loop-really-is-where-the-docs-say">2.1 VERIFIED IN CODE — the loop really is where the docs say <span class="seal-badge" style="font-size: 0.65em; vertical-align: middle;">✓ CODE VERIFIED</span><a href="#batch-01/2-1-verified-in-code-the-loop-really-is-where-the-docs-say" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent/conversation_loop.py</code> exists (94,997 bytes) and its module docstring names exactly the phases the
+docs claim: <em>&quot;retries, fallbacks, compression, post-turn hooks&quot;</em> (line 4). The pre-API compression guard
+is real: <code>run_preflight_gate</code> is imported at line 56 and the mid-turn pre-API guard is described at line
+86 (<em>&quot;the pruned… token figure the mid-turn pre-API compression guard compares&quot;</em>). <strong>Doc claim: TRUE.</strong></p>
+<h3 id="2-2-verified-in-code-concurrency-and-the-sequential-exception">2.2 VERIFIED IN CODE — concurrency, and the sequential exception <span class="seal-badge" style="font-size: 0.65em; vertical-align: middle;">✓ CODE VERIFIED</span><a href="#batch-01/2-2-verified-in-code-concurrency-and-the-sequential-exception" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The docs say multiple tool calls run concurrently except interactive ones. Code:
+<code>agent/tool_executor.py:1498–1501</code> computes <code>_max_workers_for_tool_batch(...)</code> and runs a
+<code>DaemonThreadPoolExecutor(max_workers=max_workers)</code>; and line 1863 documents the other path —
+<em>&quot;Execute tool calls sequentially (single calls or interactive tools)&quot;</em>. <strong>Doc claim: TRUE</strong>, with a code
+detail the docs skip: the pool is a <strong>daemon</strong> pool, and the worker count is capped (<code>_MAX_TOOL_WORKERS</code>,
+further limited by an image-generation parallel limit at line 248).</p>
+<h3 id="2-3-verified-in-code-the-iteration-budget-and-a-rule-the-docs-omit">2.3 VERIFIED IN CODE — the iteration budget, and a rule the docs omit <span class="seal-badge" style="font-size: 0.65em; vertical-align: middle;">✓ CODE VERIFIED</span><a href="#batch-01/2-3-verified-in-code-the-iteration-budget-and-a-rule-the-docs-omit" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent/iteration_budget.py</code> confirms the doc&#39;s numbers: parent cap <strong>500</strong> (<code>max_iterations</code>), subagent cap
+<strong>50</strong> (<code>delegation.max_iterations</code>), each agent its own counter. <strong>But the code adds something the docs do
+not say:</strong> <code>IterationBudget.refund()</code> exists specifically so that <strong><code>execute_code</code> (programmatic tool
+calling) iterations are given back and do not eat the budget</strong> (class docstring, lines 27–28). That is a
+material behavioural difference — a run that uses <code>execute_code</code> can effectively do more work than its
+budget number suggests.</p>
+<h3 id="2-4-verified-in-code-message-alternation-is-repaired-not-just-required">2.4 VERIFIED IN CODE — message alternation is REPAIRED, not just required <span class="seal-badge" style="font-size: 0.65em; vertical-align: middle;">✓ CODE VERIFIED</span><a href="#batch-01/2-4-verified-in-code-message-alternation-is-repaired-not-just-required" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The docs say Hermes <em>enforces</em> strict message alternation (never two assistants, never two users in a
+row). The code goes further: <code>agent/agent_runtime_helpers.py:766–771</code> is a <strong>repair pass</strong> whose own
+docstring says <em>&quot;Collapse malformed role-alternation left in the live history; … Providers require strict
+alternation after the system message (violations: silent empty …)&quot;</em>. The pass merges consecutive
+assistants (<code>_merge_consecutive_assistants</code>, line 549), merges consecutive users (<code>_merge_consecutive_users</code>,
+line 662), drops stray tool results and prunes unanswered tool calls.</p>
+<p><strong>So the platform cannot break a conversation by injecting content in the wrong place — Hermes repairs it
+before sending.</strong> That is a stronger, more useful fact than the doc&#39;s rule statement, and it is a direct
+design input for how our own context enters a conversation.</p>
+<h3 id="2-5-api-modes-the-docs-undercount-the-code-wins">2.5 API modes — the docs undercount, the code wins<a href="#batch-01/2-5-api-modes-the-docs-undercount-the-code-wins" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The docs list <strong>three</strong> API modes (<code>chat_completions</code>, <code>codex_responses</code>, <code>anthropic_messages</code>). The code
+(<code>agent/agent_init.py:381–384</code>) defines <strong>five</strong> explicit modes plus open registration:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>_EXPLICIT_API_MODES = {
+    &quot;chat_completions&quot;, &quot;codex_responses&quot;, &quot;anthropic_messages&quot;, &quot;bedrock_converse&quot;,
+    &quot;codex_app_server&quot;,
+}
+</code></pre>
+</div>
+<p>and <code>_resolve_api_mode</code> (lines 387–423) resolves them through an ordered ladder that also accepts <strong>any
+mode a provider plugin registered</strong> via <code>register_transport(api_mode, cls)</code> (line 394–396), and maps
+<code>bedrock</code> / <code>bedrock-runtime.*</code> endpoints to <code>bedrock_converse</code> (lines 412–415).</p>
+<p><strong>DIVERGENCE RECORDED:</strong> docs say 3 modes; code has 5 built-in + plugin-registered. Consequence for the
+reader: <em>&quot;Hermes supports three provider dialects&quot;</em> is <strong>understated</strong> — the real claim is <em>&quot;Hermes supports
+its built-in dialects plus any a plugin adds.&quot;</em> That widens the &quot;bring any model supplier&quot; picture
+(batch 09).</p>
+<h3 id="2-6-the-main-auxiliary-model-split-confirmed-as-a-config-surface">2.6 The main/auxiliary model split — confirmed as a config surface<a href="#batch-01/2-6-the-main-auxiliary-model-split-confirmed-as-a-config-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>hermes_cli/config.py</code> carries the auxiliary config (referenced at lines 775, 967, 2304 — e.g. an
+unexpanded literal <code>auxiliary.&lt;task&gt;.api_key</code> pinned for the process lifetime). So the split is not a doc
+idea: it is a <strong>real config surface</strong> with per-task keys. <strong>Doc claim: TRUE.</strong></p>
+<h3 id="2-7-compression-real-thresholds-and-dynamic-tail-sizing-the-docs-omit">2.7 Compression — real thresholds, and dynamic tail sizing the docs omit<a href="#batch-01/2-7-compression-real-thresholds-and-dynamic-tail-sizing-the-docs-omit" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent/context_compressor.py</code> confirms compression is real and threshold-driven, and adds constants the
+docs do not name: <code>LEAN_TAIL_FLOOR_TOKENS = 10_000</code> and <code>LEAN_TAIL_CAP_TOKENS = 25_000</code> (lines 925–926) —
+the &quot;lean tail&quot; the compressor keeps is <strong>sized dynamically between 10k and 25k tokens</strong>, with a floor
+referenced at line 2239 (<code>max(LEAN_TAIL_FLOOR_TOKENS, min(LEAN_TAIL_CAP_TOKENS, int(self.context_length * 0.025)))</code>).
+The compressor also depends on <strong>sqlite3</strong> (line 10) and has its own timeout-recovery path returning a
+terminal message that tells the user to start a fresh session (lines 199–205).</p>
+<p><strong>DIVERGENCE RECORDED (minor):</strong> the docs describe the protected tail as a <em>count</em> (<code>protect_last_n</code>,
+default 20). The code carries <strong>both</strong> a count (<code>protect_last_n</code>, line 2837) <strong>and</strong> a token-budget lean
+tail (10k–25k). The count is the simpler story; the token budget is what actually bounds size.</p>
+<hr>
+<h2 id="3-the-capability-table-the-owner-s-two-questions">3. The capability table — the owner's two questions<a href="#batch-01/3-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> deliberately empty (that is Batch 12&#39;s job).</p>
+<h3 id="3-1-the-loop">3.1 The loop<a href="#batch-01/3-1-the-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Think→act→observe loop</td>
+<td>the agent works until the job is done, not just until it has spoken</td>
+<td>a staff member gets a <em>finished</em> artefact (a pulled figure, a drafted report), not a suggestion</td>
+<td>the difference between a chat box and an <strong>AI-first worker</strong> — the platform&#39;s core promise</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Interruptible calls</td>
+<td>the user can cut in and history stays clean</td>
+<td>a wrong turn is caught in seconds</td>
+<td>makes the agent safe to leave running in a business</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Iteration budget + refund</td>
+<td>a hard stop (500 / 50), <strong>but <code>execute_code</code> turns are refunded</strong></td>
+<td>no runaway cost, and heavy programmatic work is not punished</td>
+<td>an exposed, tunable cost control per tenant</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Fallback across providers</td>
+<td>another model takes over on failure</td>
+<td>outages become invisible</td>
+<td>resilience we do not have to build</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td>Main + auxiliary model split</td>
+<td>one strong model for talking, small cheap ones for chores</td>
+<td>faster, cheaper answers</td>
+<td>a direct per-tenant <strong>cost lever</strong>, configurable per task</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td>Compression w/ dynamic lean tail</td>
+<td>long chats are summarised; the recent tail is kept at 10k–25k tokens</td>
+<td>a long session does not lose the thread</td>
+<td>long-lived workstreams without unbounded cost</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="3-2-provider-dialects-and-conversation-shape">3.2 Provider dialects and conversation shape<a href="#batch-01/3-2-provider-dialects-and-conversation-shape" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Built-in dialects <strong>+ plugin transports</strong></td>
+<td>five built-in wires and any a plugin adds</td>
+<td>— (invisible)</td>
+<td>a tenant can bring <strong>any</strong> supplier; the list is open, not fixed</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>One internal message shape</td>
+<td>every exchange stored uniformly</td>
+<td>—</td>
+<td>portable transcripts if a tenant switches models</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Reasoning kept apart, optionally shown</td>
+<td>the model&#39;s inner voice is stored separately</td>
+<td>a user can ask <em>why</em></td>
+<td><strong>explainability</strong> — show how, not just what</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Alternation is auto-repaired</strong></td>
+<td>Hermes fixes malformed turn order before sending</td>
+<td>conversations never break from bad injection</td>
+<td>a platform can inject its own context <strong>safely</strong> — a strong design input</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>SQLite session store + resume</td>
+<td>chats are saved and resumable</td>
+<td>continue yesterday&#39;s work</td>
+<td>substrate for &quot;workspaces as threads&quot;</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td>Session lineage on compression</td>
+<td>a compressed chat keeps a link to its origin</td>
+<td>history stays traceable</td>
+<td>audit + continuity for a long-lived tenant</td>
+<td><code>later</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="3-3-tools-named-here-analysed-in-their-own-batch">3.3 Tools named here, analysed in their own batch<a href="#batch-01/3-3-tools-named-here-analysed-in-their-own-batch" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Each is named (nothing silently dropped) and carried forward — not analysed twice.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tool / toolset</th>
+<th>Plain meaning</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>todo</code></td>
+<td>the agent&#39;s own in-session checklist</td>
+<td>06</td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td>facts that survive sessions</td>
+<td>04</td>
+</tr>
+<tr>
+<td><code>session_search</code></td>
+<td>search past conversations (local DB, no LLM)</td>
+<td>04</td>
+</tr>
+<tr>
+<td><code>clarify</code></td>
+<td>the agent asks the user, with choices, 1–5 at a time</td>
+<td>07</td>
+</tr>
+<tr>
+<td><code>delegate_task</code></td>
+<td>spawn isolated subagents</td>
+<td>06</td>
+</tr>
+<tr>
+<td><code>execute_code</code></td>
+<td>run a Python script that calls Hermes tools (budget-refunded)</td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>skill_manage</code> / <code>skill_view</code> / <code>skills_list</code></td>
+<td>create / load / list &quot;skills&quot;</td>
+<td>03</td>
+</tr>
+<tr>
+<td><code>cronjob_manage</code></td>
+<td>scheduled recurring tasks</td>
+<td>06</td>
+</tr>
+<tr>
+<td><code>kanban_*</code> (14 tools)</td>
+<td>a shared multi-agent board</td>
+<td>06</td>
+</tr>
+<tr>
+<td><code>manage_connections</code></td>
+<td>connect apps / MCP servers via an approval card</td>
+<td>08</td>
+</tr>
+<tr>
+<td><code>web_search</code> / <code>web_extract</code></td>
+<td>search and read the web</td>
+<td>05</td>
+</tr>
+<tr>
+<td><code>terminal</code> / <code>process_manage</code></td>
+<td>shell + background jobs</td>
+<td>05/10</td>
+</tr>
+<tr>
+<td><code>browser_*</code> (18 tools)</td>
+<td>drive a real browser, with vision</td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>vision_analyze</code>, <code>image_generate</code>, <code>text_to_speech</code>, <code>video_*</code></td>
+<td>media in and out</td>
+<td>11</td>
+</tr>
+<tr>
+<td><code>computer_use</code></td>
+<td>drive the desktop without stealing the cursor</td>
+<td>11</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="4-items-carried-forward">4. Items carried forward<a href="#batch-01/4-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C1-1</td>
+<td>Plugin-registered API transports (<code>register_transport</code>) widen the supplier list — measure the mechanism</td>
+<td>batch 09</td>
+</tr>
+<tr>
+<td>C1-2</td>
+<td><code>execute_code</code> refunds budget — measure how much work a refunded turn can do</td>
+<td>batch 10</td>
+</tr>
+<tr>
+<td>C1-3</td>
+<td>The <strong>repair pass</strong> is the safe injection point for our platform&#39;s own context — measure its rules</td>
+<td>batch 02 / 07</td>
+</tr>
+<tr>
+<td>C1-4</td>
+<td><code>clarify</code> (1–5 questions, single/multi/open) is a form mechanism already present</td>
+<td>batch 07</td>
+</tr>
+<tr>
+<td>C1-5</td>
+<td>Lean-tail token budget (10k–25k) vs count (<code>protect_last_n</code>) — which governs long workspaces</td>
+<td>batch 04</td>
+</tr>
+<tr>
+<td>C1-6</td>
+<td><code>_MAX_TOOL_WORKERS</code> and the image-gen parallel limit — the real concurrency ceiling</td>
+<td>batch 05</td>
+</tr>
+<tr>
+<td>C1-7</td>
+<td><code>context_compressor.py</code> is 335 KB — the single largest agent module; deserves its own read</td>
+<td>batch 04</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-the-two-value-questions-answered-at-the-batch-level">5. The two value questions, answered at the batch level<a href="#batch-01/5-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> Yes, structurally. The loop turns &quot;ask the computer&quot; into &quot;give the computer a job&quot;,
+and a staff member&#39;s day is finished artefacts. Interruption, budgets, fallbacks and compression are
+exactly what make that safe and affordable over a working day rather than a per-message novelty. Two
+code-verified details sharpen it: <strong><code>execute_code</code> turns are budget-refunded</strong> (heavy automated work is
+not punished) and <strong>malformed turn order is auto-repaired</strong> (a user&#39;s session cannot be broken by a bad
+injection).</p>
+<p><strong>Q2 — VISION VALUE.</strong> Yes, and load-bearing. The platform&#39;s &quot;AI-first&quot; claim rests on an agent that
+finishes work unattended, recovers when a provider fails, and can be pointed at any supplier. All three are
+present here — and the supplier list is <strong>open</strong> (plugin transports), not fixed at three dialects as the
+docs claim. Versatility and integratability, the owner&#39;s own words, exist at the base layer already.</p>
+<p><strong>Learning lens.</strong> The loop does not itself learn; it is the <strong>container learning happens in</strong> — <code>memory</code>
+(batch 04) and <code>skill_manage</code> (batch 03) are the two tools it calls that accumulate knowledge, and every
+turn is a chance for either to fire. That is why the loop is read first.</p>
+<hr>
+<p><em>Batch 01 of 12 complete. Divergences found this batch: 2 (API-mode count; lean tail). Next:
+<code>02-bots-profiles-and-group-chats.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-bots-profiles-group-chats.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Bots, Profiles &amp; Group Chats</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-plain-words" class="toc-link">0. What this batch is (plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-loop-in-plain-words" class="toc-link">2. The loop, in plain words</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-verified-in-code-the-loop-really-is-where-the-docs-say" class="toc-link">2.1 VERIFIED IN CODE — the loop really is where the docs say</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-verified-in-code-concurrency-and-the-sequential-exception" class="toc-link">2.2 VERIFIED IN CODE — concurrency, and the sequential exception</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-verified-in-code-the-iteration-budget-and-a-rule-the-docs-omit" class="toc-link">2.3 VERIFIED IN CODE — the iteration budget, and a rule the docs omit</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-verified-in-code-message-alternation-is-repaired-not-just-required" class="toc-link">2.4 VERIFIED IN CODE — message alternation is REPAIRED, not just required</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-api-modes-the-docs-undercount-the-code-wins" class="toc-link">2.5 API modes — the docs undercount, the code wins</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-6-the-main-auxiliary-model-split-confirmed-as-a-config-surface" class="toc-link">2.6 The main/auxiliary model split — confirmed as a config surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-7-compression-real-thresholds-and-dynamic-tail-sizing-the-docs-omit" class="toc-link">2.7 Compression — real thresholds, and dynamic tail sizing the docs omit</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-capability-table-the-owner-s-two-questions" class="toc-link">3. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-loop" class="toc-link">3.1 The loop</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-provider-dialects-and-conversation-shape" class="toc-link">3.2 Provider dialects and conversation shape</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-tools-named-here-analysed-in-their-own-batch" class="toc-link">3.3 Tools named here, analysed in their own batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-items-carried-forward" class="toc-link">4. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-two-value-questions-answered-at-the-batch-level" class="toc-link">5. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

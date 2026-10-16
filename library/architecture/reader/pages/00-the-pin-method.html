@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 00 — The pin, the method, and what this study is — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-00" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 00</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Pin &amp; Method</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">00-PIN-AND-METHOD.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #d97706">OPEN</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,303</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">7 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">151</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 00 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>Forensic Study Topology: Nous Hermes vs Enterprise Platform</h4>
+    <p>Strategic comparison of systems, verification boundaries, and the Build AROUND blueprint</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 480" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="gEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#047857" stop-opacity="0.05"/>
+        </linearGradient>
+        <linearGradient id="gPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#6d28d9" stop-opacity="0.05"/>
+        </linearGradient>
+        <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #3b82f6)"/>
+        </marker>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+
+      <!-- Outer Boundary: Our Enterprise Platform -->
+      <rect x="20" y="20" width="920" height="440" rx="16" fill="url(#gBlue)" stroke="var(--diagram-accent, #3b82f6)" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="45" y="55" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="var(--diagram-accent, #3b82f6)">OUR PLATFORM: ENTERPRISE BUSINESS &amp; RESOURCES PLANNER</text>
+      <text x="45" y="75" font-family="system-ui, sans-serif" font-size="12" fill="var(--text-muted, #64748b)">Multi-Tenant Boundary • Company RBAC • Scoreboard Discipline • Commercial Isolation</text>
+
+      <!-- Column 1: Outermost Platform Door -->
+      <g transform="translate(45, 105)">
+        <rect width="240" height="150" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.5"/>
+        <rect x="12" y="12" width="70" height="20" rx="4" fill="#3b82f6" fill-opacity="0.15"/>
+        <text x="18" y="26" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#2563eb">DOOR 1</text>
+        <text x="12" y="52" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">Multi-Tenancy Key</text>
+        <text x="12" y="72" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Hard tenant isolation boundary</text>
+        <text x="12" y="90" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Customer billing &amp; data residency</text>
+        <text x="12" y="108" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Zero cross-tenant data leaks</text>
+        <rect x="12" y="122" width="216" height="18" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="20" y="135" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">Our Platform Advantage (§2.1)</text>
+      </g>
+
+      <g transform="translate(45, 275)">
+        <rect width="240" height="160" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.5"/>
+        <rect x="12" y="12" width="70" height="20" rx="4" fill="#3b82f6" fill-opacity="0.15"/>
+        <text x="18" y="26" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#2563eb">DOOR 2</text>
+        <text x="12" y="52" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">Typed Engine Port</text>
+        <text x="12" y="68" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#2563eb">Row 28: lib/ai-runtime-port.ts</text>
+        <text x="12" y="88" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Exactly 8 typed operations</text>
+        <text x="12" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Engine swappable by proof</text>
+        <text x="12" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Definition-of-Done contracts</text>
+        <rect x="12" y="132" width="216" height="18" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="20" y="145" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">Row 28 Port is non-negotiable (§2.2)</text>
+      </g>
+
+      <!-- Connecting arrows -->
+      <path d="M 285 180 L 330 180 L 330 270 L 350 270" stroke="var(--diagram-accent, #3b82f6)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+      <path d="M 285 350 L 350 350" stroke="var(--diagram-accent, #3b82f6)" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- Inner Box: Hermes as an Engine Adapter -->
+      <rect x="360" y="90" width="555" height="345" rx="12" fill="url(#gEmerald)" stroke="#10b981" stroke-width="2"/>
+      <text x="385" y="122" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#059669">HERMES ENGINE ADAPTER (Nous Research — Pinned Tree)</text>
+      <text x="385" y="140" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">19,728 Files • 455 Docs (8.9 MB) • 1,819 Python Modules (698k LOC) • Single-Operator Architecture</text>
+
+      <!-- Subsystems inside Hermes -->
+      <!-- Top Row inside Hermes -->
+      <g transform="translate(385, 160)">
+        <rect width="160" height="110" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Execution Engine</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Alternation Repair (b01)</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• DaemonThreadPool (b01)</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Budget 500 / refund (b01)</text>
+        <text x="10" y="94" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Primary/Auxiliary Split</text>
+      </g>
+
+      <g transform="translate(560, 160)">
+        <rect width="175" height="110" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Security &amp; Sandboxing</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Hardline Floor (b08)</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Docker (pids 2048) (b08)</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Context Approvals (b08)</text>
+        <text x="10" y="94" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#059669">★ Take into Platform</text>
+      </g>
+
+      <g transform="translate(750, 160)">
+        <rect width="145" height="110" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.8"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">iron-proxy</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Credential Injection</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Dummy token egress</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Zero secret leak (b11)</text>
+        <text x="10" y="96" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#059669">STRONGEST DESIGN</text>
+      </g>
+
+      <!-- Bottom Row inside Hermes -->
+      <g transform="translate(385, 285)">
+        <rect width="160" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Intelligence &amp; Skills</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 3-Way Learn Loop (b03)</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• /learn extraction (b03)</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Curator hygiene (b03)</text>
+        <text x="10" y="92" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 4-tier memory (b04)</text>
+        <text x="10" y="112" font-family="system-ui, sans-serif" font-size="10" fill="#64748b">Dynamic Tail Sizing</text>
+      </g>
+
+      <g transform="translate(560, 285)">
+        <rect width="175" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Orchestration &amp; Tools</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Cron ticks + retry (b06)</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Child cap 250 (b06)</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• /goal judge gate (b06)</text>
+        <text x="10" y="92" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• MCP Gateway &amp; Trust (b05)</text>
+        <text x="10" y="112" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">★ Take Cron rate-limit</text>
+      </g>
+
+      <g transform="translate(750, 285)">
+        <rect width="145" height="130" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="10" y="24" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Extensibility</text>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 17 Plugin kinds (b10)</text>
+        <text x="10" y="60" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Compat contract (b10)</text>
+        <text x="10" y="76" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• Shrinking core (b10)</text>
+        <text x="10" y="92" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• 35 Channels (b11)</text>
+        <text x="10" y="112" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">★ Take Plugin contract</text>
+      </g>
+
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 VISUAL GUIDE</div>
+    <h4>Forensic Verification Pipeline &amp; Codebase Distribution</h4>
+    <p>How claims in 455 documents (8.9 MB) were systematically verified against 1,819 Python files (698k LOC)</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 280" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-b0" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#3b82f6"/>
+        </marker>
+      </defs>
+
+      <!-- Step 1: Pinned Snapshot -->
+      <g transform="translate(20, 30)">
+        <rect width="180" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)" stroke-width="1.5"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">STEP 1: THE PIN</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">19,728 Files</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">md5: f57f729d4b251547...</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Snapshot: 2026-10-15</text>
+      </g>
+
+      <path d="M 200 80 L 235 80" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Step 2: Doc Claim Extraction -->
+      <g transform="translate(245, 30)">
+        <rect width="180" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)" stroke-width="1.5"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">STEP 2: DOC CLAIM</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">455 Markdown Docs</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">8.9 MB in website/docs/</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="#d97706">Claim = Hypothesis</text>
+      </g>
+
+      <path d="M 425 80 L 460 80" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Step 3: Source Verification -->
+      <g transform="translate(470, 30)">
+        <rect width="200" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #cbd5e1)" stroke-width="1.5"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#2563eb">STEP 3: CODE IS KING</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">1,819 Python Files</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">698,487 Source Lines</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">AST / Function Lines</text>
+      </g>
+
+      <path d="M 670 80 L 705 80" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+      <!-- Step 4: Outcome & Divergences -->
+      <g transform="translate(715, 30)">
+        <rect width="185" height="100" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#059669">STEP 4: FINDINGS</text>
+        <text x="15" y="52" font-family="system-ui, sans-serif" font-size="13" font-weight="600" fill="var(--text-primary, #0f172a)">Verified vs Divergent</text>
+        <text x="15" y="70" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Code wins every dispute</text>
+        <text x="15" y="88" font-family="system-ui, sans-serif" font-size="10.5" fill="#dc2626">4 Real Divergences</text>
+      </g>
+
+      <!-- Bottom Distribution Bar -->
+      <g transform="translate(20, 160)">
+        <text x="0" y="15" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Python Source Code Distribution (698,487 Total Lines)</text>
+        
+        <!-- Stacked Bar -->
+        <rect x="0" y="28" width="370" height="24" rx="4" fill="#3b82f6"/>
+        <text x="10" y="44" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">hermes_cli (285k)</text>
+
+        <rect x="375" y="28" width="180" height="24" rx="4" fill="#10b981"/>
+        <text x="385" y="44" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">agent (140k)</text>
+
+        <rect x="560" y="28" width="160" height="24" rx="4" fill="#8b5cf6"/>
+        <text x="570" y="44" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">tools (126k)</text>
+
+        <rect x="725" y="28" width="155" height="24" rx="4" fill="#f59e0b"/>
+        <text x="735" y="44" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#ffffff">gateway (122k)</text>
+
+        <text x="0" y="75" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Remaining Subsystems: plugins (76k) • tui_gateway (45k) • cron (19k) • skills (12k) • acp_adapter (6k)</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-00-the-pin-the-method-and-what-this-study-is">Batch 00 — The pin, the method, and what this study is<a href="#batch-00/batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/hermes-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-15
+<strong>This is a clean forensic study.</strong> It reads ONE source tree, measures it, and verifies every
+load-bearing claim against the source code. Nothing from any earlier Hermes analysis is reused,
+referenced, or assumed. Where this study reaches a conclusion that contradicts older material, the
+older material is ignored by instruction, not silently patched.</p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is:</strong>
+<code>C:/Users/Ramzi/Downloads/companai/hermes-agent-main/hermes-agent-main</code></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/NousResearch/hermes-agent</code> (<code>main</code>)</td>
+<td>the owner&#39;s instruction, 2026-10-15</td>
+</tr>
+<tr>
+<td>Extracted</td>
+<td>2026-10-15, 09:57 (all files share this mtime)</td>
+<td><code>ls -la</code></td>
+</tr>
+<tr>
+<td><code>.git</code> present?</td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td>Total files</td>
+<td><strong>19,728</strong></td>
+<td><code>find . -type f | wc -l</code></td>
+</tr>
+<tr>
+<td><code>pyproject.toml</code> md5</td>
+<td><strong><code>f57f729d4b251547a5a9e2565ce1e726</code></strong></td>
+<td><code>md5sum</code></td>
+</tr>
+<tr>
+<td>Declared version</td>
+<td><code>0.0.0</code> (the upstream default; carries no identity)</td>
+<td><code>pyproject.toml</code></td>
+</tr>
+<tr>
+<td>Product</td>
+<td><strong>Hermes Agent</strong> by Nous Research; licence <strong>MIT</strong></td>
+<td><code>pyproject.toml</code>, <code>README.md</code></td>
+</tr>
+<tr>
+<td>Python support</td>
+<td><code>&gt;=3.11,&lt;3.15</code></td>
+<td><code>pyproject.toml</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-why-the-pin-needed-re-taking-rule-13-a-premise-changed">1.1 Why the pin needed re-taking (rule 13 — a premise changed)<a href="#batch-00/1-1-why-the-pin-needed-re-taking-rule-13-a-premise-changed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The repository&#39;s existing pin record (<code>library/development/HERMES-PIN.md</code>) names a <strong>different</strong> copy:
+the repository-root <code>hermes-agent-main/</code>, 18,248 files, <code>pyproject.toml</code> md5 <code>11d88a68…</code>. <strong>That copy
+no longer exists as a copy</strong> — the owner replaced it. Measured today:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th></th>
+<th>Old pin&#39;s target</th>
+<th><strong>This study&#39;s source</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Path</td>
+<td><code>hermes-agent-main/</code> (root)</td>
+<td><code>hermes-agent-main/hermes-agent-main/</code></td>
+</tr>
+<tr>
+<td>Files</td>
+<td>18,248</td>
+<td><strong>19,728</strong></td>
+</tr>
+<tr>
+<td><code>pyproject.toml</code> md5</td>
+<td><code>11d88a68…</code></td>
+<td><strong><code>f57f729d…</code></strong></td>
+</tr>
+<tr>
+<td>Status</td>
+<td><strong>gone</strong> (the root folder now contains only this nested copy)</td>
+<td>present</td>
+</tr>
+</tbody></table></div>
+<p>The two hashes differ and the new tree holds <strong>1,480 more files</strong>. So this is not the same snapshot under
+a new name — it is a <strong>newer extract of the same product</strong>, and the pin must name it explicitly. This
+document is that pin. <strong>Any figure in this study is a figure about THIS tree and no other.</strong></p>
+<h3 id="1-2-the-honest-limit-on-which-commit-is-this">1.2 The honest limit on "which commit is this?"<a href="#batch-00/1-2-the-honest-limit-on-which-commit-is-this" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree, and <code>version = &quot;0.0.0&quot;</code>
+carries no identity. <strong>The md5 of <code>pyproject.toml</code> plus the file count plus the extraction date is the
+whole identity we can assert.</strong> A reader wanting to reproduce this study must match those three numbers.
+This is stated, not glossed: <strong>any claim here about &quot;the latest Hermes&quot; is a claim about this extract,
+dated 2026-10-15.</strong></p>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-documentation">2.1 Documentation<a href="#batch-00/2-1-documentation" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Folder under <code>website/docs/</code></th>
+<th align="right">Files</th>
+<th align="right">Bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>user-guide/</code></td>
+<td align="right">336</td>
+<td align="right">5,692,748</td>
+</tr>
+<tr>
+<td><code>developer-guide/</code></td>
+<td align="right">61</td>
+<td align="right">1,290,691</td>
+</tr>
+<tr>
+<td><code>guides/</code></td>
+<td align="right">36</td>
+<td align="right">390,910</td>
+</tr>
+<tr>
+<td><code>reference/</code></td>
+<td align="right">15</td>
+<td align="right">525,371</td>
+</tr>
+<tr>
+<td><code>getting-started/</code></td>
+<td align="right">8</td>
+<td align="right">163,353</td>
+</tr>
+<tr>
+<td><code>integrations/</code></td>
+<td align="right">4</td>
+<td align="right">129,028</td>
+</tr>
+<tr>
+<td><strong>Total <code>.md</code>/<code>.mdx</code></strong></td>
+<td align="right"><strong>455</strong></td>
+<td align="right"><strong>8.9 MB</strong></td>
+</tr>
+</tbody></table></div>
+<p><code>user-guide/</code> holds five subfolders: <code>features/</code>, <code>messaging/</code>, <code>skills/</code>, <code>secrets/</code>, <code>egress/</code>.</p>
+<h3 id="2-2-source-code-python">2.2 Source code (Python)<a href="#batch-00/2-2-source-code-python" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hermes_cli/</code></td>
+<td align="right">731</td>
+<td align="right">285,370</td>
+</tr>
+<tr>
+<td><code>agent/</code></td>
+<td align="right">362</td>
+<td align="right">139,601</td>
+</tr>
+<tr>
+<td><code>tools/</code></td>
+<td align="right">353</td>
+<td align="right">125,785</td>
+</tr>
+<tr>
+<td><code>gateway/</code></td>
+<td align="right">307</td>
+<td align="right">121,603</td>
+</tr>
+<tr>
+<td><code>plugins/</code></td>
+<td align="right">225</td>
+<td align="right">75,879</td>
+</tr>
+<tr>
+<td><code>tui_gateway/</code></td>
+<td align="right">116</td>
+<td align="right">45,456</td>
+</tr>
+<tr>
+<td><code>cron/</code></td>
+<td align="right">45</td>
+<td align="right">19,128</td>
+</tr>
+<tr>
+<td><code>skills/</code></td>
+<td align="right">50</td>
+<td align="right">11,590</td>
+</tr>
+<tr>
+<td><code>acp_adapter/</code></td>
+<td align="right">19</td>
+<td align="right">5,846</td>
+</tr>
+<tr>
+<td><code>hermes_platform/</code></td>
+<td align="right">15</td>
+<td align="right">2,049</td>
+</tr>
+<tr>
+<td><code>providers/</code></td>
+<td align="right">2</td>
+<td align="right">1,154</td>
+</tr>
+<tr>
+<td><strong>Total (these dirs)</strong></td>
+<td align="right"><strong>1,819</strong></td>
+<td align="right"><strong>698,487</strong></td>
+</tr>
+</tbody></table></div>
+<p>Non-Python top-level trees also present: <code>web/</code>, <code>website/</code>, <code>apps/</code> (desktop), <code>native/</code>, <code>ui-tui/</code>,
+<code>tests/</code>, <code>tests-js/</code>, <code>evals/</code>, <code>optional-skills/</code>, <code>optional-mcps/</code>, <code>plugin-catalog/</code>, <code>docker/</code>,
+<code>nix/</code>, <code>scripts/</code>, <code>pm/</code> (its package manager), <code>locales/</code>, <code>contributors/</code>, <code>assets/</code>.</p>
+<hr>
+<h2 id="3-the-method-how-every-batch-is-produced">3. The method (how every batch is produced)<a href="#batch-00/3-the-method-how-every-batch-is-produced" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>This is forensics, so the discipline is fixed and stated up front:</strong></p>
+<ol>
+<li><strong>Docs are claims; code is the authority.</strong> Every load-bearing statement a doc makes is checked against
+the Python source. Where they disagree, <strong>the code wins and the disagreement is recorded</strong> as a finding.</li>
+<li><strong>Every number is measured at the time of writing</strong>, never carried from memory or from an older
+document. File counts, line counts and hashes are produced by a command and quoted with their result.</li>
+<li><strong>Claims carry their evidence</strong>: a batch line that rests on code cites the file and line it was read at.</li>
+<li><strong>Two value questions per capability</strong>, per the owner&#39;s instruction:<ul>
+<li><strong>Q1 · USER VALUE</strong> — <em>how does this serve a real use case for a person using the platform?</em></li>
+<li><strong>Q2 · VISION VALUE</strong> — <em>how does this serve the vision of an AI-first business &amp; resources planner,
+now and long-run, including versatility and integratability?</em></li>
+</ul>
+</li>
+<li><strong>No comparison to our own platform inside the batches.</strong> Understanding first; comparison is the
+synthesis&#39;s (Batch 12) job alone.</li>
+<li><strong>Every capability is named, including ones we will not use.</strong> Nothing is silently dropped.</li>
+<li><strong>Findings are additive and never overwrite history</strong>: a later batch that changes an earlier batch&#39;s
+line says so explicitly rather than editing it away.</li>
+<li><strong>Plain words</strong> — every capability gets a one-sentence plain gloss before any detail.</li>
+</ol>
+<hr>
+<h2 id="4-the-batch-plan-each-documented-as-it-is-completed">4. The batch plan (each documented as it is completed)<a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Batch</th>
+<th>Primary docs</th>
+<th>Code to verify against</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>00</strong></td>
+<td><strong>This file</strong> — pin and method</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td>The agent loop + conversation model</td>
+<td><code>developer-guide/agent-loop.md</code>, <code>user-guide/features/tools.md</code>, <code>reference/toolsets-reference.md</code>, <code>reference/tools-reference.md</code>, <code>user-guide/features/overview.md</code></td>
+<td><code>agent/conversation_loop.py</code>, <code>agent/tool_executor.py</code>, <code>agent/agent_init.py</code>, <code>agent/iteration_budget.py</code>, <code>agent/agent_runtime_helpers.py</code>, <code>agent/context_compressor.py</code></td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td>Bots, profiles and group chats</td>
+<td><code>user-guide/bot-mode.md</code>, <code>profiles.md</code>, <code>multi-profile-gateways.md</code>, <code>profile-distributions.md</code></td>
+<td><code>agent/</code>, <code>gateway/</code> profile code</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td>Skills — the learning loop</td>
+<td><code>features/skills.md</code>, <code>developer-guide/creating-skills.md</code>, <code>reference/skills-catalog.md</code>, <code>user-guide/skills/*</code></td>
+<td><code>tools/</code> skill tools, <code>skills/</code></td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td>Memory and context</td>
+<td><code>features/memory.md</code>, <code>memory-providers.md</code>, <code>context-files.md</code>, <code>context-references.md</code>, <code>developer-guide/context-compression-and-caching.md</code></td>
+<td><code>agent/context_compressor.py</code>, memory modules</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td>Tools, MCP and the gateway</td>
+<td><code>features/mcp.md</code>, <code>tool-gateway.md</code>, <code>tool-search.md</code>, <code>developer-guide/adding-tools.md</code>, <code>reference/mcp-config-reference.md</code></td>
+<td><code>tools/</code>, <code>gateway/</code></td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td>Scheduling, delegation and the board</td>
+<td><code>features/cron.md</code>, <code>delegation.md</code>, <code>kanban*.md</code>, <code>loops.md</code>, <code>goals.md</code>, <code>heartbeat.md</code></td>
+<td><code>cron/</code>, delegation + kanban tool code</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td>Sessions, dashboard and settings surface</td>
+<td><code>user-guide/sessions.md</code>, <code>features/web-dashboard.md</code>, <code>desktop.md</code>, <code>reference/cli-commands.md</code>, <code>slash-commands.md</code></td>
+<td><code>web/</code>, dashboard backend</td>
+</tr>
+<tr>
+<td><strong>08</strong></td>
+<td>Security, approvals, secrets, sandboxing</td>
+<td><code>user-guide/security.md</code>, <code>secrets/*</code>, <code>egress/*</code>, <code>developer-guide/gateway-internals.md</code></td>
+<td>approval/secrets/sandbox code</td>
+</tr>
+<tr>
+<td><strong>09</strong></td>
+<td>Models and providers</td>
+<td><code>user-guide/configuring-models.md</code>, <code>local-models.md</code>, <code>integrations/providers.md</code>, <code>features/provider-routing.md</code>, <code>fallback-providers.md</code>, <code>credential-pools.md</code></td>
+<td><code>providers/</code>, <code>agent/agent_init.py</code>, <code>auxiliary_client</code></td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td>Code execution, plugins and extensibility</td>
+<td><code>features/code-execution.md</code>, <code>plugins.md</code>, <code>extending-the-dashboard.md</code></td>
+<td><code>tools/</code> code-exec, <code>plugins/</code></td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td>Channels, voice and media</td>
+<td><code>user-guide/messaging/*</code>, <code>features/voice-mode.md</code>, <code>tts.md</code>, <code>vision.md</code>, <code>image-generation.md</code>, <code>browser.md</code></td>
+<td><code>gateway/platforms/</code>, media tool code</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><strong>The synthesis</strong></td>
+<td>all of the above</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Each batch document carries:</strong> (a) what was read and its measured size; (b) the capability table with
+<strong>Q1 · Q2 · Phase</strong>; (c) the code verification, with file:line evidence, and any <strong>doc-vs-code
+divergence</strong> found; (d) items carried forward.</p>
+<hr>
+<h2 id="5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">5. Ground rules restated as a checklist the reader can hold this study to<a href="#batch-00/5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Is the claim measured, or remembered? → must be measured.</li>
+<li>Does the line rest on a doc, or on code? → code where it matters.</li>
+<li>If doc and code disagree, is the disagreement recorded? → must be.</li>
+<li>Is every capability named, including the ones we will not use? → must be.</li>
+<li>Are the two value questions answered in the owner&#39;s words? → yes, per capability.</li>
+<li>Is there any comparison to our own platform in a batch (<code>01</code>–<code>11</code>)? → must be none; that is Batch 12.</li>
+</ul>
+<hr>
+<p><em>Batch 00 of 12. Begun 2026-10-15. Next: <code>01-agent-loop-and-conversation.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              <div></div>
+
+              <a href="../index.html#batch-00" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="01-agent-loop-conversation.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Agent Loop &amp; Conversation</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-pin-task-zero-answered-by-measurement" class="toc-link">1. THE PIN — task zero, answered by measurement</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-why-the-pin-needed-re-taking-rule-13-a-premise-changed" class="toc-link">1.1 Why the pin needed re-taking (rule 13 — a premise changed)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-the-honest-limit-on-which-commit-is-this" class="toc-link">1.2 The honest limit on &quot;which commit is this?&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-what-the-tree-contains-measured" class="toc-link">2. What the tree contains (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-documentation" class="toc-link">2.1 Documentation</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-source-code-python" class="toc-link">2.2 Source code (Python)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-method-how-every-batch-is-produced" class="toc-link">3. The method (how every batch is produced)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-batch-plan-each-documented-as-it-is-completed" class="toc-link">4. The batch plan (each documented as it is completed)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="toc-link">5. Ground rules restated as a checklist the reader can hold this study to</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

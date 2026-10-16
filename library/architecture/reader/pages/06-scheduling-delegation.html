@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Scheduling, delegation and the board — Hermes Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Scheduling &amp; Delegation</div>
+        <div class="header-subtitle">Hermes Agent Forensic Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-scheduling-delegation-and-the-board.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,791</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">24 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">470</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+                    <optgroup label="Core Strategic Architectures">
+                      <option value="master">Executive Topology (Nous vs Platform)</option>
+                      <option value="12">Batch 12: Build AROUND Blueprint &amp; Transfer Matrix</option>
+                    </optgroup>
+                    <optgroup label="Execution &amp; Engine">
+                      <option value="01">Batch 01: Agent Loop Execution Flow</option>
+                      <option value="02">Batch 02: Profile Boundary &amp; Bot Routing</option>
+                      <option value="09">Batch 09: Model Routing &amp; Provider Grid</option>
+                      <option value="10">Batch 10: Plugin Contract &amp; PTC Execution</option>
+                    </optgroup>
+                    <optgroup label="Security &amp; Sandboxing">
+                      <option value="08">Batch 08: 4-Tier Security Defense Matrix</option>
+                      <option value="11">Batch 11: iron-proxy Egress Credential-Injection</option>
+                    </optgroup>
+                    <optgroup label="Intelligence, Memory &amp; Tools">
+                      <option value="03">Batch 03: 3-Way Self-Improving Learning Loop</option>
+                      <option value="04">Batch 04: 4-Tier Memory &amp; Dynamic Tail Sizing</option>
+                      <option value="05">Batch 05: Tool Registry, MCP Door &amp; Tool Search</option>
+                      <option value="06">Batch 06: Delegation Tree &amp; /goal Quality Gate</option>
+                      <option value="07">Batch 07: 24-Platform Session Pipeline &amp; Dashboard</option>
+                      <option value="00">Batch 00: Forensic Pin &amp; Codebase Anatomy</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 VISUAL GUIDE</div>
+    <h4>Delegation Tree &amp; /goal Completion Contract Gate</h4>
+    <p>Parent-to-child iteration caps (with corrected 250 cap) and the 5-field quality gate with LLM judge</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 250" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+      <!-- Left: Delegation Hierarchy -->
+      <g transform="translate(20, 20)">
+        <rect width="400" height="210" rx="10" fill="var(--surface-card, #ffffff)" stroke="#3b82f6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#2563eb">DELEGATION HIERARCHY (delegate_task)</text>
+        
+        <!-- Parent Box -->
+        <rect x="15" y="45" width="370" height="50" rx="6" fill="var(--bg-main, #f8fafc)" stroke="var(--border-color, #cbd5e1)"/>
+        <text x="25" y="66" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">Parent Agent</text>
+        <text x="25" y="84" font-family="system-ui, sans-serif" font-size="11" fill="#2563eb">Iteration Cap: 500 (max_iterations) • Spawns child tasks</text>
+
+        <!-- Arrow Down -->
+        <path d="M 200 95 L 200 120" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr-b0)"/>
+
+        <!-- Child Box -->
+        <rect x="15" y="130" width="370" height="70" rx="6" fill="#10b981" fill-opacity="0.1" stroke="#10b981" stroke-width="1.5"/>
+        <text x="25" y="152" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">Child Subagents</text>
+        <text x="25" y="170" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#047857">Iteration Cap: 250 (CORRECTED divergence: docs said 50!)</text>
+        <text x="25" y="188" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Isolated session • Own budget • Results bubble up to parent</text>
+      </g>
+
+      <!-- Right: /goal Quality Gate -->
+      <g transform="translate(450, 20)">
+        <rect width="450" height="210" rx="10" fill="var(--surface-card, #ffffff)" stroke="#8b5cf6" stroke-width="1.8"/>
+        <text x="15" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">/goal COMPLETION CONTRACT GATE</text>
+
+        <g transform="translate(15, 45)">
+          <rect width="130" height="60" rx="6" fill="var(--bg-main, #f8fafc)" stroke="var(--border-color, #cbd5e1)"/>
+          <text x="10" y="22" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="var(--text-primary, #0f172a)">1. Contract Fields</text>
+          <text x="10" y="38" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">5 completion</text>
+          <text x="10" y="52" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">field criteria</text>
+        </g>
+
+        <path d="M 150 75 L 175 75" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-loop)"/>
+
+        <g transform="translate(180, 45)">
+          <rect width="120" height="60" rx="6" fill="var(--bg-main, #f8fafc)" stroke="var(--border-color, #cbd5e1)"/>
+          <text x="10" y="22" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="var(--text-primary, #0f172a)">2. Exit-0 Gate</text>
+          <text x="10" y="38" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">Test command</text>
+          <text x="10" y="52" font-family="system-ui, sans-serif" font-size="9.5" fill="var(--text-secondary, #475569)">3 retries / 5 min</text>
+        </g>
+
+        <path d="M 305 75 L 330 75" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr-loop)"/>
+
+        <g transform="translate(335, 45)">
+          <rect width="100" height="60" rx="6" fill="#10b981" fill-opacity="0.12" stroke="#10b981"/>
+          <text x="8" y="22" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#047857">3. LLM Judge</text>
+          <text x="8" y="38" font-family="system-ui, sans-serif" font-size="9.5" fill="#047857">Verifies proof</text>
+          <text x="8" y="52" font-family="system-ui, sans-serif" font-size="9.5" fill="#047857">before finish</text>
+        </g>
+
+        <rect x="15" y="125" width="420" height="75" rx="6" fill="#3b82f6" fill-opacity="0.08"/>
+        <text x="25" y="145" font-family="system-ui, sans-serif" font-size="11.5" font-weight="700" fill="#2563eb">Session-Scoped Trio Comparison:</text>
+        <text x="25" y="165" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• /goal — Judge-driven loop with hard proof contracts</text>
+        <text x="25" y="183" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• /loop — Timer-driven repeated execution • /heartbeat — Recurring prompt</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-06-scheduling-delegation-and-the-board">Batch 06 — Scheduling, delegation and the board<a href="#batch-06/batch-06-scheduling-delegation-and-the-board" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Source:</strong> the pinned tree (<code>00-PIN-AND-METHOD.md</code> §1)
+<strong>Method:</strong> doc claims checked against the Python source; code wins; divergences recorded.</p>
+<hr>
+<h2 id="0-what-this-batch-is-in-plain-words">0. What this batch is (in plain words)<a href="#batch-06/0-what-this-batch-is-in-plain-words" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The first five batches covered how <em>one</em> agent thinks, remembers and acts. This batch covers how Hermes
+runs <strong>many</strong> agents and <strong>recurring</strong> work. Five mechanisms, deliberately kept separate — because they are
+easy to confuse and the docs themselves draw the boundaries sharply:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>One line</th>
+<th>Lives where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>cron</strong></td>
+<td>a schedule, outside any conversation</td>
+<td>its own fresh session per run</td>
+</tr>
+<tr>
+<td><strong><code>/heartbeat</code></strong></td>
+<td>one recurring prompt, <em>inside this</em> conversation</td>
+<td>the current session</td>
+</tr>
+<tr>
+<td><strong><code>/loop</code></strong></td>
+<td>re-run a prompt on a timer <em>inside this</em> conversation</td>
+<td>the current session</td>
+</tr>
+<tr>
+<td><strong><code>/goal</code></strong></td>
+<td>keep working until a judge says the objective is met</td>
+<td>the current session</td>
+</tr>
+<tr>
+<td><strong><code>delegate_task</code></strong></td>
+<td>spawn child agents that return a summary</td>
+<td>children of this session</td>
+</tr>
+<tr>
+<td><strong>kanban</strong></td>
+<td>a durable, shared task board many profiles work from</td>
+<td>a database + a dispatcher</td>
+</tr>
+</tbody></table></div>
+<p>The single most important distinction the docs draw: <strong><code>delegate_task</code> is a function call; kanban is a
+work queue</strong> (<code>kanban.md:97</code>) — and they <strong>cannot be mixed inside one run</strong> (a kanban worker is not offered
+<code>delegate_task</code>).</p>
+<hr>
+<h2 id="1-what-was-read-and-how-big-it-is-measured">1. What was read, and how big it is (measured)<a href="#batch-06/1-what-was-read-and-how-big-it-is-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc (under <code>website/docs/user-guide/features/</code>)</th>
+<th align="right">Bytes / lines</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cron.md</code></td>
+<td align="right">1,398 lines</td>
+</tr>
+<tr>
+<td><code>delegation.md</code></td>
+<td align="right">699 lines</td>
+</tr>
+<tr>
+<td><code>kanban.md</code></td>
+<td align="right">1,469 lines</td>
+</tr>
+<tr>
+<td><code>kanban-worker-lanes.md</code></td>
+<td align="right">143 lines</td>
+</tr>
+<tr>
+<td><code>kanban-multi-gateway.md</code></td>
+<td align="right">52 lines</td>
+</tr>
+<tr>
+<td><code>kanban-tutorial.md</code></td>
+<td align="right">310 lines</td>
+</tr>
+<tr>
+<td><code>loops.md</code></td>
+<td align="right">125 lines</td>
+</tr>
+<tr>
+<td><code>goals.md</code></td>
+<td align="right">299 lines</td>
+</tr>
+<tr>
+<td><code>heartbeat.md</code></td>
+<td align="right">70 lines</td>
+</tr>
+</tbody></table></div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Code verified against</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hermes_cli/config_defaults.py</code></td>
+<td><code>delegation</code> block (~1330), <code>goals</code> (1418), <code>loops</code> (1420), <code>cron</code> (1800), <code>kanban</code> (1886)</td>
+</tr>
+<tr>
+<td><code>cron/constants.py</code></td>
+<td>fire-claim TTL bounds (lines 9–17)</td>
+</tr>
+<tr>
+<td><code>cron/scheduler.py</code></td>
+<td>217,304 bytes — the tick, preflight, parking</td>
+</tr>
+<tr>
+<td><code>cron/jobs.py</code></td>
+<td>160,485 bytes — job storage, <code>quota_hold_until</code> interplay</td>
+</tr>
+<tr>
+<td><code>cron/quota_hold.py</code></td>
+<td><code>STATE_KEY = &quot;quota_hold_until&quot;</code> (line 28)</td>
+</tr>
+<tr>
+<td><code>tools/delegate_tool.py</code></td>
+<td><code>DEFAULT_MAX_ITERATIONS = 250</code> (line 105); config authoritative (530–536)</td>
+</tr>
+<tr>
+<td><code>tools/delegate_tool_config.py</code></td>
+<td><code>_DEFAULT_MAX_CONCURRENT_CHILDREN = 10</code>, <code>MAX_DEPTH = 1</code></td>
+</tr>
+<tr>
+<td><code>tools/kanban_tools_schemas.py</code></td>
+<td>the 14 <code>kanban_*</code> tool schemas</td>
+</tr>
+<tr>
+<td><code>toolsets.py</code></td>
+<td><code>kanban</code> toolset (157), <code>delegation</code> (156), <code>cronjob_manage</code> in core (28)</td>
+</tr>
+<tr>
+<td><code>hermes_cli/loops.py</code></td>
+<td>loop config readers (158–171)</td>
+</tr>
+<tr>
+<td><code>agent/iteration_budget.py</code></td>
+<td>the parent cap (default 500)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-cron-scheduled-unattended-work">2. Cron — scheduled, unattended work<a href="#batch-06/2-cron-scheduled-unattended-work" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-the-single-tool">2.1 The single tool<a href="#batch-06/2-1-the-single-tool" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>All cron management is <strong>one tool</strong>: <code>cronjob_manage</code>, action-style (<code>create</code>/<code>list</code>/<code>update</code>/<code>pause</code>/
+<code>resume</code>/<code>run</code>/<code>remove</code>) — <strong>VERIFIED</strong> (<code>tools/cronjob_tools.py:1057, 1193</code>; registered in the core tool list
+at <code>toolsets.py:28</code>). There is no separate <code>schedule</code>/<code>list</code>/<code>remove</code> tool family.</p>
+<p>Jobs are <strong>plain JSON on disk</strong> (<code>~/.hermes/cron/jobs.json</code>), output under <code>~/.hermes/cron/output/&lt;id&gt;/</code>
+(<code>cron.md:1369</code>). Written with atomic file writes so an interrupted write cannot leave a half-file
+(<code>cron.md:1383</code>).</p>
+<h3 id="2-2-how-a-tick-works">2.2 How a tick works<a href="#batch-06/2-2-how-a-tick-works" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The <strong>gateway daemon</strong> ticks the scheduler <strong>every 60 seconds</strong> (<code>cron.md:356</code>). <strong>VERIFIED</strong>:
+<code>gateway/run.py:4615</code> <code>_start_cron_ticker(… interval: int = 60)</code>. Each tick loads jobs, compares
+<code>next_run_at</code> to now, starts a fresh <code>AIAgent</code> session per due job, optionally injects attached skills, runs
+the prompt, delivers the result, and updates metadata (<code>cron.md:384–392</code>). A file lock at
+<code>~/.hermes/cron/.tick.lock</code> prevents overlapping ticks from double-running a batch.</p>
+<p><strong>Model resolution at fire time</strong> is a three-step ladder (<code>cron.md:26</code>): <em>per-job pin → <code>cron.model</code> → the
+main agent model</em>. The notable design choice: <strong>the agent cannot re-point a job at a different model</strong> —
+inference pins are <em>user-owned</em> (<code>cron.md:28</code>). The same for <code>reasoning_effort</code>: exposed on the CLI but
+<strong>deliberately not</strong> on the agent&#39;s tool (<code>cron.md:38</code>).</p>
+<h3 id="2-3-the-features-that-make-it-production-grade">2.3 The features that make it production-grade<a href="#batch-06/2-3-the-features-that-make-it-production-grade" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The cron doc is unusually deep — 1,398 lines for a scheduler. The load-bearing mechanisms:</p>
+<ul>
+<li><strong>Pre-dispatch validation (preflight).</strong> Before building <em>any</em> agent machinery, the scheduler checks the
+provider key resolves, attached skills are ready, delivery targets have gateway credentials, and every
+named MCP server resolved to at least one tool (<code>cron.md:90–115</code>). On failure: <code>last_status: blocked_config</code>, <strong>ONE</strong> alert (not one per tick), and <strong>no LLM call</strong> — <em>&quot;a misconfigured job never
+spends tokens.&quot;</em> <strong>VERIFIED</strong>: <code>cron/scheduler.py:1705, 1730, 1733</code> (<code>blocked_config</code> record; alert-once
+via a persisted <code>preflight_alerted</code> bit).</li>
+<li><strong>No-agent mode.</strong> <code>no_agent=True</code> runs a script on schedule and delivers its <strong>stdout verbatim</strong> with
+zero LLM involvement — the classic watchdog (<code>cron.md:912</code>). Empty stdout → a <strong>silent tick</strong>. Non-zero
+exit → an error alert (a broken watchdog can&#39;t fail silently). Scripts must resolve inside
+<code>$HERMES_HOME/scripts/</code>; the subprocess environment is <strong>sanitized</strong> so provider credentials are not
+inherited (<code>cron.md:932</code>).</li>
+<li><strong><code>wakeAgent</code> gate.</strong> A pre-run script can emit <code>{&quot;wakeAgent&quot;: false}</code> on its last line and skip the agent
+entirely for that tick — a <strong>$0</strong> way to decide whether a poll deserves tokens at all (<code>cron.md:1250</code>).
+The doc gives three worked recipes (file-change, external-flag, SQL-count) and credits a community PR
+whose proposed parallel trigger mechanism it deliberately did <strong>not</strong> build because this gate already
+covers it (<code>cron.md:1352</code>).</li>
+<li><strong>Recovery ladders.</strong> Two mirror cases, both bounded: a run that failed <strong>before any model call</strong> with a
+transient network error re-runs automatically after <strong>5, 15 and 30 minutes</strong> (spend-neutral —
+zero API calls were made), and a job whose subscription provider reports an exhausted usage window with a
+<code>retry after &lt;N&gt;s</code> hint is <strong>parked</strong> (<code>quota_hold_until</code>) rather than re-fired into a guaranteed
+failure (<code>cron.md:461–503</code>). <strong>VERIFIED</strong>: <code>cron/quota_hold.py:28</code> <code>STATE_KEY = &quot;quota_hold_until&quot;</code>.</li>
+<li><strong>Failure incidents.</strong> A recurring job failing with the <em>same</em> error alerts <strong>once</strong>, keyed by a
+normalized signature of the error text (case, whitespace and measured durations ignored), with a
+<code>failure_repeat_alert_hours: 6</code> reminder cooldown, a success re-arming the signature, and an explicit
+<code>ack</code> that silences that signature for good (<code>cron.md:505–549</code>). <strong>VERIFIED</strong>:
+<code>config_defaults.py:1881</code> <code>&quot;failure_repeat_alert_hours&quot;: 6</code>.</li>
+<li><strong>Execution ledger.</strong> Each claimed attempt is written to <code>~/.hermes/cron/executions.db</code> with immutable
+terminal states (<code>completed</code>/<code>failed</code>/<code>unknown</code>). An abandoned attempt is marked <code>unknown</code> only when the
+original <strong>PID and process-start fingerprint</strong> prove its owner is gone, or a live owner has been silent
+past a derived stale bound (<code>max(3 × HERMES_CRON_TIMEOUT, script timeout, 2 h)</code>) — so a healthy
+multi-hour job is never reclaimed mid-run (<code>cron.md:411–425</code>). <strong>The doc states its own limit honestly</strong>:
+this is <em>not</em> an exactly-once guarantee (<code>cron.md:438</code>).</li>
+<li><strong>Restart-safe workers.</strong> Under systemd each due job is handed to a transient user scope
+(<code>systemd-run --user --scope</code>) so a gateway restart mid-job doesn&#39;t kill it; on hosts without a user
+systemd session it <strong>degrades</strong> (runs as an external process without cgroup isolation) unless
+<code>cron.require_restart_safe_scope: true</code> fails closed (<code>cron.md:396–409</code>).</li>
+<li><strong>Health surfaces.</strong> <code>hermes cron doctor</code> (read-only, exits 1 while findings stand), <code>hermes cron incidents</code>, <code>hermes cron runs</code>, <code>hermes cron status</code> (overdue detection: a <code>next_run_at</code> &gt;15 min in the
+past is labelled <code>Overdue:</code> everywhere), plus monitoring metrics <code>hermes.cron.store.writable</code> /
+<code>skipped_runs</code> (<code>cron.md:367–380, 551–576</code>).</li>
+<li><strong><code>context_from</code> chaining + <code>continuity</code>.</strong> Job B can consume Job A&#39;s most recent completed output;
+<code>continuity=true</code> makes a job inject <em>its own</em> previous output so a recurring scout stops re-reporting
+(<code>cron.md:966–1038</code>).</li>
+</ul>
+<h3 id="2-4-delivery-and-the-honesty-about-it">2.4 Delivery — and the honesty about it<a href="#batch-06/2-4-delivery-and-the-honesty-about-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The <code>deliver:</code> target table is long (Telegram, Discord, Slack, WhatsApp, Signal, Matrix, SMS, email,
+DingTalk, Feishu, WeCom, Weixin, BlueBubbles, QQ Bot, Home Assistant, <code>bot-chat</code>, <code>all</code>). Three design
+points stand out because they are about <em>correctness</em>, not features:</p>
+<ol>
+<li><strong>Execution and delivery are tracked separately</strong> — a successful run whose output never reached the
+target records <code>delivery_failed</code>, <strong>never</strong> a plain <code>ok</code>, and it does <strong>not</strong> count toward the job&#39;s
+failure streak (<code>cron.md:622</code>).</li>
+<li><strong><code>UNVERIFIED</code> is a distinct state</strong> — a live-adapter send with <code>success</code> but no <code>message_id</code> /
+<code>raw_response</code> is accepted but flagged, because it is not proof of failure either (<code>cron.md:705</code>).</li>
+<li><strong>Delivered output is secret-redacted on every lane</strong>, and this applies <strong>even when
+<code>security.redact_secrets: false</code></strong> — <em>&quot;that setting governs your own logs, not what leaves the
+machine&quot;</em> (<code>cron.md:613–620</code>). A redactor failure <strong>replaces the payload</strong> rather than sending it
+unscanned.</li>
+</ol>
+<hr>
+<h2 id="3-delegation-child-agents-delegate-task">3. Delegation — child agents (`delegate_task`)<a href="#batch-06/3-delegation-child-agents-delegate-task" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-shape">3.1 The shape<a href="#batch-06/3-1-the-shape" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>delegate_task</code> spawns child <code>AIAgent</code> instances with <strong>isolated context</strong> and inherited tool access; only
+the child&#39;s <strong>final summary</strong> enters the parent&#39;s context (<code>delegation.md:9</code>). Top-level calls run in the
+background automatically (return a handle, post the result later as a new message); an <strong>orchestrator</strong>
+subagent waits for its own workers so it can synthesise.</p>
+<p><strong>Subagents know nothing</strong> — a completely fresh conversation, zero knowledge of the parent&#39;s history. The
+parent must pass everything in <code>goal</code> + <code>context</code> (<code>delegation.md:82</code>). One exception: when the parent has a
+resolved workspace, the child&#39;s system prompt embeds that workspace&#39;s <strong>project context files</strong> (AGENTS.md
+chain), so a child works under the repo&#39;s own conventions.</p>
+<h3 id="3-2-verified-constants-the-divergence-check">3.2 Verified constants (the divergence check) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/3-2-verified-constants-the-divergence-check" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Claim (doc)</th>
+<th>Code</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>concurrent children <strong>10</strong> default, floor 1, no ceiling</td>
+<td><code>delegate_tool_config.py:17</code> <code>_DEFAULT_MAX_CONCURRENT_CHILDREN = 10</code>; <code>max(1, int(v))</code></td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td><code>delegation.max_iterations</code> default <strong>250</strong></td>
+<td><code>delegate_tool.py:105</code> <code>DEFAULT_MAX_ITERATIONS = 250</code>; config default <code>250</code> (<code>config_defaults.py</code> delegation block)</td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td><code>max_spawn_depth</code> default <strong>1</strong> (flat)</td>
+<td><code>delegate_tool_config.py:21</code> <code>MAX_DEPTH = 1</code>; config <code>&quot;max_spawn_depth&quot;: 1</code></td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td><code>oneshot_max_children</code> default <strong>2</strong></td>
+<td>config <code>&quot;oneshot_max_children&quot;: 2</code>; <code>_get_oneshot_max_children()</code> default 2</td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td>no wall-clock child timeout by default</td>
+<td><code>delegate_tool_config.py:25</code> <code>DEFAULT_CHILD_TIMEOUT: Optional[float] = None</code>; config <code>&quot;child_timeout_seconds&quot;: 0</code></td>
+<td><strong>TRUE</strong></td>
+</tr>
+<tr>
+<td>parent cap <strong>500</strong></td>
+<td><code>agent/iteration_budget.py:4</code> docstring <em>&quot;the cap is <code>max_iterations</code> (default 500)&quot;</em>; <code>hermes_cli/cli_config_load.py:201</code> <code>&quot;max_turns&quot;: 500</code></td>
+<td><strong>TRUE</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>No divergence this batch on delegation constants.</strong> One <strong>correction to my own earlier note</strong>, recorded
+here under rule 13: batch 01&#39;s summary carried &quot;subagent 50&quot; as the delegation cap. The code is
+unambiguous — <code>DEFAULT_MAX_ITERATIONS = 250</code>, and the config field is 250. The <strong>500/250</strong> pair (parent /
+child) is the correct one; the &quot;50&quot; was wrong and is corrected here and forward.</p>
+<h3 id="3-3-the-mechanisms-worth-naming">3.3 The mechanisms worth naming<a href="#batch-06/3-3-the-mechanisms-worth-naming" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Structured output (<code>output_schema</code>).</strong> A child&#39;s answer can be validated against a JSON Schema. On a
+contract miss the parent sends <strong>exactly one</strong> bounded correction turn; a <em>second</em> miss does <strong>not</strong>
+discard the work — the result keeps <code>status: completed</code>, the raw text in <code>summary</code>, and <code>schema_valid: false</code> with the errors, so the parent can salvage an hour of work (<code>delegation.md:55–59</code>).</li>
+<li><strong>Steering, not just killing.</strong> A running child can be <strong>steered</strong> (<code>subagent.steer</code>) — text queued and
+appended at the next iteration boundary without cutting the in-flight tool call. The honesty detail:
+<code>&quot;queued&quot;</code> is not delivery; if the child finishes first the text is returned as <code>missed_steer</code> with a
+note appended to the summary, so the parent can tell a steered child from one that ran on old
+instructions (<code>delegation.md:500–514</code>).</li>
+<li><strong>Stall detection is progress-based, not wall-clock.</strong> A background child frozen past the stale
+threshold (<strong>450 s idle, 1200 s while inside a tool</strong>) is interrupted and given a 120 s grace window, then
+force-finalised with a <code>stalled</code> event — so a wedged child never leaves its session looking dead
+(<code>delegation.md:397–430</code>).</li>
+<li><strong>Worktree isolation.</strong> Opt-in <code>delegation.worktree_isolation: true</code> gives each child its own git
+worktree off <code>HEAD</code> so parallel editors can&#39;t collide; a worktree with <strong>no commits and a clean tree is
+pruned</strong>, anything holding work is kept (<code>delegation.md:607–641</code>). Note the care: if the git inspection
+probe fails, the entry carries <code>inspection_failed: true</code> and the parent is told <code>commits</code>/<code>dirty</code> are
+<em>defaults, not measurements</em>.</li>
+<li><strong>Live transcripts.</strong> Every dispatch writes an append-only readable log per task at
+<code>&lt;hermes_home&gt;/cache/delegation/live/&lt;id&gt;/task-&lt;n&gt;.log</code>; directories older than 7 days are pruned
+(<code>delegation.md:516–530</code>).</li>
+<li><strong><code>/review</code>.</strong> An independent, full-privilege background subagent whose only job is to review the work
+the conversation produced; it inherits the primary&#39;s loaded skills and the repo&#39;s context files, and
+re-enters the session as a normal background completion (<code>delegation.md:294–327</code>). <code>/review</code> reviews the
+<em>work</em>; <code>/refine</code> reviews the conversation to update memory and skills.</li>
+</ul>
+<hr>
+<h2 id="4-kanban-the-durable-board">4. Kanban — the durable board<a href="#batch-06/4-kanban-the-durable-board" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-the-one-sentence-distinction-doc-s-own">4.1 The one-sentence distinction (doc's own)<a href="#batch-06/4-1-the-one-sentence-distinction-doc-s-own" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<blockquote>
+<p><code>delegate_task</code> is a function call; Kanban is a work queue where every handoff is a row any profile (or
+human) can see and edit. — <code>kanban.md:97</code></p>
+</blockquote>
+<p>Each task is a row in <code>~/.hermes/kanban.db</code> (or a per-board DB); each worker is a <strong>full OS process with its
+own identity</strong>; each handoff is a row (<code>kanban.md:13</code>). Task status is a real state machine:
+<code>triage | todo | ready | running | blocked | review | done | archived</code> (<code>kanban.md:132</code>).</p>
+<h3 id="4-2-two-front-doors-one-database">4.2 Two front doors, one database<a href="#batch-06/4-2-two-front-doors-one-database" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Agents drive the board through a <code>kanban_*</code> toolset</strong> — <strong>VERIFIED 14 tools</strong> in
+<code>tools/kanban_tools_schemas.py</code>: <code>kanban_show</code>, <code>kanban_list</code>, <code>kanban_complete</code>, <code>kanban_block</code>,
+<code>kanban_request_review</code>, <code>kanban_request_changes</code>, <code>kanban_heartbeat</code>, <code>kanban_comment</code>, <code>kanban_create</code>,
+<code>kanban_link</code>, <code>kanban_unblock</code>, <code>kanban_attach</code>, <code>kanban_attach_url</code>, <code>kanban_attachments</code> (the
+doc lists 14; the schema file also holds <code>kanban_schedule</code> and <code>kanban_workflow</code> helpers). <strong>VERIFIED</strong>
+the toolset registration at <code>toolsets.py:157–165</code>.</li>
+<li><strong>Humans/scripts/cron</strong> drive it through <code>hermes kanban …</code> / <code>/kanban …</code> / the dashboard.</li>
+</ul>
+<p>Both route through the same <code>kanban_db</code> layer (<code>kanban.md:25</code>). The doc records the <strong>boundary hazard</strong>
+explicitly: a naive <code>kanban_link</code> can deadlock the board — linking a support card to the card it is meant
+to unblock makes the support card a <em>child</em> of the blocked parent, so neither runs. The fix is to reference
+the parent id in prose; a demoted <code>ready</code> child records a <code>dependency_wait</code> event so the deadlock is
+<strong>visible on the board</strong> (<code>kanban.md:112</code>).</p>
+<h3 id="4-3-the-dispatcher-and-the-worker-lifecycle">4.3 The dispatcher and the worker lifecycle<a href="#batch-06/4-3-the-dispatcher-and-the-worker-lifecycle" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>Dispatcher</strong> — a long-lived loop that every N seconds (<strong>default 60</strong>) reclaims stale claims, reclaims
+crashed workers (PID gone), reaps workers that outlived their run, promotes ready tasks, atomically claims
+and spawns. Runs <strong>inside the gateway</strong> by default. One dispatcher sweeps <strong>all boards</strong> per tick; workers
+are spawned with <code>HERMES_KANBAN_BOARD</code> pinned so they can&#39;t see other boards. After
+<code>kanban.failure_limit</code> consecutive spawn failures (<strong>default 2</strong>) it auto-blocks the task to stop thrashing
+(<code>kanban.md:135</code>). <strong>VERIFIED</strong>: <code>config_defaults.py:1896</code> <code>&quot;dispatch_in_gateway&quot;: True</code>, <code>:1904</code>
+<code>&quot;failure_limit&quot;: 2</code>, <code>:1947</code> <code>&quot;dispatch_stale_timeout_seconds&quot;: 14400</code> (= 4 h).</p>
+<p><strong>Worker lifecycle</strong> — injected into every worker&#39;s system prompt at spawn as a <code>KANBAN_GUIDANCE</code> block, so
+there is <strong>nothing to install</strong>: <code>kanban_show()</code> → <code>cd $HERMES_KANBAN_WORKSPACE</code> → <code>kanban_heartbeat(...)</code>
+during long work → <code>kanban_complete</code> / <code>kanban_request_review</code> / <code>kanban_block</code> (<code>kanban.md:561</code>).</p>
+<p>Three failure <strong>bookings</strong> are distinguished by exit code, and the design is unusually careful:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Exit</th>
+<th>Meaning</th>
+<th>Booking</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code> with task still <code>running</code></td>
+<td><strong>protocol violation</strong> — worker never made its terminal board call</td>
+<td><code>protocol_violation</code> event; bounded retry (default 3) before auto-block</td>
+</tr>
+<tr>
+<td><code>75</code> (<code>EX_TEMPFAIL</code>)</td>
+<td>rate-limited / 5xx / timeout / quota wall</td>
+<td><code>rate_limited</code>; <strong>requeued without counting a failure</strong></td>
+</tr>
+<tr>
+<td><code>78</code> (<code>EX_CONFIG</code>)</td>
+<td>credential / model / TLS rejected — a retry can&#39;t fix it</td>
+<td>terminal: circuit breaker on <strong>first</strong> occurrence, parked <code>blocked</code> (sticky)</td>
+</tr>
+</tbody></table></div>
+<p>The design point: the rate-limit lane <strong>is not booked as a failure</strong>, and the terminal provider lane <strong>is
+not re-spawned into the same wall</strong> (<code>kanban.md:600–610</code>). Before the worker exits, Hermes injects up to
+<strong>two synthetic nudges</strong> if the model is about to stop without a terminal board call — and the nudge
+<strong>never</strong> asks a worker that already handed its card off for review to <code>kanban_complete</code>.</p>
+<h3 id="4-4-boards-vs-tenants-the-isolation-ladder">4.4 Boards vs tenants — the isolation ladder<a href="#batch-06/4-4-boards-vs-tenants-the-isolation-ladder" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Strength</th>
+<th>Mechanism</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Board</strong></td>
+<td><strong>hard</strong> isolation</td>
+<td>separate SQLite DB + <code>workspaces/</code> + <code>logs/</code> per board; cross-board linking disallowed</td>
+</tr>
+<tr>
+<td><strong>Tenant</strong></td>
+<td><strong>soft</strong> filter</td>
+<td>a string namespace <em>within</em> a board; data isolated by workspace path + memory key prefix</td>
+</tr>
+</tbody></table></div>
+<p><code>kanban.md:124–140, 141–260</code>. The doc is candid that tenants are <em>&quot;a soft filter; boards are the hard
+isolation boundary.&quot;</em> Workspace kinds are three, with different lifetimes: <code>scratch</code> (fresh tmp dir,
+<strong>deleted on completion</strong> unless artifacts are declared), <code>dir:&lt;path&gt;</code> (existing shared dir, must be
+absolute — relative paths rejected as a <em>confused-deputy escape vector</em>, <strong>preserved</strong>), and <code>worktree</code>
+(git worktree, <strong>preserved</strong>).</p>
+<h3 id="4-5-pr-completion-contracts-the-strongest-governance-artifact-in-this-batch">4.5 PR completion contracts — the strongest governance artifact in this batch<a href="#batch-06/4-5-pr-completion-contracts-the-strongest-governance-artifact-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A card can declare <code>--completion-contract OWNER/REPO</code>. Completion then reads <strong>branch protection and active
+ruleset required contexts</strong>, paginates exact-head check runs, re-reads the PR head/base, and <strong>refuses to
+complete</strong> on missing, pending, failed, cancelled, timed-out, stale, skipped or neutral <strong>required</strong>
+evidence — as well as on zero-run acceptance, unreadable policy or GitHub API failures (<code>kanban.md:48–96</code>).</p>
+<p>Two details mark this as seriously built:</p>
+<ol>
+<li><strong>Acceptance runs as the <em>assignee profile&#39;s</em> <code>gh</code> login</strong>, from that profile&#39;s own <code>.env</code> — never the
+ambient login of whichever process completes the card. On multi-profile hosts this is the difference
+between two GitHub identities not leaking into each other.</li>
+<li>The doc <strong>states what it is not</strong>: <em>&quot;a single-user lifecycle guard, not OS isolation against arbitrary
+direct database writes. GitHub Enterprise is not covered.&quot;</em></li>
+</ol>
+<hr>
+<h2 id="5-the-session-scoped-trio-heartbeat-loop-goal">5. The session-scoped trio: `/heartbeat`, `/loop`, `/goal`<a href="#batch-06/5-the-session-scoped-trio-heartbeat-loop-goal" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>These three are easy to confuse, and the docs each carry an explicit comparison table. All three inject a
+<strong>plain user-role turn</strong> at an idle boundary — <strong>no system-prompt mutation, no toolset swap</strong>, so the
+prompt cache survives (<code>heartbeat.md:48</code>, <code>goals.md:221</code>, <code>loops.md:98</code>). That single property is what makes
+them cheap.</p>
+<h3 id="5-1-the-comparison-as-the-docs-themselves-draw-it">5.1 The comparison (as the docs themselves draw it)<a href="#batch-06/5-1-the-comparison-as-the-docs-themselves-draw-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>/heartbeat</code></th>
+<th><code>/loop</code></th>
+<th><code>/goal</code></th>
+<th>cron</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Trigger</strong></td>
+<td>timer</td>
+<td>timer (or self-paced)</td>
+<td><strong>judge verdict after each turn</strong></td>
+<td>schedule, outside session</td>
+</tr>
+<tr>
+<td><strong>Lives in</strong></td>
+<td>this session</td>
+<td>this session</td>
+<td>this session</td>
+<td>its own session per run</td>
+</tr>
+<tr>
+<td><strong>Ends when</strong></td>
+<td>you clear it</td>
+<td>stop condition / caps / you</td>
+<td>goal achieved / budget / you</td>
+<td>you remove it</td>
+</tr>
+<tr>
+<td><strong>Survives restart</strong></td>
+<td>state survives; gateway resumes</td>
+<td>state persists</td>
+<td>state persists (<code>/resume</code>)</td>
+<td>fully durable</td>
+</tr>
+</tbody></table></div>
+<h3 id="5-2-goal-the-judge-driven-loop">5.2 `/goal` — the judge-driven loop<a href="#batch-06/5-2-goal-the-judge-driven-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>After every turn a <strong>lightweight judge model</strong> rules <code>done</code> / <code>blocked</code> / <code>continue</code> / <code>wait</code> on the
+assistant&#39;s last response (~4 KB of it), and a <code>continue</code> feeds a continuation prompt back into the session
+(<code>goals.md:183</code>). A goal judged <strong>unachievable</strong> gets <code>blocked</code> — never <code>done</code> — and the loop <strong>pauses</strong>,
+so an impossible task is not waved through as complete (<code>goals.md:189</code>). Judge failures <strong>fail open</strong>
+(→ <code>continue</code>); the <strong>turn budget</strong> is the real backstop (default <strong>20</strong>, <code>goals.max_turns</code>).
+<strong>VERIFIED</strong>: <code>config_defaults.py</code> goals block <code>&quot;max_turns&quot;: 20</code>.</p>
+<p>Three layers of rigour beyond a bare judgement:</p>
+<ul>
+<li><strong>Completion contracts</strong> — five optional fields (<code>outcome</code>, <code>verification</code>, <code>constraints</code>, <code>boundaries</code>,
+<code>stop_when</code>), where the judge marks <code>done</code> <strong>only when the verification criterion is met with concrete
+evidence</strong> (a command result, file excerpt, test output), not a &quot;looks done&quot; claim (<code>goals.md:85–95</code>).
+<code>/goal draft &lt;text&gt;</code> expands a one-liner into a full contract.</li>
+<li><strong>Quality gates</strong> — a deterministic <strong>shell command that must exit 0</strong> before the goal can complete at
+all. <strong>Gates run before the judge</strong>; if a gate fails the judge is <em>not called</em> — a red gate is
+deterministic evidence. Each gate defaults to <strong>3 retries and a 5-minute timeout</strong>; exhausting them
+auto-pauses the goal (<code>goals.md:136–154</code>). This is the strongest available answer to &quot;the judge is still
+an LLM reading prose.&quot;</li>
+<li><strong><code>/subgoal</code></strong> — append acceptance criteria mid-loop without resetting it; the judge verdict must
+consider every subgoal.</li>
+</ul>
+<p><strong>Automatic parking</strong> is the cleverest part: the judge is shown the session&#39;s own live background processes
+each turn, and when progress is genuinely gated on one it returns <code>wait</code> and the loop <strong>parks</strong> — no judge
+call, no continuation, no turn consumed. A pid/session wait is capped at <strong>30 minutes</strong>, so a forgotten
+poller can&#39;t park a goal forever (<code>goals.md:156–177</code>).</p>
+<h3 id="5-3-loop-the-timer-driven-loop">5.3 `/loop` — the timer-driven loop<a href="#batch-06/5-3-loop-the-timer-driven-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Fixed interval (you set the clock) or <strong>self-paced</strong> (Hermes sets it): start at the floor (<strong>1 min</strong>),
+back off exponentially while replies stop changing (2m, 4m, 8m …) up to a ceiling (<strong>15 min</strong>), snap back
+to the floor the moment a reply differs. Change detection is a <strong>local digest comparison</strong> (timestamps
+ignored) — <em>&quot;idle waits cost nothing extra&quot;</em> (<code>loops.md:48</code>). Stop conditions: the agent emits
+<code>LOOP_COMPLETE</code>, a <code>--times N</code> cap, a judge-checked <code>--until</code> condition, you, or the backstop budget
+<code>loops.max_ticks</code> (<strong>default 100</strong>).</p>
+<p><strong>VERIFIED</strong> (<code>hermes_cli/config_defaults.py</code> loops block, and <code>hermes_cli/loops.py:158–171</code>):
+<code>min_interval_seconds: 30</code>, <code>max_ticks: 100</code>, <code>self_paced_floor_seconds: 60</code>,
+<code>self_paced_ceiling_seconds: 900</code>. <strong>Doc claim: TRUE</strong> (the doc quotes the floor as &quot;1 minute&quot; — the config
+value <code>60</code> seconds matches).</p>
+<h3 id="5-4-heartbeat-one-recurring-prompt">5.4 `/heartbeat` — one recurring prompt<a href="#batch-06/5-4-heartbeat-one-recurring-prompt" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Simplest of the three: one recurring instruction per session, fired only when the session is idle.
+<strong>Missed ticks coalesce</strong> — a busy session gets <strong>one</strong> heartbeat turn, not a backlog (<code>heartbeat.md:45</code>).
+State lives in <code>SessionDB.state_meta</code> keyed <code>heartbeat:&lt;session_id&gt;</code>; the gateway restores active
+heartbeats on startup, and a heartbeat whose conversation was reset/cleared is <strong>not</strong> resurrected.</p>
+<p><strong>Interaction rule between all three</strong> (<code>loops.md:90</code>, <code>goals.md:205</code>): <strong>an active goal owns the session</strong> —
+loop wakeups defer while a goal is driving; the loop resumes in the goal&#39;s idle time. <strong>A real user message
+always wins over both.</strong></p>
+<hr>
+<h2 id="6-the-capability-table-the-owner-s-two-questions">6. The capability table — the owner's two questions<a href="#batch-06/6-the-capability-table-the-owner-s-two-questions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Verdict</code> empty (that is Batch 12&#39;s job).</p>
+<h3 id="6-1-scheduling-cron">6.1 Scheduling (cron)<a href="#batch-06/6-1-scheduling-cron" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>cronjob_manage</code> (one tool)</strong></td>
+<td>the AI schedules work by talking</td>
+<td>&quot;every morning, brief me&quot; with no UI</td>
+<td>the AI is a <strong>planner</strong>, not just a responder</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Model pin is user-owned</strong></td>
+<td>the agent can&#39;t re-point a job&#39;s model</td>
+<td>cost/quality stays the user&#39;s choice</td>
+<td><strong>governance</strong> over inference spend</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Preflight (blocked_config, no LLM call)</strong></td>
+<td>a misconfigured job never spends tokens</td>
+<td>no silent token burn from a bad job</td>
+<td><strong>cost control by construction</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>No-agent mode + <code>wakeAgent</code> gate</strong></td>
+<td>script-only jobs; $0 pre-run gate</td>
+<td>cheap watchdogs that only speak when wrong</td>
+<td><strong>an economy of scale</strong> for monitoring</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Recovery ladders (unreachable / quota-park)</strong></td>
+<td>transient failures self-heal; quota windows are held</td>
+<td>briefs arrive despite a flaky link</td>
+<td><strong>resilience without busywork</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Failure incidents (alert once, ack)</strong></td>
+<td>same error alerts once, then on cooldown</td>
+<td>the inbox isn&#39;t flooded by a stuck job</td>
+<td><strong>signal hygiene</strong></td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Execution ledger + <code>cron doctor</code></strong></td>
+<td>every attempt is recorded; a read-only health check</td>
+<td>&quot;is my automation actually running?&quot;</td>
+<td><strong>auditability</strong> of autonomous work</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>context_from</code> + <code>continuity</code></strong></td>
+<td>chain jobs; a job remembers its own last output</td>
+<td>pipelines (collect→filter→ship)</td>
+<td><strong>multi-stage autonomy</strong> as data</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Secret-redaction on every delivery lane</strong></td>
+<td>credentials masked on the way out</td>
+<td>scheduled output can&#39;t leak a key</td>
+<td><strong>a safety floor for autonomy</strong></td>
+<td><code>now</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="6-2-delegation-and-the-board">6.2 Delegation and the board<a href="#batch-06/6-2-delegation-and-the-board" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>delegate_task</code></strong></td>
+<td>spawn child agents that return a summary</td>
+<td>big jobs done in parallel</td>
+<td>the <strong>worker layer</strong> of an AI company</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Cost strategy (frontier planner, cheap workers)</strong></td>
+<td>pin children to a cheaper model</td>
+<td>the same work for less money</td>
+<td><strong>economic design</strong> of a company of agents</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>output_schema</code> + salvage</strong></td>
+<td>a child&#39;s answer validated against a contract</td>
+<td>structured, dependable results</td>
+<td><strong>machine-checkable</strong> delegation</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Steering + stall detection</strong></td>
+<td>redirect a child; a frozen one is caught</td>
+<td>long jobs don&#39;t silently die</td>
+<td><strong>reliability</strong> at fleet scale</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Worktree isolation</strong></td>
+<td>each child gets its own git worktree</td>
+<td>parallel edits don&#39;t collide</td>
+<td>safe <strong>parallel engineering</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong><code>/review</code></strong></td>
+<td>an independent reviewer of the work</td>
+<td>a second pair of eyes on demand</td>
+<td><strong>quality control</strong> as a primitive</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong>Kanban board (durable, shared)</strong></td>
+<td>a task queue many profiles work from</td>
+<td>work survives restarts; humans can step in</td>
+<td><strong>the operating system of an AI company</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Assignees = named profiles with memory</strong></td>
+<td>each card goes to a persistent agent</td>
+<td>specialists with a memory of their work</td>
+<td><strong>roles and org structure</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>PR completion contracts</strong></td>
+<td>a card can&#39;t complete without proof of green</td>
+<td>&quot;done&quot; means verified</td>
+<td><strong>governed autonomy</strong> — the strongest artifact here</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Boards (hard) vs tenants (soft)</strong></td>
+<td>isolation ladder for work streams</td>
+<td>separate projects cleanly</td>
+<td><strong>multi-tenant plumbing</strong>, honestly scoped</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="6-3-the-session-scoped-trio">6.3 The session-scoped trio<a href="#batch-06/6-3-the-session-scoped-trio" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>What it is (plain)</th>
+<th>Q1 · user value</th>
+<th>Q2 · vision value</th>
+<th>Phase</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>/heartbeat</code></strong></td>
+<td>one recurring prompt in this chat</td>
+<td>&quot;keep an eye on X while we work&quot;</td>
+<td>in-conversation liveness</td>
+<td><code>now</code></td>
+</tr>
+<tr>
+<td><strong><code>/loop</code> (self-paced)</strong></td>
+<td>re-run a prompt, auto-slowing when idle</td>
+<td>polling without token waste</td>
+<td><strong>cheap liveness</strong> at scale</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong><code>/goal</code> (judge loop)</strong></td>
+<td>keep working until an objective is met</td>
+<td>&quot;don&#39;t make me say keep going&quot;</td>
+<td><strong>persistence</strong> as a first-class primitive</td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Completion contracts</strong></td>
+<td>names what <em>done</em> means + how to prove it</td>
+<td>the AI stops at the right moment</td>
+<td><strong>definition-of-done as data</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Quality gates (exit-0 command)</strong></td>
+<td>a deterministic gate before the judge</td>
+<td>&quot;green&quot; is mechanically checked</td>
+<td><strong>verification beats vibes</strong></td>
+<td><code>soon</code></td>
+</tr>
+<tr>
+<td><strong>Auto-parking on a live process</strong></td>
+<td>the loop waits for CI instead of polling</td>
+<td>no busywork while you wait</td>
+<td><strong>patience</strong> as a designed behaviour</td>
+<td><code>soon</code></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-divergence-and-boundary-notes">7. Divergence and boundary notes <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/7-divergence-and-boundary-notes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>One divergence, and it was mine, not the docs&#39;.</strong> The delegation constants all match the code
+(10 / 250 / 1 / 2 / no-timeout / parent-500). My <strong>own</strong> earlier batch note of &quot;subagent 50&quot; was wrong;
+corrected here under rule 13. The docs&#39; <code>250</code> is right.</li>
+<li><strong>The doc&#39;s own boundaries, stated honestly and worth repeating:</strong> cron&#39;s ledger is <em>not</em> an
+exactly-once guarantee; kanban&#39;s PR contract is <em>not</em> OS isolation and does <strong>not</strong> cover GitHub
+Enterprise; kanban&#39;s <code>dir:</code> workspace <strong>trusts the path</strong> — it is a <em>trusted-local-user</em> threat model,
+single-host by design; tenants are a <strong>soft</strong> filter while <strong>boards</strong> are the hard boundary.</li>
+<li><strong><code>/goal</code> and kanban never flow into each other</strong> (<code>goals.md:26–39</code>): setting a goal never creates a
+card; pausing a goal never moves a card. The overlap is exactly one thing — a kanban card created with
+<code>--goal</code> runs the <em>same continuation engine</em> <strong>inside that card&#39;s worker session</strong>.</li>
+<li><strong><code>delegate_task</code> and kanban cannot mix inside one run</strong> (<code>kanban.md:121</code>): a kanban worker is not
+offered <code>delegate_task</code>; split fan-out into child cards instead.</li>
+</ul>
+<hr>
+<h2 id="8-items-carried-forward">8. Items carried forward<a href="#batch-06/8-items-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C6-1</td>
+<td>A durable, shared board with <strong>named-profile assignees</strong> is the closest existing match to the platform&#39;s org-chart vision — study it as the board&#39;s foundation (rule 17)</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C6-2</td>
+<td>PR completion contracts = &quot;definition-of-done as data&quot;; the platform&#39;s board approval gate (M3-AGT-02) is a sibling idea</td>
+<td>batch 08 / synthesis</td>
+</tr>
+<tr>
+<td>C6-3</td>
+<td>The <strong>preflight</strong> pattern (validate, then don&#39;t call the model) is a reusable cost-control idiom</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C6-4</td>
+<td>Exit-code <strong>booking</strong> (rate-limit ≠ failure; terminal ≠ retry) is a reliability idiom to copy</td>
+<td>batch 08</td>
+</tr>
+<tr>
+<td>C6-5</td>
+<td>The <strong>session-scoped</strong> trio is Hermes&#39; answer to in-flight liveness; the platform&#39;s <code>heartbeat.ts</code> engine is the counterpart</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C6-6</td>
+<td>Boards (hard) vs tenants (soft) — the exact isolation ladder to compare against the platform&#39;s per-company/per-employee model</td>
+<td>batch 12</td>
+</tr>
+<tr>
+<td>C6-7</td>
+<td><code>no_agent</code> + <code>wakeAgent</code> = a $0 gate before any token spend; a pattern for cheap always-on monitoring</td>
+<td>synthesis</td>
+</tr>
+<tr>
+<td>C6-8</td>
+<td><code>context_from</code> / <code>continuity</code> = pipelines as data; compare against the platform&#39;s run-chaining</td>
+<td>batch 12</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-the-two-value-questions-answered-at-the-batch-level">9. The two value questions, answered at the batch level<a href="#batch-06/9-the-two-value-questions-answered-at-the-batch-level" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — USER VALUE.</strong> High, and broader than any earlier batch. The user gets three <em>paces</em> of autonomy —
+<strong>inside</strong> a chat (<code>/heartbeat</code>, <code>/loop</code>, <code>/goal</code>), <strong>beside</strong> it (delegated children, <code>/review</code>), and
+<strong>outside</strong> it (cron) — plus a <strong>board</strong> where work survives restarts and a human can step in. The
+capabilities are all <em>usable by description</em>: the user says &quot;every morning at 9am…&quot; and the AI builds the
+job; there is no scheduler UI to learn. The honesty in the delivery/verification model (<code>delivery_failed</code>,
+<code>UNVERIFIED</code>, PR contracts) means the user is told the truth about whether the work actually landed.</p>
+<p><strong>Q2 — VISION VALUE.</strong> This is the <strong>operations half</strong> of the platform vision, and it is the densest batch
+so far for it. Three things map almost directly onto an &quot;AI-first business and resource planner&quot;:
+(1) <strong>kanban</strong> is a durable, shared, multi-agent board whose cards are assigned to <strong>named persistent
+agents</strong> — the nearest thing in Hermes to an org chart with work flowing through it; (2) <strong><code>/goal</code> +
+completion contracts + quality gates</strong> are a working model of <em>&quot;done&quot; defined, proven and enforced</em> — the
+platform&#39;s board-approval gate is the same family of idea; (3) <strong>cron&#39;s cost and governance design</strong>
+(preflight, user-owned model pins, secret redaction, execution ledger) is a template for running autonomy
+without losing control of either spend or truth. The boundary the docs draw — <em>tenants are soft, boards are
+hard</em> — is exactly the kind of honest scoping the platform&#39;s per-company isolation model should mirror.</p>
+<p><strong>Learning lens (explicit).</strong> Batch 03 = procedures; batch 04 = facts; <strong>batch 06 = execution</strong> — how the
+AI <em>does many things over time</em>. Where batches 03/04 asked &quot;what does it know?&quot;, this batch asks &quot;what does
+it <em>run</em>, and how do we know it ran correctly?&quot;</p>
+<hr>
+<p><em>Batch 06 of 12 complete. Divergences found this batch: 0 in the docs (one correction to my own earlier
+note: delegation&#39;s child cap is 250, not 50). Next: <code>07-sessions-dashboard-and-settings.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-tools-mcp-gateway.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Tools, MCP &amp; Gateway</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-sessions-dashboard.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Sessions &amp; Dashboard</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-is-in-plain-words" class="toc-link">0. What this batch is (in plain words)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-how-big-it-is-measured" class="toc-link">1. What was read, and how big it is (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-cron-scheduled-unattended-work" class="toc-link">2. Cron — scheduled, unattended work</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-single-tool" class="toc-link">2.1 The single tool</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-how-a-tick-works" class="toc-link">2.2 How a tick works</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-features-that-make-it-production-grade" class="toc-link">2.3 The features that make it production-grade</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-delivery-and-the-honesty-about-it" class="toc-link">2.4 Delivery — and the honesty about it</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-delegation-child-agents-delegate-task" class="toc-link">3. Delegation — child agents (delegate_task)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-shape" class="toc-link">3.1 The shape</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-verified-constants-the-divergence-check" class="toc-link">3.2 Verified constants (the divergence check)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-mechanisms-worth-naming" class="toc-link">3.3 The mechanisms worth naming</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-kanban-the-durable-board" class="toc-link">4. Kanban — the durable board</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-one-sentence-distinction-doc-s-own" class="toc-link">4.1 The one-sentence distinction (doc&#039;s own)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-two-front-doors-one-database" class="toc-link">4.2 Two front doors, one database</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-dispatcher-and-the-worker-lifecycle" class="toc-link">4.3 The dispatcher and the worker lifecycle</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-boards-vs-tenants-the-isolation-ladder" class="toc-link">4.4 Boards vs tenants — the isolation ladder</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-5-pr-completion-contracts-the-strongest-governance-artifact-in-this-batch" class="toc-link">4.5 PR completion contracts — the strongest governance artifact in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-session-scoped-trio-heartbeat-loop-goal" class="toc-link">5. The session-scoped trio: /heartbeat, /loop, /goal</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-the-comparison-as-the-docs-themselves-draw-it" class="toc-link">5.1 The comparison (as the docs themselves draw it)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-goal-the-judge-driven-loop" class="toc-link">5.2 /goal — the judge-driven loop</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-loop-the-timer-driven-loop" class="toc-link">5.3 /loop — the timer-driven loop</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-4-heartbeat-one-recurring-prompt" class="toc-link">5.4 /heartbeat — one recurring prompt</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-capability-table-the-owner-s-two-questions" class="toc-link">6. The capability table — the owner&#039;s two questions</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-scheduling-cron" class="toc-link">6.1 Scheduling (cron)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-delegation-and-the-board" class="toc-link">6.2 Delegation and the board</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-the-session-scoped-trio" class="toc-link">6.3 The session-scoped trio</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-divergence-and-boundary-notes" class="toc-link">7. Divergence and boundary notes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-items-carried-forward" class="toc-link">8. Items carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-two-value-questions-answered-at-the-batch-level" class="toc-link">9. The two value questions, answered at the batch level</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('hermes_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('hermes_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('hermes_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('hermes_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.HermesReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
