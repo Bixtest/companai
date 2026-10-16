@@ -52,8 +52,48 @@ export class ActHeldForApprovalError extends CrudHttpError {
   }
 }
 
+/**
+ * Raised when the resolver refuses an act outright.
+ *
+ * The first of the three outcomes the caller has to be able to tell apart —
+ * *you may not do this* (this), *this failed* (500), and *not yet, and here is
+ * where it went* ({@link ActHeldForApprovalError}, 202). A refusal carries the
+ * same explainability a hold does: which rule bound it, and why.
+ *
+ * **Why the gate refuses at all, when the route guard already does.** For a
+ * *capability* refusal it does — `RbacService` answers before the command bus
+ * runs, so the gate never sees one. But a **record lock** is a refusal the route
+ * guard *cannot* make: `refusalFor` threads no record id, and this gate is the
+ * only production path that does. Before `T-45` the gate passed every `A0`
+ * through on the belief that the route guard had already refused it — so a
+ * locked record was writable by any actor holding the capability.
+ */
+export class AuthorityRefusedError extends CrudHttpError {
+  readonly gate: string
+  readonly bindingRule: string
+  readonly because: string | null
+
+  constructor(params: { gate: string; bindingRule: string; because: string | null }) {
+    // 403 — "you may not", distinct from 202 ("not yet") and 500 ("it broke").
+    super(403, {
+      error: 'This act is refused.',
+      code: 'authority_act_refused',
+      gate: params.gate,
+      bindingRule: params.bindingRule,
+      because: params.because,
+    })
+    this.name = 'AuthorityRefusedError'
+    this.gate = params.gate
+    this.bindingRule = params.bindingRule
+    this.because = params.because
+  }
+}
+
 /** Gates below this are refusals, above are permissions. `A1`/`A2` are "not yet". */
 const HELD_GATES = new Set(['A1', 'A2'])
+
+/** `A0` — a refusal: the act may not happen at all, here or later. */
+const REFUSAL_GATE = 'A0'
 
 /** `A3` — the act waits, then runs itself unless somebody objects. */
 const COMMIT_GATE = 'A3'
@@ -75,8 +115,13 @@ const REVIEWED_GATE = 'A4'
  *   capability and the bus by command; a command that has not been mapped is not
  *   gated, and the gap is visible rather than guessed at.
  * - **Tenants not in `enforce`.** Shadow mode observes and changes nothing.
- * - **`A0`.** That is a refusal and `RbacService` has already made it at the
- *   route guard, before any of this runs.
+ * - **Nothing that is a refusal.** An `A0` is *refused* here, not passed through
+ *   (T-45). For a *capability* refusal `RbacService` has already answered at the
+ *   route guard, so this gate never sees one — but a **record-lock** `A0` is a
+ *   refusal the route guard *cannot* make, because `refusalFor` threads no record
+ *   id and this gate is the only path that does. Passing it through (which this
+ *   gate did until T-45) let a locked record be written by any holder of the
+ *   capability.
  * `A3` **is** held, but it ends differently: nobody has to answer it. A scheduled
  * sweep runs it once its window passes, and only a veto stops it.
  *
@@ -180,6 +225,24 @@ export const authorityCommandGate: CommandInterceptor = {
       { tenantId, organizationId },
       { onBehalfOfUserId, recordId },
     )
+
+    // A refusal stops here. It is the one answer the caller must not be able to
+    // reach past, and the record lock — which only this path threads — is a
+    // refusal no other caller makes (T-45).
+    if (decision?.gate === REFUSAL_GATE) {
+      const refusal = decision.reasons.find((reason) => reason.rule === decision.bindingRule) ?? null
+      logger.warn('Command refused instead of executing', {
+        commandId: context.commandId,
+        capability,
+        gate: decision.gate,
+      })
+      throw new AuthorityRefusedError({
+        gate: decision.gate,
+        bindingRule: decision.bindingRule,
+        because: refusal?.detail ?? null,
+      })
+    }
+
     if (!decision || !HELD_GATES.has(decision.gate)) {
       logger.debug('Gate permits the act to run now', {
         commandId: context.commandId,

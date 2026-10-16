@@ -6,11 +6,12 @@
  * were recorded as obligations while the act ran anyway, which is a control in
  * name only.
  *
- * What these tests protect is the narrow claim: **a held act does not run**, and
- * everything the gate declines to gate, it declines to gate on purpose.
+ * What these tests protect is the narrow claim: **a held act does not run, and a
+ * refused act does not run either** — and everything the gate declines to gate,
+ * it declines to gate on purpose.
  */
 
-import { ActHeldForApprovalError, authorityCommandGate } from '../interceptors'
+import { ActHeldForApprovalError, AuthorityRefusedError, authorityCommandGate } from '../interceptors'
 import { APPROVED_ACT_REPLAY } from '@open-mercato/core/modules/auth/services/pendingActService'
 
 const TENANT = 'tenant-1'
@@ -126,13 +127,6 @@ describe('what the gate lets through, deliberately', () => {
     expect(enforcement.modeFor).not.toHaveBeenCalled()
   })
 
-  it('leaves A0 to the route guard, which already refused it', async () => {
-    const { context } = makeContext({ gate: 'A0' })
-
-    await expect(authorityCommandGate.beforeExecute!({}, context as never)).resolves.toBeUndefined()
-    expect(hold).not.toHaveBeenCalled()
-  })
-
   it('lets A5 through, which is the only gate with nothing to enforce', async () => {
     const { context } = makeContext({ gate: 'A5' })
 
@@ -181,5 +175,34 @@ describe('what the gate lets through, deliberately', () => {
     }
 
     await expect(authorityCommandGate.beforeExecute!({}, context as never)).resolves.toBeUndefined()
+  })
+})
+
+describe('what the gate refuses (T-45)', () => {
+  it('refuses an A0 instead of passing it through', async () => {
+    // The gate used to leave A0 to the route guard. That holds for a *capability*
+    // refusal — the route guard answers before the bus runs — but not for a
+    // *record lock*, which the route guard cannot make because `refusalFor`
+    // threads no record id. So an A0 that reaches this gate must be refused here.
+    const { context } = makeContext({ gate: 'A0' })
+
+    await expect(authorityCommandGate.beforeExecute!({}, context as never))
+      .rejects.toBeInstanceOf(AuthorityRefusedError)
+    expect(hold).not.toHaveBeenCalled()
+    expect(holdUntilCommit).not.toHaveBeenCalled()
+  })
+
+  it('refuses with a 403 and names the rule that refused it', async () => {
+    // A refusal is "you may not" — distinct from "not yet" (202, the held case)
+    // and from "it broke" (500). The rule and its reason ride out with it, the
+    // same explainability a hold carries.
+    const { context } = makeContext({ gate: 'A0' })
+
+    await expect(authorityCommandGate.beforeExecute!({}, context as never)).rejects.toMatchObject({
+      gate: 'A0',
+      bindingRule: 'effect-class-floor',
+      because: 'because',
+      status: 403,
+    })
   })
 })

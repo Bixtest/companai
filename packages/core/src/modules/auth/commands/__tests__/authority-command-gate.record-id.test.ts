@@ -28,9 +28,10 @@
  * | `readRecordId` returns the raw candidate (no shape check) | a slug is not a record id |
  * | drop the pattern's `/i` | an uppercase id |
  * | `readRecordId` returns null always (threading removed) | every threading test |
+ * | the gate passes `A0` through again (pre-T-45) | a locked record is refused (both) |
  */
 
-import { ActHeldForApprovalError, authorityCommandGate } from '../interceptors'
+import { ActHeldForApprovalError, AuthorityRefusedError, authorityCommandGate } from '../interceptors'
 import { AuthorityEnforcementService } from '../../services/authorityEnforcementService'
 import { clearCapabilityRegistry, registerCapabilityDescriptors } from '@open-mercato/shared/lib/capabilities/registry'
 
@@ -174,24 +175,28 @@ describe('ids that must not', () => {
   })
 })
 
-describe('what the fix does not change — the gap it leaves visible', () => {
-  it('still passes a locked record: the gate does not hold A0, by design', async () => {
-    // The gate's own docblock: "`A0` is a refusal and `RbacService` has
-    // already made it at the route guard." That holds for capability
-    // refusals. A *record-lock* A0 reaches the gate through the record-id
-    // threading this file pins — and `refusalFor`, the route guard's path,
-    // threads no record id at all, so no route-level consumer ever sees it.
-    // The write proceeds.
-    //
-    // Pinned, not endorsed: who refuses a locked record on the command path
-    // is a separate question, recorded in the triage as T-45, and changing
-    // this line is that fix's job — not T-32's.
-    const { service, stateFor } = makeEnforcement({ state: 'locked', reason: null })
+describe('a locked record is refused, not passed (T-45)', () => {
+  it('refuses a write to a locked record named by a v7 id', async () => {
+    // The lock produces A0. The gate now refuses A0 instead of passing it
+    // through — which is what closed T-45: before, the write proceeded. The
+    // route guard cannot make this refusal, because `refusalFor` threads no
+    // record id; only this gate does.
+    const { service, stateFor } = makeEnforcement({ state: 'locked', reason: 'frozen pending review' })
 
     await expect(authorityCommandGate.beforeExecute({ id: V7_ID }, makeContext(service)))
-      .resolves.toBeUndefined()
+      .rejects.toBeInstanceOf(AuthorityRefusedError)
 
+    // The lock was still looked up — T-32's threading — and the act did not run.
     expect(stateFor).toHaveBeenCalledWith(V7_ID, SCOPE)
     expect(hold).not.toHaveBeenCalled()
+  })
+
+  it('refuses a locked record named by a v4 id too', async () => {
+    // The refusal is the lock's, not the id version's: a v4-named locked record
+    // is refused exactly as a v7-named one is.
+    const { service } = makeEnforcement({ state: 'locked', reason: null })
+
+    await expect(authorityCommandGate.beforeExecute({ id: V4_ID }, makeContext(service)))
+      .rejects.toBeInstanceOf(AuthorityRefusedError)
   })
 })
