@@ -211,6 +211,24 @@
     <code>CC-60</code> closed (done by <code>P2-4</code>, verified in
     code — the runner agent's fixed one-tool menu); <code>CC-67</code> closed and <code>CC-72</code> is the
     open row-28 item; the frontier boxes aligned across BACKLOG / platform_points / JOURNAL.
+    <br><b>Re-synced later the same day:</b> <code>CC-85</code>–<code>CC-90</code> carried across to the
+    <code>REGISTER</code> array. <code>CC-88</code> is the prompt-cache warm-up (the first turn no longer
+    re-reads the 16.6k-token sheet after a model restart: replayed from the worker's own
+    <code>state.db</code>, verified at 16,559 of 16,560 tokens reused, and the cold fill was caught live
+    at 2,051 s). <code>CC-89</code> is the CPU-ceiling finding (the stack ran on 4 of 8 CPUs, and a
+    Docker Desktop restart does <b>not</b> reboot the WSL VM, so <code>.wslconfig</code> only applies via
+    <code>docker desktop stop</code>/<code>start</code>; measured +56 % at the 2,048-token point but only
+    <b>+10 % on the whole cold fill</b>). <code>CC-86</code> closed — the stdio handshake gate passed on
+    the re-pinned worker (103.9 s). <code>CC-90</code> added — <code>verify_pin.py</code>'s stale default
+    digest made a correctly-pinned tree read as <code>PIN BROKEN</code> for any caller not given
+    <code>HERMES_PIN_DIGEST</code>; source fixed, image rebuild pending. <code>CC-91</code> added — the
+    tooling set, now the frontier, with its <b>first two slices</b> (the one-truth check and the
+    escape-hatch census) built and tested. The
+    register now reads <b>48 closed · 42 open · 90 total</b>.
+    <br><b>How to update this file:</b> the content lives in the JS arrays at the top of the script
+    (<code>PHASES</code>, <code>ROWS</code>, <code>OPEN</code>, <code>PLATFORMS</code>,
+    <code>FRONTIER</code>, <code>REGISTER</code>, <code>SRSREG</code>) — edit an array entry, not the
+    rendered markup. All counts are derived from those arrays at render time, so they cannot drift.
   </footer>
 </div>
 
@@ -329,16 +347,49 @@ const PLATFORMS = [
 ];
 
 /* ---------- FRONTIER ---------- */
-const FRONTIER = `<b>NOW — Row 28 (Phase 8):</b> the agent runtime behind one typed door.
-  Sub-rows <b>R28-1 … R28-5 are DONE</b> (the port's shape · the first engine · the chat route moved
-  onto it · the run closed at the door · the exit gate). Hermes is now <b>wired behind the door and
-  live-proven</b> (<code>P2-5</code> selectable · <code>P2-7</code>/<code>P2-8</code> live turns ·
-  <code>P2-9a</code> the MCP bridge — a real Hermes turn called one of the 21 platform tools).
-  <b>R28-6 (deleting OpenCode, <code>CC-72</code>) waits on the <code>P2-9b</code> switchover
-  decision</b> — the default-flip + the deletion + the <code>hermes-local</code> retirement, one change,
-  paused on your stale-timeout ruling (the default toolset's ~16,757 tokens → a ~3000 s cold prefill vs
-  the worker's own 2400 s stale ceiling).
-  <b>ALSO NOW:</b> the architecture workshop's mapping pass is <b>DONE</b> (53 requirements,
+const FRONTIER = `<b>LAST DONE — 2026-10-16 (evening):</b> the warm-up's last leg, and the handshake gate.
+  The <b>cold fill was caught live</b> (the loop engaged unattended; <b>2,051 s cold → 4.1 s warm</b>,
+  16,559 of 16,560 tokens reused) — <code>CC-88</code>. The <b>stdio handshake gate PASSED in 103.9 s</b>
+  on the re-pinned worker (<code>hermes-gateway:p2-9a</code> / tree <code>07ee857b…</code>: ping,
+  gateway.capabilities, client.capabilities → 16 server_requests, gateway.ready, process.stop; all 5
+  stdout frames valid JSON-RPC) — <b>closes <code>CC-86</code></b>. The CPU gain was re-measured honestly
+  — <b>+10 % on the whole fill</b>, not the +56 % a segment suggested — <code>CC-89</code>. The gate then
+  found a real defect: a stale default digest in <code>verify_pin.py</code> naming the previous revision
+  — <code>CC-90</code> <b>open</b> (source fixed; the image needs a rebuild).
+  <br><b>AND THE MEASUREMENT THAT UNBLOCKS THE NEXT STEP:</b> a <b>turn-shaped</b> request reuses
+  <b>99.92 %</b> of the turn prompt (16,558 of 16,572 — leaving <b>14 tokens</b> to prefill), so the
+  warm-up <b>retires the stale-timeout hazard</b> that gated the switchover
+  (<code>DECISION-p2-9b-stale-timeout-trade.md</code> §4.6).
+  <br><b>AND THE TOOLING SET'S FIRST TWO SLICES — <code>CC-91</code> / <code>SR-39</code> +
+  <code>SR-41</code>:</b> a registry-driven <code>scripts/check-one-truth.mjs</code> + a
+  <b>mutation-proof</b> test (4/4) + the <code>check:one-truth</code> script, with the <b>Hermes pin
+  digest</b> as its first fact — the fact that actually drifted (<code>CC-90</code>); <b>and</b> the
+  <b>escape-hatch census</b> <code>scripts/check-escape-hatches.mjs</code> + a <b>5/5</b> test +
+  <code>check:escape-hatches</code>/<code>:fail</code>, which <b>measured the real repo: 7,968 files ·
+  202 holes · 33 named · 169 unnamed</b> — <b>one-sided</b>, because every
+  <code>@ts-expect-error</code>/<code>@ts-ignore</code> carries a reason (24 of 24) while only <b>8 of
+  168</b> <code>eslint-disable</code>s do, so the backlog is a <i>convention gap</i>, not a discipline
+  failure. <b>Finding:</b> the SRS marks the four BORROW, but the repo
+  <b>already runs the pattern</b> (<code>check-version-alignment.sh</code> = one-truth;
+  <code>check-agents-md-budget.mjs</code> + baseline = the ratchet, <code>SR-40</code>) — so the work is
+  <i>generalise</i>, not <i>import</i>.
+  <br><b>▶ NEXT — the rest of the tooling set (<code>CC-91</code>):</b> <code>SR-38</code> (digital-twin
+  harness — fixtures typechecked against the real interfaces) and <code>SR-46</code> (the two-reads lint
+  — <b>★ whose stated home needs a correction:</b> <code>packages/eslint-plugin-ds</code> runs only on
+  <b>backend-UI files</b> via <code>eslint.ds.config.mjs</code>, so a <i>settings-read</i> lint there
+  would never fire on the files that read settings; it belongs in the <code>scripts/check-*.mjs</code>
+  family, where cross-file drift is visible). These are the SRS's <i>"land FIRST; make
+  everything after cheaper"</i> items, and they <b>gate the critical path</b>: tooling → identity
+  (<code>SR-02</code>/<code>SR-07</code>) → <b><code>SR-12</code> (per-tenant engine home)</b> →
+  <code>P2-9b</code>.
+  <br><b>▶ THEN — <code>P2-9b</code>, now SPLIT (owner's ruling 2026-10-16):</b> <b>(1)</b> the
+  default-flip to Hermes + the <code>hermes-local</code> retirement (<code>CC-74</code>) — <b>after
+  <code>SR-12</code> lands</b>, because until then a flip would make the open <code>CC-84</code> hole (a
+  Hermes turn runs platform tools as ONE superadmin identity, outside the chat's tenant) the
+  <b>default</b> path; and <b>(2)</b> the OpenCode deletion (<code>R28-6</code>/<code>N-8</code>) —
+  <b>DEFERRED</b>: OpenCode stays in place, un-defaulted, so deleting it cannot break something we are
+  unaware of; revisit once its presence has proved harmless.
+  <br><b>ALSO NOW:</b> the architecture workshop's mapping pass is <b>DONE</b> (53 requirements,
   <code>SR-01</code>…<code>SR-53</code>); two platform studies remain (mattermost + activepieces), and the
   approved next build is the tooling set (<code>SR-38</code>/<code>39</code>/<code>41</code>/<code>46</code>)
   + <code>SR-08</code>.
@@ -429,6 +480,13 @@ const REGISTER = [
  ["CC-82","The port carries no settings (model / toolset / prompt are deployment constants on the Hermes path)","open"],
  ["CC-83","P2-9b retires the only door that can write into a Hermes session","open"],
  ["CC-84","The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority","open"],
+ ["CC-85","The worker's MCP key lives only in the process the entrypoint starts — a worker spawned any other way gets a 401 from the MCP server and loses its tools","open"],
+ ["CC-86","The live Hermes proofs (P2-1…P2-9a) were taken against the previous pin revision — both legs now re-proven on the new pin: the live turn (route B, 2026-10-16: TURN DONE in 2280.4 s, usage.prompt = 16572) and the stdio handshake gate — GATE PASSED in 103.9 s on hermes-gateway:p2-9a / tree 07ee857b… (ping, gateway.capabilities, client.capabilities -> 16 server_requests, gateway.ready, process.stop answered; all 5 stdout frames valid JSON-RPC)","closed"],
+ ["CC-87","The architecture reader is a generated bundle printing a stale pin — regenerate it from the study sources","open"],
+ ["CC-88","The first turn of every conversation re-read the whole 16.6k-token instruction sheet after each model restart (~2,280 s — the CC-86 turn). A warm-up service now replays the exact shared prefix from the worker's own state.db so the model's RAM cache is already full: verified at 16,559 of 16,560 tokens reused in 1.4 s, and it engages unattended on a fresh model process","closed"],
+ ["CC-89","The stack ran on 4 of the host's 8 CPUs (.wslconfig), so the model's -tb 8 was silently clamped. Raised to 8 — and a Docker Desktop restart does NOT reboot the WSL VM, so the file only applies via docker desktop stop/start. Measured: +56 % at the 2,048-token point (7.81 to 12.18 tok/s), but only +10 % on the whole 16,560-token cold fill (2,264 s @ 7.32 -> 2,051 s @ 8.07 tok/s) — the prefill rate is length-dependent, so the early-fill sample flatters","closed"],
+ ["CC-90","The container's pin verifier carried a stale default digest. After the 2026-10-16 re-pin, library/.hermes_pin.py, HERMES-PIN.md and the compose HERMES_PIN_DIGEST default all moved to db44c462…/07ee857b… — but docker/hermes/verify_pin.py's DEFAULT_EXPECTED_DIGEST still named the previous revision (3569e846…/ca760e97…), though its own docstring says to update it in the same change. Effect: any invocation without HERMES_PIN_DIGEST — a manual docker run, a test, the handshake gate — rejected the correctly-pinned tree with PIN BROKEN (19,728 files hashing to 07ee857b…). Source corrected; the image must be rebuilt to carry it — until then callers pass --pin-digest 07ee857bdab59a875317035d8aaad4d6","open"],
+ ["CC-91","The tooling set (SR-38/39/41/46) — the SRS's 'land FIRST; make everything after cheaper' item, and now the frontier. It is why the switchover is NOT next: the SRS sequences SR-12 (per-tenant engine home) as gating P2-9b, and SR-12 is the fix for the OPEN CC-84 (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's tenant) — so flipping the default first would make that hole the DEFAULT path. First slice DONE 2026-10-16: the one-truth check (SR-39) — scripts/check-one-truth.mjs + a mutation-proof test (4/4) + the check:one-truth script — with the Hermes pin digest as its first fact, i.e. the fact that actually drifted (CC-90). Second slice DONE 2026-10-16 (evening): the escape-hatch census (SR-41) — scripts/check-escape-hatches.mjs + a 5/5 test (the trap: a bare rule list is NOT a reason; the precision case: prose is NOT a hole) + check:escape-hatches / :fail. Measured on the real repo: 7,968 files, 202 holes, 33 named, 169 unnamed — and the finding is ONE-SIDED: every @ts-expect-error/@ts-ignore carries a reason (24 of 24) but only 8 of 168 eslint-disables do, so the backlog is a convention gap (nobody was told to write a reason after --), not a discipline failure. Finding: the SRS marks all four BORROW, but the repo ALREADY runs the pattern (check-version-alignment.sh = one-truth; check-agents-md-budget.mjs + baseline = the ratchet SR-40), so the work is generalise, not import. Remainder: SR-38 (digital-twin harness), SR-46 (two-reads lint — and its stated home needs a correction: packages/eslint-plugin-ds runs only on backend-UI files via eslint.ds.config.mjs, so a settings-read lint there would never fire on the files that read settings; it belongs in the scripts/check-*.mjs family, where cross-file drift is visible)","open"],
 ];
 
 /* ---------- SR REGISTER (mirrors 08-THE-SRS.md, read straight from the register, 2026-10-16) ---------- */

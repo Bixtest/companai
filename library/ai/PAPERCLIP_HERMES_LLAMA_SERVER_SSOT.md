@@ -507,6 +507,10 @@ Explicitly prevents llama-server from reading the model’s much larger training
 
 One inference slot. This keeps the full 65,536-token budget available to the one active generation and avoids multiplying context/KV pressure on an 8-vCPU host.
 
+> **MEASURED 2026-10-16 (rule 13) — the running deployment does NOT pass `--parallel`, so this "1" is a recommendation, not the current state.** The `model:` service in `workspace/starting-kit/docker-compose.fullapp.yml` sets no `--parallel` / `--slots` / `LLAMA_ARG_N_PARALLEL` (the container's entire environment is `PATH` + `LLAMA_ARG_HOST`). This llama.cpp build (`version: 0.5.0-dev`, build 11371, commit `99b95488c`) documents the flag as `-np, --parallel N (default: -1, -1 = auto)` (env `LLAMA_ARG_N_PARALLEL`), and **auto selected 4**. Measured two ways, agreeing: the server's own startup log — `srv load_model: initializing, n_slots = 4, n_ctx_slot = 65536, kv_unified = 'true'` — and the live `/props` endpoint — `"total_slots": 4`. Because `kv_unified = true` the four slots **share** the one 65,536-token buffer (the budget is *not* multiplied four-fold, so the memory worry above is milder than stated), but they **compete for the same CPUs**, so two simultaneous long turns each run at roughly half the single-turn token rate. To make this "1" real, the compose must pass `--parallel 1` explicitly.
+>
+> **Same note, second finding:** the host has **8 logical CPUs** (`Win32_ComputerSystem.NumberOfLogicalProcessors = 8`, 4 physical cores) but the **container sees only 4** (`nproc` = 4; `docker info` `NCPU = 4`) — Docker is limiting it. So the compose's `-tb 8` is clamped to 4, and the benchmark comment above (which compares "8/8" and "4/8") does **not** describe the running configuration. The measured production prefill rate is **7.32 tok/s** (`2262809.92 ms / 16572 tokens`).
+
 ### `--threads 7`
 
 Use seven of eight vCPUs for token generation, leaving one logical CPU worth of scheduling headroom for Hermes, Paperclip, Docker, Plesk, networking, and the OS.

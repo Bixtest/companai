@@ -318,6 +318,80 @@ every-turn cost. A warm turn re-ingests only the delta — the new user message 
 and the probe shows that reuse is real on the deployed server. The cold turn itself is a one-time
 cost per conversation whose size §4.3 has now established (**16,725 tokens**).
 
+### 4.5 What the 16.6k-token sheet is MADE OF — and the re-read is not inevitable (measured 2026-10-16)
+
+§4.3 established the *size* of the prompt; this section establishes its *contents*, from the
+worker's own `state.db` (opened read-only) and `agent/system_prompt.py::build_system_prompt()`.
+
+**The sheet is not stored in the chat.** It is assembled fresh per conversation in three tiers
+(`stable` → `context` → `volatile`, joined by `\n\n`) from files and compiled-in text:
+
+| Block | Size | Source |
+|---|---|---|
+| Identity | 663 chars | `/var/lib/hermes/SOUL.md` |
+| Built-in guidance | ~11.7k chars | compiled into `agent/prompt_builder.py` ("Finishing the job", "Parallel tool calls", "Tool-use enforcement", "Execution discipline", the `<mandatory_tool_use>` family…) |
+| **Project context** | **11,952 chars** | **`/hermes-src/AGENTS.md` — Hermes' OWN developer guide, loaded because the worker's cwd is `/hermes-src`** |
+| Workspace + env + profile + date + runtime | ~2.4k chars | git snapshot, env probe, profile line, the `Conversation started:` line |
+| **Tool definitions** | **42,619 chars** | 20 tools (`browser_exec`, `terminal`, `read_file`, `write_file`, `patch`, `execute_code`, `delegate_task`, `web_search`, `memory`, `skills`… — **no business tool**) |
+| Memory / skills | 0 | `memories/` and `skills/` are both empty |
+
+**≈ 69k chars ≈ 16.6k tokens, against a user message of a few tokens.**
+
+**The re-read is not inevitable — a qualifier §4.4's framing needs.** The session rows prove the
+server *skips* the read when the sheet is still cached: on 2026-10-14, sessions `503acd` and
+`a32218` each recorded **`input_tokens = 1`, `cache_read_tokens = 16,724`** (one token read,
+16,724 reused); `275de2` = 433 read / 33,481 reused. Full re-reads occur only when the sheet
+changed or was evicted: `a43f3d` = 16,725 read / 0 reused (immediately after a different-toolset
+session), `37afd4` = 16,572 / 0 (two days later).
+
+**And the sheet is not byte-identical between chats.** Same-day prompts share **96.7 %** (the only
+difference is the `Conversation started:` date line, near the end); the **tool block shares only
+6 %** (first difference at char 2,543, inside `browser_exec`'s own description); across a build
+change the system prompt shares only **36 %** (2026-10-14 carries `# Async handoff` where 2026-10-16
+carries the coding-agent brief).
+
+**Consequence for the options below — and a correction (rule 13, same day).** The largest block is
+Hermes' own developer guide, present only because the worker's cwd is the Hermes source tree. I
+first wrote that *"most of the 16.6k tokens is scaffolding a business tenant never needs"* —
+**too strong**. Measured per block, the split is **≈52 % developer-only (≈8,650 tokens) / ≈48 %
+needed in any chat (≈7,900 tokens)**:
+
+| Developer-only — only when the agent acts on a computer (≈36,139 chars) | Needed in any chat (≈33,029 chars) |
+|---|---|
+| Hermes' own `AGENTS.md` (11,952) | Behaviour rules — "Finishing the job", "Parallel tool calls", "Tool-use enforcement", "Execution discipline", the `<mandatory_tool_use>` family (~8,862) |
+| The coding-agent brief (~2,822) | Identity (SOUL.md, 663) + workspace/env/date/profile/runtime (~2,238) |
+| File/code tools (~21,365): `read_file` 1,223 · `write_file` 1,116 · `patch` 1,014 · `search_files` 2,329 · `terminal` 2,741 · `execute_code` 3,092 · `browser_exec` 3,351 · `skill_manage` 3,725 · `skill_view` 929 · `skills_list` 321 · `text_to_speech` 1,524 | General tools (~21,183): `delegate_task` 4,680 · `manage_connections` 4,526 · `tool_search` 3,748 · `memory` 3,284 · `clarify` 1,820 · `web_extract` 1,122 · `web_search` 794 · `tool_call` 713 · `tool_describe` 496 |
+
+**And the 21 business tools ARE in the block.** `tool_search`'s description embeds a **deferred
+catalog** listing all 21 platform tools by name (`mcp__open_mercato__search_query`,
+`…inbox_ops_list_proposals`, `…context_whoami`, `…meta_list_agents`,
+`…attachments_list_record_attachments`, …) plus `browser_vault`, `cronjob_manage`,
+`desktop_project`, `session_search` — **27 deferred tools in all**; their schemas load on demand
+via `tool_describe`/`tool_call`. So the block is not purely developer scaffolding.
+
+**The actionable reading: the split is backwards.** Hermes is a coding agent, so its always-on core
+is the developer toolkit while the business toolkit is deferred. For a business tenant the ideal is
+the reverse.
+
+### 4.6 The warm-up retires the hazard — measured, 2026-10-16 *(added the evening of the ruling)*
+
+§4.3 left the ceiling **marginal**: the real cold turn used **2,280.4 s of the 2,400 s clock — 95 %, ~120 s of headroom**. That margin is the last thing standing between us and the switchover. It is now measured to be **retired in the steady state**, by the prompt-cache warm-up built the same day (`workspace/starting-kit/docker/hermes/warmup.py`; live-verified at **COLD 2,051 s → WARM 4.1 s** — see §10.3/§10.4 of `hermes_prompt_cache_and_session_readiness_REPORT.md`).
+
+**The measurement.** The warm-up proves the *prefix* request reuses 16,559 of 16,560 tokens. That is **not** the same claim as "a real turn reuses it": a turn's prompt diverges after the tools block (a `user` block where the warm-up leaves the assistant generation prompt), and it would miss entirely if the worker assembled the system prompt per turn. So a **turn-shaped** request — the exact stored system text + the exact stored tools + one user message — was sent to the same endpoint the worker uses:
+
+| | measured |
+|---|---|
+| `prompt_tokens` | **16,572** — *exactly* §4.3's live-turn `usage.prompt = 16572`, so the probe is faithfully turn-shaped |
+| `cached_tokens` | **16,558** |
+| reused | **99.92 %** |
+| **tokens the turn must prefill** | **14** |
+
+**So a turn's own prefill collapses from 2,280.4 s to ~14 tokens of work.** The 2,400 s stale ceiling is no longer marginal *for a turn*, because the big prefill no longer happens **inside** a turn — the warm-up pays it once, in the background, as its own request.
+
+**The honest caveat — what is NOT retired.** This holds for turns that arrive **after** the warm-up has filled the prefix, which is the steady state (the loop engages within ~30 s of the model being ready and re-checks every 600 s). It does **not** remove the cold-start window: if a turn arrives while the prefix is still cold, or while the warm-up is still filling, that turn pays its own cold prefill and the 95 %-of-clock problem returns for it. The warm-up converts a **per-conversation** cold cost into a **one-time** one; it does not abolish the one-time cost.
+
+**What this changes for `P2-9b`.** The measurement §6 asked for (§4.3) is done, and no tool-side configuration is demanded by it — §4.3 showed the lever is the **system prompt** (26.5k chars, ~6.7k tokens), which no toolset knob reaches. The one remaining action is the **switchover itself**: the default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`) — one change, awaiting the owner's explicit go.
+
 ---
 
 ## 5. The options, ranked — with one recommendation

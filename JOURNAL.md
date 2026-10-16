@@ -242,6 +242,194 @@ box carry it.)
 
 ---
 
+### ✅ THE TOOLING SET'S SECOND SLICE — **`SR-41` (named escape hatches) built, tested, and measured: 202 holes in the repo, 169 of them unnamed — and the gap is ONE-SIDED (TypeScript directives are all named; ESLint's are not). Plus a correction to `SR-46`'s stated home, found by measuring where the DS plugin actually runs.** *(2026-10-16, evening, third pass)*
+
+**The requirement, in one line.** *"The lesson is not 'have escape hatches' — it is **name them**, so one search finds every one."* A hole with no reason is indistinguishable from an accident, and the next reader cannot tell whether it is still needed.
+
+**★ THE CONVENTION — each tool's NATIVE reason form, so nothing new is learned or configured:**
+
+```ts
+// eslint-disable-next-line no-console -- the CLI's one legal writer (see logger.ts)
+// @ts-expect-error: the upstream signature is wrong for the 3rd arg (fixed upstream in v5)
+```
+
+**Built:**
+
+| Artefact (code repo `workspace/starting-kit`) | What it is |
+|---|---|
+| `scripts/check-escape-hatches.mjs` | The census: counts every directive hole, splits **named / unnamed**, and lists the unnamed ones with `file:line`. `--json`, `--fail`, `--root <dir>`, `--help`. |
+| `scripts/__tests__/check-escape-hatches.test.mjs` | **5 / 5 pass** — including the **trap** (a bare rule list is *not* a reason) and the **precision case** (prose is *not* a hole). |
+| `package.json` | `check:escape-hatches` (census) and `check:escape-hatches:fail` (enforcement). |
+
+**★ THE MEASUREMENT (the real repo, 2026-10-16): 7,968 files scanned · 202 holes · 33 named · 169 unnamed.**
+
+| kind | total | named | unnamed |
+|---|---|---|---|
+| `eslint-disable` | 168 | 8 | **160** |
+| `ts-nocheck` | 10 | 1 | 9 |
+| `ts-expect-error` | 22 | **22** | 0 |
+| `ts-ignore` | 2 | **2** | 0 |
+
+**★ THE FINDING — the backlog is ONE-SIDED, and that changes what it means.** Every `@ts-expect-error` and `@ts-ignore` in the repo already carries a reason (**24 of 24**); only **8 of 168** `eslint-disable`s do. So this is not a discipline failure — it is a **convention gap**: nobody was ever told to write a reason after ESLint's `--`. That reframes the work from *"people are careless"* to *"write the rule down"*, which is the difference between a useful check and a nagging one.
+
+**Two design decisions worth naming.**
+- **`--fail` is deliberately NOT the default.** The first job is to *answer a question* — "how many holes, and where?" — and a census that refuses to print when it finds something is useless. The report always prints and exits 0; `--fail` enforces, for once the backlog is cleared. This mirrors the repo's existing `check:time-bombs` / `check:time-bombs:fail` split rather than inventing one.
+- **A directive counts only when it OPENS the comment.** Not a style choice — it is how *both* tools parse — and it removes a real false-positive class in this repo: `// TS2578 "Unused '@ts-expect-error' directive" …` is a *sentence about* a directive, not a hole. The rule was added **after the first run counted such a line** (23 → 22 `ts-expect-error`), and a regression test pins it. **This is the second time in two slices that running the thing on the real repo found a bug in the thing** (the one-truth slice's `--json` purity was the first).
+
+**Deliberately excluded:** `as any` / `as unknown as` — type *assertions*, not guard bypasses, ~4.4k in `src`. Requiring a reason on each would bury the 202 real directive holes in noise. Recorded in the checker's header as an exclusion, not an oversight.
+
+**★ A CORRECTION FOUND BY MEASURING — `SR-46`'s stated home does not work.** The plan (and the SRS) place the **two-reads lint** on `packages/eslint-plugin-ds`. Measured: that plugin runs only on **backend-UI files** — `eslint.ds.config.mjs` scopes it to `packages/{core,enterprise}/src/modules/**/backend/**` + `packages/ui/src/backend/**`, and `yarn lint:ds` targets the same. **A settings-read lint there would never fire on the files that read settings** (which are server/config modules). It belongs in the `scripts/check-*.mjs` family, where the **cross-file** drift is visible — and the target is real and large: `process.env` is read **718×** in `src`, with `NODE_ENV` ×205, `BASE_URL` ×114, `QUEUE_STRATEGY` ×72. Recorded, not worked around; the remaining slice is now `SR-38` + a re-homed `SR-46`.
+
+**Also observed — NOT this slice's work.** `node --test scripts/__tests__/*.test.mjs` reports **7 pre-existing failures** (dev-splash / dev-memory-sampler / watch-packages) against a **326-pass** suite. Untouched here: the only shared file edited is `package.json`, and only to add two `check:*` keys. Recorded so a red suite is not mistaken for this slice. **And the not-committed note stands:** the code repo's new files (`scripts/check-one-truth.mjs`, `scripts/check-escape-hatches.mjs`, both `__tests__`, `package.json`) are still **unstaged** — explicit paths, both repos.
+
+**Next:** `SR-38` (digital-twin harness — fixtures typechecked against the real interfaces) and the re-homed `SR-46`; then the critical path proper — identity (`SR-02`/`SR-07`) → **`SR-12` (per-tenant engine home, the fix for `CC-84`)** → `P2-9b` step (1).
+
+---
+
+### ✅ THE TOOLING SET BEGINS — **the next step was NOT the switchover: the SRS's own sequencing shows `SR-12` gates `P2-9b`, and `SR-12` is the fix for the open `CC-84` tenancy hole. So the tooling set lands first (it "makes everything after cheaper"), its first slice is built and tested, and `P2-9b` is split so the OpenCode deletion can be deferred.** *(2026-10-16, evening, second pass)*
+
+**The decision, and the evidence that made it.** The owner delegated: *"Do what's best for the platform and development productivity."* Two candidates were on the table — the `P2-9b` switchover, or the architecture workshop's approved tooling set. **The SRS decided it, in a diagram the checklist had not surfaced** (`08-THE-SRS.md` §4):
+
+```
+SR-38, SR-39, SR-41, SR-46   ← tooling; land FIRST; no blockers; make everything after cheaper
+        │
+SR-02 + SR-07 (identity)     ← land together
+        │
+        └── SR-12 (per-tenant engine home = CC-84)   ← GATES P2-9b
+```
+
+**`P2-9b` is gated by `SR-12`** — the per-tenant engine home, which is the fix for **`CC-84`**, still **open**: the worker's tool calls all run as **one superadmin identity**, so a Hermes turn executes platform tools **outside the chat's own tenant**. **Flipping the default to Hermes before `SR-12` lands would make that hole the *default* path** — the one every tenant gets — instead of a path behind a non-default engine. The owner's own note sharpens this rather than softening it: *Hermes keeps its development skills and may be used for coding at some point.* A coding agent carrying broad file/terminal tools, running as a single superadmin identity, is exactly the shape `CC-84` names.
+
+**★ THE OWNER'S RULING — `P2-9b` is now TWO steps, and the deletion is deferred.** *"if it is safer and not much more time and effort consuming, we can keep opencode aside and deploy our functionality on hermes and revisit deleting opencode later - if its presence creates no issues. so that deleting it doesnt crash something we are unaware of."* Adopted, because it **is** safer and costs nothing: **(1)** the default-flip to Hermes + the `hermes-local` retirement (`CC-74`) — after `SR-12`; **(2)** the OpenCode deletion (`R28-6`/`N-8`) — **DEFERRED**, OpenCode stays in place un-defaulted, revisited once its presence has proved harmless. A deletion is the one step that cannot be un-taken, so separating it from the flip is free risk reduction.
+
+**★ THE FINDING THAT CHANGED THE DESIGN — the repo already runs the pattern.** The SRS marks all four tooling requirements **BORROW** (*"the mechanism comes from a platform study"*). **Measured in the code repo, that understates what exists:** `scripts/check-version-alignment.sh` *already is* one-truth (one fact, many representations, checked mechanically), and `scripts/check-agents-md-budget.mjs` + `scripts/agents-md-budget.baseline.json` *already is* the ratchet (`SR-40`) — *"a ratchet on the representative root-to-module chains recorded in the baseline: when a chain already exceeds the budget, the nested part may only shrink"*. So the work is to **generalise a pattern we run**, not import a foreign mechanism — and the repo's conventions (a `scripts/check-*.mjs` with `--json`, a `--root <dir>` override for testability, a `scripts/__tests__/*.test.mjs` run by `node --test`, a `package.json` `check:*` entry) are adopted rather than reinvented. Plan: [`PLAN-tooling-set-SR-38-39-41-46.md`](library/development/PLAN-tooling-set-SR-38-39-41-46.md).
+
+**★ THE FIRST SLICE, BUILT AND TESTED — `SR-39`'s first instance: the Hermes pin digest.** Chosen because it is the fact that **actually drifted**, measured the same day (`CC-90`): the re-pin updated three of four copies and left `verify_pin.py` naming the previous revision.
+
+| Artefact (code repo `workspace/starting-kit`) | What it is |
+|---|---|
+| `scripts/check-one-truth.mjs` | A **registry-driven** check: one fact, N representations, and a rule — ≥2 readable and all equal → PASS; any differ → FAIL **printing every copy so the stale one is named**; a copy that disagrees with itself → FAIL; fewer than 2 readable → SKIP **loudly**, because silence there would be a false green. |
+| `scripts/__tests__/check-one-truth.test.mjs` | **4/4 pass**, including a **mutation proof** (one copy drifted → the check must FAIL and name it) and the self-conflict case. |
+| `package.json` → `check:one-truth` | Joins the existing `check:*` family. |
+
+**Verified** on the repo's own toolchain (`workspace/.toolchain/node24`, v24.19.0): the checker **PASSES against the real repo** (all three copies read `07ee857b…`), and `--json` is pure JSON. **The test caught a real bug in the checker** — the first run put the JSON report *plus* a human status line on stdout, so `--json` was unparseable; two tests failed and named it, and the status line now goes to stderr in that mode.
+
+**A second finding, recorded rather than worked around.** `HERMES-PIN.md` holds **two different 32-hex digests for the same tree** — `f57f729d…` in its §1 table and `07ee857b…` in its "computed twice" note — and never says which is *the* pin digest. That is exactly what a one-truth check exists to remove, and it is why the document is **not** registered as a representation yet: a checker cannot demand agreement from a document that does not agree with itself. **Open sub-item.**
+
+**⚠️ WHAT THIS PASS DID NOT DO.** No product behaviour changed — all four tools are development-time checks. Nothing was trimmed from Hermes, no Hermes file was edited, and **the switchover was not started** (it is gated on `SR-12`, which is gated on this tooling set). The code repo's three new files are **not committed** — the handover's rule is that a batch ends with an explicit-paths commit in **both** repos, and that is a separate, deliberate step.
+
+---
+
+### ✅ THE WARM-UP'S LAST LEG, THE HANDSHAKE GATE, AND TWO NUMBERS CORRECTED — **the cold fill was caught live (2,051 s → 4.1 s warm), the gate passes on the re-pinned worker (103.9 s), and running both surfaced two real defects: the CPU gain is +10 % on the whole fill (not the +56 % a segment suggested), and the container's pin verifier was still naming the PREVIOUS revision.** *(2026-10-16, evening)*
+
+Three legs were open: the cold fill had never been seen live; the stdio handshake gate had not been re-run on the re-pinned worker; and the CPU change's effect was a *segment* measurement that had been reported as the fill's. All three are now measured — and each one corrected something already written down.
+
+**1. ★ THE COLD FILL, CAUGHT LIVE AND UNATTENDED.** The owner's Docker restart emptied the model's RAM cache, and the warm-up loop engaged **by itself** — `docker logs mercato-hermes-warmup` shows `warming from session 20261016_100451_37afd4` followed by a 60 s heartbeat for **2,051 s**. The model's own log then gave the authoritative numbers:
+
+| | measured |
+|---|---|
+| prompt eval (cold) | `2051115.42 ms / 16560 tokens` = **8.07 tok/s** |
+| warm-up verdict | `DONE in 2051.4s — COLD -> prefilled all 16560 tokens` |
+| **the NEXT probe (the proof)** | **`already WARM (16,559 of 16,560 tokens reused)` in 4.1 s** |
+
+So **2,051 s → 4.1 s (≈500×)**, and the replay is byte-faithful to **1 token in 16,560**. The verdict reads `COLD -> prefilled` rather than `COLD -> warmed` deliberately: `usage.prompt_tokens_details.cached_tokens` reports the cache state **as the request STARTED**, so a cold cycle legitimately reports `0` even though it just filled the cache — the *next* request is what proves a fill (**LESSONS L175**). The message was rewritten so it states the moment rather than implying failure.
+
+**2. ★ THE CPU GAIN, RE-MEASURED HONESTLY — +10 % on the fill, not +56 %.** The whole 16,560-token cold fill measured **8.07 tok/s at 8 CPUs** against the historical **7.32 tok/s at 4** — i.e. **+10 %** (2,264 s → 2,051 s), not the **+56 %** a same-progress-point sample suggested (7.81 → 12.18 tok/s at 2,048 tokens). Both are true; they answer different questions. The prefill rate is **length-dependent** (the same 4-CPU server ran **12.26 tok/s on 1,148 tokens** vs **7.32 on 16,572**), so a fixed *early* progress point samples the most favourable part of the curve for both conditions and flatters the change — the 8-CPU run degrades over the fill more steeply (12.18 → 8.07) than the 4-CPU one (7.81 → 7.32). **The whole-fill figure is what a first turn actually pays**, so it is the headline; the +56 % survives only as a labelled segment. Recorded as **LESSONS L174**, with an addendum in **L173** (whose headline number this supersedes) and the refinement in `CC-89`. *I had already predicted this in the daily log — "the CPU fix's gain on the real 16.6k prompt will be smaller than the short-prompt ratio suggests" — and the measurement confirmed it.*
+
+**3. ★ THE HANDSHAKE GATE — and its first failure was the INSTRUMENT, not the worker.** The gate drives a real worker over stdio and waits for frames. Its first run failed five checks at once (`no frame within 60s` ×4, plus an "unexpected frame"). **Nothing was wrong with the worker:** the entrypoint digest-verifies **18,248 files** over a Docker Desktop bind mount and the worker imports **46 locked dependencies** before it emits anything — measured **~3–4 minutes** — so every "missing" frame was simply *late*, and the "unexpected frame" was the **correct answer to request id 1** arriving after the 60 s window had been declared a failure. The gate had one clock, sized for a *conversation* frame (~1 s warm), applied to a *boot*. Fixed by splitting them — `BOOT_TIMEOUT_S` (600 s) for the first frames, `FRAME_TIMEOUT_S` (60 s) after the handshake — and recorded as **LESSONS L176**. The re-run then passed:
+
+```
+ok  client.capabilities    -> {'server_requests': [16 methods]}
+ok  gateway.capabilities   -> {'per_session_exclusive_submit': True}
+ok  ping                   -> {'pong': True}
+ok  gateway.ready          -> ['change_events', 'replay_epoch', 'skin']
+ok  process.stop           -> answered
+gate: worker stdout frames: 5 (every one is a JSON-RPC frame)
+GATE PASSED in 103.9s — the pinned worker booted, answered the measured handshake, and stopped on process.stop.
+```
+
+**All 5 stdout frames are valid JSON-RPC** (the channel discipline the gate exists to keep honest), and the run took **103.9 s** on `hermes-gateway:p2-9a` / tree `07ee857b…`. **This closes `CC-86`'s last leg** — both its legs (the live turn and the handshake) are now re-proven on the new pin.
+
+**4. ★ THE DEFECT THE GATE FOUND: the container's pin verifier was one re-pin behind.** The gate's *second* run failed before it reached the handshake, with a verdict that looked alarming and was not:
+
+```
+PIN BROKEN — the mounted tree is not the snapshot that was pinned.
+  expected : ca760e97ff1ef1f0e2ed3deb0dfc2923
+  actual   : 07ee857bdab59a875317035d8aaad4d6
+  files    : 19728
+```
+
+The **tree was correct** — 19,728 files, `07ee857b…`, exactly what `HERMES-PIN.md` §1 and `library/.hermes_pin.py` record, and with **zero** `__pycache__`/`.pyc` files, so it is a genuine documented re-pin, not pollution. The **verifier was stale**: `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision (`3569e846…`/`ca760e97…`), though its own docstring says to update it *"in the same change"*. The 2026-10-16 re-pin updated three of four copies — `library/.hermes_pin.py`, `HERMES-PIN.md`, and the compose's `HERMES_PIN_DIGEST` default — and **missed this one**. Effect: any invocation **without** `HERMES_PIN_DIGEST` (a manual `docker run`, a test, this gate) rejects a **correctly-pinned** tree. The live stack was unaffected *only* because `docker-compose.hermes.yml` injects the env. **Source corrected (the pin of record's value), and raised as `CC-90` — open, because the image must be rebuilt to carry it.** ⚠️ **`workspace/starting-kit/` is gitignored, so this fix is local-only — this entry and `CC-90` are its durable record.**
+
+**5. A side-finding that corrects a justification: the worker runs `journal_mode=DELETE`, not WAL.** The gate's worker log carries `state.db: linked SQLite 3.40.1 … vulnerable to the WAL-reset corruption bug — using journal_mode=DELETE instead of enabling WAL`. That is the worker's own runtime choice, and it means the warm-up's stated reason for mounting the state volume **read-write** ("SQLite cannot read a WAL database through a read-only mount — the reader needs the `-shm`") **does not apply to this database**. The rw mount is harmless and the script still opens the DB `mode=ro`, so nothing is wrong; but the note as written justifies the mount with a mechanism the deployment does not use. *(The same log also flags the pin's bundled SQLite as WAL-reset-vulnerable with an upgrade path — a separate, recorded observation, not a defect we introduced.)*
+
+**6. ★ THE MEASUREMENT THAT UNBLOCKS THE NEXT STEP — a turn-shaped request reuses 99.92 % of the turn prompt.** The switchover's last blocker was arithmetic: §4.3 of the decision record measured a real cold turn at **`usage.prompt = 16572` / 2,280.4 s — 95 % of the worker's own 2,400 s stale ceiling, ~120 s of headroom.** The warm-up *should* retire that, because it prefills the shared prefix outside any turn. But "the prefix request reuses 16,559 tokens" is **not** the same claim as "a turn reuses it" — a turn's prompt diverges after the tools block (a `user` block where the warm-up leaves the assistant generation prompt), and it would miss entirely if the worker assembled the system prompt per turn. So a **turn-shaped** request — the exact stored system text + the exact stored tools + one user message — was sent to the same endpoint the worker uses:
+
+| | measured |
+|---|---|
+| `prompt_tokens` | **16,572** — *exactly* §4.3's live-turn `usage.prompt = 16572`, so the probe is faithfully turn-shaped |
+| `cached_tokens` | **16,558** |
+| reused | **99.92 %** |
+| **tokens the turn must prefill** | **14** |
+
+**So a turn's own prefill collapses from 2,280.4 s to ~14 tokens of work**, and the 2,400 s ceiling stops being marginal *for a turn* — the big prefill no longer happens inside one; the warm-up pays it once, in the background. **The honest caveat:** this holds for turns arriving *after* the warm-up has filled the prefix (the steady state — the loop engages within ~30 s and re-checks every 600 s); it does **not** abolish the cold-start window, where a turn still pays its own prefill. The warm-up converts a **per-conversation** cold cost into a **one-time** one. Recorded as **§4.6** of [`DECISION-p2-9b-stale-timeout-trade.md`](library/development/DECISION-p2-9b-stale-timeout-trade.md).
+
+**⚠️ WHAT THIS PASS DID NOT DO.** No code was written for the product; no Hermes file was forked or edited; nothing was trimmed. The changes are the gate's two clocks, the warm-up's verdict wording, and one stale constant in a local verifier. **`P2-9b` (the switchover) has not started** — its measurement leg is now **done** and no tool-side config is demanded by it (the lever is the system prompt, which no toolset knob reaches), so what remains is the one-change switchover itself: the default-flip + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`). It **awaits the owner's explicit go**, and `CC-90`'s image rebuild is a build step that waits with it.
+
+**★ STANDING FORMAT (the owner's instruction, 2026-10-16).** Every pass states **what was done**, **its address in `MASTER-CHECKLIST.html`**, and **what is next** — and the HTML's **top section** (the `FRONTIER` array) is updated to match. This entry's frontier rewrite carries: *LAST DONE* (`CC-88`, **`CC-86` closed**, `CC-89` refined, `CC-90` open) and *▶ NEXT* (`P2-9b`'s switchover). The `.md` twin's §2 carries the same.
+
+---
+
+### ✅ THE WARM-UP BUILT AND VERIFIED — **the first turn's ~38-minute read is now pre-paid by a service: the model's own DB already stores both halves of the exact prefix, so the warm-up REPLAYS it instead of rebuilding it — measured 16,559 of 16,560 tokens reused in 1.4 s.** *(2026-10-16)*
+
+The owner approved the recommendation and set the constraint: *"we do not compromize or chop off anything from hermis… Apply the optimizations that you find fit most… Approve it is working or not and report back."* Two changes were applied; **nothing was trimmed.**
+
+**1. The CPU ceiling raised (`.wslconfig`).** The host has 8 logical CPUs, but the Docker VM was capped at 4, so every container saw 4 (`nproc`=4, `Cpus_allowed_list: 0-3`, no cgroup limit). The model service is tuned for 8 (`-t 4 -tb 8`, and its own benchmark measured 19.3 tok/s at 4/8 vs 13.2 at 4/4) — so `-tb 8` was being **silently clamped**, and every cold prefill ran at the measured 7.32 tok/s. `processors` raised `4 → 8`. This is a CEILING, not a reservation; it takes effect on the next WSL/Docker start.
+
+**2. ★ THE WARM-UP (`docker/hermes/warmup.py` + the `hermes-warmup` service).** The gap it closes is narrow and specific: the **first turn after the model process starts**. Everything else was already fine — two real sessions recorded `cache_read_tokens = 16,724`, and a live probe measured a cold call at 112.2 s followed by warm calls at 1.2 s / 0.9 s (`cache_n` 1142 of 1148) — a *different* conversation reusing the shared prefix, ~93× faster. But the cache lives in **process RAM**, so each of the four measured model loads emptied it, and the next human to open a chat paid all ~38 minutes.
+
+- **★ THE DESIGN CHOICE THAT MAKES IT SAFE — replay, never rebuild.** A warm-up that *reconstructs* the prompt drifts the moment anything changes. It does not have to: the worker already persists **both halves of the exact request prefix** in its own `state.db` — `sessions.system_prompt_hash` → the system text (measured **26,549 chars** for the newest session) and `sessions.tool_names` → the tools array in **literal OpenAI wire JSON** (measured **42,619 chars**, `{"version": "0.0.0", "tools": [{"type": "function", …}]}`). **26,549 + 42,619 = 69,168 chars — exactly the figure the prompt audit measured.** The script reads those two rows and posts them back unchanged, to the **same endpoint the worker uses** (`/v1/chat/completions`, so the server applies the identical chat template), with `max_tokens: 1` — prefill happens before generation, so one token forces the whole prefix through the model. **Same bytes in, same tokens rendered, same prefix cached; nothing to keep in sync because nothing is derived.**
+- **★ MEASURED — and the number proves the byte-fidelity.** First live run: **`DONE in 8.1s — 16558 of 16560 tokens reused`**. That single figure carries both results: (a) the replay matched the model's cached prefix to within **2 tokens out of 16,560**, so reading those two DB rows really does reproduce the exact request a real turn sends; and (b) **8.1 s instead of ~2,264 s**. The service's own cycles then read **1.9 s / 1.4 s, 16,559 of 16,560**. The 1-token shortfall is not a miss — llama.cpp always re-evaluates the LAST prompt token because it needs its logits to sample the first generated token. *(Verdict thresholds corrected after this: judging on `prompt_tokens - cached <= max(8, 1%)` stops a perfect hit being mislabelled "PARTIAL".)*
+- **Why it LOOPS rather than running once.** The case that hurts is the model restarting **under** a long-lived worker, which a boot-time-only warm-up would miss entirely. Each cycle reads back `usage.prompt_tokens_details.cached_tokens` and reports **COLD → warmed** (it just filled the cache) or **already WARM** (the cycle was ~free), so the loop is self-healing with **no restart detection at all**. A SKIPPED cycle (model still starting, or no session has stored a prefix yet) retries in **30 s** instead of waiting out the 600 s interval, so the warm-up lands the moment the stack is ready.
+- **Two design points that look wrong and are not.** The service runs on a bare `python:3.14-slim-bookworm` (already the worker image's own base, so already on the host — verified it carries `sqlite3` 3.40.1) with the script as a **read-only bind mount**, so changing the script needs no rebuild and no worker restart. And it mounts the state volume **read-write on purpose**: SQLite cannot read a WAL database through a read-only mount, because the reader needs write access to the `-shm` wal-index file — the script itself opens the DB `mode=ro` and only ever SELECTs.
+
+**★ A REAL BUG FOUND BY RUNNING IT (the first attempt was useless).** The first live run printed `SKIP — the model server is not answering at http://model:8080/v1 yet`. The model was up: the probe had built `…/v1/props`, and **llama.cpp's control endpoints (`/props`, `/slots`, `/health`) live at the ROOT, not under `/v1`** — so every cycle 404'd and the service would have sat there reporting "not ready" forever while looking healthy. Fixed by deriving the root from the base URL; recorded as **LESSONS L171**. *A warm-up that silently never warms is worse than no warm-up, because it reads as green.*
+
+**⚠️ WHAT IS MEASURED vs WHAT IS NOT.** Measured: the replay is byte-faithful (16,559/16,560); a warm cycle costs 1.4–1.9 s; the compose service starts, loops, and reports correctly; the DB replay reads the right rows. **Not yet measured live: the cold fill** — a warm-up request landing on a *fresh* model process. The mechanism itself is already proven by the session history (a cold turn populates the cache, and later turns reuse it: `37afd4` = 16,572 cached **0**, then sessions reusing 16,724), and the warm-up performs exactly that prefill. **The live confirmation is deliberately deferred to the owner's Docker restart**, which empties the cache anyway — restarting the model now would take the stack down twice for one answer. *Expect `COLD -> warmed` in `docker logs mercato-hermes-warmup` after the restart; that is the leg to check.*
+
+**Nothing was trimmed** — the owner's rule (`"you can trim stuff that you shouldn't (like you almost did with skills)"`) stands, and the fix does not need it: the dominant cost was a **cold-process cache miss**, not prompt length.
+
+**★ AND THE ARCHITECTURE QUESTION ANSWERED — the containers are ALREADY running in Linux, so "deploy it inside the environment" is what already happens.** The owner asked why Windows Docker Desktop runs the stack when a VM-like environment already exists and the cloud target is Ubuntu. Measured: `docker info` reports `OS=Docker Desktop`, **`Kernel=6.18.33.2-microsoft-standard-WSL2`**, `storage=overlayfs`, engine **29.8.2**, 4 CPUs / 16 GB — and inside any container, `/etc/os-release` says **`Ubuntu 24.04.5 LTS`**. **Docker Desktop is not "Windows Docker": it is a front end for a Linux VM, and the containers are Linux processes in it.** What Docker Desktop actually adds is convenience — the CLI, `C:\…` bind mounts translated into the VM, port forwarding, and a managed Engine version. Where it costs us is exactly the CPU cap that was just fixed, plus **Engine-version skew** against the cloud server and **slower I/O** for `C:\` bind mounts. The separate `Platform-Server` VM (also Ubuntu 24.04.5 LTS, with Coolify/Traefik — see `vm-setup.md`) is the better **staging** target because it matches production. **Ruling recorded: Docker Desktop stays for development velocity; migrate when integration testing against the deployment target begins — not now.** *(The migration trigger is the deployment story, not this optimisation.)*
+
+---
+
+### ✅ The "instruction sheet" traced — **it is mostly Hermes' own developer guide, loaded only because the worker runs inside the Hermes source tree; and the re-read is NOT inevitable (measured: sessions that read 1 token and reused 16,724).** *(2026-10-16)*
+
+The owner pressed the follow-up: *"If the chat is empty, where does the istruction sheet per chat comes from? And if it is the same instructions for all chats then why reading it every time a new chat opens?"* Measured against the worker's own `state.db` (opened read-only) and `agent/system_prompt.py`.
+
+- **Where it comes from.** It is not stored in the chat — `build_system_prompt()` assembles it fresh per conversation in three tiers (stable → context → volatile) from: `/var/lib/hermes/SOUL.md` (663 chars, the identity) · built-in guidance compiled into `agent/prompt_builder.py` (~11.7k chars) · **project context files from the working directory, and the cwd is `/hermes-src`, so it loads Hermes' OWN `AGENTS.md` (11,952 chars)** · workspace/git snapshot + env probe + profile line + date line + runtime block (~2.4k) · **plus the tool definitions as a separate JSON array (~42.6k chars, 20 generic developer tools — no business tool)**. `memories/` and `skills/` are empty. **Total ≈ 69k chars ≈ 16.6k tokens; the user's own message is a few tokens.**
+- **★ The correction (rule 13, applied to my own earlier statement).** I had said *"the model must read the entire instruction sheet for every new chat."* **Too absolute.** Measured: the server **skips** the read when the sheet is still cached — sessions `503acd` and `a32218` (2026-10-14) recorded **`input_tokens = 1`, `cache_read_tokens = 16,724`**; `275de2` = 433 read / 33,481 reused. Full re-reads happen only when the sheet changed or was evicted (`a43f3d` = 16,725/0 after a different-toolset session; `37afd4` = 16,572/0 two days later).
+- **And the sheet is not identical anyway.** Same-day prompts share **96.7%** (only the `Conversation started:` date line differs, near the end); the **tool block shares only 6%** (diverges at char 2,543, inside the first tool's description); across a build change the system prompt shares only **36%**.
+- **Why turn 1 is the expensive one:** turn cost = reading whatever is not cached + generating. Turn 1 reads the whole sheet; turn 2+ reads only the new words (947 tokens, 946 reused, 1.5 s).
+
+**Consequence for `P2-9b`:** the single biggest block of the "instruction sheet" is Hermes' own developer guide — present only because the worker's cwd is the Hermes source tree. **★ CORRECTION (same day, rule 13):** I first wrote *"most of it is scaffolding a business tenant never needs"* — **too strong.** Measured per block, the split is **≈52 % developer-only / ≈48 % needed in any chat**: developer-only = `AGENTS.md` 11,952 + the coding brief ~2,822 + the file/terminal/code/browser/skill tools ~21,365 (≈8,650 tokens); needed in any chat = the behaviour rules ~8,862 + identity/date/workspace ~2,900 + the general tools ~21,183 (`delegate_task`, `manage_connections`, `tool_search`, `memory`, `clarify`, `web_search`…) (≈7,900 tokens). **And the 21 business tools ARE in the block** — listed by name inside `tool_search`'s deferred catalog (27 deferred tools in all), schemas loaded on demand. So the split is **backwards** for a business tenant (developer tools always-on, business tools deferred) — but it is not "most". **No changes made** (owner: *"do not make any changes till we have this all clear"*).
+
+---
+
+### ✅ The "cold start" MEASURED — **nothing sleeps; the wait is the first turn of every new chat (16,572 tokens ≈ 38 min), and the model server is actually running FOUR slots, not the one the design doc claims.** *(2026-10-16)*
+
+The owner asked two questions — *is the platform not running all the time, and if so when does a cold start happen and why (RAM?); and if a cold start is unavoidable, could the system ping first, wait for a pong in the background, then send the prompt, with a "we are calling the folks to serve you" status so the wait feels alive?* Both are answered from measurement, not assumption.
+
+- **Nothing sleeps.** Every service is `restart: unless-stopped`; `docker ps` shows all ten containers up and `mercato-model-local` (llama.cpp) **up 15 h**. `git grep` for `prewarm|pre-warm|warmup|warm_up|keepalive|keep-alive` across `apps/**`, `workspace/**`, `docker/**` is **empty** — no warm-up mechanism exists anywhere.
+- **The "cold" is the first turn of each new conversation, not a sleeping server.** Every new chat must read its whole prompt into an empty KV cache before it can answer. Measured on the live worker: **16,572 tokens at 7.32 tok/s = 2,262.8 s ≈ 38 min** (the model's own log line `prompt eval time = 2262809.92 ms / 16572 tokens`). It is identical whether the server booted a second ago or 15 hours ago.
+- **★ Rule-13 correction — the server runs FOUR slots, not one.** `library/ai/PAPERCLIP_HERMES_LLAMA_SERVER_SSOT.md` states the production baseline as `--parallel 1` ("Parallel slots: 1"), but the compose passes **no** `--parallel` at all, and this build's flag default is `-1 = auto`, which chose **4**. Two routes agree: the startup log `srv load_model: initializing, n_slots = 4, n_ctx_slot = 65536, kv_unified = 'true'` and the live `/props` `"total_slots": 4`. Unified KV means the four slots **share** the one 65,536-token buffer (the budget is not multiplied four-fold), but they compete for the CPUs. The doc's section now carries the measured note.
+- **Second finding:** the host has **8 logical CPUs** (4 physical cores) but the **container sees only 4** (`nproc`=4; `docker info` `NCPU=4`) — Docker is limiting it, so the compose's `-tb 8` is clamped and its own benchmark comment (comparing 8/8 and 4/8) does **not** describe the running config.
+- **The ping/pong idea, evaluated honestly:** a generic probe builds a *different* cache key than the real turn (the system prompt and toolset are per-session), so the server's prefix match (`f_sim_best`) would miss and the real turn would still prefill from scratch — and while the probe ran it would occupy one of the four slots. The **UX half is sound and cheap** ("fetching your answer…" is honest); the **pre-warm half cannot remove the per-session cold turn**. The real levers are a smaller system prompt (~6.7k of the 16.6k tokens), faster/more hardware, or an exact-prefix warm-up per tenant.
+
+**Records:** the SSOT doc annotated (rule 13), lesson **L170**.
+
+---
+
 ### ✅ The Hermes pin RE-TAKEN — **the worker was crash-looping (1,834 restarts) on a half-done re-pin, and the new extract could not import at the depth it landed — both found by measurement and fixed.** *(2026-10-16)*
 
 The owner renamed the previous Hermes snapshot aside and extracted a newer download under the standard name (*"I renamed older version of hermes and extracted a new version with the same standard name."*). Two failures followed, both caught by measuring rather than guessing:

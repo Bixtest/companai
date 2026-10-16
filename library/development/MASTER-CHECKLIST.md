@@ -41,18 +41,46 @@ largely built — while the **platform skeleton underneath it is only starting**
 
 ## 2. ▶ The frontier — what is being built now
 
-- **NOW — Row 28 (Phase 8):** the agent runtime behind one typed door. Sub-rows **R28-1 … R28-5 are
-  DONE** (the port's shape · the first engine · the chat route moved onto it · the run closed at the
-  door · the exit gate). Hermes is now **wired behind the door and live-proven** (`P2-5` selectable ·
-  `P2-7`/`P2-8` live turns · `P2-9a` the MCP bridge — a real Hermes turn called one of the 21 platform
-  tools). **`R28-6` (deleting OpenCode, `CC-72`) — the stale-timeout gate is RULED (2026-10-16).** The
-  owner ruled Option 1 of [`DECISION-p2-9b-stale-timeout-trade.md`](DECISION-p2-9b-stale-timeout-trade.md):
-  **keep the worker's 2400 s stale ceiling**; on-demand tool loading is the **standard behavior** (the
-  pin ships progressive disclosure ON by default; prompt-cache reuse measured ON — 168.7 s cold → 1.5 s
-  warm); `P2-9b` is re-scoped to **measure-and-configure** — one in-process re-measurement of the
-  assembled prompt (the ~16,757 figure doesn't reconcile with the compose's own 10,988), config tuning
-  only if the numbers demand — then the switchover itself: the default-flip to Hermes + the deletion +
-  the `hermes-local` retirement, one change.
+- **★ LAST DONE — 2026-10-16 (evening):** the warm-up's last leg, and the handshake gate.
+  The **cold fill was caught live** — the loop engaged unattended and refilled the prefix in **2,051 s**
+  (`8.07 tok/s`), after which the next request reused **16,559 of 16,560 tokens in 4.1 s** — `CC-88`.
+  The **stdio handshake gate PASSED in 103.9 s** on the re-pinned worker (`hermes-gateway:p2-9a` /
+  tree `07ee857b…`): `ping`→pong, `gateway.capabilities`→`per_session_exclusive_submit`,
+  `client.capabilities`→16 `server_requests`, the `gateway.ready` event, `process.stop`→answered, and
+  **all 5 stdout frames valid JSON-RPC** — **closes `CC-86`**. The CPU gain was re-measured honestly —
+  **+10 % on the whole 16,560-token fill** (2,264 s @ 7.32 → 2,051 s @ 8.07 tok/s), not the +56 % a
+  2,048-token segment had suggested — `CC-89`. The gate then found a **real defect**:
+  `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision after
+  the 2026-10-16 re-pin, so any caller not given `HERMES_PIN_DIGEST` read a correctly-pinned tree as
+  `PIN BROKEN` — `CC-90`, **open** (source corrected; the image needs a rebuild to carry it).
+  **Also measured, and it unblocks the next step:** a **turn-shaped** request (system + tools + a user
+  message) reuses **99.92 %** of the turn prompt — 16,558 of 16,572, leaving **14 tokens** to prefill —
+  so the warm-up **retires the stale-timeout hazard** that gated the switchover
+  (`DECISION-p2-9b-stale-timeout-trade.md` §4.6).
+- **★ AND THE TOOLING SET'S FIRST TWO SLICES — `CC-91` / `SR-39` + `SR-41`, built 2026-10-16:** a
+  registry-driven `scripts/check-one-truth.mjs` (code repo) + a **mutation-proof** test
+  (`scripts/__tests__/check-one-truth.test.mjs`, 4/4) + the `check:one-truth` script, with the **Hermes
+  pin digest** as its first fact — the fact that actually drifted (`CC-90`); **and** the **escape-hatch
+  census** `scripts/check-escape-hatches.mjs` + a 5/5 test + `check:escape-hatches`/`:fail`, which
+  **measured the real repo: 7,968 files · 202 holes · 33 named · 169 unnamed** — one-sided, because every
+  `@ts-expect-error`/`@ts-ignore` carries a reason (24 of 24) while only **8 of 168** `eslint-disable`s
+  do. **Finding:** the SRS marks the four BORROW, but the repo **already runs the pattern**
+  (`check-version-alignment.sh` = one-truth; `check-agents-md-budget.mjs` + `.baseline.json` = the
+  ratchet, `SR-40`), so the work is *generalise*, not *import*. Plan:
+  [`PLAN-tooling-set-SR-38-39-41-46.md`](PLAN-tooling-set-SR-38-39-41-46.md).
+- **▶ NEXT — the rest of the tooling set (`CC-91`):** `SR-38` (digital-twin harness — fixtures
+  typechecked against the real interfaces, so drift breaks the build) and `SR-46` (the two-reads lint —
+  **★ whose stated home needs a correction:** `packages/eslint-plugin-ds` runs only on **backend-UI
+  files** via `eslint.ds.config.mjs`, so a *settings-read* lint there would never fire on the files that
+  read settings; it belongs in the `scripts/check-*.mjs` family, where cross-file drift is visible).
+  These are the SRS's *"land FIRST; make everything after cheaper"* items, and they **gate the critical
+  path**: tooling → identity (`SR-02`/`SR-07`) → **`SR-12` (per-tenant engine home)** → `P2-9b`.
+- **▶ THEN — `P2-9b`, now SPLIT (owner's ruling 2026-10-16):** **(1)** the default-flip to Hermes + the
+  `hermes-local` retirement (`CC-74`) — **after `SR-12` lands**, because until then a flip would make the
+  open `CC-84` hole (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's
+  tenant) the **default** path; and **(2)** the OpenCode deletion (`R28-6`/`N-8`) — **DEFERRED**: OpenCode
+  stays in place, un-defaulted, so that deleting it cannot break something we are unaware of; revisit once
+  its presence has proved harmless.
 - **ALSO NOW:** the architecture workshop's mapping pass is **DONE** (53 requirements,
   `SR-01`…`SR-53`); two platform studies remain (mattermost + activepieces), and the approved next
   build is the tooling set (`SR-38`/`39`/`41`/`46`) + `SR-08`.
@@ -142,7 +170,7 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 **Every one has an address here**: a code you meet anywhere in the documents resolves on this page.
 **Closed** = built and proven (tests, mutations, a separate-agent hostile critic — the record is in
 `COMPLETION-CALLBACKS.md`). States were read item by item from that register, not scanned by keyword.
-**CC-75 was never assigned** — the numbering skips it. **45 closed · 41 open · 86 total.**
+**CC-75 was never assigned** — the numbering skips it. **48 closed · 42 open · 90 total.**
 
 | Item | What it is, in plain words | State |
 |---|---|---|
@@ -230,8 +258,12 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-83 | P2-9b retires the only door that can write into a Hermes session | ☐ open |
 | CC-84 | The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority | ☐ open |
 | CC-85 | The worker's MCP key lives only in the process the entrypoint starts — a worker spawned any other way gets a 401 from the MCP server and loses its tools | ☐ open |
-| CC-86 | The live Hermes proofs (`P2-1`…`P2-9a`) were taken against the previous pin revision — the **live turn is re-proven on the new pin** (route B, 2026-10-16: `TURN DONE in 2280.4 s`, `usage.prompt = 16572`); the **stdio handshake gate re-run remains** | ☐ open |
+| CC-86 | The live Hermes proofs (`P2-1`…`P2-9a`) were taken against the previous pin revision — **both legs now re-proven on the new pin**: the **live turn** (route B, 2026-10-16: `TURN DONE in 2280.4 s`, `usage.prompt = 16572`) and the **stdio handshake gate** — **GATE PASSED in 103.9 s** on `hermes-gateway:p2-9a` / tree `07ee857b…`: `ping`→pong, `gateway.capabilities`→`per_session_exclusive_submit`, `client.capabilities`→16 `server_requests`, the `gateway.ready` event, `process.stop`→answered, and **all 5 stdout frames valid JSON-RPC** | ✅ closed |
 | CC-87 | The architecture reader is a generated bundle printing a stale pin — regenerate it from the study sources | ☐ open |
+| CC-88 | The first turn of every conversation re-read the whole 16.6k-token instruction sheet after each model restart (~2,280 s — the `CC-86` turn). A warm-up service now replays the exact shared prefix **from the worker's own `state.db`** so the model's RAM cache is already full: verified at **16,559 of 16,560 tokens reused in 1.4 s**, and it engages unattended on a fresh model process | ✅ closed |
+| CC-89 | The stack ran on **4 of the host's 8 CPUs** (`.wslconfig`), so the model's `-tb 8` was silently clamped. Raised to 8 — and **a Docker Desktop restart does NOT reboot the WSL VM**, so the file only applies via `docker desktop stop`/`start`. Measured: **+56 % at the 2,048-token point** (7.81 → 12.18 tok/s), but only **+10 % on the whole 16,560-token cold fill** (2,264 s @ 7.32 → **2,051 s @ 8.07 tok/s**) — the prefill rate is length-dependent, so the early-fill sample flatters | ✅ closed |
+| CC-90 | The container's pin verifier carried a **stale default digest**. After the 2026-10-16 re-pin, `library/.hermes_pin.py`, `HERMES-PIN.md` and the compose's `HERMES_PIN_DIGEST` default all moved to `db44c462…`/`07ee857b…` — but `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision (`3569e846…`/`ca760e97…`), though its own docstring says to update it "in the same change". Effect: any invocation **without** `HERMES_PIN_DIGEST` — a manual `docker run`, a test, the handshake gate — rejected the **correctly-pinned** tree with `PIN BROKEN` (19,728 files hashing to `07ee857b…`). The live stack was unaffected only because the compose injects the env. **Source corrected; the image must be rebuilt to carry it** — until then, callers pass `--pin-digest 07ee857bdab59a875317035d8aaad4d6` | ☐ open |
+| CC-91 | **The tooling set (`SR-38`/`39`/`41`/`46`) — the SRS's "land FIRST; make everything after cheaper" item, and now the frontier.** It is why the switchover is *not* next: the SRS sequences **`SR-12` (per-tenant engine home) ← gates `P2-9b`**, and `SR-12` is the fix for the **open** `CC-84` (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's tenant) — so flipping the default first would make that hole the **default** path. **First slice DONE 2026-10-16:** the **one-truth check (`SR-39`)** — `scripts/check-one-truth.mjs` + a **mutation-proof** test (`scripts/__tests__/check-one-truth.test.mjs`, 4/4) + the `check:one-truth` script — with the **Hermes pin digest** as its first fact, i.e. the fact that actually drifted (`CC-90`). **Second slice DONE 2026-10-16 (evening):** the **escape-hatch census (`SR-41`)** — `scripts/check-escape-hatches.mjs` + a **5/5** test (the trap: a bare rule list is *not* a reason; the precision case: prose is *not* a hole) + `check:escape-hatches` / `:fail`. **Measured on the real repo: 7,968 files · 202 holes · 33 named · 169 unnamed** — and the finding is **one-sided**: every `@ts-expect-error`/`@ts-ignore` carries a reason (24 of 24) but only **8 of 168** `eslint-disable`s do, so the backlog is a *convention gap* (nobody was told to write a reason after `--`), not a discipline failure. **★ Finding:** the SRS marks all four BORROW, but the repo **already runs the pattern** (`check-version-alignment.sh` = one-truth; `check-agents-md-budget.mjs` + `.baseline.json` = the ratchet, `SR-40`), so the work is *generalise*, not *import*. **Remainder:** `SR-38` (digital-twin harness), `SR-46` (two-reads lint — **★ and its stated home needs a correction:** `packages/eslint-plugin-ds` runs only on **backend-UI files** via `eslint.ds.config.mjs`, so a *settings-read* lint there would never fire on the files that read settings; it belongs in the `scripts/check-*.mjs` family, where the cross-file drift is visible) | ☐ open |
 
 ---
 
@@ -340,4 +372,38 @@ the SR register added: all 53 architecture requirements carry an address (3 HAVE
 `CC-67` closed, both verified in code and in the callbacks register; `CC-72` is the open row-28
 item (its stale-timeout gate **RULED 2026-10-16** — Option 1: keep the 2400 s ceiling, `P2-9b` =
 measure-and-configure; the ruling is recorded in the decision doc §6, `platform_points.md` row 28
-and the phase-2 plan §2.15); the frontier boxes aligned across BACKLOG / platform_points / JOURNAL).
+and the phase-2 plan §2.15); the frontier boxes aligned across BACKLOG / platform_points / JOURNAL). **Re-synced later the same
+day:** `CC-88` and `CC-89` added — the prompt-cache warm-up, and the CPU-ceiling finding (including
+that **a Docker Desktop restart does not reboot the WSL VM**, so `.wslconfig` only applies via
+`docker desktop stop`/`start`).
+
+**Re-synced again 2026-10-16 (evening).** `CC-86` **closed** — the stdio handshake gate passed on the
+re-pinned worker (`GATE PASSED in 103.9 s`), so both of its legs are now re-proven. `CC-90` **added** —
+`docker/hermes/verify_pin.py` carried a stale `DEFAULT_EXPECTED_DIGEST` naming the *previous* revision,
+so any caller not given `HERMES_PIN_DIGEST` read a correctly-pinned tree as `PIN BROKEN`; the source is
+corrected but the image needs a rebuild to carry it. `CC-89`'s measured claim was refined to give the
+**whole-fill** figure (+10 %) beside the segment figure (+56 %). The register is now **48 closed · 41
+open · 89 total**. The HTML twin was re-synced the same evening and carries `CC-85`…`CC-90`.
+
+**Re-synced again 2026-10-16 (evening, third pass).** `CC-91`'s **second slice** landed — the
+**escape-hatch census (`SR-41`)**, `scripts/check-escape-hatches.mjs` + a 5/5 test +
+`check:escape-hatches`/`:fail`, **measured on the real repo at 7,968 files · 202 holes · 33 named · 169
+unnamed**, and **one-sided** (every `@ts-expect-error`/`@ts-ignore` carries a reason — 24 of 24 — while
+only **8 of 168** `eslint-disable`s do). A **correction** is recorded in the `CC-91` row: `SR-46`'s
+stated home does not work, because `packages/eslint-plugin-ds` runs only on **backend-UI files**, so a
+*settings-read* lint there would never fire on the files that read settings. **The register now reads
+48 closed · 42 open · 90 total** — the previous note's 41 / 89 was the state *before* `CC-91` was added,
+so it is corrected here by name rather than left to look like a second count. The HTML twin was
+re-synced in the same pass.
+
+**The frontier was rewritten the same evening.** The HTML's top section (and this file's §2) now carries
+**LAST DONE** with the `CC-*` addresses — `CC-88` (the cold fill, caught live), **`CC-86` closed** (the
+handshake gate, `GATE PASSED in 103.9 s`), `CC-89` (refined to the whole-fill figure), `CC-90` (added,
+open) and `CC-91` (the tooling set, **two slices built and tested**) — and **▶ NEXT**: the rest of the
+tooling set (`SR-38` + the re-homed `SR-46`), then the critical path — identity (`SR-02`/`SR-07`) →
+**`SR-12` (per-tenant engine home)** → `P2-9b` step (1). **`SR-12` is why the switchover is not next**:
+it is the fix for the open `CC-84`, so a default-flip before it would make that hole the *default* path.
+The turn-shaped reuse measurement that unblocks the flip is
+`DECISION-p2-9b-stale-timeout-trade.md` **§4.6** (99.92 % of the turn prompt reused — 14 tokens left to
+prefill). *This is the standing format from 2026-10-16: every pass states what was done, its address in
+this register, and what is next — and the HTML's top section is updated to match.*
