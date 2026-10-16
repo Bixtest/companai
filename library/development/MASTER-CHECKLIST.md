@@ -41,23 +41,90 @@ largely built — while the **platform skeleton underneath it is only starting**
 
 ## 2. ▶ The frontier — what is being built now
 
-- **★ LAST DONE — 2026-10-16 (evening):** the warm-up's last leg, and the handshake gate.
-  The **cold fill was caught live** — the loop engaged unattended and refilled the prefix in **2,051 s**
-  (`8.07 tok/s`), after which the next request reused **16,559 of 16,560 tokens in 4.1 s** — `CC-88`.
-  The **stdio handshake gate PASSED in 103.9 s** on the re-pinned worker (`hermes-gateway:p2-9a` /
-  tree `07ee857b…`): `ping`→pong, `gateway.capabilities`→`per_session_exclusive_submit`,
-  `client.capabilities`→16 `server_requests`, the `gateway.ready` event, `process.stop`→answered, and
-  **all 5 stdout frames valid JSON-RPC** — **closes `CC-86`**. The CPU gain was re-measured honestly —
-  **+10 % on the whole 16,560-token fill** (2,264 s @ 7.32 → 2,051 s @ 8.07 tok/s), not the +56 % a
-  2,048-token segment had suggested — `CC-89`. The gate then found a **real defect**:
-  `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision after
-  the 2026-10-16 re-pin, so any caller not given `HERMES_PIN_DIGEST` read a correctly-pinned tree as
+- **★ LAST DONE — 2026-10-16 (late): the `preview/` audit, triaged and validated — `CC-92`.**
+  13 documents, **45,652 words**, written 11–14 Oct by an agent brought in cold, and **never triaged**.
+  **46 findings re-measured against the code at `b183df58`: zero false.**
+  **Both CRITICALs confirmed and still open.** **T-01** — the delegation route's guard is
+  `{requireAuth, requireFeatures:[FEATURE_MANAGE]}`, i.e. `auth.delegations.manage`, and **never the
+  capability being granted**; `capabilityId` is `z.string().min(1)` with no descriptor lookup; and
+  `.delegable` has **0 production readers** repo-wide. **T-02** — `business-ir-pack.ts:129` passes
+  `features: ctx.userFeatures` into the Business-IR chain and **0 of the four files read it**;
+  `engine.query` at `business-ir-run.ts:324` runs unguarded. **One correction that sharpens T-02:**
+  `ai_assistant.view` *is* declared in the ai-assistant package's own `acl.ts` — what it lacks is a
+  `capability` descriptor, and `registerCapabilityDescriptors` skips features without one, so `decideFor`
+  returns null and the tool is permitted. The descriptor's absence is a documented migration position;
+  `features` being unread is not.
+  **And the measurement that matters most — my own census was the error.** §6 claims
+  `communication_channels` declares no command capability. My first census grepped the bare word
+  `capability` and **matched the prose** "adapter capability" in a comment, scoring it as declared.
+  Re-measured with `^\s*capability\s*:`: **15 core modules with `commands/`, 8 declaring one.** The audit's
+  numbers were right; the method was mine to get wrong. **Rule 13 applied to my own reading.**
+  **Four claims now fixed — recorded so nobody re-fixes them:** `ledger:verify` **has** a caller
+  (`audit_logs/cli.ts:91,115`; only the *scheduling* half stands); `OPENAI_BASE_URL` **is** forwarded to
+  `hermes-gateway` (`docker-compose.hermes.yml:107`, with the P2-7/§2.13 measurement beside it) — **but not
+  to `mcp`**, which is still open; `HERMES-PIN.md` **exists** (29,340 bytes, digest `07ee857b…` — the same
+  one `SR-39` verifies); and `run.ts` gate 3 gained `|| !fn.businessIr`.
+  **Five of the audit's own numbers corrected by name** (`C-01`…`C-05`), the largest being the RTL ratio:
+  **70:1 → 15.1:1**. Measured token-level over string literals — 4,320 files, 472,110 class-like tokens,
+  **878 physical vs 58 logical** — against the audit's word-boundary count of 1,129/16. **The finding and
+  its severity are unchanged.**
+  **A sixth correction is on my own work (`C-06`):** this pass first carried the preview folder as
+  **197,912 words**; that figure is not reproducible by any measure of the folder (`wc -w` = **45,652**,
+  `wc -c` = 287,331 bytes). It was inherited unverified, and rule 13 commits the fix by name.
+  Document: [`PREVIEW-AUDIT-TRIAGE.md`](PREVIEW-AUDIT-TRIAGE.md).
+- **★ THE RANKING'S OWN FINDING — and the one substantive addition to the audit's §17 order:**
+  rank **`SR-42` — a declared-control coverage check — FIRST, ahead of both CRITICAL patches.**
+  Because **six findings in the register are the SAME finding**: `.delegable`,
+  `demoteIfEvidenceDemands`, the C6 command contract, `authorityPolicyProblems`,
+  `findFrontendVocabulary`, `detectRepeatedRequest` — every one declared, every one with **zero production
+  readers**, every one **invisible to the build**. A patch closes an instance; `SR-42` closes the class —
+  **and the workshop already owns the mechanism** (`SR-39`'s one-truth check + `SR-41`'s escape-hatch
+  census, both committed today).
+- **▶ NEXT — `SR-42`, then the two CRITICALs (T-01, T-02):** both are **one function to close**, and the
+  code to copy already exists in the repo — `getCapabilityDescriptor` for T-01, `authorizeEntityAccess`
+  (`search/ai-tools.ts:86`, 53 entities' `aclFeatures` behind it) for T-02. **Then the one-character fix**
+  (T-32: `UUID_PATTERN`'s `[1-5]` → `[0-9a-f]` — a v7 id currently fails the match, so no lock lookup runs
+  and a locked record is writable), **and the two live compose defects** (T-13 `--jinja`, absent from every
+  compose file; T-14 the `mcp` service's missing base URL, which is the difference between the embedding
+  lane working and it silently calling `api.openai.com`).
+- **▶ THEN — the rest of the tooling set (`CC-91`), unchanged:** `SR-38` (digital-twin harness — fixtures
+  typechecked against the real interfaces, so drift breaks the build) and `SR-46` (the two-reads lint —
+  **★ whose stated home needs a correction:** `packages/eslint-plugin-ds` runs only on **backend-UI
+  files** via `eslint.ds.config.mjs`, so a *settings-read* lint there would never fire on the files that
+  read settings; it belongs in the `scripts/check-*.mjs` family, where cross-file drift is visible).
+  These are the SRS's *"land FIRST; make everything after cheaper"* items, and they **gate the critical
+  path**: tooling → identity (`SR-02`/`SR-07`) → **`SR-12` (per-tenant engine home)** → `P2-9b`.
+  **`SR-42` does not displace that order** — it *is* the SRS's own *"land FIRST"* item, and it is the item
+  that makes the next three findings arrive as a build failure instead of a discovery.
+- **▶ AND THEN — `P2-9b`, now SPLIT (owner's ruling 2026-10-16):** **(1)** the default-flip to Hermes + the
+  `hermes-local` retirement (`CC-74`) — **after `SR-12` lands**, because until then a flip would make the
+  open `CC-84` hole (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's
+  tenant) the **default** path; and **(2)** the OpenCode deletion (`R28-6`/`N-8`) — **DEFERRED**: OpenCode
+  stays in place, un-defaulted, so that deleting it cannot break something we are unaware of; revisit once
+  its presence has proved harmless.
+- **ALSO NOW:** the architecture workshop's mapping pass is **DONE** (53 requirements,
+  `SR-01`…`SR-53`); two platform studies remain (mattermost + activepieces), and the approved next
+  build is the tooling set (`SR-38`/`39`/`41`/`46`) + `SR-08`.
+- **Behind it:** Row 16 team-leg (`CC-51` — your go-ahead) and the `B-WS/B9` widget design.
+
+### 2.1 And earlier the same day — the warm-up's last leg, and the handshake gate
+
+- **`CC-88` / `CC-89` / `CC-90`.** The **cold fill was caught live** — the loop engaged unattended and
+  refilled the prefix in **2,051 s** (`8.07 tok/s`), after which the next request reused **16,559 of
+  16,560 tokens in 4.1 s** — `CC-88`. The **stdio handshake gate PASSED in 103.9 s** on the re-pinned
+  worker (`hermes-gateway:p2-9a` / tree `07ee857b…`): `ping`→pong, `gateway.capabilities`→
+  `per_session_exclusive_submit`, `client.capabilities`→16 `server_requests`, the `gateway.ready` event,
+  `process.stop`→answered, and **all 5 stdout frames valid JSON-RPC** — **closes `CC-86`**. The CPU gain
+  was re-measured honestly — **+10 % on the whole 16,560-token fill** (2,264 s @ 7.32 → 2,051 s @ 8.07
+  tok/s), not the +56 % a 2,048-token segment had suggested — `CC-89`. The gate then found a **real
+  defect**: `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision
+  after the 2026-10-16 re-pin, so any caller not given `HERMES_PIN_DIGEST` read a correctly-pinned tree as
   `PIN BROKEN` — `CC-90`, **open** (source corrected; the image needs a rebuild to carry it).
   **Also measured, and it unblocks the next step:** a **turn-shaped** request (system + tools + a user
   message) reuses **99.92 %** of the turn prompt — 16,558 of 16,572, leaving **14 tokens** to prefill —
   so the warm-up **retires the stale-timeout hazard** that gated the switchover
   (`DECISION-p2-9b-stale-timeout-trade.md` §4.6).
-- **★ AND THE TOOLING SET'S FIRST TWO SLICES — `CC-91` / `SR-39` + `SR-41`, built 2026-10-16:** a
+- **`CC-91` — the tooling set's first two slices, `SR-39` + `SR-41`, built 2026-10-16:** a
   registry-driven `scripts/check-one-truth.mjs` (code repo) + a **mutation-proof** test
   (`scripts/__tests__/check-one-truth.test.mjs`, 4/4) + the `check:one-truth` script, with the **Hermes
   pin digest** as its first fact — the fact that actually drifted (`CC-90`); **and** the **escape-hatch
@@ -68,23 +135,10 @@ largely built — while the **platform skeleton underneath it is only starting**
   (`check-version-alignment.sh` = one-truth; `check-agents-md-budget.mjs` + `.baseline.json` = the
   ratchet, `SR-40`), so the work is *generalise*, not *import*. Plan:
   [`PLAN-tooling-set-SR-38-39-41-46.md`](PLAN-tooling-set-SR-38-39-41-46.md).
-- **▶ NEXT — the rest of the tooling set (`CC-91`):** `SR-38` (digital-twin harness — fixtures
-  typechecked against the real interfaces, so drift breaks the build) and `SR-46` (the two-reads lint —
-  **★ whose stated home needs a correction:** `packages/eslint-plugin-ds` runs only on **backend-UI
-  files** via `eslint.ds.config.mjs`, so a *settings-read* lint there would never fire on the files that
-  read settings; it belongs in the `scripts/check-*.mjs` family, where cross-file drift is visible).
-  These are the SRS's *"land FIRST; make everything after cheaper"* items, and they **gate the critical
-  path**: tooling → identity (`SR-02`/`SR-07`) → **`SR-12` (per-tenant engine home)** → `P2-9b`.
-- **▶ THEN — `P2-9b`, now SPLIT (owner's ruling 2026-10-16):** **(1)** the default-flip to Hermes + the
-  `hermes-local` retirement (`CC-74`) — **after `SR-12` lands**, because until then a flip would make the
-  open `CC-84` hole (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's
-  tenant) the **default** path; and **(2)** the OpenCode deletion (`R28-6`/`N-8`) — **DEFERRED**: OpenCode
-  stays in place, un-defaulted, so that deleting it cannot break something we are unaware of; revisit once
-  its presence has proved harmless.
-- **ALSO NOW:** the architecture workshop's mapping pass is **DONE** (53 requirements,
-  `SR-01`…`SR-53`); two platform studies remain (mattermost + activepieces), and the approved next
-  build is the tooling set (`SR-38`/`39`/`41`/`46`) + `SR-08`.
-- **Behind it:** Row 16 team-leg (`CC-51` — your go-ahead) and the `B-WS/B9` widget design.
+- **And what was deliberately NOT done in the triage pass:** the hosted-login defect (`06 §3.5` — needs the
+  owner's machine and a real account) and the audit's green-suite claims (a full run was not in scope) are
+  recorded **UNVALIDATED** in the triage document — named as unverified rather than guessed or silently
+  passed over.
 
 ---
 
@@ -264,6 +318,7 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-89 | The stack ran on **4 of the host's 8 CPUs** (`.wslconfig`), so the model's `-tb 8` was silently clamped. Raised to 8 — and **a Docker Desktop restart does NOT reboot the WSL VM**, so the file only applies via `docker desktop stop`/`start`. Measured: **+56 % at the 2,048-token point** (7.81 → 12.18 tok/s), but only **+10 % on the whole 16,560-token cold fill** (2,264 s @ 7.32 → **2,051 s @ 8.07 tok/s**) — the prefill rate is length-dependent, so the early-fill sample flatters | ✅ closed |
 | CC-90 | The container's pin verifier carried a **stale default digest**. After the 2026-10-16 re-pin, `library/.hermes_pin.py`, `HERMES-PIN.md` and the compose's `HERMES_PIN_DIGEST` default all moved to `db44c462…`/`07ee857b…` — but `docker/hermes/verify_pin.py`'s `DEFAULT_EXPECTED_DIGEST` still named the **previous** revision (`3569e846…`/`ca760e97…`), though its own docstring says to update it "in the same change". Effect: any invocation **without** `HERMES_PIN_DIGEST` — a manual `docker run`, a test, the handshake gate — rejected the **correctly-pinned** tree with `PIN BROKEN` (19,728 files hashing to `07ee857b…`). The live stack was unaffected only because the compose injects the env. **Source corrected; the image must be rebuilt to carry it** — until then, callers pass `--pin-digest 07ee857bdab59a875317035d8aaad4d6` | ☐ open |
 | CC-91 | **The tooling set (`SR-38`/`39`/`41`/`46`) — the SRS's "land FIRST; make everything after cheaper" item, and now the frontier.** It is why the switchover is *not* next: the SRS sequences **`SR-12` (per-tenant engine home) ← gates `P2-9b`**, and `SR-12` is the fix for the **open** `CC-84` (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's tenant) — so flipping the default first would make that hole the **default** path. **First slice DONE 2026-10-16:** the **one-truth check (`SR-39`)** — `scripts/check-one-truth.mjs` + a **mutation-proof** test (`scripts/__tests__/check-one-truth.test.mjs`, 4/4) + the `check:one-truth` script — with the **Hermes pin digest** as its first fact, i.e. the fact that actually drifted (`CC-90`). **Second slice DONE 2026-10-16 (evening):** the **escape-hatch census (`SR-41`)** — `scripts/check-escape-hatches.mjs` + a **5/5** test (the trap: a bare rule list is *not* a reason; the precision case: prose is *not* a hole) + `check:escape-hatches` / `:fail`. **Measured on the real repo: 7,968 files · 202 holes · 33 named · 169 unnamed** — and the finding is **one-sided**: every `@ts-expect-error`/`@ts-ignore` carries a reason (24 of 24) but only **8 of 168** `eslint-disable`s do, so the backlog is a *convention gap* (nobody was told to write a reason after `--`), not a discipline failure. **★ Finding:** the SRS marks all four BORROW, but the repo **already runs the pattern** (`check-version-alignment.sh` = one-truth; `check-agents-md-budget.mjs` + `.baseline.json` = the ratchet, `SR-40`), so the work is *generalise*, not *import*. **Remainder:** `SR-38` (digital-twin harness), `SR-46` (two-reads lint — **★ and its stated home needs a correction:** `packages/eslint-plugin-ds` runs only on **backend-UI files** via `eslint.ds.config.mjs`, so a *settings-read* lint there would never fire on the files that read settings; it belongs in the `scripts/check-*.mjs` family, where the cross-file drift is visible) | ☐ open |
+| CC-92 | **The `preview/` folder's 13 documents (45,652 words, written 11–14 Oct by an agent brought in cold) were never triaged** — `08-FORENSIC-AUDIT.md` alone carries 20 numbered sections with **2 CRITICAL authorization defects**. **TRIAGED AND VALIDATED 2026-10-16** in [`PREVIEW-AUDIT-TRIAGE.md`](PREVIEW-AUDIT-TRIAGE.md): **46 findings re-measured against the code at `b183df58`, ZERO false.** **Both CRITICALs CONFIRMED and still open** — **T-01** (the delegation route requires `auth.delegations.manage` but **never the capability being granted**; `.delegable` has **0 production readers** repo-wide) and **T-02** (`business_ir.run_query` passes `features: ctx.userFeatures` into the Business-IR chain and **nothing reads it**; `engine.query` runs unguarded). **Also CONFIRMED:** the count-gap-verifies-as-passed (§3), the pending-act double-approve with no CAS (§4), undo bypassing the ledger (§5), nine modules' commands ungated (§6 — **and my OWN first census was the measurement error**: grepping the bare word `capability` matched the prose "adapter capability" in a comment; re-measured with `^\s*capability\s*:` gives **15 core modules with `commands/`, 8 declaring one**), `demoteIfEvidenceDemands` with 4 callers all its own test (§7), the broken DS lint + all six rules at `warn` (11 §1), and **878 physical vs 58 logical direction utilities = 15.1:1** (11 §3). **FOUR claims now FIXED**, recorded so nobody re-fixes them: `ledger:verify` **has** a caller (`audit_logs/cli.ts:91,115`), `OPENAI_BASE_URL` **is** forwarded to `hermes-gateway` (`docker-compose.hermes.yml:107`, P2-7/§2.13), `HERMES-PIN.md` **exists** (29,340 bytes, digest `07ee857b…` = the one `SR-39` verifies), and `run.ts` gate 3 gained `\|\| !fn.businessIr`. **FIVE of the audit's own numbers corrected by name** (`C-01`…`C-05`), the largest being the RTL ratio **70:1 → 15.1:1** (token-level count of string literals, 4,320 files, 472,110 class-like tokens, vs the audit's word-boundary count). **A sixth (`C-06`) corrects my own work**: the folder is 45,652 words, not the 197,912 first carried. **★ THE RANKING'S OWN FINDING — the one substantive addition to the audit's §17 order: rank `SR-42` — a declared-control coverage check — FIRST, ahead of both CRITICAL patches**, because **six findings in the register are the SAME finding** (`.delegable`, `demoteIfEvidenceDemands`, the C6 command contract, `authorityPolicyProblems`, `findFrontendVocabulary`, `detectRepeatedRequest`: all declared, all with **zero production readers**, all **invisible to the build**) **and the workshop already owns the mechanism** (`SR-39`'s one-truth check + `SR-41`'s escape-hatch census, both committed today). **UNVALIDATED and recorded as such rather than guessed:** the hosted login (06 §3.5, environmental), the green-suite claims (a full run was not in scope), the `@deprecated` pair's 106 call sites (could not locate the audit's cited file), and F10's byte-level locale divergence | ☐ open |
 
 ---
 
@@ -407,3 +462,19 @@ The turn-shaped reuse measurement that unblocks the flip is
 `DECISION-p2-9b-stale-timeout-trade.md` **§4.6** (99.92 % of the turn prompt reused — 14 tokens left to
 prefill). *This is the standing format from 2026-10-16: every pass states what was done, its address in
 this register, and what is next — and the HTML's top section is updated to match.*
+
+**Re-synced again 2026-10-16 (late, fourth pass) — the `preview/` triage, `CC-92`.** The 13 documents in
+`preview/`, written 11–14 Oct by an agent brought in cold and **never triaged**, are now triaged and
+validated in [`PREVIEW-AUDIT-TRIAGE.md`](PREVIEW-AUDIT-TRIAGE.md): **46 findings re-measured against the
+code at `b183df58` — zero false.** Both of `08-FORENSIC-AUDIT.md`'s CRITICAL authorization defects are
+**confirmed and still open** (T-01 the delegation route lending authority the lender does not have; T-02
+the business-query tool checking scope but not authorization). **The register now reads 48 closed ·
+43 open · 91 total.** The frontier in §2 was rewritten so the triage is **LAST DONE** and the warm-up /
+handshake-gate work moved under **§2.1 "And earlier the same day"** — **this pass also fixes a dangling
+sentence** in the HTML frontier card ("…a full run was not in scope) are" ended mid-clause) and
+**corrects the preview folder's size by name**: it is **45,652 words** (`wc -w`, 287,331 bytes), not the
+197,912 first carried — recorded as `C-06` in the triage document, since rule 13 applies to my own
+headline numbers as much as to the audit's. **★ And the ranking's own finding:** `SR-42` — a declared-control
+coverage check — is ranked **FIRST**, ahead of both CRITICAL patches, because six findings in the triage
+register are the same finding (a control declared, never consumed, invisible to the build) and the
+workshop already owns the mechanism (`SR-39` + `SR-41`, both committed today).
