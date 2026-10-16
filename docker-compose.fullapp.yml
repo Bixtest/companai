@@ -355,6 +355,10 @@ services:
     command:
       - -m
       - /models/${MODEL_FILE:-Qwen2.5-7B-Instruct-Q4_K_M.gguf}
+      # Apply the model's own chat template, including its tool-call grammar
+      # (T-13). Without --jinja llama.cpp does not format tool calls through the
+      # template the model was trained on, so tool calling is silently degraded.
+      - --jinja
       - --port
       - "8080"
       - --host
