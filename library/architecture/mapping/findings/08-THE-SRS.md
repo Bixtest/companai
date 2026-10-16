@@ -34,11 +34,11 @@ duplicated.
 | SR-02 | P1 | `agent` ≠ `agent_runtime`; uniqueness key as a DB constraint | Multica | BORROW | — |
 | SR-03 | P1 | Permission policy ladder as data | openrig | BORROW | — |
 | SR-04 | P1 | Two-surface rule: policy set by code, never config | openrig | BORROW | — |
-| SR-05 | P1 | Sub-agent spawn cap (measured) + spawn ledger | Hermes, zulip | BUILD | — |
+| SR-05 | P1 | Sub-agent spawn cap (measured) + spawn ledger | n8n (max-children cap, `07-SYNTHESIS §7.2` F02-04); Hermes (iteration cap) | BUILD | — | **[C]**
 | SR-06 | P1 | Skills as versioned `SKILL.md` artifacts | n8n, Hermes | BORROW | — |
 | SR-07 | P1 | A bot is a participant, not a parallel object | zulip | BORROW | — |
 | SR-08 | P1 | The triage core gets a production caller | mercato | BUILD | `G-21`, `CC-59`, `CC-60` |
-| SR-09 | P1 | A2UI-style protocol contract with enforcement | CrewAI | BORROW | — |
+| SR-09 | P1 | Typed tool filter with `run_context`; typed tool failures | CrewAI (`02-the-aissistant §5.2, §8` — its own pick, "the single most actionable finding for our aissistant") | BORROW | — | **[C]** A2UI was moved out of P1: it is a widget protocol (PX-W), see SR-32a below
 | SR-10 | P2 | Ambient tenancy: tenant derived from the request | zulip | RE-ENGINEER | — |
 | SR-11 | P2 | Scope enters once — collapse the double entry | mercato, zulip | BUILD | `CC-84` |
 | SR-12 | P2 | One tenant ↔ one engine home; per-run credential | Multica, `CC-84` | BUILD | `CC-84` |
@@ -47,13 +47,13 @@ duplicated.
 | SR-15 | P2 | Audit log with topology-encoded event numbering | zulip | BORROW | — |
 | SR-16 | P2 | Personal / team workspace kinds | n8n | BORROW | — |
 | SR-17 | P2 | Tenancy contract + prose + conformance harness + `LIMITS.md` | buzz | BORROW | — |
-| SR-18 | P2 | Machine actors capped at approve-first, test-pinned | Multica, mercato | HAVE | authority layer |
+| SR-18 | P2 | Machine actors capped at approve-first, test-pinned | mercato only (Multica's P2 file has **zero** mentions of approve/authority; it makes machines *first-class owners*, the opposite) | HAVE | authority layer | **[C]**
 | SR-19 | P3 | Durable wake queue: at-least-once, retries in payload, late cutoff | zulip | BUILD | — |
 | SR-20 | P3 | One-statement claim with health gate inside | Multica | BORROW | — |
 | SR-21 | P3 | Closed failure taxonomy per attempt | Multica | BORROW | — |
 | SR-22 | P3 | Every command declares risk + approval + expiry | mercato, buzz | BUILD | `CC-63` |
 | SR-23 | P3 | Transport does not decide | Gas Town | BORROW | — |
-| SR-24 | P3 | Durable hooks for side effects | Gas Town | BORROW | — |
+| SR-24 | P3 | Durable hooks for side effects | Gas Town (`03-the-workspace §3`, **F03-03** — "The Hook is the durability primitive", a `hook_bead` pointer on the agent bead; session ephemeral, work not) | BORROW | — | **[C]** cited from the P2 file, not the P3 file
 | SR-25 | P3 | Event-kind registry; kinds over endpoints | buzz | BORROW | — |
 | SR-26 | P3 | Every approval gate ships a test that fires it | buzz | BUILD | — |
 | SR-27 | PX-W | Widget = append-only log; state by replay | zulip | RE-ENGINEER | — |
@@ -62,14 +62,15 @@ duplicated.
 | SR-30 | PX-W | Generic bridge: any backend drives any widget | zulip | BORROW | — |
 | SR-31 | PX-W | Widget-kind registry; kinds register themselves | zulip | BORROW | — |
 | SR-32 | PX-W | Composition canvas with CRDT collaboration | n8n | BORROW | — |
+| SR-32a | PX-W | **Widget protocol, not widget model** — a declarative UI vocabulary a client renders; an 18-component typed catalog whose `allowed_components` is enforced **on the response**, not just advertised in the prompt | CrewAI (`05-widgets-and-frontend §5.3` — "A2UI — the actual widget architecture (the important find)", 3,669 lines) | BORROW | — | **[C] new row** The markdown's own discipline: "Say 'widget *protocol*', never 'widget system'" — no renderer ships in the tree |
 | SR-33 | PX-F | Design system + own ESLint plugin guarding composition | n8n | BORROW | — |
 | SR-34 | PX-F | Prohibition-constrained 3-package layering | Multica | BORROW | — |
 | SR-35 | PX-W | UMES injection as the widget entry point | mercato | HAVE | kit |
 | SR-36 | PX-F | Dashboard + perspective screens | mercato | BUILD | `M5` |
-| SR-37 | out | Plugin/module registry with full lifecycle | buzz, Multica | BORROW | — |
+| SR-37 | out | Plugin/module registry with full lifecycle | Hermes (`12-SYNTHESIS §3.2` versioned compat contract + deprecation window), Multica (`07-SYNTHESIS §7.3 #12` plugin contract) | BORROW | — | **[C]** buzz's synthesis has no plugin mechanism; Multica's `344` deletes Plugin V1 entirely (14 DROP TABLEs → 3 tables)
 | SR-38 | out | Digital-twin harness; drift breaks the build | openrig | BORROW | — |
 | SR-39 | **PZ** | One-truth check across every representation | zulip | BORROW | — |
-| SR-40 | **PZ** | Feature-level ratchet only a human can raise | zulip | BORROW | — |
+| SR-40 | **PZ** | Feature-level ratchet only a human can raise | zulip (`06-out-of-pole §6.3`; `API_FEATURE_LEVEL = 513`) | BORROW | — | **[C]** trigger corrected — see the note below
 | SR-41 | **PZ** | Named, greppable escape hatches | zulip | BORROW | — |
 | SR-42 | **PZ** | Exclusion ledger with mechanical expiry; ships empty | openrig | BORROW | — |
 | SR-43 | **PZ** | Proof beside prose: contract + falsifiable check + `LIMITS.md` | buzz | BORROW | — |
@@ -77,8 +78,50 @@ duplicated.
 | SR-45 | out | Kinds-over-endpoints policy with conformance test | buzz | BORROW | — |
 | SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | BORROW | — |
 
-**Count by status:** HAVE 4 (`SR-01`, `SR-18`, `SR-35`, + `SR-11` partial via `CC-84`) ·
-BUILD 8 · BORROW 31 · RE-ENGINEER 3 (`SR-10`, `SR-27`, + the frame itself).
+**Count by status:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 · BORROW 31 ·
+RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 10 + 31 + 2 = 46.
+
+**Trigger corrections applied in this pass:**
+
+- **SR-40 (the ratchet) was inverted.** The markdown says the build fails when the level is
+  **not** raised: *"If a merged PR leaves any `ZF-` marker in the API docs or the spec, this
+  guard fails the build — and it also skips the job that posts the announcement."* The human
+  must replace the `ZF-` marker **and** post the announcement by hand. The design is a ratchet
+  with a **social consequence attached** — which is the part worth borrowing, not the direction
+  of the trigger.
+- **SR-09's source moved.** A2UI is a *widget* protocol, filed under PX-W as SR-32a. CrewAI's
+  P1 contribution is the typed tool filter with `run_context` and the typed tool-failure chain,
+  which CrewAI's own batch calls *"the single most actionable finding for our aissistant."*
+- **SR-05's sources corrected.** The measured **max-children** spawn cap is n8n's
+  (`07-SYNTHESIS §7.2`, F02-04). Hermes has a *subagent iteration* cap — `DEFAULT_MAX_ITERATIONS
+  = 250`, parent 500 — and the earlier "50" was corrected inside the corpus itself under rule
+  13. There is no spawn cap in zulip; what zulip has is cost metering
+  (`MAX_PER_USER_MONTHLY_AI_COST`, default **0.5 USD**).
+- **SR-18's Multica source removed.** Multica's P2 file contains zero mentions of approve or
+  authority; its stance is machines as **first-class owners** (`F03-07` — a lead that may be a
+  member or an agent), which is the opposite of a cap. The cap is mercato's own, test-pinned.
+- **SR-37's sources corrected.** buzz's synthesis has no plugin mechanism. The versioned
+  compatibility contract with a deprecation window is **Hermes's** (`12-SYNTHESIS §3.2`); the
+  plugin contract is Multica's (`07-SYNTHESIS §7.3 #12`). Multica's own obituary is the lesson:
+  migration `344` deletes Plugin V1 entirely — **14 DROP TABLEs**, leaving 3.
+- **SR-24's citation corrected.** Gas Town's Hook *is* the durability primitive
+  (`03-the-workspace §3`, **F03-03**: *"The hook is the 'durability primitive' — work on your
+  hook survives session restarts"*). It is filed in Gas Town's P2 file, not its P3 file —
+  recorded rather than silently moved.
+- **SR-23's name corrected.** ZFC is **"Zero Framework Cognition"** — *"the framework
+  transports, the agent decides"* (`03-the-workspace §6`, F03-06). "Transport, don't decide"
+  was a fair gloss of a real principle, but the name is what should be quoted.
+
+> **Correction pass, 2026-10-16 (same day, after the first commit `512a4d2`).** The mapping
+> was written from compressed digests instead of from the markdown findings directly. It has
+> now been re-verified against all 77 findings markdowns in six batches, one per pole plus a
+> summary pass. The corrections below are marked **[C]**. Three rules from the verification
+> now apply to every row: **(a)** the source citation must name the *findings file* the
+> mechanism was read from, not just the platform; **(b)** where a mechanism lives in a pole's
+> file other than the one it is cited from, that is recorded rather than silently moved; and
+> **(c)** superlatives ("the only", "the first", "the strongest") are only retained where the
+> markdown itself states them, because the markdown's own superlatives age as later studies
+> land.
 
 ---
 

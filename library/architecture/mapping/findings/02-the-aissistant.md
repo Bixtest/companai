@@ -15,18 +15,37 @@ forensics is the load-bearing instruction of the whole workshop:
 
 Concretely: Hermes is never forked and never edited. It sits behind a typed port. Its
 mechanisms (skills, the learning loop, memory and context, tools/MCP/gateway, scheduling and
-delegation, the board) are taken *selectively and tiered* — not wholesale. One standing
-contradiction, reported not resolved: **the sub-agent cap is 50 in one place and 250 in
-another**. It must be decided by measurement, not by picking a number.
+delegation, the board) are taken *selectively and tiered* — not wholesale.
 
-### Paperclip — the seam (P1 = weak)
+**One number to correct:** the sub-agent iteration cap is **250, not 50.** The "50" was written
+in an earlier batch and the corpus corrected it itself under rule 13 — `06-scheduling-...`
+records *"My **own** earlier batch note of 'subagent 50' was wrong; corrected here under rule
+13. The docs' `250` is right"*, and `12-SYNTHESIS` carries *"the subagent iteration cap (`50` →
+**250**, b06)"*. The parent cap is 500. **This contradiction is resolved; do not re-open it.**
+
+### Paperclip — the seam, and a cleaner foundation than credited
 Paperclip's aissistant is a *seam-provider*: the assistant is a pluggable provider behind a
-stable interface, not the product. The lesson is that P1 can be thin *if* the seam is real.
+stable interface, not the product. **Correction [C]:** the first version of this file called
+P1 "weak". The batch says the opposite — *"P1's worker model is otherwise the cleanest of the
+three poles' foundations"* (`02-the-aissistant §6`, Q2).
+
+What Paperclip actually contributes: **four separable layers**, called *"the single most
+transferable thing in this batch"* (§0); the three-method adapter contract (`invoke`, `status`,
+`cancel` — C2-2, *"the exact versatility seam"*); a persistent **Ed25519 identity** that is
+*"never silently replaced"* (C2-5); **permanent revocation** — *"a grant removed by an operator
+stays removed"* (§1.4); and **gated hire with a real liveness probe** (C2-7).
 
 ### CrewAI — the donor (mechanism, not architecture)
-CrewAI gives us the study's only piece of aissistant behaviour with **real enforcement**: the
-**A2UI protocol**. Everything else about CrewAI is a mechanism donor — executor yes, delivery
-no, tenancy nowhere. Its value to P1 is a protocol shape, not an architecture.
+CrewAI's P1 contribution is the **per-invocation tool filter with `run_context`** — a tool set
+computed fresh for each call — plus the **typed tool-failure chain** (`retryable`/`code`,
+tool→task→agent→crew→WARN precedence). CrewAI's own batch calls the tool filter *"the single
+most actionable finding for our aissistant"* (`02-the-aissistant §8`, picking 2.6).
+
+**Correction [C]:** the first version attributed A2UI to P1 and called it *"the study's only
+piece of aissistant behaviour with real enforcement."* Both halves are wrong. **A2UI is a
+widget protocol** — it lives in `05-widgets-and-frontend §5.3` and is filed here as **SR-32a**.
+And "the only real enforcement" is a superlative later studies already contradict: n8n's own
+ESLint plugin, zulip's `check-schemas`, and openrig's build-time boundary are enforcement too.
 
 ### Multica — the identity primitive (★)
 The single most transferable P1 mechanism in the study:
@@ -45,16 +64,43 @@ encoded as a database constraint rather than a convention.
 The watchdog is *made of agents*. Not a cron job watching a queue — agents watching agents.
 The chain is the durability mechanism.
 
-### buzz — no P1 of its own
-buzz is a communication substrate. Its automation approval gate is **dead code** (reported,
-not resolved — it is in the honest ledger).
+### buzz — a real but thin P1, and a safety default that matters more
+buzz **does** have an aissistant, built on a striking premise: *"its premise is that **an agent
+is a member, not a bot**"* (`02-the-aissistant §0`). Concretely: **agent = keypair + channel
+membership**; memory is a custom NIP (NIP-AE, per-(agent,owner), NIP-44-encrypted and
+owner-readable); **six tools**, not sixty; and a **six-mode permission ladder** including
+`plan`.
+
+**The finding that outranks everything else in this pole** (`02-the-aissistant §4.3`, D2-2,
+F2-2): *"The CLI declares **`default_value = "bypass-permissions"`** for `permission_mode`"* —
+test-confirmed at `config.rs:1578`, *"Skip the permission flow entirely."* And the documented
+policy switch, `BUZZ_ACP_PERMISSION_POLICY`, **does not exist** as a variable. The batch's own
+verdict is careful and worth copying exactly: *"the *mechanism* exists and is real (the
+permission broker in `buzz-agent/src/permission.rs` is ~1,000 lines with documented
+invariants); the *policy switch* is documented under a name that does not exist"* — and the
+default is permissive.
+
+**Correction [C]:** the first version said buzz's approval gate is *"dead code"*. That collapses
+two true facts into one wrong word. The correct statement is the batch's own: a real mechanism,
+a misnamed switch, and a permissive default. **Any statement about buzz's agent safety posture
+must start with the default.**
 
 ### openrig — the permission ladder and the two-surface rule
-Five permission policies: `locked` / `standard` (default) / `open`+`yolo` / `auto`. And the
-rule that governs how they may be set:
+Five built-ins: `BUILTIN_POLICY_NAMES = ["locked","standard","open","yolo","auto"]`
+(`02-the-aissistant §6.4`). **Correction [C]:** the first version merged `open`+`yolo` into one
+rung. The markdown separates them **by surface** — *"**yolo** | flag | `full_bypass`"* versus
+*"**open** | config | `default_posture: allow`"* — and merging them erases the very distinction
+the two-surface rule rests on. Also, `standard` is *"the **recommended** default"*, not the
+default: `nodes.permission_policy` is *"`NULL` = floor"* (§6.4/§6.8).
 
-> **The two-surface rule:** launch-time flags may be deterministic *code*; config-file policy
-> may NOT be. Two reads of the same flag can diverge; one cannot.
+> **The two-surface rule** (`02-the-aissistant section 6.1`): launch-time flags may be
+> deterministic *code*; config-file policy may NOT be - because *"a config-file policy (a
+> rules file whose schema a vendor may change) is **not** [deterministic] - it must go through
+> a **skill** that reads the installed version and adapts."*
+
+**Correction [C]:** the quote *"two reads of the same flag can diverge; one cannot"* is **not
+in the markdown**. It was my paraphrase of the principle. The reason the markdown gives is the
+skill-translation requirement above - quote that instead.
 
 ### zulip — deliberately tiny (★)
 One LLM feature in the entire product (topic summarisation), **fenced five ways**. And the
@@ -96,11 +142,12 @@ artifacts, or any rule governing how a policy may be set.
 3. **A bot is a participant.** An agent in a workspace is a `UserProfile`-class identity, not
    a new object type. This is not a nicety — it is the thing that makes per-tenant identity
    work at all.
-4. **A permission policy ladder as data** — `locked` / `standard` / `open`+`yolo` / `auto` —
-   selectable per agent, per workspace, and settable **only** where the two-surface rule
-   allows.
+4. **A permission policy ladder as data** — five rungs, `locked` / `standard` / `open` /
+   `yolo` / `auto`, with `open` and `yolo` living on **different surfaces** (config vs launch
+   flag) — selectable per agent, per workspace, and governed by the two-surface rule.
 5. **A sub-agent spawn ledger.** Every spawn recorded in the hash-chained ledger, against a
-   hard cap decided by measurement (the 50-vs-250 contradiction resolved by evidence).
+   hard cap decided by measurement. The Hermes number is settled at **250** (parent 500); the
+   max-children precedent to copy is n8n's.
 6. **Skills as versioned artifacts.** `SKILL.md` files, versioned, sandboxed, tiered — the
    Hermes "selectively, tiered" instruction applied to the artifact rather than the engine.
 7. **The triage core gets a production caller.** It is built; it is unwired. That is the
@@ -114,13 +161,22 @@ artifacts, or any rule governing how a policy may be set.
 |---|---|---|---|
 | **SR-01** | Typed engine port: Hermes runs behind it; no other module imports Hermes directly | Hermes "Build UNDER" | **HAVE** (gateway live `P2-1…P2-9a`) — enforce the "no direct import" half |
 | **SR-02** | `agent` ≠ `agent_runtime`; uniqueness key `(workspace_id, daemon_id, provider)` as a DB constraint | Multica | **BORROW** — new object, new migration |
-| **SR-03** | Permission policy ladder (`locked`/`standard`/`open`+`yolo`/`auto`) as data, per agent per workspace | openrig | **BORROW** |
-| **SR-04** | Two-surface rule: policy set by deterministic code only, never by a config file alone | openrig | **BORROW** — build-time fence |
-| **SR-05** | Sub-agent spawn cap, measured not guessed; every spawn in the hash-chained ledger | Hermes (50↔250) + zulip audit log | **BUILD** — resolves the contradiction by measurement |
+| **SR-03** | Permission policy ladder — five rungs, `open` and `yolo` on different surfaces — as data, per agent per workspace | openrig (`02-the-aissistant §6.4`) | **BORROW** |
+| **SR-04** | Two-surface rule: config-file policy must be skill-translated, never trusted as deterministic | openrig (`02-the-aissistant §6.1`, §6.3, §6.4) | **BORROW** — build-time fence |
+| **SR-05** | Sub-agent spawn cap, measured not guessed; every spawn in the hash-chained ledger | n8n (max-children cap, `07-SYNTHESIS §7.2` F02-04); Hermes (iteration cap **250**, parent 500) | **BUILD** |
 | **SR-06** | Skills as versioned `SKILL.md` artifacts, sandboxed and tiered | n8n `@n8n/agents` + Hermes skills loop | **BORROW** |
 | **SR-07** | A bot is a participant (`UserProfile` class), not a parallel agent object | zulip | **BORROW** — identity-model change |
 | **SR-08** | The triage core gets a production caller | mercato `G-21` / `CC-59` / `CC-60` | **BUILD** — wire what exists |
-| **SR-09** | A2UI-style protocol contract for agent↔host messages, with enforcement | CrewAI | **BORROW** — protocol shape only |
+| **SR-09** | Typed tool filter with `run_context`; typed tool-failure chain | CrewAI (`02-the-aissistant §5.2`, §8) | **BORROW** — CrewAI's own pick for us |
+| **SR-32a** | **Widget protocol (moved here from PX-W):** declarative UI vocabulary + 18-component typed catalog, `allowed_components` enforced on the response | CrewAI (`05-widgets-and-frontend §5.3`) | **BORROW** — protocol, never "widget system" |
+
+**Corrections [C] applied 2026-10-16 against the markdown:** the Hermes cap (250, not 50 — the
+corpus resolved this itself); Paperclip is not "weak" (its P1 is *"the cleanest of the three
+poles' foundations"*); buzz has a real P1 and a **permissive default** (`bypass-permissions`,
+with a documented switch that does not exist); `open` and `yolo` are separate rungs on separate
+surfaces; the two-surface rule is *skill-translation*, not a ban on config policy; the
+"hash-chained ledger" is mercato's own, and zulip has cost metering instead; and A2UI belongs
+in PX-W, not here.
 
 **Prerequisites:** SR-02 and SR-07 land together (identity first, or the runtime constraint
 has nothing to constrain). SR-04 is a build-time fence and can land independently.

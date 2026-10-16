@@ -95,4 +95,45 @@ A row with no RE-ENGINEER column is not finished.
 
 ---
 
+## 8. The correction pass — 2026-10-16, same day
+
+The mapping was first written from **compressed digests** — summaries produced by digest
+agents — rather than from the markdown findings files directly. That broke the workshop's own
+rule: *markdown is the source of truth.* The gap was 77 files and 1.6 MB never read.
+
+**Correction run:** six verification batches, one per pole plus a summary pass, each agent
+given only the markdown findings files for its slice and the corresponding mapping section to
+check them against. Findings marked **[C]** throughout the pole files.
+
+**What the pass found and fixed:**
+
+| Class | Count | Worst instance |
+|---|---|---|
+| Wrong numbers | 5 | buzz's Tamarin lemmas: **32**, not 21 (stated twice in the markdown) |
+| Invented quotes | 2 | *"Guard-as-document: the proof is only as good as the document that says where it stops"* — **not in the corpus at all**; and *"two reads of the same flag can diverge; one cannot"* |
+| Inverted mechanism | 1 | SR-40's ratchet trigger — the build fails when the level is **not** raised |
+| Wrong pole | 2 | A2UI is PX-W, not P1; openrig's Context Packs are PX-W, not P3 |
+| Platform wrongly omitted | 5 | CrewAI from P2; Hermes, Gas Town, n8n, Paperclip, CrewAI from the guard pole |
+| False negatives | 2 | buzz "has no P1"; CrewAI "has no widget model" |
+| Stale superlatives | 2 | "the study's only real enforcement"; "the only platform with machine-checked composition" |
+| Bad arithmetic | 3 | the status counts (3/10/31/2, not 4/8/31/3); the "six of nine" widget count; the "three of nine" tenancy count |
+| Wrong attribution | 4 | Multica's approve-first authority layer (does not exist); zulip's hash-chained ledger (does not exist); buzz's plugin mechanism (does not exist); SR-05's sources |
+
+**Two verification "no support" findings were themselves wrong**, and were corrected by
+grepping the corpus: Gas Town's Hook **is** F03-03 and exactly as described (it lives in Gas
+Town's P2 file, not its P3 file), and buzz's 136 `ALL_KINDS` entries are real. Both are now
+cited correctly. The lesson: an agent that reads one pole's files cannot say a mechanism
+"does not exist" — only that it is not in the files it was given.
+
+**Rules added by this pass:**
+1. Every source citation names the **findings file** the mechanism was read from, not just the
+   platform.
+2. Where a mechanism lives in a pole's file other than the one it is cited from, that is
+   **recorded**, not silently moved.
+3. A superlative is retained only where the markdown itself states it — superlatives age as
+   later studies land.
+4. A "not found" is a statement about the files read, never about the corpus.
+
+---
+
 *Next: `01-platform-overview.md`.*
