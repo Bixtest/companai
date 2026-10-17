@@ -33,6 +33,49 @@ const mutations = [
     apply: (s) => s.replace('all **54** open', 'all **52** open'),
     expect: /§4 says 52 open rows/,
   },
+  {
+    name: 'M6 — change §4\'s state tally (13 startable → 12)',
+    apply: (s) => s.replace('**13 startable now**', '**12 startable now**'),
+    expect: /state tally says 12 "startable now"/,
+  },
+  {
+    name: 'M7 — change §8\'s id count for one family (G-* 21 → 22)',
+    apply: (s) => s.replace('| `G-*` | the governance & security floor | `platform_points.md` §G | 21 |',
+                            '| `G-*` | the governance & security floor | `platform_points.md` §G | 22 |'),
+    expect: /§8 says 22 G-\* ids/,
+  },
+  {
+    name: 'M8 — change §8\'s measured "now" coverage headline (80 → 79)',
+    apply: (s) => s.replace('the unaddressed count is **80**', 'the unaddressed count is **79**'),
+    expect: /says 79 ids unaddressed; measured 80/,
+  },
+  {
+    name: 'M9 — change §8\'s benchmark "before" number (157 → 156)',
+    apply: (s) => s.replace('**157 ids across 12 families had no address here at all**',
+                            '**156 ids across 12 families had no address here at all**'),
+    expect: /were unaddressed at 3970769; measured 157/,
+  },
+  {
+    name: 'M10 — invent an id in a declared family that its home does not hold (NY-99)',
+    apply: (s) => s.replace('## 2. \u25b6 The frontier', 'A phantom id: `NY-99`.\n\n## 2. \u25b6 The frontier'),
+    expect: /NY-99 \(not in NEEDS-YOU\.md\)/,
+  },
+  {
+    name: 'M11 — rename one §3 row to another row\'s label (20b -> 21), creating a duplicate',
+    apply: (s) => s.replace('| 20b | 5 | An AI user can run only the agents bound to it',
+                            '| 21 | 5 | An AI user can run only the agents bound to it'),
+    expect: /duplicate row label: 21/,
+  },
+  {
+    name: 'M12 — un-escape one code pipe in a register row, breaking that table\'s shape',
+    apply: (s) => s.replace('\'human\' \\| \'ai_worker\' \\| \'service\'', '\'human\' | \'ai_worker\' | \'service\''),
+    expect: /live pipes/,
+  },
+  {
+    name: 'M13 — over-escape a code pipe (\\| -> \\\\|), which the first version of the check could not see',
+    apply: (s) => s.replace('\'human\' \\| \'ai_worker\'', '\'human\' \\\\| \'ai_worker\''),
+    expect: /live pipes/,
+  },
 ]
 
 let allRed = true
