@@ -63,13 +63,15 @@ const mutations = [
   },
   {
     name: 'M5 — change §4\'s own count line',
-    apply: (s) => s.replace('all **56** open', 'all **52** open'),
-    expect: /§4 says 52 open rows/,
+    // ★ DERIVED, like M3/M14: this one went stale the moment §4's count moved.
+    apply: (s) => s.replace(/all \*\*(\d+)\*\* open/, (m, n) => 'all **' + (+n - 1) + '** open'),
+    expect: /§4 says \d+ open rows/,
   },
   {
     name: 'M6 — change §4\'s state tally (15 startable → 12)',
-    apply: (s) => s.replace('**15 startable now**', '**12 startable now**'),
-    expect: /state tally says 12 "startable now"/,
+    // ★ DERIVED for the same reason: the tally moves with every closed row.
+    apply: (s) => s.replace(/\*\*(\d+) startable now\*\*/, (m, n) => '**' + (+n - 1) + ' startable now**'),
+    expect: /state tally says \d+ "startable now"/,
   },
   {
     name: 'M7 — change §8\'s id count for one family (G-* 21 → 22)',
@@ -101,12 +103,25 @@ const mutations = [
   },
   {
     name: 'M12 — un-escape one code pipe in a register row, breaking that table\'s shape',
-    apply: (s) => s.replace('\'human\' \\| \'ai_worker\' \\| \'service\'', '\'human\' | \'ai_worker\' | \'service\''),
+    // ★ DERIVED: the old target lived in CC-103's row and vanished when that row was
+    // rewritten. This finds the first escaped pipe in ANY register row and un-escapes it.
+    apply: (s) => {
+      const m = /\| CC-[0-9]+ \|[^\n]*?\\\|/.exec(s)
+      if (!m) throw new Error('no escaped pipe found in a register row')
+      const at = m.index + m[0].length - 2
+      return s.slice(0, at) + '|' + s.slice(at + 2)
+    },
     expect: /live pipes/,
   },
   {
     name: 'M13 — over-escape a code pipe (\\| -> \\\\|), which the first version of the check could not see',
-    apply: (s) => s.replace('\'human\' \\| \'ai_worker\'', '\'human\' \\\\| \'ai_worker\''),
+    // ★ DERIVED: finds the first escaped pipe in a register row and OVER-escapes it.
+    apply: (s) => {
+      const m = /\| CC-[0-9]+ \|[^\n]*?\\\|/.exec(s)
+      if (!m) throw new Error('no escaped pipe found in a register row')
+      const at = m.index + m[0].length - 2
+      return s.slice(0, at) + '\\\\|' + s.slice(at + 2)
+    },
     expect: /live pipes/,
   },
 ]
