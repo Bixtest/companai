@@ -801,33 +801,93 @@ export class AiChatConversation {
  * access predicate is "is the caller an undeleted participant" — see
  * `AiChatConversationRepository.assertAccessible`.
  *
+ * ★ `CC-107` — **a member is identified by exactly ONE of two axes.** `user_id`
+ * is the human axis; `agent_id` is the machine axis. An agent id is TEXT and
+ * cannot live in a uuid column, which is why the second axis exists at all
+ * (`acting-user-subject.probe.sql`, P4) and why `user_id` is now nullable.
+ *
+ * `num_nonnulls(user_id, agent_id) = 1` is enforced by the database
+ * (`ai_chat_conv_participants_one_identity_ck`) and again at the repository
+ * boundary: a row with neither identity is unreachable by every predicate in
+ * this module, and a row with both would answer to two owners. **Both checks
+ * landed in the same migration on purpose** — making `user_id` nullable without
+ * them in the same change is the risk the register carried forward itself.
+ *
+ * `agent_owner_user_id` is the human principal answerable for an agent
+ * participant (the `bot_owner` analogue) — authorization and audit need a person
+ * to name. A human participant needs no owner, so the constraint is one-sided.
+ *
  * `last_read_at` is reserved for future unread/share UX and is unused in MVP.
  */
 @Entity({ tableName: 'ai_chat_conversation_participants' })
+// ── the human axis ────────────────────────────────────────────────────────────
+// Two partial uniques, split on the nullable org. Both now also require
+// `user_id is not null` (a plain unique over a nullable column lets duplicates
+// through — NULLs are distinct) and exclude retired rows (a revoked member must
+// not block its own slot; `addParticipant` already did this in application
+// code, so the invariant now lives where a raw writer will see it).
 @Index({
   name: 'ai_chat_conv_participants_tenant_org_conv_user_uq',
   expression:
-    'create unique index "ai_chat_conv_participants_tenant_org_conv_user_uq" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "conversation_id", "user_id") where "organization_id" is not null',
+    'create unique index "ai_chat_conv_participants_tenant_org_conv_user_uq" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "conversation_id", "user_id") where "organization_id" is not null and "user_id" is not null and "deleted_at" is null',
 })
 @Index({
   name: 'ai_chat_conv_participants_tenant_conv_user_null_org_uq',
   expression:
-    'create unique index "ai_chat_conv_participants_tenant_conv_user_null_org_uq" on "ai_chat_conversation_participants" ("tenant_id", "conversation_id", "user_id") where "organization_id" is null',
+    'create unique index "ai_chat_conv_participants_tenant_conv_user_null_org_uq" on "ai_chat_conversation_participants" ("tenant_id", "conversation_id", "user_id") where "organization_id" is null and "user_id" is not null and "deleted_at" is null',
 })
+// ── the machine axis — the same two, for `agent_id` ───────────────────────────
+// `CC-107`: without these, two rows naming the same agent in one conversation
+// coexist legally, because (t, o, c, NULL, 'agent') is not equal to itself under
+// Postgres NULL semantics.
+@Index({
+  name: 'ai_chat_conv_participants_tenant_org_conv_agent_uq',
+  expression:
+    'create unique index "ai_chat_conv_participants_tenant_org_conv_agent_uq" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "conversation_id", "agent_id") where "organization_id" is not null and "agent_id" is not null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_chat_conv_participants_tenant_conv_agent_null_org_uq',
+  expression:
+    'create unique index "ai_chat_conv_participants_tenant_conv_agent_null_org_uq" on "ai_chat_conversation_participants" ("tenant_id", "conversation_id", "agent_id") where "organization_id" is null and "agent_id" is not null and "deleted_at" is null',
+})
+// ── the read paths, one per axis, each leading with its own identity ──────────
 @Index({
   name: 'ai_chat_conv_participants_active_conv_user_idx',
   expression:
-    'create index "ai_chat_conv_participants_active_conv_user_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "conversation_id", "user_id") where "deleted_at" is null',
+    'create index "ai_chat_conv_participants_active_conv_user_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "user_id", "conversation_id") where "deleted_at" is null',
+})
+@Index({
+  name: 'ai_chat_conv_participants_active_conv_agent_idx',
+  expression:
+    'create index "ai_chat_conv_participants_active_conv_agent_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "agent_id", "conversation_id") where "deleted_at" is null',
 })
 @Index({
   name: 'ai_chat_conv_participants_tenant_org_user_conv_idx',
-  properties: ['tenantId', 'organizationId', 'userId', 'conversationId'],
+  expression:
+    'create index "ai_chat_conv_participants_tenant_org_user_conv_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "user_id", "conversation_id") where "deleted_at" is null',
+})
+// ── the CHECK constraints ─────────────────────────────────────────────────────
+// Exactly one identity, and a human behind every agent participant. Both NOT
+// VALID: the table can be large and the application already maintains both, so
+// a lock-and-scan on deploy would take the app down for an invariant that holds.
+@Index({
+  name: 'ai_chat_conv_participants_one_identity_ck',
+  expression:
+    'alter table "ai_chat_conversation_participants" add constraint "ai_chat_conv_participants_one_identity_ck" check (num_nonnulls("user_id", "agent_id") = 1) not valid',
+})
+@Index({
+  name: 'ai_chat_conv_participants_agent_owner_ck',
+  expression:
+    'alter table "ai_chat_conversation_participants" add constraint "ai_chat_conv_participants_agent_owner_ck" check ("agent_id" is null or "agent_owner_user_id" is not null) not valid',
 })
 export class AiChatConversationParticipant {
   [OptionalProps]?:
     | 'createdAt'
     | 'updatedAt'
     | 'organizationId'
+    | 'userId'
+    | 'agentId'
+    | 'agentOwnerUserId'
     | 'role'
     | 'lastReadAt'
     | 'deletedAt'
@@ -844,8 +904,17 @@ export class AiChatConversationParticipant {
   @Property({ name: 'conversation_id', type: 'text' })
   conversationId!: string
 
-  @Property({ name: 'user_id', type: 'uuid' })
-  userId!: string
+  /** The human axis. Nullable since `CC-107` — an agent participant has none. */
+  @Property({ name: 'user_id', type: 'uuid', nullable: true })
+  userId?: string | null
+
+  /** `CC-107` — the machine axis. Text, exactly as `ai_chat_conversations.agent_id` is. */
+  @Property({ name: 'agent_id', type: 'text', nullable: true })
+  agentId?: string | null
+
+  /** `CC-107` — the human answerable for an agent participant. Required when `agentId` is set. */
+  @Property({ name: 'agent_owner_user_id', type: 'uuid', nullable: true })
+  agentOwnerUserId?: string | null
 
   @Property({ name: 'role', type: 'text', default: 'owner' })
   role: 'owner' | 'viewer' | 'commenter' = 'owner'

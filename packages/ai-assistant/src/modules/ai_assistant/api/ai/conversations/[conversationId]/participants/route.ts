@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { FilterQuery } from '@mikro-orm/core'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { effectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
@@ -102,6 +103,7 @@ async function resolveCallerContext(req: NextRequest, context: RouteContext): Pr
   | { kind: 'unauthorized' }
   | { kind: 'forbidden' }
   | { kind: 'missing-tenant' }
+  | { kind: 'no-acting-user' }
   | { kind: 'invalid-id'; issues: unknown }
   | {
       kind: 'ok'
@@ -130,11 +132,17 @@ async function resolveCallerContext(req: NextRequest, context: RouteContext): Pr
     return { kind: 'forbidden' }
   }
   if (!auth.tenantId) return { kind: 'missing-tenant' }
+  // `CC-107` §3.1 — the same defect the chat and conversations routes had: `auth.sub`
+  // is a subject string (`api_key:<id>` / `ai_worker:<id>`), and everything below
+  // feeds it into contexts ending in `user_id`, a uuid column. Resolve the person
+  // ONCE, here. A machine credential acting for nobody is refused.
+  const actingUserId = effectiveUserId(auth)
+  if (!actingUserId) return { kind: 'no-acting-user' }
   return {
     kind: 'ok',
     tenantId: auth.tenantId,
     organizationId: auth.orgId ?? null,
-    userId: auth.sub,
+    userId: actingUserId,
     conversationId: parseResult.data.conversationId,
     canManageConversations: hasRequiredFeatures(
       [MANAGE_CONVERSATIONS_FEATURE],
@@ -161,6 +169,14 @@ export async function GET(req: NextRequest, context: RouteContext): Promise<Resp
   }
   if (callerCtx.kind === 'forbidden') {
     return jsonError(403, `Caller lacks required feature "${REQUIRED_FEATURE}".`, 'forbidden')
+  }
+  if (callerCtx.kind === 'no-acting-user') {
+    return jsonError(
+      422,
+      'This credential acts for no person. A conversation is written for a person: ' +
+        'name the acting user on the key, or call as a user.',
+      'ai_acting_user_required',
+    )
   }
   if (callerCtx.kind === 'missing-tenant') {
     return jsonError(404, 'Conversation not found.', 'conversation_not_found')
@@ -207,6 +223,14 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
   }
   if (callerCtx.kind === 'forbidden') {
     return jsonError(403, `Caller lacks required feature "${REQUIRED_FEATURE}".`, 'forbidden')
+  }
+  if (callerCtx.kind === 'no-acting-user') {
+    return jsonError(
+      422,
+      'This credential acts for no person. A conversation is written for a person: ' +
+        'name the acting user on the key, or call as a user.',
+      'ai_acting_user_required',
+    )
   }
   if (callerCtx.kind === 'missing-tenant') {
     return jsonError(404, 'Conversation not found.', 'conversation_not_found')
@@ -278,7 +302,7 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
 
     const participant = await repo.addParticipant(
       callerCtx.conversationId,
-      targetUserId,
+      { userId: targetUserId },
       parseResult.data.role,
       {
         tenantId: callerCtx.tenantId,

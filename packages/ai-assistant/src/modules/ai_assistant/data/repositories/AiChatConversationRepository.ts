@@ -36,6 +36,13 @@ export interface AiChatConversationContext {
   tenantId: string
   organizationId?: string | null
   userId: string
+  /**
+   * `CC-107` — the caller's machine axis, when the caller IS an agent. A human
+   * has none. Present so the access predicate can consult the agent axis
+   * instead of only the human one; an agent caller still carries the person it
+   * acts for in `userId` (see `effectiveUserId`).
+   */
+  agentId?: string | null
   canManageConversations?: boolean
 }
 
@@ -123,6 +130,76 @@ export class AiChatConversationOrgNotFoundError extends Error {
   }
 }
 
+/**
+ * `CC-107` — **a participant's identity: exactly one of two axes.**
+ *
+ * A discriminated union rather than `(userId?, agentId?)`, so a caller cannot
+ * pass both or neither without the compiler noticing. The repository normalises
+ * and re-checks it, because the database constraint
+ * (`ai_chat_conv_participants_one_identity_ck`) is `NOT VALID` by design and so
+ * protects new writes only where the application enforces it too.
+ */
+export type AiChatConversationParticipantIdentity =
+  | { userId: string; agentId?: never; agentOwnerUserId?: never }
+  | { agentId: string; agentOwnerUserId: string; userId?: never }
+
+/** A participant identity that failed the "exactly one axis" rule. */
+export class AiChatConversationParticipantIdentityError extends Error {
+  override readonly name = 'AiChatConversationParticipantIdentityError'
+  constructor(message: string) {
+    super(message)
+  }
+}
+
+/**
+ * `CC-107` — narrow an identity to the single axis it names.
+ *
+ * Rejects, by name and at the boundary:
+ * - neither axis — a row no predicate in this module could ever reach again;
+ * - both axes — a row that answers to two owners;
+ * - an agent with no owning human — authorization and audit need a person to
+ *   name, and the CHECK constraint is one-sided, so nothing else would refuse it.
+ */
+export function normalizeParticipantIdentity(
+  input: AiChatConversationParticipantIdentity,
+): { userId: string | null; agentId: string | null; agentOwnerUserId: string | null } {
+  const userId = typeof input.userId === 'string' ? input.userId.trim() : ''
+  const agentId = typeof input.agentId === 'string' ? input.agentId.trim() : ''
+  const ownerRaw =
+    'agentOwnerUserId' in input && typeof input.agentOwnerUserId === 'string'
+      ? input.agentOwnerUserId.trim()
+      : ''
+
+  if (userId && agentId) {
+    throw new AiChatConversationParticipantIdentityError(
+      'A participant has exactly ONE identity — a human user_id or an agent_id, not both. ' +
+        'A row naming both would answer to two owners.',
+    )
+  }
+  if (!userId && !agentId) {
+    throw new AiChatConversationParticipantIdentityError(
+      'A participant needs an identity — a human user_id or an agent_id. A row with neither ' +
+        'is unreachable by every predicate in this module.',
+    )
+  }
+  if (agentId && !ownerRaw) {
+    throw new AiChatConversationParticipantIdentityError(
+      `An agent participant needs a human owner ("${agentId}" has none). Authorization and ` +
+        'audit must be able to name a person; name the acting user on the key, or call as a user.',
+    )
+  }
+  if ((userId && ownerRaw) || (!userId && !agentId)) {
+    throw new AiChatConversationParticipantIdentityError(
+      'agentOwnerUserId applies to the agent axis only.',
+    )
+  }
+  return {
+    userId: userId || null,
+    agentId: agentId || null,
+    agentOwnerUserId: ownerRaw || null,
+  }
+}
+
 export class AiChatConversationRepository {
   constructor(private readonly em: EntityManager) {}
 
@@ -203,7 +280,7 @@ export class AiChatConversationRepository {
             ctx.tenantId!,
             ctx.organizationId,
             row.conversationId,
-            ctx.userId!,
+            ctx,
           )
         : false
     if (!canAccessConversation(row, ctx, isParticipant)) return null
@@ -223,28 +300,38 @@ export class AiChatConversationRepository {
       deletedAt: null,
     }
     if (!canManageConversations(ctx)) {
-      const participantFilter: FilterQuery<AiChatConversationParticipant> = {
-        tenantId: ctx.tenantId,
-        userId: ctx.userId,
+      // `CC-107` — the caller may hold membership on EITHER axis, so both are
+      // fetched and unioned. Two indexed queries rather than one `$or`: each
+      // axis has its own index, and a combined `$or` could use neither.
+      const scope = {
         deletedAt: null,
         ...(ctx.organizationId ? { organizationId: ctx.organizationId } : {}),
       }
-      const participantRows = await findWithDecryption<AiChatConversationParticipant>(
-        this.em,
-        AiChatConversationParticipant,
-        participantFilter,
-        { fields: ['conversationId'] as any },
-        { tenantId: ctx.tenantId ?? null, organizationId: ctx.organizationId ?? null },
-      )
-      const participantConvIds = participantRows.map((p) => p.conversationId)
-      if (participantConvIds.length > 0) {
-        where.$or = [
-          { ownerUserId: ctx.userId },
-          { conversationId: { $in: participantConvIds } },
-        ]
-      } else {
-        where.ownerUserId = ctx.userId
+      const axes: Array<FilterQuery<AiChatConversationParticipant>> = []
+      if (ctx.userId) {
+        axes.push({ tenantId: ctx.tenantId, userId: ctx.userId, ...scope })
       }
+      if (ctx.agentId) {
+        axes.push({ tenantId: ctx.tenantId, agentId: ctx.agentId, ...scope })
+      }
+
+      const participantConvIds = new Set<string>()
+      for (const axis of axes) {
+        const rows = await findWithDecryption<AiChatConversationParticipant>(
+          this.em,
+          AiChatConversationParticipant,
+          axis,
+          { fields: ['conversationId'] as any },
+          { tenantId: ctx.tenantId ?? null, organizationId: ctx.organizationId ?? null },
+        )
+        for (const row of rows) participantConvIds.add(row.conversationId)
+      }
+
+      const ownedOrMember: Array<Record<string, unknown>> = [{ ownerUserId: ctx.userId }]
+      if (participantConvIds.size > 0) {
+        ownedOrMember.push({ conversationId: { $in: [...participantConvIds] } })
+      }
+      where.$or = ownedOrMember
     }
     if (options.agentId) where.agentId = options.agentId
     if (options.status) where.status = options.status
@@ -603,13 +690,22 @@ export class AiChatConversationRepository {
     )
   }
 
+  /**
+   * `CC-107` — add a participant on EITHER axis.
+   *
+   * The identity is normalised (and re-checked) here rather than at the route:
+   * the database's `one_identity_ck` is NOT VALID by design, so it guards new
+   * writes only where the application guards them too, and the route's zod
+   * schema cannot express "exactly one of two".
+   */
   async addParticipant(
     conversationId: string,
-    userId: string,
+    identity: AiChatConversationParticipantIdentity,
     role: 'viewer',
     ctx: AiChatConversationContext,
   ): Promise<AiChatConversationParticipant> {
     assertContext(ctx, 'addParticipant')
+    const { userId, agentId, agentOwnerUserId } = normalizeParticipantIdentity(identity)
     return this.em.transactional(async (tx) => {
       const conv = await findOneAccessibleConversation(
         tx as unknown as EntityManager,
@@ -626,10 +722,13 @@ export class AiChatConversationRepository {
           'Only the conversation owner can add participants.',
         )
       }
+      // Look up the SAME axis the caller named. A filter naming both would never
+      // match (the columns are mutually exclusive by construction), and one
+      // naming the wrong axis would silently revive somebody else's row.
       const existingFilter: FilterQuery<AiChatConversationParticipant> = {
         tenantId: ctx.tenantId,
         conversationId,
-        userId,
+        ...(userId ? { userId } : { agentId }),
         ...(ctx.organizationId ? { organizationId: ctx.organizationId } : {}),
       }
       const existing = await findOneWithDecryption<AiChatConversationParticipant>(
@@ -655,6 +754,8 @@ export class AiChatConversationRepository {
         organizationId: ctx.organizationId ?? null,
         conversationId,
         userId,
+        agentId,
+        agentOwnerUserId,
         role,
       } as unknown as AiChatConversationParticipant)
       if (conv.visibility === 'private') {
@@ -665,12 +766,18 @@ export class AiChatConversationRepository {
     })
   }
 
+  /**
+   * `CC-107` — revoke a participant on EITHER axis, by the identity the caller
+   * names. The old signature took a uuid, so an agent could never be addressed
+   * at all (`participants/[userId]/route.ts:26` validated `z.string().uuid()`).
+   */
   async revokeParticipant(
     conversationId: string,
-    targetUserId: string,
+    identity: AiChatConversationParticipantIdentity,
     ctx: AiChatConversationContext,
   ): Promise<void> {
     assertContext(ctx, 'revokeParticipant')
+    const { userId, agentId } = normalizeParticipantIdentity(identity)
     await this.em.transactional(async (tx) => {
       const conv = await findOneAccessibleConversation(
         tx as unknown as EntityManager,
@@ -687,13 +794,14 @@ export class AiChatConversationRepository {
           'Only the conversation owner can revoke participants.',
         )
       }
-      if (targetUserId === conv.ownerUserId) {
+      // The owner is a human, so this guard can only ever fire on the human axis.
+      if (userId && userId === conv.ownerUserId) {
         throw new AiChatConversationAccessError('Cannot revoke the conversation owner.')
       }
       const participantFilter: FilterQuery<AiChatConversationParticipant> = {
         tenantId: ctx.tenantId,
         conversationId,
-        userId: targetUserId,
+        ...(userId ? { userId } : { agentId }),
         deletedAt: null,
         ...(ctx.organizationId ? { organizationId: ctx.organizationId } : {}),
       }
@@ -732,25 +840,55 @@ export class AiChatConversationRepository {
     } as FilterQuery<AiChatConversationParticipant>)
   }
 
+  /**
+   * `CC-107` — does ANY identity of the caller hold membership here?
+   *
+   * Two queries, not one `$or`: the two axes are indexed separately
+   * (`..._active_conv_user_idx` and `..._active_conv_agent_idx`), so a single
+   * `$or` over `{userId} or {agentId}` cannot use either index and would seq-scan
+   * the table. Two indexed lookups are the cheaper shape, and they are also the
+   * honest one: "this person is a member" and "this machine is a member" are
+   * different facts.
+   */
   private async loadParticipantFlag(
     em: EntityManager,
     tenantId: string,
     organizationId: string | null | undefined,
     conversationId: string,
-    userId: string,
+    ctx: AiChatConversationContext,
   ): Promise<boolean> {
-    const row = await findOneWithDecryption<AiChatConversationParticipant>(
+    // Typed as a concrete object rather than `FilterQuery` so it can be SPREAD:
+    // `FilterQuery` is an intersection type and TypeScript refuses to spread it
+    // (`TS2698`) — the same trap `organizationScope` hit in `CC-102`.
+    type ParticipantScope = {
+      tenantId: string
+      conversationId: string
+      deletedAt: null
+      organizationId?: string
+    }
+    const scoped: ParticipantScope = {
+      tenantId,
+      conversationId,
+      deletedAt: null,
+      ...(organizationId ? { organizationId } : {}),
+    }
+
+    const human = ctx.userId
+      ? await findOneWithDecryption<AiChatConversationParticipant>(
+          em,
+          AiChatConversationParticipant,
+          { ...scoped, userId: ctx.userId } as FilterQuery<AiChatConversationParticipant>,
+        )
+      : null
+    if (human) return true
+
+    if (!ctx.agentId) return false
+    const agent = await findOneWithDecryption<AiChatConversationParticipant>(
       em,
       AiChatConversationParticipant,
-      {
-        tenantId,
-        conversationId,
-        userId,
-        deletedAt: null,
-        ...(organizationId ? { organizationId } : {}),
-      } as FilterQuery<AiChatConversationParticipant>,
+      { ...scoped, agentId: ctx.agentId } as FilterQuery<AiChatConversationParticipant>,
     )
-    return row !== null
+    return agent !== null
   }
 }
 

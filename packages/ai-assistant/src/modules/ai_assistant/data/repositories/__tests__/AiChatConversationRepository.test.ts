@@ -9,7 +9,9 @@ import {
   AiChatConversationDuplicateParticipantError,
   AiChatConversationOrgNotFoundError,
   AiChatParticipantNotFoundError,
+  AiChatConversationParticipantIdentityError,
   AiChatConversationRepository,
+  normalizeParticipantIdentity,
 } from '../AiChatConversationRepository'
 
 type ConvRow = {
@@ -630,10 +632,10 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-dup', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-dup', 'u-viewer', 'viewer', ownerCtx)
+    await repo.addParticipant('c-dup', { userId: 'u-viewer' }, 'viewer', ownerCtx)
 
     await expect(
-      repo.addParticipant('c-dup', 'u-viewer', 'viewer', ownerCtx),
+      repo.addParticipant('c-dup', { userId: 'u-viewer' }, 'viewer', ownerCtx),
     ).rejects.toBeInstanceOf(AiChatConversationDuplicateParticipantError)
 
     const active = em.__stores.participant.filter(
@@ -647,10 +649,10 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-restore', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-restore', 'u-viewer', 'viewer', ownerCtx)
-    await repo.revokeParticipant('c-restore', 'u-viewer', ownerCtx)
+    await repo.addParticipant('c-restore', { userId: 'u-viewer' }, 'viewer', ownerCtx)
+    await repo.revokeParticipant('c-restore', { userId: 'u-viewer' }, ownerCtx)
 
-    const restored = await repo.addParticipant('c-restore', 'u-viewer', 'viewer', ownerCtx)
+    const restored = await repo.addParticipant('c-restore', { userId: 'u-viewer' }, 'viewer', ownerCtx)
     expect(restored.userId).toBe('u-viewer')
     const allRows = em.__stores.participant.filter(
       (row: ParticipantRow) => row.userId === 'u-viewer',
@@ -672,7 +674,7 @@ describe('AiChatConversationRepository', () => {
       canManageConversations: true,
     }
     await expect(
-      repo.addParticipant('c-bug-002', 'u-victim', 'viewer', managerCtx),
+      repo.addParticipant('c-bug-002', { userId: 'u-victim' }, 'viewer', managerCtx),
     ).rejects.toBeInstanceOf(AiChatConversationAccessError)
   })
 
@@ -681,7 +683,7 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-bug-002-rev', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-bug-002-rev', 'u-viewer', 'viewer', ownerCtx)
+    await repo.addParticipant('c-bug-002-rev', { userId: 'u-viewer' }, 'viewer', ownerCtx)
 
     const managerCtx = {
       tenantId: tenantAlpha,
@@ -690,7 +692,7 @@ describe('AiChatConversationRepository', () => {
       canManageConversations: true,
     }
     await expect(
-      repo.revokeParticipant('c-bug-002-rev', 'u-viewer', managerCtx),
+      repo.revokeParticipant('c-bug-002-rev', { userId: 'u-viewer' }, managerCtx),
     ).rejects.toBeInstanceOf(AiChatConversationAccessError)
   })
 
@@ -701,7 +703,7 @@ describe('AiChatConversationRepository', () => {
     await repo.createOrGet({ conversationId: 'c-no-self-revoke', agentId: 'a' }, ownerCtx)
 
     await expect(
-      repo.revokeParticipant('c-no-self-revoke', 'u-owner', ownerCtx),
+      repo.revokeParticipant('c-no-self-revoke', { userId: 'u-owner' }, ownerCtx),
     ).rejects.toBeInstanceOf(AiChatConversationAccessError)
   })
 
@@ -710,7 +712,7 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-bug-006', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-bug-006', 'u-viewer', 'viewer', ownerCtx)
+    await repo.addParticipant('c-bug-006', { userId: 'u-viewer' }, 'viewer', ownerCtx)
 
     const viewerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-viewer' }
     await expect(repo.listParticipants('c-bug-006', viewerCtx)).rejects.toBeInstanceOf(
@@ -723,8 +725,8 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-list-ok', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-list-ok', 'u-viewer-1', 'viewer', ownerCtx)
-    await repo.addParticipant('c-list-ok', 'u-viewer-2', 'viewer', ownerCtx)
+    await repo.addParticipant('c-list-ok', { userId: 'u-viewer-1' }, 'viewer', ownerCtx)
+    await repo.addParticipant('c-list-ok', { userId: 'u-viewer-2' }, 'viewer', ownerCtx)
 
     const list = await repo.listParticipants('c-list-ok', ownerCtx)
     expect(list.map((p) => p.userId).sort()).toEqual(
@@ -737,7 +739,7 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-list-mgr', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-list-mgr', 'u-viewer', 'viewer', ownerCtx)
+    await repo.addParticipant('c-list-mgr', { userId: 'u-viewer' }, 'viewer', ownerCtx)
 
     const managerCtx = {
       tenantId: tenantAlpha,
@@ -842,9 +844,9 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-count', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-count', 'u-v1', 'viewer', ownerCtx)
-    await repo.addParticipant('c-count', 'u-v2', 'viewer', ownerCtx)
-    await repo.revokeParticipant('c-count', 'u-v1', ownerCtx)
+    await repo.addParticipant('c-count', { userId: 'u-v1' }, 'viewer', ownerCtx)
+    await repo.addParticipant('c-count', { userId: 'u-v2' }, 'viewer', ownerCtx)
+    await repo.revokeParticipant('c-count', { userId: 'u-v1' }, ownerCtx)
 
     const total = await repo.getParticipantCount(tenantAlpha, null, 'c-count')
     expect(total).toBe(1)
@@ -867,7 +869,7 @@ describe('AiChatConversationRepository', () => {
     await repo.createOrGet({ conversationId: 'c-revoke-nf', agentId: 'a' }, ownerCtx)
 
     await expect(
-      repo.revokeParticipant('c-revoke-nf', 'u-nonexistent', ownerCtx),
+      repo.revokeParticipant('c-revoke-nf', { userId: 'u-nonexistent' }, ownerCtx),
     ).rejects.toBeInstanceOf(AiChatParticipantNotFoundError)
   })
 
@@ -876,11 +878,223 @@ describe('AiChatConversationRepository', () => {
     const repo = new AiChatConversationRepository(em)
     const ownerCtx = { tenantId: tenantAlpha, organizationId: null, userId: 'u-owner' }
     await repo.createOrGet({ conversationId: 'c-double-revoke', agentId: 'a' }, ownerCtx)
-    await repo.addParticipant('c-double-revoke', 'u-viewer', 'viewer', ownerCtx)
-    await repo.revokeParticipant('c-double-revoke', 'u-viewer', ownerCtx)
+    await repo.addParticipant('c-double-revoke', { userId: 'u-viewer' }, 'viewer', ownerCtx)
+    await repo.revokeParticipant('c-double-revoke', { userId: 'u-viewer' }, ownerCtx)
 
     await expect(
-      repo.revokeParticipant('c-double-revoke', 'u-viewer', ownerCtx),
+      repo.revokeParticipant('c-double-revoke', { userId: 'u-viewer' }, ownerCtx),
     ).rejects.toBeInstanceOf(AiChatParticipantNotFoundError)
+  })
+})
+
+
+// ── CC-107 — the second identity axis ─────────────────────────────────────────
+describe('CC-107 — a participant has exactly ONE identity', () => {
+  const ownerCtx = { tenantId: 't-1', organizationId: 'o-1', userId: 'u-owner' }
+
+  it('refuses an identity naming NEITHER axis', () => {
+    expect(() => normalizeParticipantIdentity({} as never)).toThrow(
+      AiChatConversationParticipantIdentityError,
+    )
+  })
+
+  it('refuses an identity naming BOTH axes — a row would answer to two owners', () => {
+    expect(() =>
+      normalizeParticipantIdentity({ userId: 'u-1', agentId: 'business_ir.query_author' } as never),
+    ).toThrow(/exactly ONE identity/)
+  })
+
+  it('refuses an agent participant with no owning human', () => {
+    expect(() => normalizeParticipantIdentity({ agentId: 'business_ir.query_author' } as never)).toThrow(
+      /needs a human owner/,
+    )
+  })
+
+  it('refuses an owner on the human axis', () => {
+    expect(() =>
+      normalizeParticipantIdentity({ userId: 'u-1', agentOwnerUserId: 'u-2' } as never),
+    ).toThrow(/applies to the agent axis only/)
+  })
+
+  it('narrows a human identity to user_id only', () => {
+    expect(normalizeParticipantIdentity({ userId: ' u-1 ' })).toEqual({
+      userId: 'u-1',
+      agentId: null,
+      agentOwnerUserId: null,
+    })
+  })
+
+  it('narrows an agent identity to agent_id + its owner', () => {
+    expect(
+      normalizeParticipantIdentity({
+        agentId: ' business_ir.query_author ',
+        agentOwnerUserId: 'u-owner',
+      }),
+    ).toEqual({
+      userId: null,
+      agentId: 'business_ir.query_author',
+      agentOwnerUserId: 'u-owner',
+    })
+  })
+})
+
+describe('CC-107 — addParticipant on the agent axis', () => {
+  function makeRepo(conversations: ConvRow[], participants: unknown[] = []) {
+    const rows = conversations.map((c) => ({ ...c }))
+    const created: unknown[] = []
+    const em = {
+      getConnection: () => ({ execute: async () => [] }),
+      transactional: async (cb: (tx: unknown) => Promise<unknown>) => cb(em),
+      findOne: async (entity: unknown) => {
+        if (entity === AiChatConversation) return rows[0] ?? null
+        return null
+      },
+      find: async (entity: unknown) => (entity === AiChatConversationParticipant ? participants : []),
+      create: (_entity: unknown, data: Record<string, unknown>) => ({ ...data }),
+      persist: (row: unknown) => {
+        const chain = {
+          flush: async () => { created.push(row) },
+          persist: (next: unknown) => {
+            chain.flush = async () => { created.push(row); created.push(next) }
+            return chain
+          },
+        }
+        return chain
+      },
+      count: async () => 0,
+    }
+    const repo = new AiChatConversationRepository(em as never)
+    // the rows the repository actually saw — a copy of the input, so a mutation
+    // the repository makes is observable without the test touching the original
+    return { repo, created, rows, em }
+  }
+
+  const conv = (): ConvRow => ({
+    id: 'conv-1',
+    tenantId: 't-1',
+    organizationId: 'o-1',
+    conversationId: 'c-1',
+    agentId: 'business_ir.query_author',
+    ownerUserId: 'u-owner',
+    title: null,
+    status: 'open',
+    visibility: 'private',
+    pageContext: null,
+    lastMessageAt: null,
+    importedFromLocalAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  })
+
+  const ownerCtx = { tenantId: 't-1', organizationId: 'o-1', userId: 'u-owner' }
+
+  it('writes an agent participant on the AGENT axis, leaving the human one empty', async () => {
+    const { repo, created } = makeRepo([conv()])
+    const row = await repo.addParticipant(
+      'c-1',
+      { agentId: 'other.agent', agentOwnerUserId: 'u-owner' },
+      'viewer',
+      ownerCtx,
+    )
+    expect(row.agentId).toBe('other.agent')
+    expect(row.agentOwnerUserId).toBe('u-owner')
+    expect(row.userId ?? null).toBeNull()
+    // two writes, not one: the participant, and the conversation's visibility
+    expect(created.length).toBe(2)
+  })
+
+  it('flips visibility to shared for an agent participant too', async () => {
+    const { repo, rows } = makeRepo([conv()])
+    await repo.addParticipant(
+      'c-1',
+      { agentId: 'other.agent', agentOwnerUserId: 'u-owner' },
+      'viewer',
+      ownerCtx,
+    )
+    // the same rule that applied to a human viewer: a second member makes the
+    // conversation non-private, whichever axis that member sits on.
+    expect(rows[0].visibility).toBe('shared')
+  })
+
+  it('refuses an agent participant with no owner BEFORE writing anything', async () => {
+    const { repo, created } = makeRepo([conv()])
+    await expect(
+      repo.addParticipant('c-1', { agentId: 'orphan.agent' } as never, 'viewer', ownerCtx),
+    ).rejects.toBeInstanceOf(AiChatConversationParticipantIdentityError)
+    expect(created.length).toBe(0)
+  })
+})
+
+describe('CC-107 — an agent caller reads through the agent axis', () => {
+  const conv = (conversationId: string): ConvRow => ({
+    id: conversationId,
+    tenantId: 't-1',
+    organizationId: 'o-1',
+    conversationId,
+    agentId: 'business_ir.query_author',
+    ownerUserId: 'u-owner',
+    title: null,
+    status: 'open',
+    visibility: 'private',
+    pageContext: null,
+    lastMessageAt: null,
+    importedFromLocalAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  })
+
+  it('an agent caller reaches a conversation it is a member of', async () => {
+    // the agent axis is consulted only when the human one misses — the fake
+    // records which filter was used, which is the assertion.
+    const filters: Record<string, unknown>[] = []
+    const rows = [conv('c-agent')]
+    const em = {
+      getConnection: () => ({ execute: async () => [] }),
+      transactional: async (cb: (tx: unknown) => Promise<unknown>) => cb(em),
+      findOne: async (entity: unknown, filter: Record<string, unknown>) => {
+        filters.push(filter)
+        if (entity === AiChatConversation) return rows[0]
+        if (entity === AiChatConversationParticipant) {
+          // the human lookup misses, the agent one hits
+          return 'agentId' in filter ? { id: 'p-1', conversationId: 'c-agent' } : null
+        }
+        return null
+      },
+      find: async () => [],
+      persist: (row: unknown) => ({ flush: async () => undefined }),
+      count: async () => 0,
+    }
+    const repo = new AiChatConversationRepository(em as never)
+    const found = await repo.getById('c-agent', {
+      tenantId: 't-1',
+      organizationId: 'o-1',
+      userId: 'u-on-behalf',
+      agentId: 'some.agent',
+    })
+    expect(found?.conversationId).toBe('c-agent')
+    expect(filters.some((f) => 'agentId' in f)).toBe(true)
+  })
+
+  it('an agent caller with no membership on either axis is refused', async () => {
+    const rows = [conv('c-no')]
+    const em = {
+      getConnection: () => ({ execute: async () => [] }),
+      transactional: async (cb: (tx: unknown) => Promise<unknown>) => cb(em),
+      findOne: async (entity: unknown) => (entity === AiChatConversation ? rows[0] : null),
+      find: async () => [],
+      persist: (row: unknown) => ({ flush: async () => undefined }),
+      count: async () => 0,
+    }
+    const repo = new AiChatConversationRepository(em as never)
+    await expect(
+      repo.getById('c-no', {
+        tenantId: 't-1',
+        organizationId: 'o-1',
+        userId: 'u-on-behalf',
+        agentId: 'not.a.member',
+      }),
+    ).resolves.toBeNull()
   })
 })
