@@ -13,6 +13,16 @@ Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1. Three step
 3. **Ask the enrichment question explicitly, in both directions, then proceed:** in that code's *structure, concepts, naming, invariants, constraints, error handling, migration discipline, tests* — what **improves, adds value, enriches, secures, or optimizes** the plan? **HARVEST** what is better (a constraint, a partial index, a state machine, a naming rule that makes a bug unrepresentable, a test). **REFUSE, by name, and say why** what is worse — a donor defect copied because it was there is the most expensive kind of fidelity. Record both in the discharge record.
 **Worked example (`SR-02`):** the digest gave the requirement; reading Multica's migration/entity code added the nullable-`daemon_id` defect (refused → `NOT NULL`) and the unconstrained `name` (harvested → its own partial unique index). Neither was in the digest; both changed the schema.
 
+## ★ WHAT THE GLYPHS MEAN (owner ruling, 2026-10-17) — apply before re-grading anything
+**✅ = the code for that row is fully done. 🟡 = some of the row's tasks are done, some are not.**
+Nothing else. **"Not committed to a remote" and "no runner has called it yet" are NOT 🟡 reasons** —
+the owner's ruling: we commit **locally** as we work, the remote is prepared later, **private** when
+it exists, **history kept**. A commit is made the moment the work is done, so there is **no
+"uncommitted" marker** and none is needed. The distinction that *does* survive: **code that nothing
+calls is missing code**, not a deployment state (a checker with no CI step is an unfinished row —
+`CC-117`). **No remote = deployment state. No caller = defect.** Written into
+`MASTER-CHECKLIST.md` §5's preamble so the rule travels with the document.
+
 ## STANDING FORMAT — every turn MUST state (owner, 2026-10-16, revised 2026-10-17)
 **(1) what was done, (2) its `CC-nn` address in `MASTER-CHECKLIST.md`, (3) what is next** — and update `MASTER-CHECKLIST.md` §2 (LAST DONE + NEXT, kept short on purpose; the full history goes to `JOURNAL.md`, never into §2). **Then run `node scripts/check-master-checklist.mjs`** and let it fail the turn if a typed count no longer matches the tables.
 
@@ -42,5 +52,18 @@ Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1. Three step
 - **Proof:** 64 tests / 4 suites (9·19·11·25); **12/12 mutations**; **133 suites / 1,943 tests green under the pinned Node 24**; `tsc` 0.
 - **★ ALWAYS run the package suite with `workspace/.toolchain/node24/node.exe`** — under node 22.22.2 it reads "1,834/1,834 pass, 2 suites failing to LOAD" while **109 tests never ran**. A suite that fails to load reports no failures.
 - **★ `CC-100` OPEN:** the MikroORM snapshot is stale AND consumed — holds neither `ai_agent_bindings` nor `ai_agent_runtimes`; `commands.ts:100` decides from it and `migrator.create()` diffs against it. Fix = regenerate against a live DB, never hand-edit.
-**▶ NEXT = `CC-101`** (wire the four uncalled checkers into `ci.yml` — closes the class) **→ `CC-102`** (`SR-02` slice 2, re-scoped: `retire()`, the registration upsert, a stable `daemon_id`, the `last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency proof = two concurrent retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant engine home, the fix for open `CC-84`) **→ `P2-9b`.**
+**LAST DONE (docs, 2026-10-17) = the glyph rule applied and the register re-graded, `51e94f7`.** `CC-113`
+and `CC-116` → ✅ closed; **`CC-117` opened** (`check:client-boundaries` is called by nothing — and the
+repo has **eight** `check:*` checkers, not the seven `CC-101`'s message claimed); `SR-38` → ✅ (enforcing
+at `ci.yml:533`, proven); `SR-39`/`SR-41`/`SR-46` stay 🟡 for measured reasons that are **not** the old
+"called by nothing" note. Register **60 closed · 56 open · 116 total**. `docs.yml` committed.
+**★ My own error, twice the same shape:** I reported "14/14 mutations RED" from `tail`'s exit code, not
+the suite's — two mutations (M3/M14) had gone stale pinning the pre-CC-116 counts. Fixed and re-proven
+with the exit status captured directly. **Never read `$?` through a pipe.**
+**▶ NEXT = `CC-117`** (wire `check:client-boundaries` — closes `CC-101`'s class) **→ `CC-103`** (the
+binding gate that fails open for every `service` principal — a security hole the register says should
+not wait) **→ `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a stable `daemon_id`,
+the `last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency proof = two
+concurrent retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant engine
+home, the fix for open `CC-84`) **→ `P2-9b`.**
 Owner decided: **core architecture first — business modules generated from the core workspace.**
