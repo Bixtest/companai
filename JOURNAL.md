@@ -7,6 +7,49 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (night) — `CC-102` closed, and the throwaway database caught a defect all 24 tests walked past
+
+`SR-02` slice 2 is done. Slice 1 had shipped a table whose `deleted_at` column had **no writer at all**, a
+`register()` that **threw on every daemon reboot** where the donor upserts, a caller-supplied-text
+`daemon_id`, no liveness writer, and a null-org caller that slid silently to the deployment-wide engine
+fallback the registry's own docblock forbids. All five gaps are closed across three increments
+(`b36e4ffa`, `2f372248`, `cd1ec88e`), and the CLI gained the writer — `runtime:register`,
+`runtime:retire`, `runtime:touch` — because a `retire()` with no caller is the same defect the row was
+opened to remove.
+
+**The thing worth recording is not the work, it is the proof running anyway.** The plan promised a
+throwaway-PostgreSQL check for the liveness migration, and I had written off a previous batch's equivalent
+as *"not applied to a database here (none available)"* — which was true of the project's own database and
+false about what could be checked. Docker was there the whole time. So the probe ran, and its **first
+write failed**:
+
+```
+null value in column "created_at" of relation "ai_agent_runtimes" violates not-null constraint
+```
+
+`register()` supplied `last_seen_at` but omitted `created_at` and `updated_at` — both `NOT NULL`, no
+database default. The entity's `onCreate` default is ORM-level and never fires on a raw-SQL path. Real
+Postgres would have refused **every first registration**, while all 24 tests passed, because a fake EM has
+no database. Fixed, and the fake now enforces the same constraint so it cannot return silently — reverting
+the INSERT turns 8 tests RED.
+
+**Then the honest part.** Two of the probe's own queries were broken. One failed loudly (`indispartial`
+does not exist in `pg_index`). The other **failed silently**: `array_position` returns NULL for
+`int2vector`, so a key-direction `CASE` fell through to its `ELSE` and reported `ASC` for both columns —
+the opposite of the truth for the one that mattered. It looked perfectly well-formed and it was wrong. The
+truth was in a column I had not read because I had not needed to. Banked as **L181**: a proof instrument
+that fails quietly hands you a confident wrong answer, and a tidy table is a claim rather than evidence.
+
+**What closed:** register as the donor's upsert with the partial index's predicate spelled and
+`(xmax = 0) AS inserted`; `retire()` idempotent and scoped like the reads; `touch()` setting
+`last_seen_at` and nothing else so `updated_at` stays clean; uuid-validated `daemon_id`; and
+`organizationScope()` widening an org caller to the tenant-level rows while **refusing** the ambiguity that
+creates. The probe is committed beside the migration with its run command. Register moved **62 closed · 55
+open · 117 total → 63 closed · 54 open · 117 total**, and `CC-107`'s trigger — *after `CC-102`* — has
+fired, so `SR-07` is startable now.
+
+---
+
 ## 2026-10-17 (late) — the master checklist became ONE file (owner ruling: no more two-mirror drift)
 
 No code was written. The owner read the top of `MASTER-CHECKLIST.html` and asked whether it was really

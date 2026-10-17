@@ -177,27 +177,79 @@ Mutation discipline: after green, revert each fix and confirm the matching test 
 
 ---
 
-## 7. PROGRESS — increment 1 of 3 (2026-10-17, `b36e4ffa`)
+## 7. PROGRESS — all three increments landed
 
 | # | Item | State |
 |---|---|---|
 | 1 | **Null-org visibility** (§4.4) — an org caller now sees its org **and** the tenant-level rows | ✅ **DONE** — `organizationScope()`, 3 new tests, mutation-proven |
 | 2 | **The ambiguity the widening creates** — a tenant-level `primary` and an org-level `primary` can both exist | ✅ **DONE** — `findByBindingName` refuses with `AiAgentRuntimeAmbiguousNameError`, naming both ids |
 | 3 | **The columns** — `last_seen_at`, `legacy_daemon_id`, the partial liveness index | ✅ **DONE** — `Migration20261017170000`; the entity's docblock updated, because it had promised these columns *"land with the probe"* |
-| 4 | `register()` as an upsert returning `inserted` | ⬜ **NOT STARTED** |
-| 5 | `retire()` | ⬜ **NOT STARTED** |
-| 6 | `touch()` | ⬜ **NOT STARTED** |
-| 7 | `daemon_id` uuid validation | ⬜ **NOT STARTED** |
-| 8 | **The CLI writer** that makes 4–7 reachable | ⬜ **NOT STARTED — and this is the one that matters** |
+| 4 | `register()` as an upsert returning `inserted` | ✅ **DONE** — `2f372248`; spelled partial-index predicate, `(xmax = 0)` |
+| 5 | `retire()` | ✅ **DONE** — `2f372248`; idempotent, scoped like the reads |
+| 6 | `touch()` | ✅ **DONE** — `2f372248`; sets `last_seen_at` and nothing else |
+| 7 | `daemon_id` uuid validation | ✅ **DONE** — `2f372248`; `AiAgentRuntimeDaemonIdError` |
+| 8 | **The CLI writer** that makes 4–7 reachable | ✅ **DONE** — `2f372248`; `runtime:register` / `runtime:retire` / `runtime:touch` |
 
-**Why 4–8 are one increment and not four:** they are worthless apart. A `retire()` with no
-`register()` is the declaration-nothing-calls this row was opened to remove; a `touch()` with no
-`last_seen_at` writer is a column claiming liveness nobody records. They land together or not at all.
-
-**Proof for increment 1:** 33/33 across the repository and registry suites; reverting
+**Proof for increment 1** (`b36e4ffa`): 33/33 across the repository and registry suites; reverting
 `organizationScope` to the exact match fails the widening test (1 failed, file restored
 byte-identical); `tsc -p packages/ai-assistant` 0.
 
-**A note on the order.** Item 1 landed first because it is the only gap reachable **today** — it needs
-no writer, and an empty `listActive` already produces the environment fallback the registry forbids.
-Everything else waits on the writer, which is why the writer is item 8 and the headline of increment 2.
+**Proof for increment 2** (`2f372248`): 77/77 across the five affected suites; two mutations RED
+(remove the uuid check → 1 fail; break the `ON CONFLICT` target → 2 fail); `tsc` 0.
+
+**Proof for increment 3** (`cd1ec88e`) — the liveness migration **proven on a real PostgreSQL 16**, not
+merely written. Self-contained: the probe recreates slice 1's table exactly as
+`Migration20261017120000` defines it, so it never depends on a migrated database. Committed beside the
+migration at `migrations/__probes__/ai_agent_runtime_liveness.probe.sql` with its run command, so the
+claim can be re-measured rather than remembered. Container removed afterwards; nothing left running.
+
+| Phase | Proved | Result |
+|---|---|---|
+| A | baseline table + the four partial unique indexes | 5 indexes, as declared |
+| B | `up()` | `last_seen_at timestamptz null`, `legacy_daemon_id text null`; `ai_agent_runtimes_tenant_last_seen_idx` = btree `(tenant_id ASC, last_seen_at DESC NULLS FIRST)` — **key order and predicate `(deleted_at IS NULL)` both read out of the catalog**, not assumed |
+| C | the write paths it serves | register **insert** writes a heartbeat; register **upsert** on the second start (the reboot) updates in place, inserts no second row, returns `inserted=false`; `touch` advances `last_seen_at` and leaves `updated_at` **untouched**; `retire` is idempotent; the **null-org** conflict target infers its own index; the **name** key still refuses a second daemon (`23505`, `ai_agent_runtimes_tenant_org_name_uq`) |
+| D | SR-12's read | the planner picks the new index **unaided** — no `enable_seqscan` coaxing |
+| E | `down()` then `up()` again | both columns and the index drop cleanly; `up()` is repeatable |
+
+### 7.1 THE PROOF FOUND A DEFECT — and that is why it was run
+
+The first run of the probe **failed**, at the very first write:
+
+> `null value in column "created_at" of relation "ai_agent_runtimes" violates not-null constraint`
+
+`register()` supplied `last_seen_at` but **omitted `created_at` and `updated_at`** — both `NOT NULL`,
+with no database default. The entity's `onCreate` default is ORM-level and **never fires on this raw-SQL
+path**. Real Postgres refused every first registration, while all 24 tests passed, because a fake EM has
+no database. That is the same shape as the `CC-103` discharge-record error: an unproven SQL change
+excused by the absence of a database that was in fact available.
+
+**FIXED** (`cd1ec88e`): the INSERT now supplies both columns as `now()`.
+
+**And it cannot come back silently:** the test fake now enforces the real
+`AI_AGENT_RUNTIMES_NOT_NULL_NO_DEFAULT` set, and one of the two new tests calls `execute()` directly with
+the exact broken SQL and asserts the `23502` refusal — so the guard's own liveness is proven, not
+assumed. Mutation: restoring the old INSERT turns **8 tests RED**; the file was restored
+byte-identical.
+
+### 7.2 What the proof also settled about my own instrument
+
+Two of the probe's own queries were wrong and had to be fixed before it could be trusted:
+
+| Query | What it wrongly said | What was actually true |
+|---|---|---|
+| `indispartial` selected from `pg_index` | — no such column, so phase B aborted | partiality is `indpred IS NOT NULL`; phase B's real proof is `pg_get_expr(indpred)` |
+| index key direction via `array_position(i.indkey, …)` | reported `last_seen_at ASC` | `array_position` **returns NULL for `int2vector`**, so the `CASE` silently fell through to `ASC` for both columns. The true `indoption` is `0 3` → `tenant_id ASC`, `last_seen_at DESC NULLS FIRST` |
+
+The second is worth keeping: **a query that fails quietly produces a confident wrong answer**, and it
+did so here until the value was read against `indoption` directly. It is recorded in the plan because
+"the probe proved it" is only as good as the probe's own instrument.
+
+**Final tally:** 87 suites / **1330 passed / 1330**, no suite failed to load; `tsc -p packages/ai-assistant`
+**0**.
+
+### 7.3 What this plan still does not do
+
+`status` is still refused — the heartbeat is a fact, a verdict needs a sweeper. The daemon's id is not
+made persistent across reboots (that is `SR-12`'s territory). No HTTP route. And the migration has not
+been applied to the project's own database — none is configured here — so the first real deployment runs
+it for the first time, against a table the probe recreated exactly.

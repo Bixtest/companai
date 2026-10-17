@@ -4793,3 +4793,26 @@ The command gate computes an authority decision for every gated command, and the
 5. **A security review that stops at authorisation is incomplete.** Authorisation asks what an actor may do; **credential issuance asks what actors may exist.** Both are attack surface, and the second one is the one that decides whether the first can ever be satisfied.
 
 *Cross-ref: L177/L178 (a check that cannot fire is not coverage), L179 (a control that discards its answer), `CC-118` (a gate whose allowlist does not exist), `CC-103` §9 of `PLAN-CC-103-binding-gate.md`; rule 1; rule 13; `packages/core/src/modules/api_keys/services/apiKeyService.ts`; `packages/ai-assistant/src/modules/ai_assistant/api/mcp-key/route.ts`.*
+
+## L181 — a proof instrument that fails QUIETLY is worse than no instrument: it hands you a confident wrong answer (2026-10-17, `CC-102`)
+
+I built a throwaway-PostgreSQL probe for the `CC-102` liveness migration and ran it. It found a real defect in my own writer, which is the reason it was worth running. Then I read its own output closely — and **two of the probe's own queries were broken**, one of them reporting the exact opposite of the truth while looking perfectly well-formed.
+
+**The first failed loudly.** I selected `indispartial` from `pg_index`. No such column exists — it lives elsewhere — so the phase aborted with an error and nothing downstream ran. Easy to spot.
+
+**The second failed silently, and that is the lesson.** I wrote a query to report each index key's sort direction:
+
+```sql
+case when i.indoption[array_position(i.indkey, a.attnum) - 1] & 1 = 1 then 'DESC' else 'ASC' end
+```
+
+It printed a tidy two-row table: `tenant_id ASC`, `last_seen_at ASC`. The index is declared `("tenant_id", "last_seen_at" desc)`, so half of that was wrong — and it was wrong in the direction that *looks* fine, because ASC is the default and nothing flags it. The cause: **`array_position` returns NULL for `int2vector`.** NULL flows through the subscript, NULL passes through `& 1`, the comparison is not true, and the `CASE` falls to its `ELSE`. No error, no warning, no NULL in the result — just `ASC`, twice. The raw value was `indoption = 0 3` → `tenant_id ASC`, `last_seen_at DESC NULLS FIRST`, i.e. the truth, sitting in a column I had not read because I had not needed to.
+
+**The rules.**
+1. **A derived value hides its own failure; a raw value does not.** When a query computes something, print the raw inputs beside it at least once. Here one extra column (`indoption`, as text) would have made the contradiction visible immediately. A `CASE` with an `ELSE` is a place where NULL becomes a confident default — treat every `ELSE` in a proof query as an unexamined branch.
+2. **If a proof query reports the default for everything, suspect the query before you believe the result.** All-ASC, all-zero, all-pass, all-empty: a uniform answer across rows that should differ is the signature of an expression that never evaluated.
+3. **Prefer the catalog's own rendering to a reconstruction of it.** `pg_indexes.indexdef` emitted the index definition verbatim; it was right the whole time and I nearly did not consult it because my derived query had already "answered". **When the source can state the fact, do not re-derive it.**
+4. **A proof is a claim about an instrument too.** "The probe proved it" is only as good as "the probe was sound", and the second sentence needs its own evidence — here, a phase that aborted on a missing column and a second that silently inverted a direction. Both are recorded in the plan (§7.2) so nobody mistakes a green run for a validated instrument.
+5. **Run the expensive proof anyway.** Every one of these instrument defects was found *because* the probe was run against a real database, which is also where the `created_at`/`updated_at` defect surfaced — the one all 24 tests had walked past for having no database at all. The lesson is not "distrust proofs"; it is **"read the proof's own output line by line, and treat a tidy table as a claim rather than evidence."**
+
+*Cross-ref: L180 (the critic walked consumers and never the factory — a second way to be confidently wrong about a fix), L179, the `CC-103` discharge-record error ("no database available" when one was), rule 13, `PLAN-CC-102-runtime-registry.md` §7.2; `packages/ai-assistant/src/modules/ai_assistant/migrations/__probes__/ai_agent_runtime_liveness.probe.sql`.*

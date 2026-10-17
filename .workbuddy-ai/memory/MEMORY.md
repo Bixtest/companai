@@ -101,8 +101,27 @@ residual is `isApiKey:true` with a **bare** subject, which no production path pr
 **Breaking:** a `service` key can no longer run an agent — mark it `ai_worker` and bind it.
 **PROOF:** 113/113 across 10 suites, 3 mutations RED, `tsc` 0. Plan + discharge record:
 `library/development/PLAN-CC-103-binding-gate.md`.
-**▶ NEXT = `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a stable `daemon_id`, the
-`last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency proof = two concurrent
-retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant engine home, the fix
-for open `CC-84`) **→ `P2-9b`.**
+**LAST DONE (code+docs, 2026-10-17 night) = `CC-102` CLOSED — all five gaps, `b36e4ffa` + `2f372248` + `cd1ec88e`.**
+`SR-02` slice 2: `retire()` (idempotent, scoped like the reads) gives `deleted_at` its first writer; `register()`
+is now the donor's upsert with the partial index's predicate spelled and `(xmax = 0) AS inserted`; `daemon_id`
+is uuid-validated; `touch()` sets `last_seen_at` and nothing else; `organizationScope()` widens an org caller
+to the tenant-level rows and refuses the ambiguity that creates. **The CLI writer (`runtime:register` /
+`runtime:retire` / `runtime:touch`) makes all of it reachable** — the plan's headline item.
+**★ THE THROWAWAY-DB PROOF FOUND A DEFECT IN MY OWN WRITER:** `register()` omitted `created_at`/`updated_at`
+(both NOT NULL, no default; the entity's `onCreate` never fires on a raw-SQL path) so real Postgres refused
+every first registration while all 24 tests passed — a fake EM has no database. Fixed; the fake now enforces
+the same NOT NULL set, and reverting the INSERT turns 8 tests RED.
+**PROOF:** 1330/1330 across 87 suites, 3 mutations RED, `tsc` 0; the liveness migration proven on a real
+PostgreSQL 16 (phases A–E green, planner picks the index unaided). The probe is committed at
+`packages/ai-assistant/src/modules/ai_assistant/migrations/__probes__/ai_agent_runtime_liveness.probe.sql`
+with its run command. Plan: `library/development/PLAN-CC-102-runtime-registry.md` §7.
+**★ LESSON BANKED — a probe's own instrument can be wrong silently:** two of its queries were broken
+(`indispartial` does not exist in `pg_index`; `array_position` returns **NULL** for `int2vector`, so the
+key-direction CASE fell through to ASC for both columns). Read the raw value (`indoption` = `0 3`) before
+trusting a derived one.
+Register: **63 closed · 54 open · 117 total.** `CC-107`/`CC-104`/`CC-106` triggers FIRED with `CC-102`.
+
+**▶ NEXT = `SR-07` (`CC-107`, a bot is a participant — trigger fired) → `CC-104`/`CC-106` (same trigger)
+→ `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
+**→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.
 Owner decided: **core architecture first — business modules generated from the core workspace.**
