@@ -101,6 +101,32 @@ function organizationScope(ctx: AiAgentRuntimeContext): OrganizationScope {
   }
 }
 
+/**
+ * `CC-102` — `daemon_id` is an identity, so a hostname is refused.
+ *
+ * The donor moved this column from `os.Hostname()` to a persistent daemon UUID
+ * (`048_runtime_daemon_uuid.up.sql:1-6`). Ours was free text, so a machine that
+ * changed its hostname registered a **second** live row, and the tenant then had
+ * two runtimes with no binding — a permanent `AiAgentRuntimeAmbiguousError` that
+ * nobody could resolve without a database edit. Requiring a uuid does not by
+ * itself keep the id stable across reboots (that is the daemon's job), but it
+ * removes the most common way it changed, and it makes the requirement explicit
+ * at the boundary rather than in a comment.
+ */
+export class AiAgentRuntimeDaemonIdError extends Error {
+  override readonly name = 'AiAgentRuntimeDaemonIdError'
+  constructor(readonly daemonId: string) {
+    super(
+      `Daemon id "${daemonId}" is not a uuid. The daemon id is this runtime's IDENTITY — a ` +
+        'hostname changes when a machine is renamed and would register a second live runtime. ' +
+        'Persist a generated uuid on the daemon and pass that.',
+    )
+  }
+}
+
+/** RFC 4122 shape, version-agnostic: the id is an opaque key, not a semantic value. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export interface AiAgentRuntimeContext {
   tenantId: string
   organizationId?: string | null
@@ -272,12 +298,17 @@ export class AiAgentRuntimeRepository {
   async register(
     input: RegisterAiAgentRuntimeInput,
     ctx: AiAgentRuntimeContext,
-  ): Promise<AiAgentRuntime> {
+  ): Promise<{ row: AiAgentRuntime; inserted: boolean }> {
     if (!ctx?.tenantId) {
       throw new Error('AiAgentRuntimeRepository.register requires tenantId')
     }
-    if (!input.daemonId?.trim()) {
+    const daemonId = input.daemonId?.trim() ?? ''
+    if (!daemonId) {
       throw new Error('AiAgentRuntimeRepository.register requires daemonId')
+    }
+    // `CC-102` — an identity, not a label. See AiAgentRuntimeDaemonIdError.
+    if (!UUID_RE.test(daemonId)) {
+      throw new AiAgentRuntimeDaemonIdError(daemonId)
     }
     if (!input.name?.trim()) {
       throw new Error('AiAgentRuntimeRepository.register requires name')
@@ -286,20 +317,58 @@ export class AiAgentRuntimeRepository {
       throw new AiAgentRuntimeProviderError(String(input.provider))
     }
 
+    const organizationId = ctx.organizationId ?? null
+    // ★ CC-102 — the upsert, harvested from the donor
+    // (`multica-main/server/pkg/db/queries/runtime.sql:63-93`). Two differences
+    // from a naive `ON CONFLICT (cols)`:
+    //
+    //   1. the conflict target must SPELL THE PARTIAL INDEX'S PREDICATE, or
+    //      Postgres cannot infer which index arbitrates and the statement fails;
+    //   2. `(xmax = 0)` distinguishes a fresh insert from an update, which is the
+    //      only signal that a machine appeared rather than rebooted.
+    //
+    // A reboot used to THROW `AiAgentRuntimeConflictError`, so the one thing a
+    // runtime does on every start — register itself — failed on the second start.
+    const conflictTarget = organizationId
+      ? 'on conflict (tenant_id, organization_id, daemon_id, provider) where organization_id is not null and deleted_at is null'
+      : 'on conflict (tenant_id, daemon_id, provider) where organization_id is null and deleted_at is null'
+
     try {
       return await this.em.transactional(async (tx) => {
-        const row = tx.create(AiAgentRuntime, {
-          tenantId: ctx.tenantId,
-          organizationId: ctx.organizationId ?? null,
-          daemonId: input.daemonId.trim(),
-          name: input.name.trim(),
-          provider: input.provider,
-          metadata: input.metadata ?? {},
-        } as unknown as AiAgentRuntime)
-        await tx.persist(row).flush()
-        return row
+        const rows = (await tx.getConnection().execute(
+          `insert into ai_agent_runtimes
+             (tenant_id, organization_id, daemon_id, name, provider, metadata, last_seen_at)
+           values (?, ?, ?, ?, ?, ?::jsonb, now())
+           ${conflictTarget}
+           do update set
+             name = excluded.name,
+             metadata = excluded.metadata,
+             last_seen_at = now(),
+             updated_at = now()
+           returning id, (xmax = 0) as inserted`,
+          [
+            ctx.tenantId,
+            organizationId,
+            daemonId,
+            input.name.trim(),
+            input.provider,
+            JSON.stringify(input.metadata ?? {}),
+          ],
+        )) as Array<{ id: string; inserted: boolean }>
+
+        const first = rows[0]
+        if (!first) {
+          throw new Error('ai_agent_runtimes upsert returned no row')
+        }
+        const row = await tx.findOne(AiAgentRuntime, { id: first.id } as FilterQuery<AiAgentRuntime>)
+        if (!row) {
+          throw new Error(`ai_agent_runtimes row ${first.id} vanished inside the upsert transaction`)
+        }
+        return { row, inserted: Boolean(first.inserted) }
       })
     } catch (error) {
+      // The identity tuple is now an upsert; the NAME index is not part of it and
+      // must still refuse, so the translation stays.
       const violation = classifyUniqueViolation(error)
       if (!violation) throw error
       throw new AiAgentRuntimeConflictError(
@@ -308,6 +377,63 @@ export class AiAgentRuntimeRepository {
         { constraint: violation.constraint, columns: violation.columns },
       )
     }
+  }
+
+  /**
+   * `CC-102` — retire a runtime. Idempotent: `false` means it was already retired
+   * or is not visible to this caller, which is an answer rather than an error.
+   *
+   * The scope is the same one the reads use (`organizationScope`), so a caller can
+   * only retire a row it can see. No cascade fires: our agents bind to a runtime by
+   * **text**, so there is no foreign key to unbind — the donor's whole
+   * `251_agent_runtime_unbind` machinery exists because its agents have one. What
+   * remains here is a stale pointer, and that fails closed as
+   * `AiAgentRuntimeBindingNotFoundError` on the next resolve.
+   */
+  async retire(id: string, ctx: AiAgentRuntimeContext): Promise<boolean> {
+    if (!ctx?.tenantId) {
+      throw new Error('AiAgentRuntimeRepository.retire requires tenantId')
+    }
+    const rows = (await this.em.getConnection().execute(
+      `update ai_agent_runtimes
+          set deleted_at = now(), updated_at = now()
+        where id = ?
+          and tenant_id = ?
+          and (organization_id is not distinct from ? or organization_id is null)
+          and deleted_at is null
+        returning id`,
+      [id, ctx.tenantId, ctx.organizationId ?? null],
+    )) as Array<{ id: string }>
+    return rows.length > 0
+  }
+
+  /**
+   * `CC-102` — record a heartbeat. Returns whether a live, visible row was touched.
+   *
+   * Deliberately updates `last_seen_at` and **nothing else** — not `updated_at`
+   * (`multica-main/server/pkg/db/queries/runtime.sql:178-186`): keeping that column
+   * clean keeps the row HOT-eligible and stops every `updated_at` watcher firing on
+   * a heartbeat. The donor's `status = 'online'` predicate has no analogue here
+   * because we have no `status` column — refused on purpose, see the entity.
+   *
+   * The affected-row answer is how a caller learns the row was retired between its
+   * read and this write.
+   */
+  async touch(id: string, ctx: AiAgentRuntimeContext): Promise<boolean> {
+    if (!ctx?.tenantId) {
+      throw new Error('AiAgentRuntimeRepository.touch requires tenantId')
+    }
+    const rows = (await this.em.getConnection().execute(
+      `update ai_agent_runtimes
+          set last_seen_at = now()
+        where id = ?
+          and tenant_id = ?
+          and (organization_id is not distinct from ? or organization_id is null)
+          and deleted_at is null
+        returning id`,
+      [id, ctx.tenantId, ctx.organizationId ?? null],
+    )) as Array<{ id: string }>
+    return rows.length > 0
   }
 }
 

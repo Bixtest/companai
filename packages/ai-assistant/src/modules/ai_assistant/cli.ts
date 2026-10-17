@@ -414,6 +414,130 @@ const runTokenUsagePrune: ModuleCli = {
   },
 }
 
+/**
+ * `CC-102` — the writer `ai_agent_runtimes` never had.
+ *
+ * ★ Why this exists at all. `AiAgentRuntimeRepository.register()` was written in
+ * `SR-02` slice 1 and **called by nothing**: no route, no CLI, no service. The
+ * table had no writer, so every column was unwritten — `deleted_at` was simply
+ * the one the audit noticed. Adding `retire()`/`touch()` without this command
+ * would have added two more methods nothing calls, which is the exact defect
+ * (`SR-47`'s class) the slice exists to remove.
+ *
+ * Why a CLI and not a route: the thing that registers a runtime is a **process on
+ * a host** at boot, not a browser. A route would need a new RBAC feature, CSRF
+ * handling and a tenant-scoping decision that does not exist yet; a command needs
+ * none of that, and it is how the daemon can announce itself.
+ */
+function runtimeContext(args: Record<string, string | boolean>): {
+  tenantId: string
+  organizationId: string | null
+} {
+  const tenantId =
+    (typeof args.tenant === 'string' ? args.tenant.trim() : '') ||
+    process.env.OM_TENANT_ID?.trim() ||
+    ''
+  if (!tenantId) {
+    throw new Error('--tenant <uuid> is required (or OM_TENANT_ID)')
+  }
+  const organizationId =
+    typeof args.org === 'string' && args.org.trim().length > 0 ? args.org.trim() : null
+  return { tenantId, organizationId }
+}
+
+async function runtimeRepository(): Promise<import('./data/repositories/AiAgentRuntimeRepository').AiAgentRuntimeRepository> {
+  await ensureBootstrap()
+  const container = await createRequestContainer()
+  const em = container.resolve<import('@mikro-orm/postgresql').EntityManager>('em')
+  const { AiAgentRuntimeRepository } = await import('./data/repositories/AiAgentRuntimeRepository')
+  return new AiAgentRuntimeRepository(em)
+}
+
+const RUNTIME_USAGE = [
+  'Usage:',
+  '  mercato ai_assistant runtime:register --daemon <uuid> --name <binding> --provider <engine> --tenant <uuid> [--org <uuid>]',
+  '  mercato ai_assistant runtime:retire   --id <uuid> --tenant <uuid> [--org <uuid>]',
+  '  mercato ai_assistant runtime:touch    --id <uuid> --tenant <uuid> [--org <uuid>]',
+  '',
+  'The daemon id is an IDENTITY and must be a uuid persisted by the daemon; a hostname is refused',
+  'because it changes when a machine is renamed and would register a second live runtime.',
+].join('\n')
+
+const runtimeRegister: ModuleCli = {
+  command: 'runtime:register',
+  async run(rest) {
+    const args = parseArgs(rest)
+    const daemonId = typeof args.daemon === 'string' ? args.daemon.trim() : ''
+    const name = typeof args.name === 'string' ? args.name.trim() : ''
+    const provider = typeof args.provider === 'string' ? args.provider.trim() : ''
+    if (!daemonId || !name || !provider) {
+      console.error(RUNTIME_USAGE)
+      process.exitCode = 1
+      return
+    }
+    try {
+      const ctx = runtimeContext(args)
+      const repo = await runtimeRepository()
+      const { row, inserted } = await repo.register({ daemonId, name, provider }, ctx)
+      // `inserted` is the only signal that a machine APPEARED rather than
+      // rebooted — the donor keeps it for the same reason (`runtime.sql:63-93`).
+      console.log(
+        `[runtime:register] ${inserted ? 'registered' : 'refreshed'} ` +
+          `(id=${row.id}, name=${row.name}, provider=${row.provider}, daemon=${row.daemonId})`,
+      )
+    } catch (error) {
+      console.error('[runtime:register] ' + (error instanceof Error ? error.message : String(error)))
+      process.exitCode = 1
+    }
+  },
+}
+
+const runtimeRetire: ModuleCli = {
+  command: 'runtime:retire',
+  async run(rest) {
+    const args = parseArgs(rest)
+    const id = typeof args.id === 'string' ? args.id.trim() : ''
+    if (!id) {
+      console.error(RUNTIME_USAGE)
+      process.exitCode = 1
+      return
+    }
+    try {
+      const ctx = runtimeContext(args)
+      const repo = await runtimeRepository()
+      const retired = await repo.retire(id, ctx)
+      // Idempotent by design: `false` means "already retired, or not visible to
+      // this caller" — an answer, not a failure.
+      console.log(`[runtime:retire] ${retired ? 'retired' : 'nothing to retire'} (id=${id})`)
+    } catch (error) {
+      console.error('[runtime:retire] ' + (error instanceof Error ? error.message : String(error)))
+      process.exitCode = 1
+    }
+  },
+}
+
+const runtimeTouch: ModuleCli = {
+  command: 'runtime:touch',
+  async run(rest) {
+    const args = parseArgs(rest)
+    const id = typeof args.id === 'string' ? args.id.trim() : ''
+    if (!id) {
+      console.error(RUNTIME_USAGE)
+      process.exitCode = 1
+      return
+    }
+    try {
+      const ctx = runtimeContext(args)
+      const repo = await runtimeRepository()
+      const touched = await repo.touch(id, ctx)
+      console.log(`[runtime:touch] ${touched ? 'heartbeat recorded' : 'no live runtime to touch'} (id=${id})`)
+    } catch (error) {
+      console.error('[runtime:touch] ' + (error instanceof Error ? error.message : String(error)))
+      process.exitCode = 1
+    }
+  },
+}
+
 export default [
   mcpServe,
   mcpServeHttp,
@@ -424,4 +548,7 @@ export default [
   runPendingActionCleanup,
   runTokenUsagePrune,
   testTools,
+  runtimeRegister,
+  runtimeRetire,
+  runtimeTouch,
 ]

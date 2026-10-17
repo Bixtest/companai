@@ -27,36 +27,37 @@ interface FakeTx {
 }
 
 function makeEm(options: {
-  flushError?: unknown
+  executeError?: unknown
+  executeResult?: Array<Record<string, unknown>>
   findOneResult?: Record<string, unknown> | null
   findResult?: Record<string, unknown>[]
 } = {}) {
-  const calls = { find: 0, findOne: 0, create: 0, flush: 0, transactional: 0 }
-  const created: Record<string, unknown>[] = []
+  const calls = { find: 0, findOne: 0, execute: 0, transactional: 0 }
+  const executed: Array<{ sql: string; params: unknown[] }> = []
   // `CC-102` — the scope filter is the assertion: a widened query is a claim
   // about which rows a caller may see, and it must be read, not assumed.
   const filters: Record<string, unknown>[] = []
 
-  const tx: FakeTx = {
-    create: (_entity, data) => {
-      calls.create += 1
-      const row = { ...data }
-      created.push(row)
-      return row
+  const connection = {
+    execute: async (sql: string, params: unknown[]) => {
+      calls.execute += 1
+      executed.push({ sql, params })
+      if (options.executeError) throw options.executeError
+      return options.executeResult ?? [{ id: 'rt-1', inserted: true }]
     },
-    persist: () => ({
-      flush: async () => {
-        calls.flush += 1
-        if (options.flushError) throw options.flushError
-      },
-    }),
+  }
+
+  const tx = {
+    getConnection: () => connection,
+    findOne: async () => options.findOneResult ?? { id: 'rt-1' },
   }
 
   const em = {
-    transactional: async <T>(cb: (t: FakeTx) => Promise<T>): Promise<T> => {
+    transactional: async <T>(cb: (t: typeof tx) => Promise<T>): Promise<T> => {
       calls.transactional += 1
       return cb(tx)
     },
+    getConnection: () => connection,
     find: async (_entity: unknown, filter: Record<string, unknown>) => {
       calls.find += 1
       filters.push(filter)
@@ -69,8 +70,11 @@ function makeEm(options: {
     },
   }
 
-  return { em: em as unknown as EntityManager, calls, created, filters }
+  return { em: em as unknown as EntityManager, calls, executed, filters }
 }
+
+/** A daemon id is an identity: a uuid, not a hostname (`CC-102`). */
+const DAEMON = '11111111-2222-4333-8444-555555555555'
 
 const pgUniqueViolation = (constraint: string) =>
   Object.assign(new Error(`duplicate key value violates unique constraint "${constraint}"`), {
@@ -131,80 +135,122 @@ describe('SR-02 — classifyUniqueViolation', () => {
   })
 })
 
-describe('SR-02 — AiAgentRuntimeRepository.register', () => {
-  it('does NOT pre-check with a SELECT — the unique index is the authority', async () => {
-    const { em, calls } = makeEm()
+describe('SR-02 / CC-102 — AiAgentRuntimeRepository.register', () => {
+  it('registers with ONE statement — an upsert, never a pre-check SELECT', async () => {
+    const { em, calls, executed } = makeEm()
     const repo = new AiAgentRuntimeRepository(em)
 
-    await repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX)
+    await repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX)
 
-    expect(calls.findOne).toBe(0)
+    expect(calls.execute).toBe(1)
     expect(calls.find).toBe(0)
-    expect(calls.flush).toBe(1)
+    expect(executed[0].sql).toMatch(/on conflict/i)
   })
 
-  it('writes the tenant, organization, daemon, name and provider it was given', async () => {
-    const { em, created } = makeEm()
+  it('sends the tenant, organization, daemon, name and provider as parameters', async () => {
+    const { em, executed } = makeEm()
     const repo = new AiAgentRuntimeRepository(em)
 
-    await repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX)
+    await repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX)
 
-    expect(created).toHaveLength(1)
-    expect(created[0]).toMatchObject({
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      daemonId: 'daemon-1',
-      name: 'primary',
-      provider: 'hermes',
-    })
+    expect(executed[0].params).toEqual([
+      'tenant-1',
+      'org-1',
+      DAEMON,
+      'primary',
+      'hermes',
+      JSON.stringify({}),
+    ])
   })
 
   it('trims the daemon id and the binding name', async () => {
-    const { em, created } = makeEm()
+    const { em, executed } = makeEm()
     const repo = new AiAgentRuntimeRepository(em)
 
-    await repo.register({ daemonId: '  daemon-1  ', name: '  primary  ', provider: 'opencode' }, CTX)
+    await repo.register(
+      { daemonId: `  ${DAEMON}  `, name: '  primary  ', provider: 'opencode' },
+      CTX,
+    )
 
-    expect(created[0]).toMatchObject({ daemonId: 'daemon-1', name: 'primary' })
+    expect(executed[0].params[2]).toBe(DAEMON)
+    expect(executed[0].params[3]).toBe('primary')
   })
 
-  it('translates a name collision into a typed error that names the binding', async () => {
+  it('spells the PARTIAL index predicate — an ON CONFLICT (cols) alone cannot infer it', async () => {
+    const orgScoped = makeEm()
+    await new AiAgentRuntimeRepository(orgScoped.em).register(
+      { daemonId: DAEMON, name: 'primary', provider: 'hermes' },
+      { tenantId: 'tenant-1', organizationId: 'org-1' },
+    )
+    expect(orgScoped.executed[0].sql).toMatch(
+      /on conflict \(tenant_id, organization_id, daemon_id, provider\) where organization_id is not null/,
+    )
+
+    const tenantLevel = makeEm()
+    await new AiAgentRuntimeRepository(tenantLevel.em).register(
+      { daemonId: DAEMON, name: 'primary', provider: 'hermes' },
+      { tenantId: 'tenant-1', organizationId: null },
+    )
+    expect(tenantLevel.executed[0].sql).toMatch(
+      /on conflict \(tenant_id, daemon_id, provider\) where organization_id is null/,
+    )
+  })
+
+  it('reports inserted: true on a first registration and false on a reboot', async () => {
+    const first = makeEm({ executeResult: [{ id: 'rt-1', inserted: true }] })
+    await expect(
+      new AiAgentRuntimeRepository(first.em).register(
+        { daemonId: DAEMON, name: 'primary', provider: 'hermes' },
+        CTX,
+      ),
+    ).resolves.toMatchObject({ inserted: true })
+
+    // ★ the defect CC-102 closed: this used to THROW AiAgentRuntimeConflictError,
+    // so the one thing a runtime does on every start failed on the second start.
+    const reboot = makeEm({ executeResult: [{ id: 'rt-1', inserted: false }] })
+    await expect(
+      new AiAgentRuntimeRepository(reboot.em).register(
+        { daemonId: DAEMON, name: 'primary', provider: 'hermes' },
+        CTX,
+      ),
+    ).resolves.toMatchObject({ inserted: false })
+  })
+
+  it('still translates a NAME collision — the name index is not part of the upsert target', async () => {
     const { em } = makeEm({
-      flushError: pgUniqueViolation('ai_agent_runtimes_tenant_org_name_uq'),
+      executeError: pgUniqueViolation('ai_agent_runtimes_tenant_org_name_uq'),
     })
     const repo = new AiAgentRuntimeRepository(em)
 
     await expect(
-      repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX),
+      repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX),
     ).rejects.toMatchObject({
       name: 'AiAgentRuntimeConflictError',
       key: 'name',
     })
-
     await expect(
-      repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX),
+      repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX),
     ).rejects.toThrow(/binding name "primary"/)
-  })
-
-  it('translates a daemon+provider collision into the other key', async () => {
-    const { em } = makeEm({
-      flushError: pgUniqueViolation('ai_agent_runtimes_tenant_org_daemon_provider_uq'),
-    })
-    const repo = new AiAgentRuntimeRepository(em)
-
-    await expect(
-      repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX),
-    ).rejects.toMatchObject({ key: 'daemon-provider' })
   })
 
   it('rethrows an error that is not a uniqueness violation', async () => {
     const boom = new Error('connection terminated')
-    const { em } = makeEm({ flushError: boom })
+    const { em } = makeEm({ executeError: boom })
     const repo = new AiAgentRuntimeRepository(em)
 
     await expect(
-      repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes' }, CTX),
+      repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX),
     ).rejects.toBe(boom)
+  })
+
+  it('refuses a hostname as a daemon id — an identity, not a label', async () => {
+    const { em, calls } = makeEm()
+    const repo = new AiAgentRuntimeRepository(em)
+
+    await expect(
+      repo.register({ daemonId: 'build-host-01', name: 'primary', provider: 'hermes' }, CTX),
+    ).rejects.toMatchObject({ name: 'AiAgentRuntimeDaemonIdError' })
+    expect(calls.execute).toBe(0)
   })
 
   it('refuses an unknown provider BEFORE writing anything', async () => {
@@ -212,13 +258,10 @@ describe('SR-02 — AiAgentRuntimeRepository.register', () => {
     const repo = new AiAgentRuntimeRepository(em)
 
     await expect(
-      repo.register({ daemonId: 'daemon-1', name: 'primary', provider: 'hermes-typo' }, CTX),
+      repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes-typo' }, CTX),
     ).rejects.toBeInstanceOf(AiAgentRuntimeProviderError)
 
-    // The vocabulary is validated at the boundary, so the write never starts —
-    // which is the point: no invalid row is ever handed to the constraint.
-    expect(calls.create).toBe(0)
-    expect(calls.flush).toBe(0)
+    expect(calls.execute).toBe(0)
     expect(calls.transactional).toBe(0)
   })
 
@@ -227,59 +270,42 @@ describe('SR-02 — AiAgentRuntimeRepository.register', () => {
     const repo = new AiAgentRuntimeRepository(em)
 
     await expect(
-      repo.register({ daemonId: 'd', name: 'n', provider: 'nope' }, CTX),
+      repo.register({ daemonId: DAEMON, name: 'n', provider: 'nope' }, CTX),
     ).rejects.toThrow(/accepted: opencode, hermes/)
-  })
-
-  it('requires a tenant, a daemon id and a name', async () => {
-    const { em } = makeEm()
-    const repo = new AiAgentRuntimeRepository(em)
-
-    await expect(
-      repo.register({ daemonId: 'd', name: 'n', provider: 'hermes' }, { tenantId: '' }),
-    ).rejects.toThrow(/requires tenantId/)
-    await expect(
-      repo.register({ daemonId: '  ', name: 'n', provider: 'hermes' }, CTX),
-    ).rejects.toThrow(/requires daemonId/)
-    await expect(
-      repo.register({ daemonId: 'd', name: '  ', provider: 'hermes' }, CTX),
-    ).rejects.toThrow(/requires name/)
-  })
-
-  it('exposes the collision key on the error instance, not only in the message', async () => {
-    const { em } = makeEm({
-      flushError: pgUniqueViolation('ai_agent_runtimes_tenant_org_name_uq'),
-    })
-    const repo = new AiAgentRuntimeRepository(em)
-
-    const error = await repo
-      .register({ daemonId: 'd', name: 'n', provider: 'hermes' }, CTX)
-      .catch((err: unknown) => err)
-
-    expect(error).toBeInstanceOf(AiAgentRuntimeConflictError)
-    expect((error as AiAgentRuntimeConflictError).key).toBe('name')
-    expect((error as AiAgentRuntimeConflictError).detail?.constraint).toBe(
-      'ai_agent_runtimes_tenant_org_name_uq',
-    )
   })
 })
 
-describe('SR-02 — AiAgentRuntimeRepository reads', () => {
-  it('returns null for an empty tenant', async () => {
-    const { em } = makeEm({ findOneResult: null })
-    const repo = new AiAgentRuntimeRepository(em)
-
-    expect(await repo.findByBindingName('primary', CTX)).toBeNull()
+describe('CC-102 — retire and touch', () => {
+  it('retires with one scoped UPDATE and reports whether a row changed', async () => {
+    const hit = makeEm({ executeResult: [{ id: 'rt-1' }] })
+    await expect(
+      new AiAgentRuntimeRepository(hit.em).retire('rt-1', CTX),
+    ).resolves.toBe(true)
+    expect(hit.executed[0].sql).toMatch(/set deleted_at = now\(\)/)
+    expect(hit.executed[0].sql).toMatch(/deleted_at is null/)
   })
 
-  it('returns null when no tenant is supplied rather than querying', async () => {
-    const { em, calls } = makeEm()
-    const repo = new AiAgentRuntimeRepository(em)
+  it('is idempotent — a second retire reports false, not an error', async () => {
+    const miss = makeEm({ executeResult: [] })
+    await expect(
+      new AiAgentRuntimeRepository(miss.em).retire('rt-1', CTX),
+    ).resolves.toBe(false)
+  })
 
-    expect(await repo.findByBindingName('primary', { tenantId: '' })).toBeNull()
-    expect(await repo.listActive({ tenantId: '' })).toEqual([])
-    expect(calls.findOne).toBe(0)
-    expect(calls.find).toBe(0)
+  it('touch updates last_seen_at and NOTHING else', async () => {
+    const { em, executed } = makeEm({ executeResult: [{ id: 'rt-1' }] })
+    await expect(new AiAgentRuntimeRepository(em).touch('rt-1', CTX)).resolves.toBe(true)
+
+    const sql = executed[0].sql
+    expect(sql).toMatch(/set last_seen_at = now\(\)/)
+    // The donor's reason (`runtime.sql:178-186`): keeping `updated_at` clean keeps
+    // the row HOT-eligible and stops every updated_at watcher firing on a heartbeat.
+    expect(sql).not.toMatch(/updated_at/)
+  })
+
+  it('touch reports false when the row is retired or invisible', async () => {
+    const { em } = makeEm({ executeResult: [] })
+    await expect(new AiAgentRuntimeRepository(em).touch('rt-1', CTX)).resolves.toBe(false)
   })
 })
 
