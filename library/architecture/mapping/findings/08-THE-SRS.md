@@ -1,8 +1,14 @@
 # 08 — THE SRS
 
-**The requirement set produced by the mapping pass. 53 requirements — `SR-01` … `SR-46`
+**The requirement set produced by the mapping pass. 54 requirements — `SR-01` … `SR-47`
 plus seven sub-lettered additions (`SR-19a`, `SR-19b`, `SR-21a`, `SR-22a`, `SR-32a`, `SR-33a`,
 `SR-35a`) — across six poles.**
+
+*(Rule 13, corrected 2026-10-17: this header read **53** and stopped at `SR-46`. `SR-47` was added
+afterwards — the one row that came from our own codebase rather than a platform study, see §below —
+and the header was never re-derived. Counted from the table: 47 base + 7 sub-lettered = **54**, which is
+also exactly what the pipeline's `SRSREG` array holds. The two were compared by ID, not assumed equal:
+**54 in the SRS, 54 in the pipeline, zero missing, zero extra.**)*
 
 **The frame (owner, 2026-10-16):** *"we are not limited by what mercato allows. we want to
 engineer the best, richest, most versatile and integratable version of each pole plus the

@@ -6,6 +6,13 @@
 Study platforms ONE AT A TIME against the three poles + escape hatch; map every pole across ALL platforms vs mercato → a clean SRS; then build one-tenant ↔ one-Hermes. **No development before a written requirement. Hermes is NOT forked or edited. Markdown is the source of truth.** **MAPPING FRAME (owner 2026-10-16): NOT limited by what mercato allows** — engineer the best version per pole.
 **Rule 1: docs are claims, code is the authority. Rule 13: a committed number can be wrong — re-measure, and commit the fix *by name*.**
 
+## ★ THE DONOR RE-READ — mandatory on every `SR-*` build (owner, 2026-10-17)
+Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1. Three steps, in order, the third not optional:
+1. **Plan it fully first** (written requirement, measured inventory, divergences named) — no code yet.
+2. **Then open the donor's SOURCE at the line the `SR-*` row cites** — not the forensics digest, not `07-SYNTHESIS`. Digests answer *"does this mechanism exist?"*; a build needs *"what is the best version of it?"*, and the donor's author was solving the same problem one file away from the quoted line.
+3. **Ask the enrichment question explicitly, in both directions, then proceed:** in that code's *structure, concepts, naming, invariants, constraints, error handling, migration discipline, tests* — what **improves, adds value, enriches, secures, or optimizes** the plan? **HARVEST** what is better (a constraint, a partial index, a state machine, a naming rule that makes a bug unrepresentable, a test). **REFUSE, by name, and say why** what is worse — a donor defect copied because it was there is the most expensive kind of fidelity. Record both in the discharge record.
+**Worked example (`SR-02`):** the digest gave the requirement; reading Multica's migration/entity code added the nullable-`daemon_id` defect (refused → `NOT NULL`) and the unconstrained `name` (harvested → its own partial unique index). Neither was in the digest; both changed the schema.
+
 ## STANDING FORMAT — every turn MUST state (owner, 2026-10-16)
 **(1) what was done, (2) its `CC-nn` address in `MASTER-CHECKLIST.html`, (3) what is next** — and update the HTML's `FRONTIER` array (LAST DONE + NEXT); the `.md` twin's §2 mirrors it. Syntax-check a script edit: extract `<script>`, `node --check` it.
 

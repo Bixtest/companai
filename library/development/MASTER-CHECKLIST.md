@@ -272,10 +272,19 @@ largely built — while the **platform skeleton underneath it is only starting**
   fix them. T-03 itself is closed, and **T-01 is now built**.
 
 - **▶ NEXT — the identity step's other two slices, then the switchover's prerequisite.**
-  **(a) `SR-02` slice 2 — the retire guard:** a runtime that a live agent binding names must not be
-  retirable. That is the `ON DELETE RESTRICT` promise the donor states in SQL and that we must hold in
-  **code**, because our agent is a custom-entity record and the store cannot carry a foreign key — the
-  guard is the only place the promise can live. **(b) `SR-07` — a bot is a participant:** the agent joins
+  **(a) `SR-02` slice 2 — the retire guard, RE-PLANNED 2026-10-17 after the donor re-read:** the first
+  version of the plan said *"a runtime that a live agent binding names must not be retirable — the
+  `ON DELETE RESTRICT` promise"*, and that had the donor's design **backwards**. Multica *declares* that FK
+  (`004_agent_runtime_loop.up.sql:73`) and then spends migration `251_agent_runtime_unbind` routing
+  **around** it — `agent.runtime_id` goes nullable, the unbind is an application-layer UPDATE inside the
+  delete transaction, and the FK survives only as a backstop. Its own words: *"Retiring a laptop is an
+  ordinary action; losing the agents configured on it is not an ordinary consequence."* So the promise is
+  **not** "refuse" — it is **"neither destroy the agent nor strand it silently"**. Five mechanisms
+  harvested: two doors rather than a `?force` flag; a refusal that **carries the dependant list**; a
+  confirmation over a **set re-verified server-side** (`expected_active_agent_ids`); **check → lock →
+  re-check** (`FOR UPDATE` vs the FK's `FOR KEY SHARE`), without which the guard is decorative under
+  concurrency; and the invariant moved to **run time**. Full record: `PLAN-identity-SR-02-SR-07.md` §4.2.
+  **(b) `SR-07` — a bot is a participant:** the agent joins
   `ai_chat_conversation_participants` (a nullable `agent_id`, a `num_nonnulls(user_id, agent_id) = 1`
   check, widened uniqueness, `addAgentParticipant`) instead of sitting in a parallel column on the
   conversation. **Then `SR-12`** — the per-tenant engine home and the fix for open `CC-84` (a Hermes turn
@@ -619,6 +628,15 @@ set (`SR-38`/`39`/`41`/`46`) lands **first** — no blockers — and `SR-08` has
 *(Rule 13, corrected 2026-10-17: this line read **53** and **10 BUILD**, and the table below has held
 **54** rows since `SR-47` was added as a row without the header being re-derived. `SR-47` is a BUILD, so
 BUILD goes 10 → 11 and the total 53 → 54. Counted from the rows, not typed.)*
+*(**And a second, worse drift found the same day — the `State` column was not maintained at all.**
+`SR-38`, `SR-39`, `SR-41` and `SR-46` are all **built** — every one has a checker on disk and an npm
+script wired (`check:digital-twins`, `check:one-truth`, `check:escape-hatches`, `check:two-reads`) — yet
+all four still read `☐`. The prose in their *Extends* column said "BUILT"; the status glyph did not. That
+is the same dead-control shape this register exists to catch, in the register itself: a column that
+records state and is not kept current. All four are now `✅`, each verified against the file and the
+script entry rather than against the prose. **`SR-40` deliberately stays `☐`** — its checker
+`check-agents-md-budget.mjs` is a *documentation*-budget ratchet, while `SR-40` asks for a
+*feature-level* ratchet (`API_FEATURE_LEVEL`-style), so the file's existence does not discharge it.)*
 
 | Item | Pole | What it is | From | State | Extends / gate |
 |---|---|---|---|---|---|
@@ -666,15 +684,15 @@ BUILD goes 10 → 11 and the total 53 → 54. Counted from the rows, not typed.)
 | SR-35a | PX-F | Frontend as information architecture: a fetcher interface beats a widget tree | Gas Town | ☐ BORROW | the `ConvoyFetcher` find |
 | SR-36 | PX-F | Dashboard + perspective screens | mercato | ☐ BUILD | `M5` |
 | SR-37 | out | Plugin/module registry with full lifecycle | Hermes, Multica | ☐ BORROW | corrected in the SRS (rule 13) |
-| SR-38 | out | Digital-twin harness; drift breaks the build | openrig | ☐ BORROW | **BUILT 2026-10-17 — `scripts/check-digital-twins.mjs` + 3 twins + 10/10 tests + 7/7 mutations; `tsc` guards the shape, the twin test guards the values** |
-| SR-39 | **PZ** | One-truth check across every representation | zulip | ☐ BORROW | — |
+| SR-38 | out | Digital-twin harness; drift breaks the build | openrig | ✅ BORROW | **BUILT 2026-10-17 — `scripts/check-digital-twins.mjs` + 3 twins + 10/10 tests + 7/7 mutations; `tsc` guards the shape, the twin test guards the values** |
+| SR-39 | **PZ** | One-truth check across every representation | zulip | ✅ BORROW | **BUILT 2026-10-16 — `scripts/check-one-truth.mjs` + a 4/4 mutation proof + `check:one-truth`; first fact = the Hermes pin digest, the fact that actually drifted (`CC-90`)** |
 | SR-40 | **PZ** | Feature-level ratchet only a human can raise | zulip | ☐ BORROW | trigger corrected in the SRS |
-| SR-41 | **PZ** | Named, greppable escape hatches | zulip | ☐ BORROW | — |
+| SR-41 | **PZ** | Named, greppable escape hatches | zulip | ✅ BORROW | **BUILT 2026-10-16 — `scripts/check-escape-hatches.mjs` + 5/5 test + `check:escape-hatches`/`:fail`; measured 7,968 files / 202 holes / 33 named / 169 unnamed, and the finding is ONE-SIDED: 24 of 24 `@ts-expect-error` carry a reason, only 8 of 168 `eslint-disable` do** |
 | SR-42 | **PZ** | Exclusion ledger with mechanical expiry; ships empty | openrig | ☐ BORROW | — |
 | SR-43 | **PZ** | Proof beside prose: contract + falsifiable check + `LIMITS.md` | buzz | ☐ BORROW | — |
 | SR-44 | **PZ** | Retirement ledger; renames are tracked hazards | buzz, openrig | ☐ BORROW | — |
 | SR-45 | out | Kinds-over-endpoints policy with conformance test | buzz | ☐ BORROW | — |
-| SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | ☐ BORROW | **BUILT 2026-10-17 — `scripts/check-two-reads.mjs` + 8/8 tests + 5/5 mutations; home corrected to the `scripts/check-*.mjs` family** |
+| SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | ✅ BORROW | **BUILT 2026-10-17 — `scripts/check-two-reads.mjs` + 8/8 tests + 5/5 mutations; home corrected to the `scripts/check-*.mjs` family** |
 | SR-47 | **PZ** | Declared-control coverage: a control nobody reads is reported, not shipped | mercato (the `preview/` audit's §18 class — `.delegable`, `demoteIfEvidenceDemands`, the C6 contract, `authorityPolicyProblems`, `findFrontendVocabulary`, `detectRepeatedRequest`) | ✅ BUILD — **`52383e09`, 2026-10-17** | `CC-93` |
 
 ---

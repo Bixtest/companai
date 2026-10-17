@@ -1,7 +1,12 @@
 # PLAN — identity: the machine is not the teammate, and a bot is a participant
 
 **Status:** written requirement, 2026-10-17. **Slice 1 (`SR-02`) is BUILT — §6.1, `CC-99` closed.**
-Slice 2 (`SR-02`'s retire guard) and slice 3 (`SR-07`) are OPEN.
+Slice 2 (`SR-02`'s retire guard) is **re-planned but not built** — §4.2 was rewritten the same day after
+reading the donor's code, because the first version had the donor's design backwards. Slice 3 (`SR-07`)
+is OPEN.
+**Method note:** §4.2 is the first slice written under the donor re-read rule
+([`00-PIN-AND-METHOD.md`](../architecture/mapping/00-PIN-AND-METHOD.md) §4.1) — plan first, then open the
+donor's source, then harvest or refuse by name. It changed the design.
 
 **Why a plan and not a commit.** `SR-02` and `SR-07` are one line each in
 [`08-THE-SRS.md`](../architecture/mapping/findings/08-THE-SRS.md) §2. One line is enough to *rank* a
@@ -148,9 +153,14 @@ binding is the `runtime` text field, and the guarantee moves to two places:
 2. **The resolver refuses an unknown binding** rather than falling through to a default. A silent
    fallback is how an agent ends up on a machine nobody registered.
 
-The `ON DELETE RESTRICT` half is preserved in behaviour: `register`/`retire` must refuse to retire a
-runtime that a live agent binding names. That is slice 2 of `SR-02` (§4.2), not this one — stated here so
-the bound is named rather than forgotten.
+The retire half is preserved in behaviour, but **not as `RESTRICT`** — that reading was corrected on
+2026-10-17 after reading the donor's code (see §4.2, which is where the correction lives). Multica declares
+`ON DELETE RESTRICT` in `004_agent_runtime_loop.up.sql:73` and then spends migration
+`251_agent_runtime_unbind` routing *around* it: `agent.runtime_id` becomes nullable, the unbind is an
+application-layer UPDATE inside the delete transaction, and the FK survives only as a last-resort backstop.
+So the promise to keep is not *"you may not retire this machine"* but *"retiring the machine must neither
+destroy the agent nor strand it silently"* — which is slice 2 of `SR-02` (§4.2). Stated here so the bound is
+named rather than forgotten.
 
 ### 3.3 `SR-07` — the shape, stated before it is built
 
@@ -182,11 +192,84 @@ That is the minimum that removes the parallel object without inventing a second 
 | the selector honours a tenant runtime over the env default, byte-identically when the tenant has none | `lib/resolve-ai-runtime-port.ts` |
 | the one production caller resolves the tenant runtime before selecting | `api/chat/route.ts` |
 
-### 4.2 Slice 2 — `SR-02`'s remaining half: the retire guard *(OPEN)*
+### 4.2 Slice 2 — `SR-02`'s remaining half: the retire guard *(OPEN — RE-PLANNED after the donor re-read)*
 
-A runtime that a live agent binding names must not be retirable. Needs the binding read path (the kernel
-custom-entity record store) and a test that fires it. **Named here because the `ON DELETE RESTRICT`
-promise in §3.2 is otherwise unbuilt.**
+**★ This section was rewritten on 2026-10-17 after reading Multica's actual code, per the donor re-read
+rule (`00-PIN-AND-METHOD.md` §4.1). The first version of it was wrong.**
+
+#### What the first version said, and why it was wrong
+
+It said: *"a runtime that a live agent binding names must not be retirable … the `ON DELETE RESTRICT`
+promise in §3.2 is otherwise unbuilt."* That treats the donor's FK as the design. Reading the donor's
+migrations shows the FK is **not** its design — it is a backstop the donor deliberately routes around.
+
+`server/migrations/004_agent_runtime_loop.up.sql:73` does declare `agent.runtime_id … ON DELETE RESTRICT`,
+and `:86` declares `agent_task_queue.runtime_id … ON DELETE CASCADE`. But
+`server/migrations/251_agent_runtime_unbind.up.sql` **drops `NOT NULL` on both columns** and says why, in
+its own words:
+
+> *"Before this migration an agent physically could not exist without a runtime … the runtime-delete flow
+> had no third option: it archived the runtime's agents and then hard-deleted the rows, taking their chat
+> sessions with them. The confirmation dialog called that 'archive', which is not what the user got …
+> **Retiring a laptop is an ordinary action; losing the agents configured on it is not an ordinary
+> consequence.**"*
+
+So the donor's settled position is: **retiring a machine must not be blocked by the agents on it, and must
+not destroy them either.** The agent survives, *unbound* — it keeps its instructions, skills, chats and
+labels, and simply cannot run until rebound. `251` also states the repository rule that produced this:
+*"No new foreign keys or cascading actions are introduced … the unbind itself is an explicit
+application-layer UPDATE inside the same transaction as the runtime delete."*
+
+A guard that only refuses would have reproduced the exact trap the donor spent a migration escaping.
+
+#### What the donor actually does — five mechanisms worth having
+
+| # | Mechanism | Where | Why it is better than "refuse" |
+|---|---|---|---|
+| **M1** | **Two doors, not one flag.** `DeleteAgentRuntime` refuses with **409 + the dependency list**; `UnbindAgentsAndDeleteRuntime` is a *separate endpoint* that performs the consequential action. | `server/internal/handler/runtime.go:991`, `:1200` | The dangerous path is a different call with a different name, so it cannot be reached by adding `?force=true` to a routine delete. |
+| **M2** | **The refusal carries the data needed to act on it.** *"Surface them on the 409 so the dialog can render the cascade plan directly from this response — saves a second round-trip."* | `runtime.go:1035` | A refusal that says only "in use" forces a second query; one that names the dependants makes the next step obvious. |
+| **M3** | **The confirmation is over a SET, re-verified server-side.** The client echoes `expected_active_agent_ids`; the server compares it to what it is about to unbind and refuses on mismatch (`runtime_delete_plan_changed`). | `runtime.go:1212`, `:1277` | Closes the *dialog-open → user-confirm* race: a teammate cannot add an agent while the dialog is open and have it silently unbound. |
+| **M4** | **Check → lock → re-check (TOCTOU).** `LockAgentRuntime` takes `FOR UPDATE`, which conflicts with the `FOR KEY SHARE` that every FK insert takes — so no new binding can appear between the check and the act. | `runtime.go:1060`, `:1258` | Without it the guard is a check-then-act race and is decorative under concurrency. |
+| **M5** | **The invariant moves to run time.** `agent_task_queue` gets `CHECK (runtime_id IS NOT NULL OR completed_at IS NOT NULL) NOT VALID`, and every dispatch site gates on `RuntimeID.Valid`. | `251_…up.sql`, `internal/dispatch/reason.go:60` | The safety is "an unbound agent cannot run", enforced at every entry point — not "a machine cannot be retired", enforced at one. |
+
+**Two more the donor gets right, and that we should copy verbatim into `down()`:**
+
+- **`251`'s down migration refuses to delete data to make itself succeed:** *"deleting them is precisely
+  the data loss the up migration removes, and an operator rolling a schema back is not asking to destroy
+  every agent whose machine was retired."* It fails loudly instead, and prints the queries to run.
+- **The constraint is expressed with `completed_at`, not a status list** — *"naming enumerable status
+  values in a constraint would force a migration for each new status. A future non-terminal status
+  therefore fails closed … instead of silently slipping through."*
+
+#### What we build — adapted, not copied
+
+Our situation differs in two ways that matter, and both change the shape:
+
+1. **Our retire is a soft delete** (`deleted_at`), so the row and its history are never lost — the donor's
+   data-loss dilemma does not arise. The risk is different and sharper: a soft-deleted runtime stops
+   appearing in `listActive`, so an agent naming it starts throwing
+   `AiAgentRuntimeBindingNotFoundError` **on every turn** — a loud failure, but a *late* one, discovered by
+   the end user rather than by the operator who retired the machine.
+2. **Our agent is a custom-entity record and cannot carry an FK**, so there is no `RESTRICT` to lean on.
+   The guard is the only place the promise can live — which is exactly why it must not be a bare `if`.
+
+The slice therefore builds:
+
+| Piece | Change |
+|---|---|
+| **repository** | `listDependants(runtimeId, ctx)` — the live agents whose binding names this runtime (**M2**). Returns `{ agentId, name }[]`, empty when none. |
+| **retire** | `retire(id, ctx)` **refuses** with a typed `AiAgentRuntimeInUseError` carrying the dependant list, when `listDependants` is non-empty. |
+| **retire (consequential)** | `retire(id, ctx, { unbindAgents: true, expectedAgentIds })` — requires the caller to echo the set it was shown (**M3**); re-reads under the transaction and throws `AiAgentRuntimePlanChangedError` on mismatch. Two doors, one signature (**M1**). |
+| **concurrency** | The dependant re-read and the soft-delete happen inside one transaction with the runtime row locked `FOR UPDATE` (**M4**). |
+| **the invariant** | A retired runtime is invisible to `listActive` *and* `resolveTenantRuntime` throws a message that **names the dependants** when a binding resolves to nothing but a retired row exists with that name — so the failure at run time explains itself instead of reading as "no runtime". |
+
+**Deliberately not built here:** the donor's `pause_reason` on automations (we have no per-agent schedule
+that would spin), and the `agent_task_queue`-style CHECK (we have no task queue on this path). Both belong
+to `SR-19`'s territory, not this slice's.
+
+**The proof standard for this slice** is slice 1's, plus one specific to it: a test that drives **two
+concurrent retires** and proves the second sees the first's effect — because a guard without **M4** passes
+every sequential test.
 
 ### 4.3 Slice 3 — `SR-07`, the agent as a participant *(OPEN)*
 

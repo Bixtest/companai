@@ -620,9 +620,22 @@ const FRONTIER = `<b>LAST DONE — 2026-10-17 (late): <code>SR-02</code> — the
   report <code>capability-delegable</code> as a hole the route leaves open; the registry row stands as the
   measurement that found it).
   <br><b>▶ NEXT — the identity step's other two slices, then the switchover's prerequisite.</b>
-  <b>(a) <code>SR-02</code> slice 2 — the retire guard:</b> a runtime that a live agent binding names must
-  not be retirable (the <code>ON DELETE RESTRICT</code> promise the donor gets from a foreign key and we
-  must get from code, because our agent is a custom-entity record). <b>(b) <code>SR-07</code> — a bot is a
+  <b>(a) <code>SR-02</code> slice 2 — the retire guard, <u>RE-PLANNED 2026-10-17 after the donor
+  re-read</u>:</b> the first version of the plan said <i>"a runtime that a live agent binding names must not
+  be retirable — the <code>ON DELETE RESTRICT</code> promise"</i>, and that had the donor's design
+  <b>backwards</b>. Multica <i>declares</i> that FK (<code>004_agent_runtime_loop.up.sql:73</code>) and then
+  spends migration <code>251_agent_runtime_unbind</code> routing <u>around</u> it — <code>agent.runtime_id</code>
+  goes nullable, the unbind is an application-layer UPDATE inside the delete transaction, and the FK survives
+  only as a backstop. Its own words: <i>"Retiring a laptop is an ordinary action; losing the agents
+  configured on it is not an ordinary consequence."</i> So the promise is <b>not</b> "refuse" — it is
+  <b>"neither destroy the agent nor strand it silently"</b>. <b>Five mechanisms harvested:</b> two doors
+  rather than a <code>?force</code> flag; a refusal that <b>carries the dependant list</b> so the caller can
+  act without a second query; a confirmation over a <b>set re-verified server-side</b>
+  (<code>expected_active_agent_ids</code> — closes the dialog-open→confirm race); <b>check → lock →
+  re-check</b> (<code>FOR UPDATE</code> conflicting with the FK's <code>FOR KEY SHARE</code>), without which
+  the guard is decorative under concurrency; and the invariant moved to <b>run time</b> (every dispatch gates
+  on <code>RuntimeID.Valid</code>) instead of one delete site. Full record:
+  <code>PLAN-identity-SR-02-SR-07.md</code> §4.2. <b>(b) <code>SR-07</code> — a bot is a
   participant:</b> the agent joins <code>ai_chat_conversation_participants</code> instead of sitting in a
   parallel column on the conversation. <b>Then <code>SR-12</code></b> — the per-tenant engine home and the
   per-run credential, the fix for open <code>CC-84</code> (a Hermes turn runs platform tools as ONE

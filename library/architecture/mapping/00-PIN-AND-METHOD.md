@@ -66,6 +66,50 @@ A row with no RE-ENGINEER column is not finished.
    `C1–C11` (uncustomisable core), `P1–P18` (module register), `ROW-*` (mapping rows). New
    requirements are numbered **`SR-*`** and cross-referenced into that vocabulary.
 
+## 4.1 The build-side rule — re-read the donor's CODE, not just the digest
+
+*(Owner, 2026-10-17. This governs every `SR-*` build, which is why it lives here rather than in the
+build register.)*
+
+Every `SR-*` row names the platform(s) that demand it. Those names are **not** decoration — they are an
+address. When a requirement reaches the front of the build queue, the work has **three** steps, in this
+order, and the third is not optional:
+
+1. **Plan it fully first.** Written requirement, measured inventory, the divergences named. No code.
+2. **Then open the donor's source and read the code the row cites.** Not the forensics digest, not
+   `07-SYNTHESIS` — the actual file. The digests were written to *justify a requirement*, which makes
+   them lossy in a specific direction: they record the mechanism that proved the requirement existed,
+   and they drop everything beside it.
+3. **Ask the enrichment question explicitly, then proceed accordingly.** In that code's *structure,
+   concepts, naming, invariants, constraints, error handling, migration discipline, and tests* — is
+   there anything that **improves, adds value to, enriches, secures, or optimizes** what was planned?
+
+The third step runs in **both** directions, and the second is the one that is easy to skip:
+
+- **Harvest** what the donor does better than the plan anticipated — a constraint the plan did not
+  think of, a partial index, a state machine, a naming convention that makes a class of bug
+  unrepresentable, a test that pins something the plan only asserted. Fold it in.
+- **Refuse, by name**, what the donor does *worse* — and say why in the plan. A donor defect copied
+  because it was there is the most expensive kind of fidelity.
+
+Both directions get recorded in the slice's discharge record. "We followed the donor" and "we diverged
+from the donor" are equally claims, and both must be checkable against the code.
+
+**Why the code and not the digest.** A digest answers *"does this mechanism exist?"*. A build needs
+*"what is the best version of this mechanism?"* — and the donor's author was solving the same problem
+with the same constraints, one file away from the line the digest quoted. Reading only the quote is
+how a re-engineering pass quietly becomes a transcription pass.
+
+**Worked example (`SR-02`, 2026-10-17).** The digest yielded the requirement: `agent` ≠ `agent_runtime`,
+with `UNIQUE (workspace_id, daemon_id, provider)`. Reading Multica's migration and entity code added two
+things the digest did not carry — **the `daemon_id` column is nullable, which voids its own uniqueness
+key for exactly the rows it cannot describe** (refused: ours is `NOT NULL`), and **`name` is not
+constrained at all**, which matters for us specifically because our agent stores its binding as text and
+resolves it by name (harvested: `name` gets its own partial unique index). Neither was in the digest.
+Both changed the schema.
+
+---
+
 ## 5. Inputs
 
 - **Nine platform digests** — one per closed study, extractive, file-cited, contradictions
