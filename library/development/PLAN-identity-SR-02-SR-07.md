@@ -192,7 +192,7 @@ That is the minimum that removes the parallel object without inventing a second 
 | the selector honours a tenant runtime over the env default, byte-identically when the tenant has none | `lib/resolve-ai-runtime-port.ts` |
 | the one production caller resolves the tenant runtime before selecting | `api/chat/route.ts` |
 
-### 4.2 Slice 2 — `SR-02`'s remaining half: the retire guard *(OPEN — RE-PLANNED after the donor re-read)*
+### 4.2 Slice 2 — `SR-02`'s remaining half: the retire guard *(OPEN — RE-PLANNED after the donor re-read, and RE-SCOPED the same night by `CC-102`)*
 
 **★ This section was rewritten on 2026-10-17 after reading Multica's actual code, per the donor re-read
 rule (`00-PIN-AND-METHOD.md` §4.1). The first version of it was wrong.**
@@ -270,6 +270,53 @@ to `SR-19`'s territory, not this slice's.
 **The proof standard for this slice** is slice 1's, plus one specific to it: a test that drives **two
 concurrent retires** and proves the second sees the first's effect — because a guard without **M4** passes
 every sequential test.
+
+#### ★ What the cross-check then found — five gaps in slice 1 itself (2026-10-17, `CC-102`)
+
+The re-plan above was about the *shape* of the retire guard. The ten-analyst donor cross-check then read
+slice 1 against the donors a second time and found five **verified gaps in what we already shipped** —
+so the re-scoped slice is larger than the guard alone. Each was checked in the code before it was written
+down (`AUDIT-2026-10-17-donor-crosscheck.md` §3):
+
+| # | Gap | Measurement | What the donor does |
+|---|---|---|---|
+| **G1** | **There is no `retire()` at all.** | `AiAgentRuntimeRepository` has no such method, and **`deleted_at` has no writer** — so every `WHERE deleted_at IS NULL` predicate in the slice is inert. Meanwhile the repository's own error text tells operators to *"retire it before registering a replacement"* (`:253`) and *"retire the existing runtime first"* (`:260`), with no API to do either. | `DeleteAgentRuntime` is a real endpoint with a real body. |
+| **G2** | **`register()` refuses a daemon reboot.** | The `(tenant, org, daemon, provider)` conflict throws `AiAgentRuntimeConflictError` (`:239`) — so restarting the same daemon is an error the operator must resolve by hand. | `UpsertAgentRuntime` (`runtime.sql:63-93`) is `INSERT … ON CONFLICT (workspace_id, daemon_id, provider) DO UPDATE … SET last_seen_at = now() RETURNING *, (xmax = 0) AS inserted` — restart updates the row, and the `xmax` flag keeps first-registration distinguishable for analytics. |
+| **G3** | **`daemon_id` is caller-supplied text.** | A hostname change creates a **second live row with no binding**, and every later lookup is a permanent `AiAgentRuntimeAmbiguousError`. | `048_runtime_daemon_uuid.up.sql:1` — *"Runtime identity is moving from `os.Hostname()` to a persistent daemon UUID"*. |
+| **G4** | **No liveness writer.** | Slice 1 withheld `last_seen_at` on the ground that a column nothing writes is a dead control — correct, and it leaves the column unbuilt rather than the writer missing. | `TouchAgentRuntimeLastSeen` (`runtime.sql:178-193`) does `UPDATE … SET last_seen_at = now() WHERE id = $1 AND status = 'online'`. The **`status` predicate is load-bearing**: a sweeper may flip the row between the caller's `SELECT` and this `UPDATE`, and the returned affected-row count lets the caller detect that race and restore the row. It deliberately never touches `status` or `updated_at`, which keeps the row HOT-eligible. **No sweeper, no Redis, no lease required.** |
+| **G5** | **A null-org caller cannot see a tenant-level runtime, and the silence is a fallback.** | `agent-runtime-registry.ts` returns `NO_TENANT_RUNTIME` (null, `:41`) for an empty active set (`:138`), and `resolve-ai-runtime-port.ts:184-189` then takes `resolveAiRuntimeEngine(env)` — the deployment default. That is the exact failure the registry's own docblock forbids: *"a fallback … is how an agent ends up served by the wrong engine"* (`:27`), *"Deliberately not a fallback"* (`:46`). | Org scoping is part of the identity, not a filter applied when convenient. |
+
+**What this changes in the slice:**
+
+- **G1 is the guard's own door.** `retire()` is not an extra feature beside the guard — it **is** the guard's
+  entry point, and without it §4.2's whole re-plan is unbuildable. It also discharges the one omission
+  slice 1 made that was held to the wrong standard: `status` and `last_seen_at` were held back as
+  unwritable, and `deleted_at` was **shipped** unwritten. *(Rule 13, by name: the reasoning was right and
+  applied to the wrong column.)*
+- **G2 changes `register()` from a refusal to an upsert**, with the same `xmax`-style distinction so a
+  first registration and a restart are still told apart where it matters.
+- **G3** makes `daemon_id` derive from a **persistent daemon identity**, not a caller string.
+- **G4** builds `last_seen_at` together with its writer, as one piece — the column never exists alone.
+- **G5** makes the null-org read **explicit**: no org in scope is a distinct answer with a distinct
+  message, never a silent slide to the environment default.
+
+**Refused from the donor, with the reason:** a `status` column + sweeper + Redis TTL (fleet machinery for
+one supervised process — G4's single UPDATE is the whole mechanism we need); `runtime_mode` (a constant
+column); a hard delete after unbind (destroys history our soft delete keeps); and the donor's
+`pause_reason` (we have no per-agent schedule that would spin).
+
+**The unbind/CHECK redesign carries over from the re-plan above, with one addition the donor's migration
+makes explicit:** `251_agent_runtime_unbind.up.sql` confines `NULL` to *history* with
+`CHECK (runtime_id IS NOT NULL OR completed_at IS NOT NULL) NOT VALID` — expressed with `completed_at` so
+a future non-terminal status **fails closed**, and `NOT VALID` so a hot table stays metadata-only. Our
+binding is text in generic storage, so there is no cascade to fire; the risk is a stale pointer, and the
+guard is that **an active binding must always resolve**.
+
+**The proof standard for this slice** is now slice 1's plus **three**: (a) two concurrent retires, the
+second seeing the first's effect; (b) a **daemon restart re-registering without an error and without a
+second row** — the mutation that removes the upsert branch must kill it; (c) the null-org path returning
+the new explicit answer rather than the environment default — proved by making the environment default
+obviously wrong in the test.
 
 ### 4.3 Slice 3 — `SR-07`, the agent as a participant *(OPEN)*
 

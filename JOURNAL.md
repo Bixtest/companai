@@ -7,6 +7,108 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (night) — the donor cross-check: ten hostile critics, nine REVISITs, and the discovery that four "done" claims were unenforceable
+
+No code was written this session. Ten third-person hostile critics read the donors' **source** against our
+ten delivered slices — one critic per slice, each re-reading the donor rather than trusting the digest —
+and then **every load-bearing claim from all ten reports was re-verified by me against the real code
+before it entered a register.** The consolidated record is
+[`AUDIT-2026-10-17-donor-crosscheck.md`](library/development/AUDIT-2026-10-17-donor-crosscheck.md), 392
+lines, every claim stamped **[V]** verified with file:line, **[A]** analyst-reported, or **[X]** refuted.
+Eleven new register rows, all open: **`CC-101`…`CC-111`**. Register: **56 closed · 54 open · 110.**
+
+**★ The verdict: nine of the ten slices are called REVISIT, one KEEP-partial.** Not because the code is
+wrong — most of it is sound — but because in nine cases the *claim* about the code was stronger than the
+code. The audit's whole value is that it separated those two things, slice by slice.
+
+**★ Three failure modes, one per hour of the audit — and every one is a declared control that does
+nothing.**
+
+**(1) A check that never runs.** Measured: `.github/workflows/ci.yml` runs **two** of the repo's seven
+drift checkers — `check:dep-versions` (`:499`) and `check:time-bombs:fail` (`:509`).
+`check:digital-twins:fail` (`package.json:121`), `check:escape-hatches:fail` (`:115`),
+`check:one-truth` (`:113`) and `check:two-reads:fail` (`:119`) are **called by nothing** — not CI, not
+`.husky/pre-commit`. Run the escape-hatch one by hand and it prints *"169 unnamed escape hatch(s) of 202
+— a hole must carry a reason"* and **exits 0** (only `--fail` exits 1, and nothing calls it). So
+`SR-38`/`SR-39`/`SR-41`/`SR-46`, whose own requirement text says *"drift breaks the build"*, were met by
+code that breaks nothing. **The artefacts are built, tested and mutation-proven; the claim about them was
+the defect.** All four revert from ✅ to 🟡 *built but NOT ENFORCED* in the checklist twin — by name,
+with the measurement quoted. This is the same defect class `SR-47` exists to catch (`CC-93`, a control
+nobody reads), pointed at CI instead of at a function, and it is the cheapest instance of that class we
+will ever get.
+
+**(2) A control that discards its answer.** `authorizeEntityRead`
+(`packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-run.ts:214-251`) reads the entity's
+search config and returns `{ ok: true } | { ok: false; reason }` — it throws away the object it just
+read. The package it was copied from does not: `packages/search/src/modules/search/ai-tools.ts:86`
+`authorizeEntityAccess` **returns the config** and its callers use it (`:125-126`, `:144-145`, `:148`
+project `config.fieldPolicy`). So the column-level strip is **structurally impossible** at the current
+return type, and a sensitive field is fetched and returned whenever the model names it as a dimension,
+because `compile.ts:416` sets `fields` straight from the model-chosen `dimensionIds`. The compiler says so
+out loud — `compile.ts:378-382` emits `AUTHORIZATION_NOT_IMPLEMENTED` as a *gap* ("no authorized
+projection is injected. This compile is a plan, not a permission") while a missing tenant is an *error*
+(`:387-392`). The same shape one layer up: authority obligations are computed at
+`packages/shared/src/lib/authority/decision.ts:440-463` and only **rendered** at
+`pendingActService.ts:506` — a grep for `obligation.kind` outside `__tests__` finds nothing.
+
+**(3) A permit written as a default.** `interceptors.ts:246` — `if (!decision || !HELD_GATES.has(decision.gate))`
+falls through to *"Gate permits the act to run now"*. **A gate value the interceptor does not recognise is
+a permission**: a future gate, a typo, or a persisted decision written by a newer version all permit. And
+`agent-binding.ts:52` returns `{bound: true}` for every principal whose `kind` is not `ai_worker` — the
+fail-open is **one `!==` wide**. Eleven lines above the hole the same file refuses an
+*unidentifiable* principal as fail-open and writes the reasoning out (`:41-49`); the same reasoning, one
+branch over, is not applied.
+
+**★ The security finding that changes the plan.** `principal.ts:127` —
+`const isService = parsed.kind === 'service' || auth.isApiKey === true`, with the comment *"Honour either,
+so a context built by an older path still resolves correctly"* — means an `ai_worker`-shaped key on a
+legacy or cached envelope resolves as `service` and **passes the binding gate with its binding never read
+at all**. The route above it requires only `ai_assistant.view` (`api/ai/chat/route.ts:191`).
+
+**★ And the row that indicts slice 1.** `CC-99` removed a dead control — a `runtime` field nothing read —
+and shipped another: **`deleted_at` has no writer**, so every `WHERE deleted_at IS NULL` predicate in the
+slice is inert. Meanwhile the repository's own error text tells operators to *"retire it before
+registering a replacement"* (`:253`) and *"retire the existing runtime first"* (`:260`) — with no API to
+do either. **`retire()` does not exist.** The omission was applied to the wrong column: `status` and
+`last_seen_at` were correctly held back as unwritable, and `deleted_at` was shipped unwritten. Four more
+gaps measured beside it: `register()` **throws** `AiAgentRuntimeConflictError` where the donor
+**upserts** (multica `UpsertAgentRuntime`, `runtime.sql:63-93` — `INSERT … ON CONFLICT … DO UPDATE … SET
+last_seen_at = now() RETURNING *, (xmax = 0) AS inserted`, so restart updates the row and
+first-registration stays distinguishable); `daemon_id` is **caller-supplied text** where the donor
+migrated to a persistent daemon UUID (`048_runtime_daemon_uuid.up.sql:1` — a hostname change creates a
+second live row with no binding, a permanent `AiAgentRuntimeAmbiguousError`); there is **no liveness
+writer** where the donor's is one UPDATE on a request that already happens
+(`TouchAgentRuntimeLastSeen`, `runtime.sql:178-193`, with a load-bearing `status = 'online'` predicate
+that lets the caller detect a sweeper's race — no sweeper, no Redis, no lease); and a **null-org caller
+cannot see a tenant-level runtime and the silence is a fallback** — `agent-runtime-registry.ts:41`
+returns `NO_TENANT_RUNTIME` for an empty set and `resolve-ai-runtime-port.ts:184-189` then takes
+`resolveAiRuntimeEngine(env)`, the exact failure the registry's own docblock forbids (*"a fallback … is
+how an agent ends up served by the wrong engine"*, `:27`; *"Deliberately not a fallback"*, `:46`).
+
+**★ Four of my own citations were wrong, and one of them nearly cost the most serious security finding.**
+(1) I recorded the analyst's `derivePrincipal` claim as **unverifiable** because "`principal.ts` does not
+exist". It does, at `packages/shared/src/lib/auth/principal.ts`, and the claim is **true** at `:28` and
+`:127-137`. (2) I called `authorizeEntityAccess` "donor parity" — it is **ours**, in `packages/search`,
+which makes `CC-106` sharper: the copy dropped a step the original still has. (3) The twin count is
+**3**, not 4. (4) The file census is **4,832**, not 4,823 — the script is the authority. All four are
+recorded by name in the audit's §14, because a wrong citation in a register is worse than no citation:
+it looks like a measurement.
+
+**★ What was deliberately NOT done.** The hosted-login defect (needs the owner's machine and a real
+account) and the audit's green-suite claims (a full run was not in scope) are recorded **UNVALIDATED**
+in the triage document — named as unverified rather than guessed or silently passed over. No code was
+changed and no test was run against the suite: this pass was measurement, and it changed the plan rather
+than the tree.
+
+**▶ NEXT:** **`CC-101`** — wire the four uncalled checkers into `ci.yml`, so a declared control with no
+reader arrives as a build failure instead of a discovery. **Then `CC-102`** — `SR-02` slice 2, re-scoped:
+`retire()`, the registration upsert, a stable `daemon_id`, the `last_seen_at` writer, null-org
+visibility, and the unbind/CHECK redesign, keeping the concurrency proof (two concurrent retires, the
+second seeing the first's effect). Behind them the tooling set's remainder, then identity → `SR-12` →
+`P2-9b`.
+
+---
+
 ## 2026-10-17 (late) — the identity step opens: `SR-02` slice 1 (`CC-99` closed), `CC-100` found
 
 The tooling set is closed, so the frontier moves to identity. The requirement was written before any code
