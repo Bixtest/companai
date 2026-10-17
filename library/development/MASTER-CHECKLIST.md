@@ -41,23 +41,25 @@ reproduces exactly, so the headline above stands.)*
 records named in §5 and §7. This section stays short because a section that
 grows every session stops being read.
 
-**LAST DONE — 2026-10-17 (night): the donor cross-check, the document audit, `CC-101`, and the glyph
-re-grade.** Ten hostile critics re-read each donor's source (`AUDIT-2026-10-17-donor-crosscheck.md`, 483
-lines; **9 REVISIT / 1 KEEP-partial**). Three more reviewed this file and found §5's coverage claim
-**false for six vocabularies — 157 ids had no address** (§8/§9 now carry them; the checker went 5 → **36
-checks**, mutation-proven **14/14 RED**, and the proof caught two holes in itself). `CC-101` then wired
-the drift checkers: **5 new `ci.yml` steps, 7 of 8 checkers now called, only 2 of the 5 able to fail** —
-`check:digital-twins:fail` and `check:one-truth`, both green today and both **proven to fail on broken
-input**; `SR-46`/`SR-47`/`SR-41` are report steps because `:fail` would be a permanently red build.
-`CC-113` built and proved `.github/workflows/docs.yml` the same way. **Then the owner ruled on the
-glyphs** — ✅ means the code is done, 🟡 means part of the row is not, and *"no remote yet"* is neither —
-so `CC-113`/`CC-116` re-graded to ✅ and `CC-117` was opened for the one checker still called by nothing.
-Register: **60 closed · 56 open · 116 total**, counted from §5. Unchanged in kind, re-graded in meaning.
+**LAST DONE — 2026-10-17 (night): the donor cross-check, the document audit, `CC-101`, the glyph
+re-grade, and `CC-117`.** Ten hostile critics re-read each donor's source
+(`AUDIT-2026-10-17-donor-crosscheck.md`, 483 lines; **9 REVISIT / 1 KEEP-partial**). Three more
+reviewed this file and found §5's coverage claim **false for six vocabularies — 157 ids had no
+address** (§8/§9 now carry them; the checker went 5 → **36 checks**, mutation-proven **14/14 RED**,
+and the proof caught two holes in itself). `CC-101` wired the drift checkers: **5 new `ci.yml` steps,
+only 2 of the 5 able to fail** — `check:digital-twins:fail` and `check:one-truth`, both green today
+and both **proven to fail on broken input**; `SR-46`/`SR-47`/`SR-41` are report steps because `:fail`
+would be a permanently red build. **Then the owner ruled on the glyphs** — ✅ means the code is done,
+🟡 means part of the row is not, and *"no remote yet"* is neither — so `CC-113`/`CC-116` re-graded to
+✅, and `CC-117` closed the last uncalled checker (`check:client-boundaries`, wired as a **report**
+step because `--fail` exits 1 today: 174 backend page roots are client components and the allowlist
+the gate needs does not exist — that gap is `CC-118`). **All eight `check:*` checkers now have a
+caller.** Register: **61 closed · 56 open · 117 total**, counted from §5.
 
-**▶ NEXT — `CC-117`** (wire `check:client-boundaries`, the last uncalled checker — closes `CC-101`'s
-class completely), **then `CC-103`** — the binding gate that fails open for every `service` principal,
-which the register itself says **should not wait**, being a security hole — **then `CC-102`** (`SR-02`
-slice 2), `SR-07` (`CC-107`), `SR-12`, `P2-9b`.
+**▶ NEXT — `CC-103`** — the binding gate that fails open for every `service` principal, which the
+register itself says **should not wait**, being a security hole. **Then `CC-102`** (`SR-02` slice 2),
+`SR-07` (`CC-107`), `SR-12`, `P2-9b`. Behind them the tooling ratchets — `CC-118` (the client-boundary
+allowlist), `CC-114` (two-reads), `CC-115` (declared controls), `CC-110` (escape hatches).
 
 ---
 
@@ -191,7 +193,7 @@ decision from you, and the rest wait on the trigger named in their row.
 | `CC-109` | 46 | The three checker defects `CC-101` will expose: the **twin checker is comment-blind** and its value test is optional (1 of the 3 twins registers one); **one-truth exits 0 on SKIP** (its own docstring calls silence *"a false green"*) and … | With or after `CC-101` — the wiring is useless if the checks it runs are themselves green-for-the-wrong-reason. | **startable now** |
 | `CC-110` | 46 | The three checker defects `CC-101` will expose: the **twin checker is comment-blind** and its value test is optional (1 of the 3 twins registers one); **one-truth exits 0 on SKIP** (its own docstring calls silence *"a false green"*) and … | With or after `CC-101` — the wiring is useless if the checks it runs are themselves green-for-the-wrong-reason. | **startable now** |
 | `CC-111` | 46 | The **two-reads lint polices the symptom** — and the donor refutes the premise: it centralises resolution behind one accessor and guards it with a **parity test**, because two *reads* through one resolver cannot disagree while two *imple… | After a single settings resolver exists — **not before**. | **blocked on its trigger** |
-| `CC-117` | 46 | **The eighth drift checker is called by nothing** — `check:client-boundaries` (`package.json:110-111`) has no CI step and no hook. Measured: **8** distinct `check:*` checkers, **7** wired after `CC-101`, and the commit message's "7" is the miscount. | **Startable now** — run it once, then wire it in the mode it can hold. | **startable now** |
+| `CC-118` | 46 | **The client-boundary gate can never pass** — the allowlist it reads (`.ai/client-boundary-allowlist.json`) does not exist, so all **174** backend page roots are unallowlisted by construction and `--fail` exits 1; **74** client roots are also over 300 LOC. | **Startable now** — seed the allowlist from the measured 174 with a ratchet that may only shrink (the `agents-md-budget.baseline.json` precedent), then wire `:fail`. | **startable now** |
 | `CC-114` | — | **The two-reads lint is wired but not enforcing.** Measured: **89 settings read more than once in 46 files**, and `check-two-reads.mjs` has **no baseline support at all**. It can be wired (done, as a report step) or enforced, not both. | **Startable now** — give the checker a baseline + ratchet, exactly as `SR-40` already does with `scripts/agents-md-budget.baseline.json`; the baseline may only shrink. `CC-111` is the same subject finer-grained. | **startable now** |
 | `CC-115` | — | **The declared-control census is a report by its own design.** Measured: **5 of 6 declared controls have no production consumer** — the dead-control doctrine *in our own repo*, the same shape `CC-105`/`CC-106` found in the entity and authority gates. Each is either wired or deleted. | **Startable now** — ratchet the census to 0 uncovered, then wire `check:declared-controls:fail`. The five controls are named by the checker. | **startable now** |
 
@@ -223,9 +225,9 @@ whether or not a push has ever happened, and there is **no "uncommitted" or "not
 a commit is made the moment the work is done, so the working tree carries nothing. The distinction
 that *does* still matter is **code that nothing calls** — a checker on disk with no CI step or hook
 referencing it is an unfinished row, because the wiring itself is missing code (`CC-101` fixed seven
-of eight; `CC-117` is the eighth). Do not confuse the two: **no remote is a deployment state; no
-caller is a defect.**
-**CC-75 was never assigned** — the numbering skips it. **60 closed · 56 open · 116 total.**
+of eight; `CC-117` closed the eighth, as a report step). Do not confuse the two: **no remote is a
+deployment state; no caller is a defect.**
+**CC-75 was never assigned** — the numbering skips it. **61 closed · 56 open · 117 total.**
 *(Rule 13, corrected 2026-10-17. The committed header read **52 closed · 44 open · 96 total**, and that
 figure corresponded to **no state the table ever held**: measured at `HEAD`, the table below already
 carried **97 rows — 55 closed, 42 open** — because rows were appended to the table without the header
@@ -356,7 +358,8 @@ be the thing that drifts.)*
 | CC-114 | THE TWO-READS LINT IS WIRED BUT NOT ENFORCING: 89 SETTINGS ARE READ TWICE, AND THERE IS NO BASELINE — 2026-10-17 (night), OPEN, found by `CC-101`'s own proof step. `SR-46`'s requirement says *"any setting read twice must be read once"*; measured, **89 settings are read more than once in 46 files**, and `check-two-reads.mjs` has **no baseline support at all** (`grep -c baseline` = 0). So the checker can be wired (done, as a report step in `ci.yml`) or enforced, not both. **FIX: give the checker a baseline file and a ratchet, exactly as `SR-40` already does** — the repo's own precedent is `scripts/agents-md-budget.baseline.json` with `--update-baseline`, whose baseline may only shrink. That turns `CC-111`'s *"the accessor comes first"* finding into a measured count that can only improve. **Startable now; `CC-111` is the same subject at a finer grain and should land first or with this.** | ☐ open |
 | CC-115 | THE DECLARED-CONTROL CENSUS IS A REPORT BY ITS OWN DESIGN: 5 OF 6 CONTROLS HAVE NO PRODUCTION CONSUMER — 2026-10-17 (night), OPEN, found by `CC-101`'s own proof step. Measured: **5 of 6 declared controls have no production consumer**, including `request-repeat-detector` and the `command-contract-c6` contract. `check-declared-controls.mjs`'s own docstring states the census is *"a REPORT that ships alongside it — a number to watch, not a gate to trip"*, and names the census count as the thing to pin as a baseline and ratchet down. **This is the dead-control doctrine measured in our own repo** — the same shape `CC-106` found in the entity gate (a gate that reads a config and discards the answer) and `CC-105` in the authority gate (a permit written as a default). Each uncovered control is either wired or deleted; *"a half-built control is the defect"* is the checker's own line. **FIX: ratchet the census to 0 uncovered, then wire `check:declared-controls:fail`.** Startable now; the five controls are named by the checker. | ☐ open |
 | CC-116 | NEITHER REPO HAS A REMOTE — ANSWERED AND CLOSED BY THE OWNER'S RULING, 2026-10-17 (night). The row's question was *"where do these two repos live: pushed to a host with Actions, or deliberately local with the checkers verified by hand?"* **ANSWER (owner, 2026-10-17): commit locally now; the remote is prepared later; private when it exists; keep the full history.** So this needs no code — it was a decision, and it is made. What the row measured is still true and worth keeping: `git remote -v` is empty in both repos, so no workflow has ever executed, and a workflow file with no runner is a file, not a control. What it got wrong is the inference — that this made the code incomplete. Under the owner's glyph ruling it does not: **✅ means the code is done, and it is.** When the repos are created, the first push turns `ci.yml` and `docs.yml` on with no code change. | ✅ closed |
-| CC-117 | THE EIGHTH DRIFT CHECKER IS CALLED BY NOTHING — `check:client-boundaries` — 2026-10-17, found while re-grading `CC-101`, OPEN, and it is the same defect `CC-101` was opened for. MEASURED: `package.json` defines **eight** distinct `check:*` checkers, not seven — `client-boundaries`, `declared-controls`, `dep-versions`, `digital-twins`, `escape-hatches`, `one-truth`, `time-bombs`, `two-reads`. After `CC-101`, **seven are called by `ci.yml`** (`:499` dep-versions, `:509` time-bombs:fail, `:533` digital-twins:fail, `:541` one-truth, `:548` two-reads, `:557` declared-controls, `:565` escape-hatches). The eighth — `check:client-boundaries` (`package.json:110-111`, both the report and the `:fail` form) — is referenced by **nothing**: not `ci.yml`, not `.husky/pre-commit`, not `AGENTS.md`. Grepped every workflow, hook and manifest; the only two hits are its own definitions. `CC-101`'s own commit message says *"2 of the repo's 7 drift checkers"*, and **the count is the part that was wrong**. **FIX: run it once, then wire it in the mode it can hold** — the same rule as the other four: a `:fail` that is permanently red gets switched off, so it starts as a report step unless it is green today. | ☐ open |
+| CC-117 | THE EIGHTH DRIFT CHECKER IS NOW CALLED — `check:client-boundaries` — 2026-10-17, CLOSED (`7851fc39`). MEASURED BEFORE WIRING, because the mode had to be decided by a number: **7,704** TS/TSX files scanned, 1,061 top-level `"use client"` files, **185** page roots, of which **174** are backend page roots — **all 174 unallowlisted** — plus **74** client page roots over 300 LOC, 123 heavy browser-library imports, and **`.ai/client-boundary-allowlist.json` DOES NOT EXIST**, so `--fail` exits **1**. With no allowlist every backend page root is *unallowlisted by definition*, which means the gate can never pass; wiring `:fail` would have shipped a permanently red build. **Wired as a REPORT step** (`ci.yml`, after escape-hatches): the number is published every run. `prove-ci-wiring.mjs` gained a third case with `mode: 'report'` — it adds a top-level `"use client"` to a backend page root that is not currently one, and goes **RED** (exit 1, restored byte-identical), proving the checker **detects** while stating plainly that CI does **not gate** on it. All **eight** distinct `check:*` checkers now have a caller (six by exact name; `digital-twins` and `time-bombs` by their stronger `:fail` variants), and the workflow parses with a real YAML parser. **The gate itself is `CC-118`.** | ✅ closed |
+| CC-118 | THE CLIENT-BOUNDARY GATE IS INERT BY DESIGN — 174 BACKEND PAGE ROOTS ARE CLIENT COMPONENTS AND THE ALLOWLIST IT DEPENDS ON DOES NOT EXIST — 2026-10-17, found while wiring `CC-117`, OPEN, medium, and it is a *declared control that cannot fire*, the class this register exists to catch. THE MEASUREMENT: `check-client-boundaries.mjs` exits 1 when `unallowlistedBackendPageRoots.length > 0 \|\| oversizedClientRoots.length > 0` (`:117`), and the allowlist it reads (`.ai/client-boundary-allowlist.json`, `:13-19`) **is not in the repo**. So `loadAllowlist()` returns an empty set on every run and **all 174** backend page roots are unallowlisted by construction — the gate is not strict, it is unreachable. 74 client page roots also exceed the 300-LOC limit (`:11`). **WHY THIS IS NOT JUST A MISSING FILE:** an allowlist seeded with the current 174 would legalise the whole backlog in one commit — the *whole-directory exclusion* the donor refuted in `CC-110` (`custom_check.py:326`), where 160 of 169 holes were test-adjacent and blanket exclusion would have legalised exactly the backlog. A list that accepts everything is a census that means nothing. **FIX: seed the allowlist from the measured 174 with a RATCHET that may only shrink** — the precedent already in this repo is `scripts/agents-md-budget.baseline.json` (`SR-40`), and the same shape `CC-114` proposes for two-reads. Then wire `check:client-boundaries:fail`. The 74 oversized roots stay a separate, visible number until they come down. **Startable now; no dependency.** | ☐ open |
 
 ---
 ## 6. Platform study — 11 platforms, every one with its address
@@ -522,7 +525,7 @@ is a measured coverage claim, not a typed one.
 
 | Family | What it is | Home (relative to this folder) | ids in home | Carried here |
 |---|---|---|---:|---|
-| `CC-*` | the fine-grained cuts, findings and fixes | **§5, this file** | 116 | ✅ **all** — §5 + §4 |
+| `CC-*` | the fine-grained cuts, findings and fixes | **§5, this file** | 117 | ✅ **all** — §5 + §4 |
 | `SR-*` | the architecture requirements, pole by pole | **§7, this file** | 54 | ✅ **all** — §7 |
 | `G-*` | the governance & security floor | `platform_points.md` §G | 21 | 🟡 **9 named** (`G-01/02/03/04/07/09/17/21/22`, the rest only as triggers) — **12 with no row** → §9 |
 | `AH-*` | the agent half — `AH-1`…`AH-12` | `platform_points.md` §E | 12 | 🟡 **1 named** (`AH-1`) — **11 open, no row** → §9 |

@@ -33,18 +33,28 @@ const mutations = [
     name: 'M3 — change §5\'s count line',
     // anchored on §5's own sentence, not the bare number: §2 prints the same total, and a
     // first-occurrence replace would hit the copy this checker does not read
-    apply: (s) => s.replace('the numbering skips it. **60 closed \u00b7 56 open \u00b7 116 total.**',
-                            'the numbering skips it. **59 closed \u00b7 55 open \u00b7 113 total.**'),
-    expect: /§5 says 59\/55\/113/,
+    // ★ DERIVED, not pinned. This mutation has gone stale three times in one day (every time the
+    // register count moved), and a mutation that cannot fire is the defect the suite exists to
+    // catch. It now reads whatever the line says and decrements it, so it can never go stale while
+    // still proving that check 5 reads THIS line and not another.
+    apply: (s) => s.replace(
+      /the numbering skips it\. \*\*(\d+) closed · (\d+) open · (\d+) total\.\*\*/,
+      (m, c, o, t) => 'the numbering skips it. **' + (+c - 1) + ' closed · ' + (+o - 1) + ' open · ' + (+t - 2) + ' total.**',
+    ),
+    expect: /§5 says \d+\/\d+\/\d+; its table holds/,
   },
   {
     // ★ this mutation is why M3 above needed an anchor. The first version of check 5 ran its regex
     // over the whole document, so it read the FIRST "N closed · N open · N total" it found — §2's
     // headline — and never read §5's copy. Breaking §5's line went unseen; breaking §2's did not.
     name: 'M14 — change §2\'s headline count, which the first version of check 5 read instead of §5',
-    apply: (s) => s.replace('**60 closed \u00b7 56 open \u00b7 116 total**, counted from \u00a75.',
-                            '**59 closed \u00b7 55 open \u00b7 113 total**, counted from \u00a75.'),
-    expect: /§2 says 59\/55\/113/,
+    // ★ DERIVED for the same reason as M3: pinned counts rot. Decrementing whatever §2 says keeps
+    // the mutation live and keeps the proof pointed at §2's copy specifically.
+    apply: (s) => s.replace(
+      /\*\*(\d+) closed · (\d+) open · (\d+) total\*\*, counted from §5/,
+      (m, c, o, t) => '**' + (+c - 1) + ' closed · ' + (+o - 1) + ' open · ' + (+t - 2) + ' total**, counted from §5',
+    ),
+    expect: /§2 says \d+\/\d+\/\d+; its table holds/,
   },
   {
     name: 'M4 — invent a CC code that has no register row',
