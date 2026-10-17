@@ -124,4 +124,23 @@ Register: **63 closed · 54 open · 117 total.** `CC-107`/`CC-104`/`CC-106` trig
 **▶ NEXT = `SR-07` (`CC-107`, a bot is a participant — trigger fired) → `CC-104`/`CC-106` (same trigger)
 → `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
 **→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.
+**★ `CC-119` — THE DATABASE REBUILD MILESTONE, opened 2026-10-17.** It fires **the moment the identity
+step closes** (`SR-02` done + `SR-07` + `SR-12`, which all move the same tables). The `CC-102`/`CC-103`
+migrations are proven only against throwaway containers whose tables were recreated by hand, and `CC-100`
+records the MikroORM snapshot as stale and consumed — so the *chain* has never run in order against a
+database shaped like ours. Deliberately not earlier: a rebuild mid-step would only prove a state about to
+change. Its five checks: full chain from zero with `down()` exercised; a clean `migrator.create()` diff
+(which also settles `CC-100`); every constraint and index present and named; the register's tables
+re-derived from that database; and the app boots and the affected paths run against it.
 Owner decided: **core architecture first — business modules generated from the core workspace.**
+
+**⟡ RESUME INFRASTRUCTURE (2026-10-17) — built so an interruption costs nothing.**
+`where_we_left.md` is now a live six-step resume recipe (set-up → read → **verify before you believe**
+→ plan → prove as you go → close the batch), and `library/development/RESUME-PROMPT.md` holds a
+paste-ready prompt encoding the whole thing. It deliberately carries **no status of its own** — it
+points at `MASTER-CHECKLIST.md` §2 and the memory, so it does not go stale the way the old 2026-08
+snapshot did. Verified toolchain commands are written down in both, including three traps found this
+month: **jest must run from inside the package** (from the repo root it fails with `TS5011` and reports
+"1 failed, 0 total" — a load failure that reads as nothing); **`.bin/*` are shell scripts**, so call
+`node_modules/jest/bin/jest.js` and `node_modules/corepack/dist/corepack.js` directly; and **`yarn`
+resolves to the pinned 4.17.1 only from the project directory**.

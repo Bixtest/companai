@@ -58,7 +58,7 @@ fake EM has no database. Fixed, and the fake now enforces the same constraint so
 proven on a real PostgreSQL 16 with the index chosen by the planner unaided.** Record:
 `PLAN-CC-102-runtime-registry.md` §7. **★ Banked as a lesson: the probe's own instrument was wrong twice**
 (`indispartial` does not exist; `array_position` returns NULL for `int2vector`, so the key-direction check silently
-read ASC) — a query that fails quietly produces a confident wrong answer. Register: **63 closed · 54 open · 117 total**, counted from §5.
+read ASC) — a query that fails quietly produces a confident wrong answer. Register: **63 closed · 55 open · 118 total**, counted from §5.
 
 **▶ NEXT — `SR-07` (`CC-107`), then `SR-12`.** `CC-107` was trigger-blocked on `CC-102` (*"both move the same
 binding, and landing them apart would change `user_id`'s meaning twice"*) — **that trigger has now fired.** It is
@@ -66,7 +66,13 @@ a bot-as-participant: two partial unique indexes, a human **owner** on the bot, 
 pruning. `CC-104` (the port's run identity) and `CC-106` (the entity gate) carry the same *"with `CC-102`"*
 trigger and are now unblocked too. **`SR-12`** follows: the per-tenant engine home, which is also where the
 daemon's persistent id lives. Behind them the tooling ratchets — `CC-118` (the client-boundary allowlist),
-`CC-114` (two-reads), `CC-115` (declared controls), `CC-110` (escape hatches).
+`CC-114` (two-reads), `CC-115` (declared controls), `CC-110` (escape hatches). **And `CC-119` — the
+DATABASE REBUILD MILESTONE — fires the moment the identity step closes:** `CC-102` and `CC-103`'s
+migrations are proven only against throwaway containers whose tables were recreated by hand, and
+`CC-100` records the MikroORM snapshot as stale and consumed, so nobody has ever run the chain in order
+against a database shaped like ours. It is deliberately NOT done before then: `SR-02`, `SR-07` and
+`SR-12` all move the same tables, and a rebuild between them would only prove a state about to change.
+The five checks it must pass are named in its row.
 ---
 
 ## 3. The checklist — 47 rows in build order
@@ -139,7 +145,7 @@ rather than silently copied.)*
 ## 4. Open work — every unfinished item, with its trigger
 
 **The trigger is the observable event that makes an item startable.** *"When a command is next
-touched"* is a trigger; *"later"* is not. This is the complete list — all **54** open
+touched"* is a trigger; *"later"* is not. This is the complete list — all **55** open
 register rows, counted from §5, never typed. **14** can start right now,
 **1** needs only a database, **3** need a
 decision from you, and the rest wait on the trigger named in their row.
@@ -201,8 +207,9 @@ decision from you, and the rest wait on the trigger named in their row.
 | `CC-114` | — | **The two-reads lint is wired but not enforcing.** Measured: **89 settings read more than once in 46 files**, and `check-two-reads.mjs` has **no baseline support at all**. It can be wired (done, as a report step) or enforced, not both. | **Startable now** — give the checker a baseline + ratchet, exactly as `SR-40` already does with `scripts/agents-md-budget.baseline.json`; the baseline may only shrink. `CC-111` is the same subject finer-grained. | **startable now** |
 | `CC-115` | — | **The declared-control census is a report by its own design.** Measured: **5 of 6 declared controls have no production consumer** — the dead-control doctrine *in our own repo*, the same shape `CC-105`/`CC-106` found in the entity and authority gates. Each is either wired or deleted. | **Startable now** — ratchet the census to 0 uncovered, then wire `check:declared-controls:fail`. The five controls are named by the checker. | **startable now** |
 
+| `CC-119` | — | **The identity step's schema changes have never touched a project-shaped database.** `CC-102` and `CC-103`'s migrations are proven only against throwaway containers whose tables were recreated by hand; nobody has run the chain in order from zero, and `CC-100` records that the MikroORM snapshot is stale and consumed while `db/commands.ts:100` decides from it. | **When the identity step closes — `SR-02` (done) + `SR-07` (`CC-107`) + `SR-12`.** All three move the same tables, so rebuilding between them would be wasted; the half-migrated state is exactly the risk `CC-107` carries. The milestone's five checks are named in the register row. | **blocked on its trigger** |
 *Grouped by state:* **14 startable now** · **1 needs a database** ·
-**3 need you** · **36 blocked** on a named trigger.
+**3 need you** · **37 blocked** on a named trigger.
 *(Rule 13, corrected 2026-10-17 (night): this line read **11 startable / 39 blocked** — typed, and two
 rows had moved past their triggers without it being re-derived. `CC-92`'s triage finished on 2026-10-16
 (what remains is *scheduling*, a decision) and `CC-72`'s stale-timeout gate was **ruled closed** the same
@@ -231,7 +238,7 @@ that *does* still matter is **code that nothing calls** — a checker on disk wi
 referencing it is an unfinished row, because the wiring itself is missing code (`CC-101` fixed seven
 of eight; `CC-117` closed the eighth, as a report step). Do not confuse the two: **no remote is a
 deployment state; no caller is a defect.**
-**CC-75 was never assigned** — the numbering skips it. **63 closed · 54 open · 117 total.**
+**CC-75 was never assigned** — the numbering skips it. **63 closed · 55 open · 118 total.**
 *(Rule 13, corrected 2026-10-17. The committed header read **52 closed · 44 open · 96 total**, and that
 figure corresponded to **no state the table ever held**: measured at `HEAD`, the table below already
 carried **97 rows — 55 closed, 42 open** — because rows were appended to the table without the header
@@ -364,6 +371,8 @@ be the thing that drifts.)*
 | CC-116 | NEITHER REPO HAS A REMOTE — ANSWERED AND CLOSED BY THE OWNER'S RULING, 2026-10-17 (night). The row's question was *"where do these two repos live: pushed to a host with Actions, or deliberately local with the checkers verified by hand?"* **ANSWER (owner, 2026-10-17): commit locally now; the remote is prepared later; private when it exists; keep the full history.** So this needs no code — it was a decision, and it is made. What the row measured is still true and worth keeping: `git remote -v` is empty in both repos, so no workflow has ever executed, and a workflow file with no runner is a file, not a control. What it got wrong is the inference — that this made the code incomplete. Under the owner's glyph ruling it does not: **✅ means the code is done, and it is.** When the repos are created, the first push turns `ci.yml` and `docs.yml` on with no code change. | ✅ closed |
 | CC-117 | THE EIGHTH DRIFT CHECKER IS NOW CALLED — `check:client-boundaries` — 2026-10-17, CLOSED (`7851fc39`). MEASURED BEFORE WIRING, because the mode had to be decided by a number: **7,704** TS/TSX files scanned, 1,061 top-level `"use client"` files, **185** page roots, of which **174** are backend page roots — **all 174 unallowlisted** — plus **74** client page roots over 300 LOC, 123 heavy browser-library imports, and **`.ai/client-boundary-allowlist.json` DOES NOT EXIST**, so `--fail` exits **1**. With no allowlist every backend page root is *unallowlisted by definition*, which means the gate can never pass; wiring `:fail` would have shipped a permanently red build. **Wired as a REPORT step** (`ci.yml`, after escape-hatches): the number is published every run. `prove-ci-wiring.mjs` gained a third case with `mode: 'report'` — it adds a top-level `"use client"` to a backend page root that is not currently one, and goes **RED** (exit 1, restored byte-identical), proving the checker **detects** while stating plainly that CI does **not gate** on it. All **eight** distinct `check:*` checkers now have a caller (six by exact name; `digital-twins` and `time-bombs` by their stronger `:fail` variants), and the workflow parses with a real YAML parser. **The gate itself is `CC-118`.** | ✅ closed |
 | CC-118 | THE CLIENT-BOUNDARY GATE IS INERT BY DESIGN — 174 BACKEND PAGE ROOTS ARE CLIENT COMPONENTS AND THE ALLOWLIST IT DEPENDS ON DOES NOT EXIST — 2026-10-17, found while wiring `CC-117`, OPEN, medium, and it is a *declared control that cannot fire*, the class this register exists to catch. THE MEASUREMENT: `check-client-boundaries.mjs` exits 1 when `unallowlistedBackendPageRoots.length > 0 \|\| oversizedClientRoots.length > 0` (`:117`), and the allowlist it reads (`.ai/client-boundary-allowlist.json`, `:13-19`) **is not in the repo**. So `loadAllowlist()` returns an empty set on every run and **all 174** backend page roots are unallowlisted by construction — the gate is not strict, it is unreachable. 74 client page roots also exceed the 300-LOC limit (`:11`). **WHY THIS IS NOT JUST A MISSING FILE:** an allowlist seeded with the current 174 would legalise the whole backlog in one commit — the *whole-directory exclusion* the donor refuted in `CC-110` (`custom_check.py:326`), where 160 of 169 holes were test-adjacent and blanket exclusion would have legalised exactly the backlog. A list that accepts everything is a census that means nothing. **FIX: seed the allowlist from the measured 174 with a RATCHET that may only shrink** — the precedent already in this repo is `scripts/agents-md-budget.baseline.json` (`SR-40`), and the same shape `CC-114` proposes for two-reads. Then wire `check:client-boundaries:fail`. The 74 oversized roots stay a separate, visible number until they come down. **Startable now; no dependency.** | ☐ open |
+
+| CC-119 | THE IDENTITY STEP'S SCHEMA CHANGES HAVE NEVER BEEN APPLIED TO A PROJECT-SHAPED DATABASE, AND THE MIGRATION CHAIN'S OWN STATE IS UNKNOWN — 2026-10-17, OPEN, found by closing `CC-102` and `CC-103`. MEASURED, not inferred: **`Migration20261017160000_ai_agent_bindings_agent_id_format` (`CC-103`) and `Migration20261017170000_ai_agent_runtime_liveness` (`CC-102`) have each been proven against a THROWAWAY `postgres:16-alpine` container whose table was recreated BY HAND from the migration under test — and neither has ever been applied to a database shaped like this project's own.** So the individual SQL statements are verified and the *chain* is not: nobody has run these migrations in order, from zero, against the rest of the schema. Compounding it, `CC-100` records that the **MikroORM snapshot is stale and consumed** — it lists 10 tables and holds NEITHER `ai_agent_bindings` NOR `ai_agent_runtimes` — while `db/commands.ts:100` decides from that snapshot's presence whether to create an initial module migration, so `migrator.create()` may diff against a snapshot that does not know the tables these two migrations created. **THE MILESTONE, chosen because it is the first moment the work is not wasted: the IDENTITY STEP closes.** `SR-02` is closed (`CC-102`), `SR-07` is next (`CC-107`, this work), `SR-12` follows (per-tenant engine home). All three move the SAME tables — bindings, runtimes, and the participant/user axis `CC-107` makes nullable — so a database rebuilt after `SR-02` would be rebuilt again after `SR-07`, and the half-migrated state in between is the risk `CC-107` itself carries ("`user_id` goes nullable, so every `{ userId }` filter and the entity type silently change meaning — the num_nonnulls slice must land with this, not before it"). **WHAT THE MILESTONE IS, concretely: (1) real Postgres, full chain from zero, in order, and the `down()` path exercised; (2) the generated schema compared against the entities — a clean `migrator.create()` diff, which is also how `CC-100` is settled; (3) every constraint and index the step added, present and named, including `ai_agent_bindings_agent_id_format_ck`, `ai_agent_bindings_tenant_agent_lower_idx`, `ai_agent_runtimes_tenant_last_seen_idx` and the two partial unique indexes `CC-107` will add; (4) `check-master-checklist.mjs`'s tables re-derived from that database, not from the throwaway; (5) the app boots and the affected paths run against it.** **WHY NOT SOONER:** a rebuild is a verification pass, not a gate, and running it mid-step would prove a state that is about to change. **WHY NOT LATER:** the longer the chain runs unapplied, the more of it a single rebuild has to clear at once, and `CC-100`'s staleness grows with every migration. **DEPENDENCY: `CC-100` must be settled first or alongside — the snapshot is regenerated against a live database, never hand-edited. Adjacent, not caused here: `CC-116` (no remote) means there is nowhere to publish the rebuilt chain to, which does not affect its verification. | ☐ open |
 
 ---
 ## 6. Platform study — 11 platforms, every one with its address
@@ -529,7 +538,7 @@ is a measured coverage claim, not a typed one.
 
 | Family | What it is | Home (relative to this folder) | ids in home | Carried here |
 |---|---|---|---:|---|
-| `CC-*` | the fine-grained cuts, findings and fixes | **§5, this file** | 117 | ✅ **all** — §5 + §4 |
+| `CC-*` | the fine-grained cuts, findings and fixes | **§5, this file** | 118 | ✅ **all** — §5 + §4 |
 | `SR-*` | the architecture requirements, pole by pole | **§7, this file** | 54 | ✅ **all** — §7 |
 | `G-*` | the governance & security floor | `platform_points.md` §G | 21 | 🟡 **9 named** (`G-01/02/03/04/07/09/17/21/22`, the rest only as triggers) — **12 with no row** → §9 |
 | `AH-*` | the agent half — `AH-1`…`AH-12` | `platform_points.md` §E | 12 | 🟡 **1 named** (`AH-1`) — **11 open, no row** → §9 |
