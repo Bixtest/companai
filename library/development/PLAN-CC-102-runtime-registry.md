@@ -194,8 +194,13 @@ Mutation discipline: after green, revert each fix and confirm the matching test 
 `organizationScope` to the exact match fails the widening test (1 failed, file restored
 byte-identical); `tsc -p packages/ai-assistant` 0.
 
-**Proof for increment 2** (`2f372248`): 77/77 across the five affected suites; two mutations RED
-(remove the uuid check → 1 fail; break the `ON CONFLICT` target → 2 fail); `tsc` 0.
+**Proof for increment 2** (`2f372248`): **93/93** across the five suites this work touches
+(`AiAgentRuntimeRepository` 24, `cli-runtime` 7, `agent-runtime-registry` 11, `resolve-ai-runtime-port` 25,
+`agent-runtime-parity` 26) — re-measured from a worktree at that commit, because the figure first recorded
+here said **77/77 and does not reproduce**; corrected by name per rule 13. Two mutations RED: **remove the
+`daemon_id` uuid check → 1 test fails**; **drop the partial-index predicate from the `ON CONFLICT` target →
+1 test fails** (that single test asserts both the org-scoped and null-org forms, and Jest stops at the first,
+so two assertions fail inside one test). `tsc` 0.
 
 **Proof for increment 3** (`cd1ec88e`) — the liveness migration **proven on a real PostgreSQL 16**, not
 merely written. Self-contained: the probe recreates slice 1's table exactly as
@@ -243,6 +248,23 @@ Two of the probe's own queries were wrong and had to be fixed before it could be
 The second is worth keeping: **a query that fails quietly produces a confident wrong answer**, and it
 did so here until the value was read against `indoption` directly. It is recorded in the plan because
 "the probe proved it" is only as good as the probe's own instrument.
+
+### 7.2b A THIRD correction, of a number I inherited rather than measured
+
+The increment-2 record said **"77/77 across the five affected suites"**. Re-measured from a worktree at
+`2f372248`, the five suites this work touches total **93/93** (`AiAgentRuntimeRepository` 24, `cli-runtime` 7,
+`agent-runtime-registry` 11, `resolve-ai-runtime-port` 25, `agent-runtime-parity` 26) — and no natural
+five-suite subset of this work sums to 77. The figure was a **previous session's**, carried forward into this
+plan without a second route, and it does not reproduce.
+
+The same re-measurement also corrected a mutation count carried beside it: "break the `ON CONFLICT` target
+→ **2** fail" is really **1 test** failing, because the test asserts both the org-scoped and the null-org form
+and Jest stops at the first.
+
+**The rule this adds to L181:** an inherited number is a claim with no author in the room. Before a figure
+enters a delivery, it is re-measured from the artefact — a worktree at the named commit is cheap, and it is
+the only thing that turns "the last agent said 77" into "93, verified". This cost one `git worktree add` and
+found two wrong numbers in a record I had already written.
 
 **Final tally:** 87 suites / **1330 passed / 1330**, no suite failed to load; `tsc -p packages/ai-assistant`
 **0**.
