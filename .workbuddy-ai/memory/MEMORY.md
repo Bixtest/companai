@@ -72,9 +72,26 @@ precedent), never a blanket allowlist (that is the whole-directory exclusion the
 **★ M3/M14 went stale a THIRD time, so they were fixed at the cause:** both now regex the line and
 **decrement whatever it says**, so they cannot rot; verified against today's 61/56/117 and a hypothetical
 70/50/120.
-**▶ NEXT = `CC-103`** (the binding gate that fails open for every `service` principal — a security hole
-the register says should not wait) **→ `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a
-stable `daemon_id`, the `last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency
-proof = two concurrent retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant
-engine home, the fix for open `CC-84`) **→ `P2-9b`.**
+**LAST DONE (code+docs, 2026-10-17) = `CC-103` CLOSED, `e8ecde6d` + `7bd5cb1`.** The binding gate
+admitted every kind that was not `ai_worker` (`service`, `system`) with `toolAllowlist: null` — which
+`computeBoundRunScope` reads as **no narrowing**, so a `service` key with `ai_assistant.view` ran any
+agent with its full tool list. It now tests the one kind that passes (`human`) and refuses the rest with
+`not_ai_worker` — the reason the type always declared and nothing produced. **★ A hostile critic found
+TWO HIGH defects in the first attempt, both real:** (1) `api/chat/route.ts` — a *second* dispatch route —
+ran `ai_assistant.chat`, which **cannot be bound** (not a code-declared agent; the manage surface 404s),
+with only `ai_assistant.view`; it now refuses non-humans and gained its **first test**; (2) `lib/auth.ts`
+hardcoded `apiKeySubject()`, so an `ai_worker` key resolved as `service` and the new gate refused every
+MCP caller — fixed to carry the key's kind (`server.ts:357`), with permissions unchanged (`loadAcl`
+parses both prefixes, `rbacService.ts:320`). **WHY BOTH SURVIVED: the coverage gate was blind to the
+door** — after `CC-67`, dispatch goes through `resolveAiRuntimePort`, which was not a dispatch marker.
+**★ A RULE-13 CORRECTION to CC-103's own claim:** "an ai_worker key on a legacy envelope resolves as
+service" is **false** — measured by running `derivePrincipal`, the prefix wins (`:137`); the real
+residual is `isApiKey:true` with a **bare** subject, which no production path produces.
+**Breaking:** a `service` key can no longer run an agent — mark it `ai_worker` and bind it.
+**PROOF:** 113/113 across 10 suites, 3 mutations RED, `tsc` 0. Plan + discharge record:
+`library/development/PLAN-CC-103-binding-gate.md`.
+**▶ NEXT = `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a stable `daemon_id`, the
+`last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency proof = two concurrent
+retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant engine home, the fix
+for open `CC-84`) **→ `P2-9b`.**
 Owner decided: **core architecture first — business modules generated from the core workspace.**
