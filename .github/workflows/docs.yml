@@ -1,0 +1,53 @@
+name: docs
+
+# CC-113 — the docs repo has no CI, and its two checkers were verified by hand.
+#
+# This is the code side of `CC-101` one repo over: `MASTER-CHECKLIST.md` is the single source of
+# truth for the whole project, its every number is typed by a human, and until now nothing ran the
+# scripts that re-derive them. Same rule as CC-101 — **wire it only in a mode where it can fail,
+# and prove it fails.** Unlike the code repo, all three steps here are green on today's tree, so
+# all three are enforcing from the first run.
+#
+# ★ WHY THERE IS NO `paths:` FILTER — the checker reads every register the document names
+# (platform_points.md, NEEDS-YOU.md, PREVIEW-AUDIT-TRIAGE.md, BLOCKERS.md, BLUEPRINT-GAP-ANALYSIS.md,
+# BACKLOG.md, ../workspace-architecture/discussion_points.md) and `derive-counts.mjs` reads
+# platform_points.md's appendix boxes. A filter that can skip an input is a control that cannot
+# fail: miss one path in the list and the step silently stops guarding it. So this runs on every
+# push and PR. Three node commands, no build — the minutes are the cheapest thing here.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # ★ NOT THE DEFAULT. `actions/checkout` defaults to fetch-depth: 1, and §8's coverage
+          # check reads a NAMED historical revision from git (`git show 3970769:…`) so the
+          # "before" number cannot drift with HEAD. On a shallow clone that revision is
+          # unreadable, the checker reports "could not read revision 3970769 — the
+          # before-number is unverifiable", and the build goes red with the document untouched.
+          # A check that fails for the wrong reason is the mirror of CC-101's false green, and it
+          # gets muted exactly the same way. Proven with a real clone, both depths — see §5's
+          # CC-113 row. Cost of full history on this repo: seconds.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Re-derive the platform point counts (78/321)
+        run: node scripts/derive-counts.mjs
+
+      - name: Measure every typed claim in MASTER-CHECKLIST.md (36 checks)
+        run: node scripts/check-master-checklist.mjs
+
+      # Not a check of the document — a check of the check. Every mutation breaks the file on
+      # purpose and must come back red; the suite also fails if a mutation's target text has gone
+      # stale and it cannot fire at all. It restores the file byte-identical either way.
+      - name: Prove the checker can fail (14 mutations, each must be red)
+        run: node scripts/__tests__/check-master-checklist.mutations.mjs

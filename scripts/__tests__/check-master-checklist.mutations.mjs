@@ -33,18 +33,18 @@ const mutations = [
     name: 'M3 — change §5\'s count line',
     // anchored on §5's own sentence, not the bare number: §2 prints the same total, and a
     // first-occurrence replace would hit the copy this checker does not read
-    apply: (s) => s.replace('the numbering skips it. **58 closed \u00b7 56 open \u00b7 114 total.**',
-                            'the numbering skips it. **57 closed \u00b7 54 open \u00b7 111 total.**'),
-    expect: /§5 says 57\/54\/111/,
+    apply: (s) => s.replace('the numbering skips it. **60 closed \u00b7 56 open \u00b7 116 total.**',
+                            'the numbering skips it. **59 closed \u00b7 55 open \u00b7 113 total.**'),
+    expect: /§5 says 59\/55\/113/,
   },
   {
     // ★ this mutation is why M3 above needed an anchor. The first version of check 5 ran its regex
     // over the whole document, so it read the FIRST "N closed · N open · N total" it found — §2's
     // headline — and never read §5's copy. Breaking §5's line went unseen; breaking §2's did not.
     name: 'M14 — change §2\'s headline count, which the first version of check 5 read instead of §5',
-    apply: (s) => s.replace('**58 closed \u00b7 56 open \u00b7 114 total**, counted from \u00a75.',
-                            '**57 closed \u00b7 54 open \u00b7 111 total**, counted from \u00a75.'),
-    expect: /§2 says 57\/54\/111/,
+    apply: (s) => s.replace('**60 closed \u00b7 56 open \u00b7 116 total**, counted from \u00a75.',
+                            '**59 closed \u00b7 55 open \u00b7 113 total**, counted from \u00a75.'),
+    expect: /§2 says 59\/55\/113/,
   },
   {
     name: 'M4 — invent a CC code that has no register row',
