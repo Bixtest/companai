@@ -4817,3 +4817,30 @@ It printed a tidy two-row table: `tenant_id ASC`, `last_seen_at ASC`. The index 
 6. **An inherited number is a claim with no author in the room.** The increment-2 record said "77/77 across the five affected suites"; re-measured from a worktree at that commit it is **93/93**, and no natural five-suite subset of this work sums to 77. A mutation count beside it ("2 fail") was also wrong — one test fails, asserting both forms, and Jest stops at the first. **Before a figure enters a delivery, re-measure it from the artefact.** `git worktree add <sha>` is cheap, and it is the only thing that turns "the last agent said 77" into "93, verified".
 
 *Cross-ref: L180 (the critic walked consumers and never the factory — a second way to be confidently wrong about a fix), L179, the `CC-103` discharge-record error ("no database available" when one was), rule 13, `PLAN-CC-102-runtime-registry.md` §7.2 and §7.2b; `packages/ai-assistant/src/modules/ai_assistant/migrations/__probes__/ai_agent_runtime_liveness.probe.sql`.*
+
+## L182 — when a row's HARVEST and its REFUSED list interact, the harvest is conditional on the refusal — and "as the donor does" can describe something the donor does not do (2026-10-17, `CC-107`)
+
+The `CC-107` row told me to mirror Zulip's membership key: *"HARVEST: TWO PARTIAL UNIQUE INDEXES, NOT ONE
+… mirror streams.py:410-418: unique (tenant, conv, user_id) where user_id is not null PLUS unique (tenant,
+conv, agent_id) where agent_id is not null."* I ran the mandatory donor re-read before writing any code.
+**At those lines there is no such thing.** `streams.py:411` is
+`unique_together = ("user_profile", "recipient")` — ONE plain unique over TWO NON-NULLABLE FKs — and the
+partial index at :414-418 is **not unique**. A search across `zerver/models/*.py` finds partial unique
+constraints only for soft-delete exclusions, never for a nullable human/agent discriminator.
+
+**Why the row was wrong, and why that is the part that generalises.** Zulip needs no two-index trick
+because a Zulip bot **is** a `UserProfile` row with `is_bot = BooleanField(...)` (`users.py:556`) — it
+joins a conversation through the *same* `Subscription.user_profile` FK a human uses, under the *same*
+key, with the *same* non-nullability. The donor refuses the split; our own REFUSED list refuses the same
+thing (*"making agents rows in the auth User table"*). **So the harvest was describing the solution to a
+problem the donor does not have, and attributing it to the donor.** It is a correct design for our schema
+— Postgres really does treat NULLs as distinct — but it is **ours**, and the register had it backwards.
+
+**The rules.**
+1. **Read the donor's source at the cited line, every time, even when the line number looks precise.** The citation being *specific* is what makes it trusted, and a precise wrong citation is more dangerous than a vague one — this one had a file and a range.
+2. **When a row says HARVEST X and REFUSED Y, ask whether Y is what makes X necessary.** If the donor's design has no X, the honest reading is usually *"the donor solved this by accepting Y"* — and refusing Y means **you own the consequence**, including the schema that follows from it.
+3. **A design can be right and its provenance wrong, and the two need separate sentences.** Justify the two partial unique indexes on Postgres NULL semantics; do not justify them on the donor. A borrowed justification for your own design cannot be checked by re-reading the donor.
+4. **The third harvest in the same row was conditional in the same way**: *"exempt agents from idle-pruning (`subscription_info.py:654`: `(is_bot OR NOT long_term_idle)`)"* — that predicate reads `is_bot` **off the joined userprofile row**, which only works because a bot is a user. Harvest the **rule** (a participant that is not a person is not subject to human idle-pruning), not the SQL, and say which table it now reads from.
+5. **Correct the row in the same edit you discover the error in, by name.** A register that carries a mis-attributed design is worse than one that carries none, because the next agent will trust the citation and skip the re-read.
+
+*Cross-ref: L181 (two wrong figures inherited from a record, found by re-measuring — the same lesson on the *measurement* side), `00-PIN-AND-METHOD.md` §4.1 (the donor re-read rule) and §4.2 (the chain rule, which then found the live `22P02` defect in `CC-107`), `PLAN-CC-107-bot-participant.md` §1; `zerver/models/streams.py`, `zerver/models/users.py`, `zerver/lib/subscription_info.py`.*

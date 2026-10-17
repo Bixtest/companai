@@ -121,7 +121,27 @@ key-direction CASE fell through to ASC for both columns). Read the raw value (`i
 trusting a derived one.
 Register: **63 closed · 54 open · 117 total.** `CC-107`/`CC-104`/`CC-106` triggers FIRED with `CC-102`.
 
-**▶ NEXT = `SR-07` (`CC-107`, a bot is a participant — trigger fired) → `CC-104`/`CC-106` (same trigger)
+**▶ IN PROGRESS — `SR-07` / `CC-107` (a bot is a participant), increment 1 of 8 landed.**
+**★ THE DONOR RE-READ CORRECTED THE REGISTER (L182).** The row said to mirror Zulip's *"TWO PARTIAL
+UNIQUE INDEXES … streams.py:410-418"*. Measured there: **ONE plain `unique_together
+("user_profile","recipient")` over two non-nullable FKs, plus a partial NON-unique index.** Zulip needs no
+two-index trick because **a bot IS a `UserProfile` row** (`is_bot`, `users.py:556`) joining through the
+same FK — it refuses the split our REFUSED list also refuses. So the two partial unique indexes are the
+right shape for OUR schema but they are **ours**, not borrowed. Corrected in the register by name.
+**★ THE CHAIN READ THEN FOUND A LIVE DEFECT (increment 1, CLOSED):** `auth.sub` is a SUBJECT STRING
+(`api_key:<id>` / `ai_worker:<id>`), `ai_chat_conversation_participants.user_id` is a **uuid** column, and
+`api/ai/chat/route.ts` (3 sites) + `api/ai/conversations/route.ts` (1 site) passed the former into the
+latter — so every key-backed caller got `22P02` from Postgres on the first persisted turn. A 500, not a
+wrong answer. `effectiveUserId()`, written for exactly this, was called **zero** times in both files.
+`git log -S` dates it to `1a0239dd` the upstream baseline — **it predates `CC-103`.** Fixed: resolve once
+with `effectiveUserId`, refuse `422 ai_acting_user_required` when a machine acts for nobody.
+**`checkAiChatRateLimit` and `loadAcl` deliberately KEEP `auth.sub` — they are subject-keyed.** Proof:
+105 suites / 1542 tests, 2 mutations RED, `tsc` 0, and a real-Postgres probe committed at
+`packages/ai-assistant/src/modules/ai_assistant/__probes__/acting-user-subject.probe.sql`.
+**Plan: `library/development/PLAN-CC-107-bot-participant.md` §9.** Remaining: `agent_id`,
+`agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls`, two-axis access
+predicate, revoke route, idle-pruning exemption.
+**▶ NEXT after `SR-07` = `CC-104`/`CC-106` (same trigger)
 → `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
 **→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.
 **★ `CC-119` — THE DATABASE REBUILD MILESTONE, opened 2026-10-17.** It fires **the moment the identity
