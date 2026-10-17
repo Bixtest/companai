@@ -161,8 +161,26 @@ statistics. Ordering kept for symmetry; the false cause removed from the comment
 marker, so the row failed the parse and CC-107 vanished from every count — 3 red checks in one run.
 Proof: 105 suites / 1,553 tests, mutation 3 RED, `tsc` 0, probe green on real PG. Plan
 `PLAN-CC-107-bot-participant.md` §10.
-**▶ Remaining in `SR-07`: the idle-pruning exemption, and the participants POST body still accepts only a
-uuid, so adding an agent participant over HTTP is not yet reachable.**
+**▶ INCREMENT 2'S GAP WAS CLOSED AT `8c56428e` (20:03) — AND THAT IS WHERE THE SESSION WAS CUT OFF.** The
+participants POST body now accepts EITHER axis (`userId` uuid or `agentId` text, exactly one via a zod
+refine), the existence check is per-axis (`User` row for a human, `getAgent` for an agent), and the
+response and audit event name the axis (`userId`/`agentId` both, exactly one non-null; `participantAgentId`
+on the event). Proof: d2-gap-guard 34/34, mutation 3 RED, `tsc` 0. **NO DOCS PASS EXISTS FOR IT** — plan
+§10.5, `MASTER-CHECKLIST.md` §2 and the `CC-107` register row, and this file all still said "the POST body
+accepts only a uuid", which became FALSE at 20:03. That sentence is corrected here; the other three still
+carry it and are the first docs edit the next session owes.
+**▶ Remaining in `SR-07`: only the idle-pruning exemption (plan item 8).**
+**★ TWO RED TEST CLASSES FOUND BY THE INTERRUPTION AUDIT (2026-10-17, 20:1x) — neither caused by
+`8c56428e`, both real.** The full `packages/ai-assistant` run is **135 suites / 4 failed / 25 failed tests**
+— the "105 suites / 1,553" proof was a SUBSET and does not reproduce as a package-wide claim.
+(a) `data/__tests__/schema-unique-indexes.test.ts` — `6b78a0ac` flipped the user-axis read index to
+identity-first (`tenant, org, user, conversation`) for symmetry, and this test still asserts the old
+`(tenant, org, conversation, user)`; the ENTITY is the intended shape (§10.3), so the TEST is what is stale.
+(b) `chat-route-cancel-complete` / `chat-route-through-port` / `chat-route-ownership` — all fail
+`requirePrincipal is not a function` at `api/chat/route.ts:291`; the import arrived with `e8ecde6d`
+(CC-103) and the three suites' `jest.mock('@open-mercato/shared/lib/auth/server')` factories never
+learned it (files last touched `be3f6258`). **A route that imports a new guard needs every mock of that
+module updated; the "affected surface" list did not include them.**
 **▶ NEXT after `SR-07` = `CC-104`/`CC-106` (same trigger)
 → `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
 **→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.
