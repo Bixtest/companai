@@ -533,6 +533,91 @@ describe('ai_assistant conversation participants — the D2-gap guard is really 
     expect(arg.input.operation).toBe('custom')
     expect(storageMock.addParticipant).toHaveBeenCalled()
   })
+
+  // ── CC-107 — the machine axis over HTTP ─────────────────────────────────────
+  // An agent was never addressable before: the body required a uuid, and an agent
+  // id is TEXT (`business_ir.query_author` style), so no schema would have
+  // accepted it. `getAgent` is the REAL registry here, seeded above.
+  it('POST accepts an agentId and writes the agent axis with the caller as owner', async () => {
+    findOneWithDecryptionMock.mockResolvedValue(null)
+    // the success body reads userId/role/createdAt off the row — a partial mock
+    // throws on `.toISOString()` and surfaces as a 500, which is a test defect
+    // masquerading as a product one.
+    storageMock.addParticipant.mockResolvedValue({
+      id: 'p-agent',
+      agentId: AGENT_ID,
+      agentOwnerUserId: 'u-owner',
+      userId: null,
+      role: 'viewer',
+      createdAt: new Date('2026-10-17T00:00:00Z'),
+    })
+    const res = await participantsPost(
+      req('http://x/api/ai_assistant/ai/conversations/c-1/participants', 'POST', {
+        agentId: AGENT_ID,
+        role: 'viewer',
+      }) as any,
+      convCtx(),
+    )
+    expect(res.status).toBe(201)
+    await expect(res.json()).resolves.toMatchObject({
+      participant: { agentId: AGENT_ID, userId: null, role: 'viewer' },
+    })
+    // the caller is the human answerable for the agent participant
+    expect(storageMock.addParticipant).toHaveBeenCalledWith(
+      'c-1',
+      { agentId: AGENT_ID, agentOwnerUserId: expect.any(String) },
+      'viewer',
+      expect.objectContaining({ canManageConversations: expect.anything() }),
+    )
+    // and the human-axis User lookup is NOT consulted for an agent
+    expect(findOneWithDecryptionMock).not.toHaveBeenCalled()
+  })
+
+  it('POST refuses an agent that does not exist', async () => {
+    const res = await participantsPost(
+      req('http://x/api/ai_assistant/ai/conversations/c-1/participants', 'POST', {
+        agentId: 'no.such.agent',
+        role: 'viewer',
+      }) as any,
+      convCtx(),
+    )
+    expect(res.status).toBe(400)
+    await expect(res.json()).resolves.toMatchObject({ code: 'agent_not_found' })
+    expect(storageMock.addParticipant).not.toHaveBeenCalled()
+  })
+
+  it('POST refuses a body naming BOTH axes', async () => {
+    findOneWithDecryptionMock.mockResolvedValue({ id: validTarget })
+    const res = await participantsPost(
+      req('http://x/api/ai_assistant/ai/conversations/c-1/participants', 'POST', {
+        userId: validTarget,
+        agentId: AGENT_ID,
+        role: 'viewer',
+      }) as any,
+      convCtx(),
+    )
+    expect(res.status).toBe(400)
+    expect(storageMock.addParticipant).not.toHaveBeenCalled()
+  })
+
+  it('POST refuses a body naming NEITHER axis — by the identity guard, not a side effect', async () => {
+    const res = await participantsPost(
+      req('http://x/api/ai_assistant/ai/conversations/c-1/participants', 'POST', {
+        role: 'viewer',
+      }) as any,
+      convCtx(),
+    )
+    // Assert the CODE, not merely "some 400". This reaches the route's FIRST
+    // guard — the schema's `exactly one axis` refine — which is why the code is
+    // `validation_error` and not the repository's `invalid_participant`. That
+    // second guard is defence in depth and is proven directly in
+    // `AiChatConversationRepository.test.ts`; asserting the specific code is what
+    // makes this test fail if the refine is removed, instead of passing on a
+    // `user_not_found` coincidence.
+    expect(res.status).toBe(400)
+    await expect(res.json()).resolves.toMatchObject({ code: 'validation_error' })
+    expect(storageMock.addParticipant).not.toHaveBeenCalled()
+  })
 })
 
 // ============================================================================

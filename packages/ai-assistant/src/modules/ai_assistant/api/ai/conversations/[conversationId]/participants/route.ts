@@ -17,6 +17,11 @@ import {
   AiChatConversationDuplicateParticipantError,
 } from '../../../../../lib/conversation-storage'
 import { emitAiAssistantEvent } from '../../../../../events'
+import { getAgent } from '../../../../../lib/agent-registry'
+import {
+  AiChatConversationParticipantIdentityError,
+  type AiChatConversationParticipantIdentity,
+} from '../../../../../data/repositories/AiChatConversationRepository'
 
 const REQUIRED_FEATURE = 'ai_assistant.view'
 const MANAGE_CONVERSATIONS_FEATURE = 'ai_assistant.conversations.manage'
@@ -30,10 +35,26 @@ const conversationIdParamSchema = z.object({
     .max(128, 'conversationId exceeds the maximum length of 128 characters'),
 })
 
-const addParticipantBodySchema = z.object({
-  userId: z.string().uuid('userId must be a valid UUID'),
-  role: z.enum(['viewer']).default('viewer'),
-})
+/**
+ * `CC-107` — add a participant on EITHER axis.
+ *
+ * `userId` is the human axis and is unchanged, so existing callers keep working.
+ * `agentId` is the machine axis. Exactly one must be present: a row naming both
+ * would answer to two owners, and a row naming neither is unreachable by every
+ * predicate in the repository. The repository re-checks this at the boundary
+ * (`normalizeParticipantIdentity`) because the database CHECK is NOT VALID by
+ * design — this refine is the first of the two guards, not a substitute for it.
+ */
+const addParticipantBodySchema = z
+  .object({
+    userId: z.string().uuid('userId must be a valid UUID').optional(),
+    agentId: z.string().trim().min(1, 'agentId must be a non-empty string').max(160).optional(),
+    role: z.enum(['viewer']).default('viewer'),
+  })
+  .refine((value) => Boolean(value.userId) !== Boolean(value.agentId), {
+    message: 'Provide exactly one of userId (a person) or agentId (a machine).',
+    path: ['agentId'],
+  })
 
 export const openApi: OpenApiRouteDoc = {
   tag: 'AI Assistant',
@@ -199,7 +220,10 @@ export async function GET(req: NextRequest, context: RouteContext): Promise<Resp
     return NextResponse.json({
       ownerUserId: conversation.ownerUserId,
       participants: participants.map((p) => ({
-        userId: p.userId,
+        // `CC-107` — both axes, so an agent member is visible as what it is
+        // rather than as a row with a null user.
+        userId: p.userId ?? null,
+        agentId: p.agentId ?? null,
         role: p.role,
         lastReadAt: p.lastReadAt ? p.lastReadAt.toISOString() : null,
         addedAt: p.createdAt.toISOString(),
@@ -257,32 +281,49 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
   }
 
   const targetUserId = parseResult.data.userId
-  if (targetUserId === callerCtx.userId) {
+  const targetAgentId = parseResult.data.agentId
+
+  // The human axis is unchanged: a person must exist as a User row in the same
+  // tenant/org. An agent is not a User row — that is the whole point of the second
+  // axis — so its existence is proved against the agent registry instead, and its
+  // owner is the caller (the only person who can authorise it).
+  const identity: AiChatConversationParticipantIdentity = targetAgentId
+    ? { agentId: targetAgentId, agentOwnerUserId: callerCtx.userId }
+    : { userId: targetUserId! }
+
+  if (targetUserId && targetUserId === callerCtx.userId) {
     return jsonError(400, 'Cannot share a conversation with yourself.', 'self_share_not_allowed')
   }
 
   try {
     const container = await createRequestContainer()
     const em = container.resolve<EntityManager>('em')
-    const targetUserFilter: FilterQuery<User> = {
-      id: targetUserId,
-      tenantId: callerCtx.tenantId,
-      deletedAt: null,
-      ...(callerCtx.organizationId ? { organizationId: callerCtx.organizationId } : {}),
-    }
-    const targetUser = await findOneWithDecryption<User>(
-      em,
-      User,
-      targetUserFilter,
-      {},
-      { tenantId: callerCtx.tenantId, organizationId: callerCtx.organizationId },
-    )
-    if (!targetUser) {
-      return jsonError(
-        400,
-        'Target user must be a staff user in the same tenant and organization.',
-        'user_not_found',
+
+    if (targetAgentId) {
+      if (!getAgent(targetAgentId)) {
+        return jsonError(400, 'Target agent does not exist.', 'agent_not_found')
+      }
+    } else {
+      const targetUserFilter: FilterQuery<User> = {
+        id: targetUserId,
+        tenantId: callerCtx.tenantId,
+        deletedAt: null,
+        ...(callerCtx.organizationId ? { organizationId: callerCtx.organizationId } : {}),
+      }
+      const targetUser = await findOneWithDecryption<User>(
+        em,
+        User,
+        targetUserFilter,
+        {},
+        { tenantId: callerCtx.tenantId, organizationId: callerCtx.organizationId },
       )
+      if (!targetUser) {
+        return jsonError(
+          400,
+          'Target user must be a staff user in the same tenant and organization.',
+          'user_not_found',
+        )
+      }
     }
 
     const repo = createConversationStorage(container)
@@ -302,7 +343,7 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
 
     const participant = await repo.addParticipant(
       callerCtx.conversationId,
-      { userId: targetUserId },
+      identity,
       parseResult.data.role,
       {
         tenantId: callerCtx.tenantId,
@@ -319,7 +360,11 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
           tenantId: callerCtx.tenantId,
           organizationId: callerCtx.organizationId,
           ownerUserId: callerCtx.userId,
-          participantUserId: participant.userId,
+          // `CC-107` — name the axis that was written. An agent participant has a
+          // null user_id, so a `participantUserId: null` event says nothing about
+          // who was actually granted access.
+          participantUserId: participant.userId ?? null,
+          participantAgentId: participant.agentId ?? null,
           role: participant.role,
         },
         { persistent: false },
@@ -331,7 +376,10 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     return NextResponse.json(
       {
         participant: {
-          userId: participant.userId,
+          // `CC-107` — exactly one of these is non-null, and both are always
+          // present, so a caller can tell which axis was written without sniffing.
+          userId: participant.userId ?? null,
+          agentId: participant.agentId ?? null,
           role: participant.role,
           lastReadAt: participant.lastReadAt ? participant.lastReadAt.toISOString() : null,
           addedAt: participant.createdAt.toISOString(),
@@ -348,6 +396,13 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     }
     if (err instanceof Error && err.message.toLowerCase().includes('owner')) {
       return jsonError(403, err.message, 'forbidden')
+    }
+    // `CC-107` — a malformed identity is a CALLER error, not an internal one. Left
+    // unmapped it surfaced as 500, which hid the second guard behind a generic
+    // failure and let the "neither axis" test pass for the wrong reason (it was
+    // actually getting user_not_found).
+    if (err instanceof AiChatConversationParticipantIdentityError) {
+      return jsonError(400, err.message, 'invalid_participant')
     }
     return jsonError(500, 'Internal server error.', 'internal_error')
   }
