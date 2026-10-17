@@ -7,6 +7,13 @@
  *
  * Two mutations, one per ENFORCING step. Each is restored byte-identical.
  *
+ * CC-117 adds a THIRD case with `mode: 'report'`, and the distinction is the point: an enforcing
+ * step must fail on broken input *and CI carries that failure*; a report step deliberately cannot
+ * fail, so the only honest thing to prove about it is that **the checker still detects** — that the
+ * number it publishes every run is a real number and not a hard-coded zero. Saying "the wiring
+ * carries the failure through" about a report step would be exactly the defect this project keeps
+ * finding: a claim stronger than the code.
+ *
  * WHAT THE FIRST DRAFT GOT WRONG, and why proof earned its keep: the first SR-38 mutation flipped a
  * twin's VALUE (`locked: 'A0'` -> `'A1'`) and the checker stayed GREEN. That is not a bug — the
  * checker regexes for a `satisfies` clause (check-digital-twins.mjs:96) and never looks at values;
@@ -55,9 +62,25 @@ const cases = [
     },
     script: ['scripts/check-one-truth.mjs'],
   },
+  {
+    // CC-117 — wired as a REPORT step (ci.yml), so this proves DETECTION, not gating: the checker
+    // must notice a new backend page root that is a client component. The file is a backend
+    // `page.tsx` that is not currently a client component, so the mutation creates the exact
+    // condition the checker owns.
+    mode: 'report',
+    req: 'CC-117',
+    file: 'packages/ai-assistant/src/modules/ai_assistant/backend/config/ai-assistant/agents/page.tsx',
+    name: 'add a top-level "use client" to a backend page root — the condition the checker owns',
+    apply: (s) => {
+      if (/^\s*["']use client["']/.test(s)) throw new Error('file is already a client component')
+      return '"use client"\n' + s
+    },
+    script: ['scripts/check-client-boundaries.mjs', '--fail'],
+  },
 ]
 
 let allRed = true
+let reportCount = 0
 for (const c of cases) {
   const p = path.join(ROOT, c.file)
   const orig = fs.readFileSync(p, 'utf8')
@@ -69,10 +92,21 @@ for (const c of cases) {
   const restored = fs.readFileSync(p, 'utf8') === orig
   const red = code === 1 && restored
   if (!red) allRed = false
-  console.log((red ? 'RED   ' : 'GREEN ') + c.req + ' — ' + c.name + '  (exit ' + code + (restored ? ', restored byte-identical' : ', NOT RESTORED') + ')')
+  const isReport = c.mode === 'report'
+  if (isReport) reportCount++
+  console.log(
+    (red ? 'RED   ' : 'GREEN ') + c.req + ' — ' + c.name +
+    (isReport ? '  [report step: proves detection, not gating]' : '') +
+    '  (exit ' + code + (restored ? ', restored byte-identical' : ', NOT RESTORED') + ')',
+  )
 }
 console.log('')
-console.log(allRed
-  ? 'PASS — every enforcing CI step fails on broken input; the wiring carries the failure through.'
-  : 'FAIL — an enforcing step stayed green on broken input; the wiring carries no failure.')
+if (allRed) {
+  const enforcing = cases.length - reportCount
+  console.log('PASS — ' + enforcing + ' enforcing CI step(s) fail on broken input, so the wiring carries the failure through;')
+  console.log('       ' + reportCount + ' report step(s) detect their condition but do NOT gate — their checkers are live, CI is not.')
+  console.log('       The two claims are different on purpose; do not read the second as the first.')
+} else {
+  console.log('FAIL — a step stayed green on input it exists to catch: the wiring carries no failure, or a report step publishes a number it does not measure.')
+}
 process.exit(allRed ? 0 : 1)

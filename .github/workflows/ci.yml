@@ -564,6 +564,19 @@ jobs:
       - name: Report escape hatches (SR-41 — report only, not yet enforcing)
         run: yarn check:escape-hatches
 
+      # CC-117 — client boundaries: a backend page root should not be a client component, and a
+      # client page root should not grow past 300 LOC.
+      # REPORT-ONLY, and the measurement is why: run with `--fail` today it exits 1 — 174 backend
+      # page roots carry a top-level "use client", 74 client page roots are over 300 LOC, and the
+      # allowlist the gate depends on (`.ai/client-boundary-allowlist.json`) DOES NOT EXIST, so every
+      # backend page root is "unallowlisted" by definition and the gate can never pass. Wiring
+      # `:fail` here would ship a permanently red build — the failure mode this file exists to avoid.
+      # The number is published every run; turning it into a gate is CC-118 (allowlist + ratchet,
+      # the SR-40 precedent), and `prove-ci-wiring.mjs` proves the checker still detects a violation
+      # even though this step does not gate on one.
+      - name: Report client boundaries (CC-117 — report only, not yet enforcing)
+        run: yarn check:client-boundaries
+
       - name: Check agent instruction budget
         # The root AGENTS.md must fit Codex's default 32 KiB project-instruction budget,
         # and the already-oversized root-to-module chains may only shrink (#4484).
