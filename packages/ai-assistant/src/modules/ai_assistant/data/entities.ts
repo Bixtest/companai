@@ -1079,10 +1079,16 @@ export class AiAgentBinding {
  * the schema cannot drift silently; `schema-unique-indexes.test.ts` asserts they
  * match.
  *
- * **No `status` / `last_seen_at`.** Liveness needs a heartbeat writer and this
- * codebase has no probe that beats one; a column claiming "online" that nothing
- * sets is the same defect this object exists to remove — a declaration nothing
- * reads — pointed the other way. They land with the probe (see the migration).
+ * **`last_seen_at`, and still no `status`.** Slice 1 withheld both and said they
+ * would *"land with the probe"*; `CC-102` is the probe — `touch()` writes this
+ * column and `ai:runtime:touch` calls it. `status` stays refused, and the refusal
+ * is not a postponement: a timestamp answers *"when did this machine last speak"*,
+ * which is a fact; `status` answers *"is it online"*, which is a **verdict** and
+ * needs a sweeper to keep it true. The fact is taken; the verdict is not.
+ *
+ * **`legacy_daemon_id`** records the previous identity after a rename, so an audit
+ * can follow the machine instead of finding two rows (`CC-102`, the donor's
+ * `048_runtime_daemon_uuid.up.sql:1-6`).
  *
  * **Not `AiAgentRuntimeOverride`** (line 254). That is per-tenant provider/model/
  * baseURL *configuration*; this is an *instance*. A setting says which model a
@@ -1110,7 +1116,14 @@ export class AiAgentBinding {
     'create unique index "ai_agent_runtimes_tenant_name_null_org_uq" on "ai_agent_runtimes" ("tenant_id", "name") where "organization_id" is null and "deleted_at" is null',
 })
 export class AiAgentRuntime {
-  [OptionalProps]?: 'organizationId' | 'metadata' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  [OptionalProps]?:
+    | 'organizationId'
+    | 'metadata'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'deletedAt'
+    | 'lastSeenAt'
+    | 'legacyDaemonId'
 
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
@@ -1149,6 +1162,21 @@ export class AiAgentRuntime {
 
   @Property({ name: 'metadata', type: 'jsonb', default: '{}' })
   metadata: Record<string, unknown> = {}
+
+  /**
+   * When this runtime last spoke — written by `touch()`, never by a read.
+   *
+   * Nullable on purpose: a row registered and never heard from has **no**
+   * heartbeat, and defaulting it to `now()` would claim one. Null means "we have
+   * never heard from it since registration", which is a different and more honest
+   * statement than "it is online".
+   */
+  @Property({ name: 'last_seen_at', type: Date, nullable: true })
+  lastSeenAt?: Date | null
+
+  /** The identity this row carried before a rename (`CC-102`, donor `048`). */
+  @Property({ name: 'legacy_daemon_id', type: 'text', nullable: true })
+  legacyDaemonId?: string | null
 
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()

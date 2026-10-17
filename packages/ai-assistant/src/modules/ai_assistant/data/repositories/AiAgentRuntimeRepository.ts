@@ -57,6 +57,50 @@ export class AiAgentRuntimeProviderError extends Error {
   }
 }
 
+/**
+ * A binding name resolves to more than one live runtime the caller can see.
+ *
+ * `CC-102` made this reachable: an org-scoped caller now sees its own rows **and**
+ * the tenant-level ones, and the two partial unique indexes allow a tenant-level
+ * `primary` and an org-level `primary` to coexist legally. Returning either would
+ * be the silent choice `resolveTenantRuntime` refuses, so the read refuses too.
+ */
+export class AiAgentRuntimeAmbiguousNameError extends Error {
+  override readonly name = 'AiAgentRuntimeAmbiguousNameError'
+  constructor(
+    readonly tenantId: string,
+    readonly binding: string,
+    readonly runtimeIds: string[],
+  ) {
+    super(
+      `The binding name "${binding}" matches ${runtimeIds.length} live runtimes in tenant ` +
+        `"${tenantId}" (${runtimeIds.join(', ')}). Refusing to choose one: retire the duplicate, ` +
+        'or give the organization-level runtime its own name.',
+    )
+  }
+}
+
+/**
+ * The rows a caller may see: its own organization's **and** the tenant-level ones.
+ *
+ * The house nullable-`org_id` rule. A caller with no organization sees only the
+ * tenant-level rows — the scope it actually acts in.
+ *
+ * Typed as a concrete union rather than `FilterQuery` so it can be **spread** into
+ * the surrounding filter; `FilterQuery` is an intersection type and TypeScript
+ * refuses to spread it (`TS2698`).
+ */
+type OrganizationScope =
+  | { organizationId: null }
+  | { $or: Array<{ organizationId: string } | { organizationId: null }> }
+
+function organizationScope(ctx: AiAgentRuntimeContext): OrganizationScope {
+  if (!ctx.organizationId) return { organizationId: null }
+  return {
+    $or: [{ organizationId: ctx.organizationId }, { organizationId: null }],
+  }
+}
+
 export interface AiAgentRuntimeContext {
   tenantId: string
   organizationId?: string | null
@@ -160,14 +204,25 @@ function parseDetailColumns(detail: string | undefined): string[] | undefined {
 export class AiAgentRuntimeRepository {
   constructor(private readonly em: EntityManager) {}
 
-  /** Every live runtime in the tenant (optionally the organization), oldest first. */
+  /**
+   * Every live runtime the caller can see, oldest first.
+   *
+   * ★ `CC-102` — an org-scoped caller must also see the **tenant-level** row.
+   * The filter used to match `organization_id` exactly, so a runtime registered
+   * with no organization (the tenant's own machine) was invisible to every caller
+   * inside an organization — and an empty result is not "no answer" here: it sends
+   * `resolve-ai-runtime-port` to the deployment-wide environment default, which is
+   * the fallback the registry's own docblock forbids (*"Deliberately not a
+   * fallback"*). The house rule is the nullable-`org_id` one: a tenant-level row
+   * belongs to the whole tenant.
+   */
   async listActive(ctx: AiAgentRuntimeContext): Promise<AiAgentRuntime[]> {
     if (!ctx?.tenantId) return []
     return this.em.find(
       AiAgentRuntime,
       {
         tenantId: ctx.tenantId,
-        organizationId: ctx.organizationId ?? null,
+        ...organizationScope(ctx),
         deletedAt: null,
       } satisfies FilterQuery<AiAgentRuntime>,
       { orderBy: { createdAt: 'ASC' } },
@@ -180,19 +235,30 @@ export class AiAgentRuntimeRepository {
    * `null` when no live runtime answers to that name — and the caller **must**
    * treat that as a refusal, not as "use the default". A silent fallback is how an
    * agent ends up on a machine nobody registered.
+   *
+   * ★ `CC-102` — widened like `listActive`, which makes **two** visible rows
+   * possible: a tenant-level `primary` and an org-level `primary` are both legal
+   * under the two partial unique indexes. Returning the first one would be the
+   * silent choice this module exists to refuse, so more than one match throws.
    */
   async findByBindingName(
     name: string,
     ctx: AiAgentRuntimeContext,
   ): Promise<AiAgentRuntime | null> {
     if (!ctx?.tenantId || !name) return null
-    const row = await this.em.findOne(AiAgentRuntime, {
+    const rows = await this.em.find(AiAgentRuntime, {
       tenantId: ctx.tenantId,
-      organizationId: ctx.organizationId ?? null,
+      ...organizationScope(ctx),
       name,
       deletedAt: null,
     } satisfies FilterQuery<AiAgentRuntime>)
-    return row ?? null
+    if (rows.length === 0) return null
+    if (rows.length === 1) return rows[0]
+    throw new AiAgentRuntimeAmbiguousNameError(
+      ctx.tenantId,
+      name,
+      rows.map((row) => row.id),
+    )
   }
 
   /**

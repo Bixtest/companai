@@ -33,6 +33,9 @@ function makeEm(options: {
 } = {}) {
   const calls = { find: 0, findOne: 0, create: 0, flush: 0, transactional: 0 }
   const created: Record<string, unknown>[] = []
+  // `CC-102` — the scope filter is the assertion: a widened query is a claim
+  // about which rows a caller may see, and it must be read, not assumed.
+  const filters: Record<string, unknown>[] = []
 
   const tx: FakeTx = {
     create: (_entity, data) => {
@@ -54,17 +57,19 @@ function makeEm(options: {
       calls.transactional += 1
       return cb(tx)
     },
-    find: async () => {
+    find: async (_entity: unknown, filter: Record<string, unknown>) => {
       calls.find += 1
+      filters.push(filter)
       return options.findResult ?? []
     },
-    findOne: async () => {
+    findOne: async (_entity: unknown, filter: Record<string, unknown>) => {
       calls.findOne += 1
+      filters.push(filter)
       return options.findOneResult ?? null
     },
   }
 
-  return { em: em as unknown as EntityManager, calls, created }
+  return { em: em as unknown as EntityManager, calls, created, filters }
 }
 
 const pgUniqueViolation = (constraint: string) =>
@@ -275,5 +280,45 @@ describe('SR-02 — AiAgentRuntimeRepository reads', () => {
     expect(await repo.listActive({ tenantId: '' })).toEqual([])
     expect(calls.findOne).toBe(0)
     expect(calls.find).toBe(0)
+  })
+})
+
+// ── CC-102 — the null-org visibility rule, and the ambiguity it creates ────────
+describe('CC-102 — a caller sees its organization AND the tenant-level runtimes', () => {
+  it('widens an org-scoped read to include organization_id IS NULL', async () => {
+    const { em, filters } = makeEm({ findResult: [] })
+    const repo = new AiAgentRuntimeRepository(em)
+    await repo.listActive({ tenantId: 'tenant-1', organizationId: 'org-1' })
+
+    // Before CC-102 this filter was `organizationId: 'org-1'` — an exact match, so
+    // a runtime registered with no organization was invisible to every caller
+    // inside an organization, and the empty result sent the caller to the
+    // deployment-wide environment default.
+    expect(filters[0]).toMatchObject({
+      tenantId: 'tenant-1',
+      deletedAt: null,
+      $or: [{ organizationId: 'org-1' }, { organizationId: null }],
+    })
+  })
+
+  it('keeps a tenant-less-org caller to the tenant-level rows', async () => {
+    const { em, filters } = makeEm({ findResult: [] })
+    const repo = new AiAgentRuntimeRepository(em)
+    await repo.listActive({ tenantId: 'tenant-1', organizationId: null })
+    expect(filters[0]).toMatchObject({ organizationId: null })
+    expect(filters[0].$or).toBeUndefined()
+  })
+
+  it('REFUSES a binding name that now matches two visible runtimes', async () => {
+    // Legal under the two partial unique indexes: a tenant-level `primary` and an
+    // org-level `primary`. Returning the first would be the silent choice this
+    // module exists to refuse.
+    const { em } = makeEm({
+      findResult: [{ id: 'rt-tenant', name: 'primary' }, { id: 'rt-org', name: 'primary' }],
+    })
+    const repo = new AiAgentRuntimeRepository(em)
+    await expect(
+      repo.findByBindingName('primary', { tenantId: 'tenant-1', organizationId: 'org-1' }),
+    ).rejects.toThrow(/matches 2 live runtimes/)
   })
 })
