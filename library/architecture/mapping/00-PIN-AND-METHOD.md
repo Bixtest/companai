@@ -110,6 +110,41 @@ Both changed the schema.
 
 ---
 
+## 4.2 The chain rule — investigate the PRODUCER, not only the consumer
+
+*(Owner, 2026-10-17, after `CC-103`. This is the reassurance the 4.1 rule needed: 4.1 says read the
+donor's code; this says read the whole chain of your OWN code before concluding anything.)*
+
+A control is only as good as the things that can **exist** in the state it checks. Reviewing it by
+walking its **callers** answers *"who can reach this"*; it does not answer *"what can exist"*. Both are
+needed, and the second is the one that gets skipped, because a gate reads as complete on its own.
+
+**Four questions, in this order, before any conclusion about a control:**
+
+1. **Who CREATES the thing the control examines?** The factory. If the creator cannot produce the kind
+   the control requires, the control can never pass — and no amount of caller-tracing will show it.
+2. **Who CHECKS it?** The gate, read at the line, not the docblock.
+3. **Who CONSUMES the answer, and what do they do with it?** A decision computed and discarded is a
+   defect site (`L179`).
+4. **Who DELETES or changes it, and does that invalidate every cache of it?** A cache keyed by an
+   identity string must be invalidated with **the same** string (`L180`).
+
+**"Done" means all four were read.** Not three, not the ones the bug report named.
+
+**The evidence, kept because it is specific.** `CC-103` fixed the agent-binding gate, then a hostile
+critic walked every caller of the resolver and found two more holes — and **still missed that
+`CreateApiKeyInput` had no `principalKind` field**, so the one function that mints every API key could
+only produce `service` keys, including for both MCP creators. The gate was correct, the factory was
+correct, and **nobody could ask for the right kind**. The gate was read three times that day; the factory
+was read zero times. The owner found it by asking one plain question.
+
+**And the fifth rule, which is a review step and not a courtesy: explain the change in plain words
+before closing it.** *"A service key can no longer run an agent"* immediately raises *"which keys are
+service keys, and who makes them?"* — a question a mechanism's name lets you avoid. Every closing
+report gets one paragraph written for a non-developer, and that paragraph is read back as a question.
+
+---
+
 ## 5. Inputs
 
 - **Nine platform digests** — one per closed study, extractive, file-cited, contradictions

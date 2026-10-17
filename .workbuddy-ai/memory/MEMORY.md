@@ -13,6 +13,17 @@ Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1. Three step
 3. **Ask the enrichment question explicitly, in both directions, then proceed:** in that code's *structure, concepts, naming, invariants, constraints, error handling, migration discipline, tests* — what **improves, adds value, enriches, secures, or optimizes** the plan? **HARVEST** what is better (a constraint, a partial index, a state machine, a naming rule that makes a bug unrepresentable, a test). **REFUSE, by name, and say why** what is worse — a donor defect copied because it was there is the most expensive kind of fidelity. Record both in the discharge record.
 **Worked example (`SR-02`):** the digest gave the requirement; reading Multica's migration/entity code added the nullable-`daemon_id` defect (refused → `NOT NULL`) and the unconstrained `name` (harvested → its own partial unique index). Neither was in the digest; both changed the schema.
 
+## ★ THE CHAIN RULE — before concluding anything about a control (owner, 2026-10-17)
+Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.2; lesson `L180`.
+Read **all four**, not the one the bug report named: **who CREATES** the thing the control examines ·
+**who CHECKS** it · **who CONSUMES** the answer · **who DELETES** it and whether that invalidates every
+cache of it. **A gate is only as good as what can EXIST in the state it checks.** `CC-103`'s gate was
+read three times in one day (me, a hostile critic, the register) and the credential factory **zero**
+times — so the product could not mint the kind of key the gate required, and its own MCP setup would
+have been locked out. **And explain every change in plain words before closing it: that paragraph is a
+review step, not a courtesy** — the owner's one-sentence question found two defects a purpose-built
+hostile critic missed.
+
 ## ★ WHAT THE GLYPHS MEAN (owner ruling, 2026-10-17) — apply before re-grading anything
 **✅ = the code for that row is fully done. 🟡 = some of the row's tasks are done, some are not.**
 Nothing else. **"Not committed to a remote" and "no runner has called it yet" are NOT 🟡 reasons** —
