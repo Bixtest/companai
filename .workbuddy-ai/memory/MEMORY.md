@@ -169,7 +169,19 @@ on the event). Proof: d2-gap-guard 34/34, mutation 3 RED, `tsc` 0. **NO DOCS PAS
 §10.5, `MASTER-CHECKLIST.md` §2 and the `CC-107` register row, and this file all still said "the POST body
 accepts only a uuid", which became FALSE at 20:03. That sentence is corrected here; the other three still
 carry it and are the first docs edit the next session owes.
-**▶ Remaining in `SR-07`: only the idle-pruning exemption (plan item 8).**
+**▶ Remaining in `SR-07`: the idle-pruning rule (item 8), plus two test gaps — and item 8 is NOT code.**
+**No participant pruning exists anywhere in the repo** (only run-registry pruning and OpenCode session-idle
+detection), so item 8 is a RULE to record for whoever builds pruning, not a pending change. The two real
+gaps: `GET /participants`' agent serialisation is untested (the four new tests are POST-only), and
+`canAccessConversation` with an agent caller (`ctx.agentId`) is untested — an agent participant can be
+written but nothing proves it can READ. Also noted, not a defect: `getAgent` is a global registry lookup
+(`agentsById.get`), not tenant-scoped — existence is proven, "enabled for this tenant" is not.
+**★ THE "ONLY ID" FLAW WAS FOUND AND FIXED IN `8c56428e` — traced to the previous agent's own thread.** It
+had two layers: a test mock returned only `{ id }` (a 500, fixed in the mock), and the real one — the POST
+response and audit event reported only `userId`, which is NULL for an agent, so a grant said nothing about
+which machine got access. Now the response carries `userId` + `agentId` (both, exactly one non-null), the
+event carries `participantAgentId`, and the GET list serialises both. The revoke route keeps
+`participant: "<axis>:<id>"` deliberately.
 **★ TWO RED TEST CLASSES FOUND BY THE INTERRUPTION AUDIT (2026-10-17, 20:1x) — neither caused by
 `8c56428e`, both real.** The full `packages/ai-assistant` run is **135 suites / 4 failed / 25 failed tests**
 — the "105 suites / 1,553" proof was a SUBSET and does not reproduce as a package-wide claim.
