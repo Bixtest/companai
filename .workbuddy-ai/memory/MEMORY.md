@@ -60,10 +60,21 @@ at `ci.yml:533`, proven); `SR-39`/`SR-41`/`SR-46` stay 🟡 for measured reasons
 **★ My own error, twice the same shape:** I reported "14/14 mutations RED" from `tail`'s exit code, not
 the suite's — two mutations (M3/M14) had gone stale pinning the pre-CC-116 counts. Fixed and re-proven
 with the exit status captured directly. **Never read `$?` through a pipe.**
-**▶ NEXT = `CC-117`** (wire `check:client-boundaries` — closes `CC-101`'s class) **→ `CC-103`** (the
-binding gate that fails open for every `service` principal — a security hole the register says should
-not wait) **→ `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a stable `daemon_id`,
-the `last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency proof = two
-concurrent retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant engine
-home, the fix for open `CC-84`) **→ `P2-9b`.**
+**LAST DONE (code+docs, 2026-10-17) = `CC-117` closed, `CC-118` opened, `7851fc39` + `308234c`.** The
+eighth `check:*` checker is now called — `check:client-boundaries`, as a **REPORT** step, because
+`--fail` exits **1** today: **174** backend page roots carry a top-level `"use client"`, **74** client
+page roots exceed 300 LOC, and `.ai/client-boundary-allowlist.json` **does not exist**, so every
+backend page root is unallowlisted *by construction* — the gate is unreachable, not strict. All **eight**
+checkers now have a caller. `prove-ci-wiring.mjs` gained a `mode: 'report'` case that proves the checker
+**detects** while saying plainly that CI does **not gate** — two different claims, stated separately.
+`CC-118` = seed the allowlist with a **ratchet that may only shrink** (the `agents-md-budget.baseline.json`
+precedent), never a blanket allowlist (that is the whole-directory exclusion the donor refuted in `CC-110`).
+**★ M3/M14 went stale a THIRD time, so they were fixed at the cause:** both now regex the line and
+**decrement whatever it says**, so they cannot rot; verified against today's 61/56/117 and a hypothetical
+70/50/120.
+**▶ NEXT = `CC-103`** (the binding gate that fails open for every `service` principal — a security hole
+the register says should not wait) **→ `CC-102`** (`SR-02` slice 2: `retire()`, the registration upsert, a
+stable `daemon_id`, the `last_seen_at` writer, null-org visibility, the unbind/CHECK redesign; concurrency
+proof = two concurrent retires) **+ `SR-07`** (a bot is a participant, `CC-107`) **→ `SR-12`** (per-tenant
+engine home, the fix for open `CC-84`) **→ `P2-9b`.**
 Owner decided: **core architecture first — business modules generated from the core workspace.**
