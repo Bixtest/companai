@@ -4,6 +4,7 @@ import type { UIMessage } from 'ai'
 import { z } from 'zod'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { effectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { llmProviderRegistry } from '@open-mercato/shared/lib/ai/llm-provider-registry'
@@ -511,6 +512,38 @@ export async function POST(req: NextRequest): Promise<Response> {
     })
   }
 
+  // ── `CC-107` §3.1 — resolve the PERSON this request writes rows for, ONCE ────
+  //
+  // `auth.sub` is a SUBJECT STRING, not a user id. A human's is a uuid, but a
+  // key-backed principal's is `api_key:<id>` or `ai_worker:<id>`
+  // (`packages/shared/src/lib/auth/principal.ts:73-79`). Three sites below
+  // passed it straight into contexts that end in `user_id` — a uuid column — so
+  // every API-key caller hit `22P02 invalid input syntax for type uuid` from
+  // Postgres on the first persisted turn. Proven on a real PostgreSQL 16
+  // (probe P1/P2, committed with this change). `effectiveUserId()` is the
+  // helper written for exactly this, whose own docblock warns that *"using a key
+  // id where a user id is expected silently writes rows nobody can read back"* —
+  // and it was called ZERO times in this file.
+  //
+  // `null` means a machine acting for nobody. Refusing is the honest answer:
+  // what this replaces was a database error, and the option beyond that —
+  // falling back to the key's own id — writes a participant row nobody can read
+  // back. A machine that wants to own a conversation needs `SR-07`, and until
+  // then it must name the person it acts for.
+  //
+  // The two call sites deliberately LEFT on `auth.sub`: `checkAiChatRateLimit`
+  // and `rbacService.loadAcl` are keyed by SUBJECT, not by user id. Do not
+  // "fix" them the other way.
+  const actingUserId = effectiveUserId(auth)
+  if (!actingUserId) {
+    return jsonError(
+      422,
+      'This credential acts for no person. A conversation is written for a person: ' +
+        'name the acting user on the key, or call as a user.',
+      'ai_acting_user_required',
+    )
+  }
+
   try {
     await loadAgentRegistry()
 
@@ -735,7 +768,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         container,
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,
-        userId: auth.sub,
+        userId: actingUserId,
         agentId,
         conversationId: effectiveConversationId,
         pageContext: bodyResult.data.pageContext,
@@ -763,7 +796,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       authContext: {
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,
-        userId: auth.sub,
+        userId: actingUserId,
         features: acl.features,
         isSuperAdmin: acl.isSuperAdmin,
         // S-02: the person this machine actor acts for (auth.userId; undefined for a person).
@@ -826,7 +859,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       container,
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId ?? null,
-      userId: auth.sub,
+      userId: actingUserId,
       conversationId: persistedTurn?.conversationId ?? conversationId,
       userClientMessageId: persistedTurn?.userClientMessageId ?? null,
       closeRun: async (outcome) => {

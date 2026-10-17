@@ -90,4 +90,57 @@ describe('GET /api/ai/conversations', () => {
       expect.any(Object),
     )
   })
+
+  // ── CC-107 §3.1 ────────────────────────────────────────────────────────────
+  // `auth.sub` is a SUBJECT STRING, not a user id. Passing it into the storage
+  // context put it in `user_id` — a uuid column — so every key-backed caller
+  // got `22P02 invalid input syntax for type uuid` from Postgres on the first
+  // write (proven on a real PostgreSQL 16; probe committed with the fix).
+  // `effectiveUserId` resolves the person; `onBehalfOfUserId` is what a machine
+  // key names when it acts for somebody.
+  describe('a key-backed principal', () => {
+    it('is refused with a named code when it acts for nobody', async () => {
+      authMock.mockResolvedValue({
+        sub: 'ai_worker:key-1',
+        keyId: 'key-1',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await GET(buildRequest() as any)
+      expect(response.status).toBe(422)
+      await expect(response.json()).resolves.toMatchObject({ code: 'ai_acting_user_required' })
+      expect(listConversationsMock).not.toHaveBeenCalled()
+    })
+
+    it('is refused the same way for a plain service key', async () => {
+      authMock.mockResolvedValue({
+        sub: 'api_key:key-2',
+        keyId: 'key-2',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await GET(buildRequest() as any)
+      expect(response.status).toBe(422)
+      expect(listConversationsMock).not.toHaveBeenCalled()
+    })
+
+    it('writes rows for the person it acts for — never for the subject string', async () => {
+      authMock.mockResolvedValue({
+        sub: 'ai_worker:key-3',
+        keyId: 'key-3',
+        userId: 'person-on-behalf',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await GET(buildRequest() as any)
+      expect(response.status).toBe(200)
+      expect(listConversationsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'person-on-behalf' }),
+        expect.any(Object),
+      )
+    })
+  })
 })

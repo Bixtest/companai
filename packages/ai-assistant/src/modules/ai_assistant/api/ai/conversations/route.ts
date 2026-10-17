@@ -2,6 +2,7 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { effectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import {
@@ -93,6 +94,7 @@ async function loadCallerContext(req: NextRequest): Promise<
   | { kind: 'unauthorized' }
   | { kind: 'forbidden' }
   | { kind: 'missing-tenant' }
+  | { kind: 'no-acting-user' }
   | {
       kind: 'ok'
       tenantId: string
@@ -121,11 +123,19 @@ async function loadCallerContext(req: NextRequest): Promise<
   if (!auth.tenantId) {
     return { kind: 'missing-tenant' }
   }
+  // `CC-107` §3.1 — the same defect as the chat route: `auth.sub` is a SUBJECT
+  // STRING (`api_key:<id>` / `ai_worker:<id>` for key-backed principals), and
+  // every handler below feeds it into contexts ending in `user_id`, a uuid
+  // column. Proven on a real PostgreSQL 16. Resolve the person ONCE, here.
+  const actingUserId = effectiveUserId(auth)
+  if (!actingUserId) {
+    return { kind: 'no-acting-user' }
+  }
   return {
     kind: 'ok',
     tenantId: auth.tenantId,
     organizationId: auth.orgId ?? null,
-    userId: auth.sub,
+    userId: actingUserId,
     canManageConversations,
   }
 }
@@ -135,6 +145,14 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (callerCtx.kind === 'unauthorized') return jsonError(401, 'Unauthorized', 'unauthenticated')
   if (callerCtx.kind === 'forbidden') {
     return jsonError(403, `Caller lacks required feature "${REQUIRED_FEATURE}".`, 'forbidden')
+  }
+  if (callerCtx.kind === 'no-acting-user') {
+    return jsonError(
+      422,
+      'This credential acts for no person. A conversation is written for a person: ' +
+        'name the acting user on the key, or call as a user.',
+      'ai_acting_user_required',
+    )
   }
   if (callerCtx.kind === 'missing-tenant') {
     return NextResponse.json({ items: [], nextCursor: null })
@@ -189,6 +207,14 @@ export async function POST(req: NextRequest): Promise<Response> {
   if (callerCtx.kind === 'unauthorized') return jsonError(401, 'Unauthorized', 'unauthenticated')
   if (callerCtx.kind === 'forbidden') {
     return jsonError(403, `Caller lacks required feature "${REQUIRED_FEATURE}".`, 'forbidden')
+  }
+  if (callerCtx.kind === 'no-acting-user') {
+    return jsonError(
+      422,
+      'This credential acts for no person. A conversation is written for a person: ' +
+        'name the acting user on the key, or call as a user.',
+      'ai_acting_user_required',
+    )
   }
   if (callerCtx.kind === 'missing-tenant') {
     return jsonError(400, 'Caller is not bound to a tenant.', 'tenant_required')

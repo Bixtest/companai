@@ -889,4 +889,96 @@ describe('POST /api/ai/chat', () => {
       expect(response.status).toBe(200)
     })
   })
+
+  // ── CC-107 §3.1 ────────────────────────────────────────────────────────────
+  // The route used `auth.sub` as the conversation's user id. That is a SUBJECT
+  // STRING: `api_key:<id>` and `ai_worker:<id>` are not uuids, and
+  // `ai_chat_conversation_participants.user_id` is one — so a key-backed caller
+  // got `22P02 invalid input syntax for type uuid` from Postgres on the first
+  // persisted turn (proven on a real PostgreSQL 16). Fixed by resolving the
+  // acting person once, with `effectiveUserId`, and refusing when there is none.
+  describe('the acting person is resolved once, not taken from the subject string', () => {
+    const body = { messages: [{ role: 'user', content: 'hi' }], conversationId: 'conv-1' }
+
+    it('refuses a key-backed principal that acts for nobody — and writes nothing', async () => {
+      seedAgentRegistryForTests([
+        makeAgent({ id: 'customers.assistant', moduleId: 'customers' }),
+      ])
+      authMock.mockResolvedValue({
+        sub: 'ai_worker:key-1',
+        keyId: 'key-1',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await POST(buildRequest({ agent: 'customers.assistant', body }) as any)
+
+      expect(response.status).toBe(422)
+      await expect(response.json()).resolves.toMatchObject({ code: 'ai_acting_user_required' })
+      expect(createOrGetConversationMock).not.toHaveBeenCalled()
+      expect(appendConversationMessageMock).not.toHaveBeenCalled()
+      expect(runAiAgentTextMock).not.toHaveBeenCalled()
+    })
+
+    it('refuses a plain service key the same way', async () => {
+      seedAgentRegistryForTests([
+        makeAgent({ id: 'customers.assistant', moduleId: 'customers' }),
+      ])
+      authMock.mockResolvedValue({
+        sub: 'api_key:key-2',
+        keyId: 'key-2',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await POST(buildRequest({ agent: 'customers.assistant', body }) as any)
+
+      expect(response.status).toBe(422)
+      expect(createOrGetConversationMock).not.toHaveBeenCalled()
+    })
+
+    it('writes the turn for the person the key acts for, not for the subject', async () => {
+      seedAgentRegistryForTests([
+        makeAgent({ id: 'customers.assistant', moduleId: 'customers' }),
+      ])
+      // The binding gate (`resolveAgentBinding`) runs BEFORE the conversation
+      // write, and an `ai_worker` reaches the DB read that a human short-circuits
+      // past (`agent-binding.ts:63-65`). So this test supplies the `em` the real
+      // route would have — the only place in the file that does, which is itself
+      // a gap worth knowing about.
+      createRequestContainerMock.mockResolvedValueOnce({
+        resolve: (name: string) => {
+          if (name === 'rbacService') return { loadAcl: loadAclMock }
+          if (name === 'em') {
+            return {
+              findOne: async () => ({ id: 'binding-1', toolAllowlist: null, requiredFeatures: [] }),
+              getConnection: () => ({}),
+            }
+          }
+          return null
+        },
+      })
+      runAiAgentTextMock.mockResolvedValue(
+        new Response('data: {"type":"text","content":"ok"}\n\ndata: [DONE]\n\n', {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        }),
+      )
+      authMock.mockResolvedValue({
+        sub: 'ai_worker:key-3',
+        keyId: 'key-3',
+        userId: 'person-on-behalf',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+      })
+
+      const response = await POST(buildRequest({ agent: 'customers.assistant', body }) as any)
+
+      expect(response.status).toBe(200)
+      expect(createOrGetConversationMock).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'conv-1' }),
+        expect.objectContaining({ userId: 'person-on-behalf' }),
+      )
+    })
+  })
 })
