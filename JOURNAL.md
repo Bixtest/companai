@@ -7,6 +7,51 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (night, continued) — the tooling set is finished: `SR-38` + `SR-46` (`CC-91` closed)
+
+The SRS's *"land FIRST; make everything after cheaper"* set is whole. Its last two slices land here; the
+first two (`SR-39` one-truth, `SR-41` escape hatches) landed 2026-10-16.
+
+**`SR-38` — the digital-twin harness.** The mechanism is the **type system**, not a runtime check:
+`packages/core/src/testing/digital-twin/authority.ts` declares three twins — `RECORD_LOCK_CEILING_TWIN`,
+`AUTONOMY_GATE_TWIN`, `ANONYMOUS_SCOPE_TWIN` — each `satisfies` a **REAL** type imported from the module
+that owns it, so adding a record-lock state or an autonomy gate cannot be done without touching this file,
+and a moved interface is a `tsc` error. `scripts/check-digital-twins.mjs` guards the **wiring** (six things
+per twin: the file exists; imports the real types; declares the symbol; carries its `satisfies`; sits in a
+`tsc`-visible location; names a semantic test that exists). **The split, named: the check guards
+completeness, `tsc` guards correctness — neither alone is the mechanism.** 10/10 tests, 7/7 mutations
+proven (each killing exactly its named case), checker restored byte-identical; `check:digital-twins` /
+`:fail`.
+
+**★ The half a `satisfies` cannot close — a twin's VALUES.** A shape check cannot tell `{locked:'A0'}` from
+`{locked:'A1'}`: both compile, and the second is a lie about the control.
+`record-lock-ceiling.twin.test.ts` pins every declared value to what `recordLockCeiling` actually returns —
+**proven by mutation:** flipping `locked` to `'A1'` still compiles and turns the test red at exactly the
+value assertion, while the other three tests pass. Restored byte-identical.
+
+**`SR-46` — the two-reads lint.** `scripts/check-two-reads.mjs`, in the `scripts/check-*.mjs` family — **★
+its home corrected by name:** the plan first put it on the ESLint surface (`packages/eslint-plugin-ds`),
+which runs only on **backend-UI files** via `eslint.ds.config.mjs`, so a settings-read rule there would
+never fire on the files that read settings. Lexical and strip-based; the trap is **a write is not a read**
+and the precision case is **a read inside a string or comment is not a read**. 8/8 tests, 5/5 mutations
+proven. **Measured on the real repo: 4,823 production files scanned · 3,153 test files skipped · 89 settings
+read twice in 46 files.** `check:two-reads` / `:fail`.
+
+**Shared foundation — extracted and proven.** The string/comment/template/regex lexer both checks need is
+now one file, `scripts/lib/strip-code.mjs` (`strip` + `readStrippedLines`), extracted from
+`check-declared-controls.mjs`. The extraction was **proven, not assumed**: the three lexer mutations in
+`verify-declared-controls-mutations.mjs` were re-pointed at the new file and all still kill their named
+tests, and the declared-controls census is byte-stable (6 controls, 1 covered). A real lexer defect was
+found while extracting it — template-literal `${…}` interpolations left an **unbalanced `{`** — and fixed.
+
+**★ A rule-13 correction (mine).** The frontier had recorded `workspace/.toolchain/node24` as **ABSENT**.
+Measured: it is **PRESENT at v24.19.0**. Corrected in `MASTER-CHECKLIST.html` §2 and its `.md` twin.
+
+**▶ NEXT:** identity (`SR-02` + `SR-07`) → `SR-12` (the per-tenant engine home, the fix for open `CC-84`) →
+`P2-9b`. Register: **55 closed · 42 open · 97 total**.
+
+---
+
 ## 2026-10-17 (night) — the urgent set closes: `T-13`, `T-14`, and `T-45`
 
 **`T-13` / `T-14` — the two live compose defects (`CC-98`).** `--jinja` added to the llama.cpp `model`

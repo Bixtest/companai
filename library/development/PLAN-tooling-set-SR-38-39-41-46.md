@@ -1,7 +1,7 @@
 # The tooling set — `SR-38` · `SR-39` · `SR-41` · `SR-46`
 
-**Status:** written requirement, 2026-10-16. **Nothing is built from this document except the first slice
-named in §5**, which is the only thing marked DONE below.
+**Status:** written requirement, 2026-10-16. **All four slices are now BUILT** — §5 records each: `SR-39`
+and `SR-41` on 2026-10-16, `SR-38` and `SR-46` on 2026-10-17. `CC-91` is closed.
 
 ---
 
@@ -93,9 +93,15 @@ one comment form for the cases a function cannot reach), each carrying a **reaso
 
 ### `SR-46` — the two-reads lint
 
-**Shape.** An ESLint rule on the existing plugin surface: a setting read twice in one scope must be read
-once. Ships at `warn` like the plugin's other rules, escalating to `error` when the metric allows —
+**Shape.** A rule on the existing plugin surface: a setting read twice in one scope must be read once.
+Ships at `warn` like the plugin's other rules, escalating to `error` when the metric allows —
 the plugin's own documented rollout (`packages/eslint-plugin-ds/index.js`).
+
+> **★ CORRECTED 2026-10-17, when the slice was built.** The ESLint surface is the wrong home, and the
+> reason is structural, not stylistic: `packages/eslint-plugin-ds` runs **only on backend-UI files** via
+> `eslint.ds.config.mjs`, so a *settings-read* rule there would **never fire on the files that read
+> settings**. The rule moved to the `scripts/check-*.mjs` family, where a read can be seen **across the
+> whole file** — which is what the requirement actually needs. See §5.4.
 
 ---
 
@@ -200,3 +206,71 @@ the checker's header as an explicit exclusion, not an oversight.)
 pre-existing failures** (dev-splash / dev-memory-sampler / watch-packages) against a 326-pass suite. They
 are untouched by this change — the only shared file edited is `package.json`, and only to add two `check:*`
 keys. Recorded so a red suite is not mistaken for this slice's work.
+
+### 5.3 `SR-38` — the digital-twin harness (the third slice)
+
+**The mechanism is the TYPE SYSTEM, not a runtime check.** A twin is a fixture declared `satisfies
+<RealType>`, so an interface that drifts stops the fixture compiling — the failure mode is the **build**,
+at the one place the type system already looks.
+
+**Built:**
+
+| Artefact | Path | What it is |
+|---|---|---|
+| The twins | `packages/core/src/testing/digital-twin/authority.ts` (code repo) | Three twins — `RECORD_LOCK_CEILING_TWIN`, `AUTONOMY_GATE_TWIN`, `ANONYMOUS_SCOPE_TWIN` — each `satisfies` a REAL type imported from the module that owns it. |
+| The wiring check | `scripts/check-digital-twins.mjs` (code repo) | Six checks per twin: the file exists; imports the real types; declares the symbol; carries its `satisfies`; sits in a `tsc`-visible location; names a semantic test that exists. `--json`, `--fail`, `--root <dir>`. |
+| The test | `scripts/__tests__/check-digital-twins.test.mjs` (code repo) | **10 / 10 pass** — the trap (re-stating a shape is not importing it) and a direct unit test for the one rule `--root` cannot reach. |
+| The mutation proof | `scripts/verify-digital-twins-mutations.mjs` (code repo) | **7 / 7 proven**, each killing exactly its named case; the checker restored byte-identical. |
+| The semantic test | `packages/core/src/modules/auth/services/__tests__/record-lock-ceiling.twin.test.ts` | **4 / 4 pass** — pins every declared VALUE to what `recordLockCeiling` returns. |
+| The script entries | `package.json` → `check:digital-twins`, `check:digital-twins:fail` | Census by default; `:fail` enforces. |
+
+**★ THE SPLIT, NAMED: the check guards COMPLETENESS, `tsc` guards CORRECTNESS — neither alone is the
+mechanism.** A twin that is deleted, unregistered, moved out of `src`, or has its `satisfies` dropped fails
+the check; a twin whose real interface moved fails the build.
+
+**★ AND THE HALF A `satisfies` CANNOT CLOSE — a twin's VALUES.** `satisfies` checks shape, never values:
+`{ open: null, restricted: 'A2', locked: 'A0' }` and `{ open: 'A5', restricted: 'A5', locked: 'A5' }` both
+compile, and the second is a lie about the control. The semantic test closes that — **proven by mutation:**
+flipping `locked` to `'A1'` (still a legal gate, so `satisfies` still compiles) turns the value assertion
+red while the other three tests pass. File restored byte-identical.
+
+**Where it is typechecked.** The twins live in `src/`, **not** `__tests__/`, because
+`packages/core/tsconfig.json` excludes `__tests__/` — a fixture there would be invisible to `yarn
+typecheck` and its drift silent. That is why the location rule is one of the six the check enforces.
+
+### 5.4 `SR-46` — the two-reads lint (the fourth slice)
+
+**★ THE HOME CHANGED, and the plan says so by name (§3).** The requirement's shape was an ESLint rule, but
+`packages/eslint-plugin-ds` runs only on backend-UI files, so a *settings-read* rule there would never fire
+on the files that read settings. It belongs in the `scripts/check-*.mjs` family — the same family as
+`SR-39` and `SR-41` — where a read can be seen across the whole file.
+
+**Built:**
+
+| Artefact | Path | What it is |
+|---|---|---|
+| The lint | `scripts/check-two-reads.mjs` (code repo) | Lexical, strip-based; a registry of setting kinds (today: `process.env`). `--json`, `--fail`, `--root <dir>`, `--include-tests`. |
+| The test | `scripts/__tests__/check-two-reads.test.mjs` (code repo) | **8 / 8 pass** — the trap (**a write is not a read**) and the precision case (**a read inside a string or a comment is not a read**). |
+| The mutation proof | `scripts/verify-two-reads-mutations.mjs` (code repo) | **5 / 5 proven**; the checker and the shared lexer restored byte-identical. |
+| The script entries | `package.json` → `check:two-reads`, `check:two-reads:fail` | Census by default; `:fail` enforces. |
+
+**★ THE MEASUREMENT (2026-10-17, the real repo): 4,823 production files scanned · 3,153 test files skipped
+· 89 settings read twice in 46 files.**
+
+**Two design decisions worth naming.**
+
+- **File scope, not block scope.** The finer rule (a setting read twice in one *function*) was built,
+  measured, and **rejected with the number**: 355 of 4,823 files (7.4%) strip to unbalanced braces, mostly
+  `.tsx` where JSX is not lexable by a JS lexer, so a brace-scope would emit false findings. The file scope
+  is what the lexer can support today; the block scope is scheduled behind a JSX-aware parse. Shipping the
+  finer rule now would have meant shipping false positives.
+- **Test files are excluded by default** (`--include-tests` scans them), because a test that reads the same
+  setting twice is not the drift the requirement is about.
+
+**A shared foundation, extracted and proven.** The string/comment/template/regex lexer that both this check
+and `check-declared-controls.mjs` need is now one file — `scripts/lib/strip-code.mjs` (`strip` +
+`readStrippedLines`). The extraction was **proven, not assumed**: the three lexer mutations in
+`verify-declared-controls-mutations.mjs` were re-pointed at the new file and all still kill their named
+tests, and the declared-controls census is byte-stable (6 controls, 1 covered). While extracting it, a real
+lexer defect was found and fixed: template-literal `${…}` interpolations left an **unbalanced `{`**, which
+is what the rejected block-scope rule mis-nested on.
