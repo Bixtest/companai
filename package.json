@@ -115,6 +115,8 @@
     "check:escape-hatches:fail": "node scripts/check-escape-hatches.mjs --fail",
     "check:declared-controls": "node scripts/check-declared-controls.mjs",
     "check:declared-controls:fail": "node scripts/check-declared-controls.mjs --fail",
+    "check:two-reads": "node scripts/check-two-reads.mjs",
+    "check:two-reads:fail": "node scripts/check-two-reads.mjs --fail",
     "check:digital-twins": "node scripts/check-digital-twins.mjs",
     "check:digital-twins:fail": "node scripts/check-digital-twins.mjs --fail",
     "check:time-bombs:fail": "node scripts/time-bomb-scanner.mjs --fail",
