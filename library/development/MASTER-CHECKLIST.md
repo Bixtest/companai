@@ -55,7 +55,7 @@ longer run an agent — mark the key `ai_worker` and create a binding. Record:
 `PLAN-CC-103-binding-gate.md` §8. **113/113 tests across 10 suites, 3 mutations RED, `tsc` 0, and the migration proven on a real PostgreSQL 16.**
 Register: **62 closed · 55 open · 117 total**, counted from §5.
 
-**▶ NEXT — `CC-102`** — `SR-02` slice 2, re-scoped by the audit: `retire()` does not exist,
+**▶ IN PROGRESS — `CC-102`** — `SR-02` slice 2, **increment 1 of 3 landed** (`b36e4ffa`: the null-org visibility gap closed, the ambiguity it creates refused, and `last_seen_at`/`legacy_daemon_id` added with their writer; plan §7). **Remaining: the upsert, `retire()`, `touch()`, the daemon-id uuid validation, and the CLI writer that makes them reachable.** The row's gaps: `retire()` does not exist,
 `deleted_at` has no writer, `register()` throws where the donor upserts, `daemon_id` is caller-supplied
 text, there is no liveness writer, and a null-org caller slides to the engine fallback. **Then
 `SR-07`** (`CC-107`, a bot is a participant), **`SR-12`** (per-tenant engine home), **`P2-9b`**.

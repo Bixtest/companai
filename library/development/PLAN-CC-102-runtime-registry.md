@@ -174,3 +174,30 @@ Mutation discipline: after green, revert each fix and confirm the matching test 
 - **It does not make the daemon's id persistent.** It validates the *shape* (uuid) and records
   `legacy_daemon_id`; keeping one id across reboots is a daemon-side change (`SR-12`'s territory).
 - **It does not add an HTTP route.** Recorded as a deliberate choice, with the reason above.
+
+---
+
+## 7. PROGRESS — increment 1 of 3 (2026-10-17, `b36e4ffa`)
+
+| # | Item | State |
+|---|---|---|
+| 1 | **Null-org visibility** (§4.4) — an org caller now sees its org **and** the tenant-level rows | ✅ **DONE** — `organizationScope()`, 3 new tests, mutation-proven |
+| 2 | **The ambiguity the widening creates** — a tenant-level `primary` and an org-level `primary` can both exist | ✅ **DONE** — `findByBindingName` refuses with `AiAgentRuntimeAmbiguousNameError`, naming both ids |
+| 3 | **The columns** — `last_seen_at`, `legacy_daemon_id`, the partial liveness index | ✅ **DONE** — `Migration20261017170000`; the entity's docblock updated, because it had promised these columns *"land with the probe"* |
+| 4 | `register()` as an upsert returning `inserted` | ⬜ **NOT STARTED** |
+| 5 | `retire()` | ⬜ **NOT STARTED** |
+| 6 | `touch()` | ⬜ **NOT STARTED** |
+| 7 | `daemon_id` uuid validation | ⬜ **NOT STARTED** |
+| 8 | **The CLI writer** that makes 4–7 reachable | ⬜ **NOT STARTED — and this is the one that matters** |
+
+**Why 4–8 are one increment and not four:** they are worthless apart. A `retire()` with no
+`register()` is the declaration-nothing-calls this row was opened to remove; a `touch()` with no
+`last_seen_at` writer is a column claiming liveness nobody records. They land together or not at all.
+
+**Proof for increment 1:** 33/33 across the repository and registry suites; reverting
+`organizationScope` to the exact match fails the widening test (1 failed, file restored
+byte-identical); `tsc -p packages/ai-assistant` 0.
+
+**A note on the order.** Item 1 landed first because it is the only gap reachable **today** — it needs
+no writer, and an empty `listActive` already produces the environment fallback the registry forbids.
+Everything else waits on the writer, which is why the writer is item 8 and the headline of increment 2.
