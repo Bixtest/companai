@@ -76,12 +76,18 @@ import {
   createWebSocketTransport,
   fetchHermesTicket,
 } from './hermes-gateway-transport'
+/**
+ * The engine vocabulary lives in `./ai-runtime-engines` — the data layer validates
+ * a runtime row's `provider` against it (`SR-02`), and that layer must not import
+ * THIS module (which pulls both adapters). Re-exported below so every existing
+ * importer is unchanged.
+ */
+import { AI_RUNTIME_ENGINES, type AiRuntimeEngine } from './ai-runtime-engines'
 
-/** The engines this selector knows. Adding one here is the whole swap. */
-export type AiRuntimeEngine = 'opencode' | 'hermes'
+export type { AiRuntimeEngine } from './ai-runtime-engines'
 
 /** The accepted engine names, in one place so the error message cannot drift. */
-const ACCEPTED_ENGINES: readonly AiRuntimeEngine[] = ['opencode', 'hermes']
+const ACCEPTED_ENGINES: readonly AiRuntimeEngine[] = AI_RUNTIME_ENGINES
 
 /** The engine selected when nothing says otherwise — the proven, live engine. */
 const DEFAULT_ENGINE: AiRuntimeEngine = 'opencode'
@@ -109,6 +115,20 @@ export interface ResolveAiRuntimePortDeps {
   auth: { userId: string; tenantId: string | null; organizationId: string | null }
   /** An explicit engine name, overriding the environment. For tests and callers. */
   engine?: string
+  /**
+   * `SR-02` — the tenant's registered runtime, when one exists
+   * (`agent-runtime-registry.resolveTenantRuntime`). Its `provider` **wins over the
+   * environment**, because a row in the database is a fact about this tenant while
+   * `AI_RUNTIME_ENGINE` is a fact about the deployment.
+   *
+   * `null`/absent means "this tenant has no runtime registered", and the env path is
+   * taken exactly as before — which is why this change is byte-identical for every
+   * tenant that has not registered one.
+   *
+   * An explicit `engine` argument still wins over this: it is a caller's deliberate
+   * override (tests, a diagnostic), not a tenant preference.
+   */
+  tenantRuntime?: { provider: string; name?: string } | null
   /** The environment read for the engine name and the worker launch. */
   env?: EngineEnv
   /**
@@ -141,6 +161,17 @@ export function resolveAiRuntimeEngine(
 /**
  * The ONE place the chat engine is chosen.
  *
+ * Precedence, highest first (`SR-02` added the middle rung):
+ *   1. `engine` — a caller's explicit override (tests, diagnostics).
+ *   2. `tenantRuntime.provider` — the tenant's registered runtime row. A row is a
+ *      fact about this tenant; the environment is a fact about the deployment.
+ *   3. `AI_RUNTIME_ENGINE` — the deployment default, unchanged.
+ *   4. `opencode` — the proven default, unchanged.
+ *
+ * A provider read from a row is normalised exactly like the environment is: an
+ * unknown value **throws**, it never falls through to a default. A hand-edited row
+ * naming `hermes-typo` must not silently serve OpenCode.
+ *
  * Returns the port **and** the implementation name, because §2.11 item 4 requires
  * the chosen engine to be recorded on the run — the caller cannot read a name off
  * the port without an `await`, and a run's ledger entry must not depend on one.
@@ -150,7 +181,12 @@ export function resolveAiRuntimePort(deps: ResolveAiRuntimePortDeps): ResolvedAi
   const engine =
     deps.engine !== undefined
       ? normalizeEngine(deps.engine, 'the `engine` override')
-      : resolveAiRuntimeEngine(env)
+      : deps.tenantRuntime
+        ? normalizeEngine(
+            deps.tenantRuntime.provider,
+            `the tenant runtime "${deps.tenantRuntime.name ?? deps.tenantRuntime.provider}"`,
+          )
+        : resolveAiRuntimeEngine(env)
 
   if (engine === 'hermes') {
     return {

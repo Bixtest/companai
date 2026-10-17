@@ -104,7 +104,13 @@ async function drainSseResponse(res: any): Promise<void> {
 beforeEach(() => {
   jest.clearAllMocks()
   mockGetAuthFromRequest.mockResolvedValue(mockAuth)
-  mockCreateRequestContainer.mockResolvedValue({ resolve: () => ({ identityCacheKey: 'em' }) })
+  // `SR-02` — the route now asks the runtime registry whether this tenant has a
+  // registered runtime, so the EntityManager sentinel must answer `find`. `[]` is
+  // the "none registered" answer: these tests assert the env-selected engine and
+  // the door's behaviour, unchanged.
+  mockCreateRequestContainer.mockResolvedValue({
+    resolve: () => ({ identityCacheKey: 'em', find: async () => [] }),
+  })
   mockGenerateSessionToken.mockReturnValue('sess_alice_token')
   mockCreateSessionApiKey.mockResolvedValue({ keyId: 'api-key-1' })
   mockBindOpencodeSessionToApiKey.mockResolvedValue(undefined)

@@ -15,6 +15,7 @@ import {
 } from '../../lib/ai-runtime-port'
 import { textInputRef } from '../../lib/opencode-port-adapter'
 import { resolveAiRuntimePort } from '../../lib/resolve-ai-runtime-port'
+import { resolveTenantRuntime } from '../../lib/agent-runtime-registry'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import {
@@ -321,12 +322,24 @@ export async function POST(req: NextRequest) {
     const container = await createRequestContainer()
     const em = container.resolve<EntityManager>('em')
 
+    // `SR-02` — the tenant's registered runtime, when it has one. This is the first
+    // production reader of the `ai_agent_runtimes` row; `null` means the tenant has
+    // registered nothing, and the selector below then behaves exactly as it did
+    // before this table existed. A tenant with several runtimes and no binding
+    // throws rather than being guessed at — see `agent-runtime-registry`.
+    const tenantRuntime = await resolveTenantRuntime({
+      em,
+      tenantId: auth.tenantId ?? null,
+      organizationId: auth.orgId ?? null,
+    })
+
     // The AI runtime door. Every engine call below goes through `port`. The
     // engine is chosen by the selector (§2.11), which also NAMES it back to us —
     // so both the run id and the run's ledger provenance say which engine
     // answered, instead of assuming OpenCode.
     const { port, implementation } = resolveAiRuntimePort({
       em,
+      tenantRuntime,
       auth: {
         userId: auth.sub,
         tenantId: auth.tenantId ?? null,

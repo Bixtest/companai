@@ -1064,3 +1064,98 @@ export class AiAgentBinding {
   @Property({ name: 'deleted_at', type: Date, nullable: true })
   deletedAt?: Date | null
 }
+
+/**
+ * `SR-02` — **the machine**, as distinct from the teammate (`ai_assistant:agent`).
+ *
+ * One row is a daemon, on a host, for one provider, inside one tenant. The kernel
+ * `Agent` object's `runtime` text field **names** a row here by `name`; it does not
+ * embed one (`ce.ts:128-136`, `AGENT-HALF.md` §1.5). One runtime hosts many agents.
+ *
+ * The migration is the source of truth for the constraints — a partial,
+ * tenant-scoped unique index cannot be expressed as a `@Unique` decorator, which
+ * is the same reason `auth`'s `User` omits one (`core/src/modules/auth/data/
+ * entities.ts:4-13`). The expressions are repeated here anyway so the entity and
+ * the schema cannot drift silently; `schema-unique-indexes.test.ts` asserts they
+ * match.
+ *
+ * **No `status` / `last_seen_at`.** Liveness needs a heartbeat writer and this
+ * codebase has no probe that beats one; a column claiming "online" that nothing
+ * sets is the same defect this object exists to remove — a declaration nothing
+ * reads — pointed the other way. They land with the probe (see the migration).
+ *
+ * **Not `AiAgentRuntimeOverride`** (line 254). That is per-tenant provider/model/
+ * baseURL *configuration*; this is an *instance*. A setting says which model a
+ * tenant prefers; this says which process can serve it.
+ */
+@Entity({ tableName: 'ai_agent_runtimes' })
+@Index({
+  name: 'ai_agent_runtimes_tenant_org_daemon_provider_uq',
+  expression:
+    'create unique index "ai_agent_runtimes_tenant_org_daemon_provider_uq" on "ai_agent_runtimes" ("tenant_id", "organization_id", "daemon_id", "provider") where "organization_id" is not null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_agent_runtimes_tenant_daemon_provider_null_org_uq',
+  expression:
+    'create unique index "ai_agent_runtimes_tenant_daemon_provider_null_org_uq" on "ai_agent_runtimes" ("tenant_id", "daemon_id", "provider") where "organization_id" is null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_agent_runtimes_tenant_org_name_uq',
+  expression:
+    'create unique index "ai_agent_runtimes_tenant_org_name_uq" on "ai_agent_runtimes" ("tenant_id", "organization_id", "name") where "organization_id" is not null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_agent_runtimes_tenant_name_null_org_uq',
+  expression:
+    'create unique index "ai_agent_runtimes_tenant_name_null_org_uq" on "ai_agent_runtimes" ("tenant_id", "name") where "organization_id" is null and "deleted_at" is null',
+})
+export class AiAgentRuntime {
+  [OptionalProps]?: 'organizationId' | 'metadata' | 'createdAt' | 'updatedAt' | 'deletedAt'
+
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  /**
+   * The identity of the process/host that can execute. `NOT NULL` — a nullable
+   * `daemon_id` would silently drop every such row out of the uniqueness key
+   * (Postgres treats `NULL`s as distinct), which is the donor's defect and is
+   * deliberately not copied. See the migration's header.
+   */
+  @Property({ name: 'daemon_id', type: 'text' })
+  daemonId!: string
+
+  /**
+   * **The binding key.** The kernel `Agent` object's `runtime` field carries this
+   * string; `resolveTenantRuntime` turns it back into this row. Unique per
+   * (tenant, organization) among live rows, or the resolution is ambiguous.
+   */
+  @Property({ name: 'name', type: 'text' })
+  name!: string
+
+  /**
+   * The engine this runtime hosts — an `AiRuntimeEngine` (`'opencode' | 'hermes'`).
+   * Typed `string` here on purpose: importing the selector would drag its adapters
+   * into the data layer. The repository validates the vocabulary at its boundary
+   * against `lib/ai-runtime-engines`, which imports nothing.
+   */
+  @Property({ name: 'provider', type: 'text' })
+  provider!: string
+
+  @Property({ name: 'metadata', type: 'jsonb', default: '{}' })
+  metadata: Record<string, unknown> = {}
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}

@@ -127,7 +127,11 @@ beforeEach(() => {
   jest.clearAllMocks()
   mockGetAuthFromRequest.mockResolvedValue(mockAuth)
   mockCreateRequestContainer.mockResolvedValue({
-    resolve: () => ({ identityCacheKey: 'em' }),
+    // `SR-02` — the route now asks the runtime registry whether this tenant has a
+    // registered runtime, so the EntityManager sentinel must answer `find`. `[]`
+    // is the "none registered" answer, which is the path these tests assert: the
+    // env-selected engine, exactly as before the table existed.
+    resolve: () => ({ identityCacheKey: 'em', find: async () => [] }),
   })
   mockFindWithDecryption.mockResolvedValue([])
   mockGenerateSessionToken.mockReturnValue('sess_alice_token')

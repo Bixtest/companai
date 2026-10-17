@@ -195,7 +195,12 @@ beforeEach(() => {
   jest.clearAllMocks()
   portCalls.length = 0
   mockGetAuthFromRequest.mockResolvedValue(mockAuth)
-  mockCreateRequestContainer.mockResolvedValue({ resolve: () => ({ identityCacheKey: 'em' }) })
+  // `SR-02` — the route now asks the runtime registry whether this tenant has a
+  // registered runtime, so the EntityManager sentinel must answer `find`. `[]` is
+  // the "none registered" answer: the env-selected engine, unchanged.
+  mockCreateRequestContainer.mockResolvedValue({
+    resolve: () => ({ identityCacheKey: 'em', find: async () => [] }),
+  })
   mockGenerateSessionToken.mockReturnValue('sess_alice_token')
   mockCreateSessionApiKey.mockResolvedValue({ keyId: 'api-key-1' })
   mockBindOpencodeSessionToApiKey.mockResolvedValue(undefined)

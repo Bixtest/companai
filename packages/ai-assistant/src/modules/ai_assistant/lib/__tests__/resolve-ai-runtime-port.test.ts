@@ -303,3 +303,82 @@ describe('P2-8 — the ws door the client connects, resolved from the environmen
     expect(resolveAiRuntimeEngine({ [AI_RUNTIME_ENGINE_ENV]: 'hermes' })).toBe('hermes')
   })
 })
+
+/**
+ * `SR-02` — the tenant's registered runtime, when it has one.
+ *
+ * The precedence this pins, highest first:
+ *   explicit `engine` > tenant runtime row > `AI_RUNTIME_ENGINE` > `opencode`.
+ *
+ * The middle rung is the new one and the reason is asymmetric: a row in
+ * `ai_agent_runtimes` is a fact about **this tenant**, while `AI_RUNTIME_ENGINE` is
+ * a fact about **the deployment**. A deployment default must not outrank a tenant's
+ * own registration, or `SR-12`'s per-tenant home could never take effect.
+ *
+ * The last assertion in this block is the one that protects every existing tenant:
+ * with no row (`null`), the env path is taken **exactly** as before.
+ */
+describe('SR-02 — a registered tenant runtime outranks the environment', () => {
+  it('uses the tenant runtime when the environment names nothing', () => {
+    const { implementation } = resolveAiRuntimePort({
+      em,
+      auth,
+      env: {},
+      tenantRuntime: { provider: 'hermes', name: 'primary' },
+    })
+    expect(implementation).toBe(HERMES_RUNTIME_IMPLEMENTATION)
+  })
+
+  it('uses the tenant runtime OVER the environment default', () => {
+    const { implementation } = resolveAiRuntimePort({
+      em,
+      auth,
+      env: { [AI_RUNTIME_ENGINE_ENV]: 'opencode' },
+      tenantRuntime: { provider: 'hermes', name: 'primary' },
+    })
+    expect(implementation).toBe(HERMES_RUNTIME_IMPLEMENTATION)
+  })
+
+  it('uses the tenant runtime OVER a hermes environment, too (both directions)', () => {
+    const { implementation } = resolveAiRuntimePort({
+      em,
+      auth,
+      env: { [AI_RUNTIME_ENGINE_ENV]: 'hermes' },
+      tenantRuntime: { provider: 'opencode', name: 'primary' },
+    })
+    expect(implementation).toBe(OPENCODE_RUNTIME_IMPLEMENTATION)
+  })
+
+  it('still lets an explicit `engine` win — it is a caller override, not a preference', () => {
+    const { implementation } = resolveAiRuntimePort({
+      em,
+      auth,
+      env: {},
+      engine: 'opencode',
+      tenantRuntime: { provider: 'hermes', name: 'primary' },
+    })
+    expect(implementation).toBe(OPENCODE_RUNTIME_IMPLEMENTATION)
+  })
+
+  it('is byte-identical to the old behaviour when the tenant has no runtime', () => {
+    // This is what makes the change safe for every existing tenant: `null` is the
+    // "nothing registered" answer, and the env rung is then reached unchanged.
+    const withNull = resolveAiRuntimePort({ em, auth, env: {}, tenantRuntime: null })
+    const withoutTheField = resolveAiRuntimePort({ em, auth, env: {} })
+    expect(withNull.implementation).toBe(withoutTheField.implementation)
+    expect(withNull.implementation).toBe(OPENCODE_RUNTIME_IMPLEMENTATION)
+  })
+
+  it('refuses an unknown provider in a row instead of falling back', () => {
+    // A hand-edited row must fail loudly. Silently serving OpenCode for a row that
+    // says `hermes-typo` is the exact deception the deny-by-default rule prevents.
+    expect(() =>
+      resolveAiRuntimePort({
+        em,
+        auth,
+        env: {},
+        tenantRuntime: { provider: 'hermes-typo', name: 'primary' },
+      }),
+    ).toThrow(/the tenant runtime "primary" names an unknown engine "hermes-typo"/)
+  })
+})
