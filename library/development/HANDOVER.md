@@ -211,8 +211,17 @@ page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*,
 **development pause**, the owner chose to finish the **platform architecture** before resuming builds.
 What changed and where things stand:
 
-- **★ START HERE — [`MASTER-CHECKLIST.html`](MASTER-CHECKLIST.html)** (its text twin:
-  [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md)). This is the **one plain-English index** over the whole
+- **★ START HERE — [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md)**. This is the **one plain-English index**
+  over the whole
+  lifecycle — every checklist row, every open item with its trigger, the platform study, and the
+  requirements. **It is the single source of truth and every count in it is measured** by
+  `scripts/check-master-checklist.mjs` (its tables vs its own typed numbers) and
+  `scripts/derive-counts.mjs` (the 78/321 unit count, re-derived from the appendix boxes).
+  **`MASTER-CHECKLIST.html` was retired 2026-10-17** — it was a second, hand-synced copy of the same
+  content, and the copy drifted: its open-work view ran 25 of 54 rows behind while its headline counts
+  stayed right, because the headline was computed and the list was typed. **Two mirrors cannot hold one
+  truth.** The old file is in git history; the deep records it never held (`AUDIT-*`, `PLAN-*`,
+  `DECISION-*`) and the running history (`JOURNAL.md`) are unchanged.
   development lifecycle — every checklist row, every open item with its trigger, the platform study, and
   the architecture requirements — built so nobody has to hunt to learn what a code-name (e.g. `CC-84`)
   means or where it sits. **The owner asked for exactly this on 2026-10-16.**

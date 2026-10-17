@@ -14,10 +14,15 @@
 > mapped into **53 architecture requirements** (`SR-*`) in `library/architecture/mapping/`. A new
 > platform, **activepieces**, was added (pending study, alongside **mattermost**). The **ONE NUMBER is
 > unchanged at 78 / 321 = 24%**. **★ START WITH THE MASTER CHECKLIST** —
-> [`library/development/MASTER-CHECKLIST.html`](MASTER-CHECKLIST.html) (text twin
-> [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md)): the one plain-English index over the whole lifecycle —
-> every checklist row, every open item with its trigger, the platform study, and the requirements — so
-> you never hunt to learn what a code-name means or where it sits. The **build frontier is paused, not
+> [`library/development/MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md): the one plain-English index over the
+> whole lifecycle — every checklist row, every open item with its trigger, the platform study, and the
+> requirements, so you never hunt to learn what a code-name means or where it sits. **It is one file and
+> it is the only one:** the old `MASTER-CHECKLIST.html` — a second, hand-synced copy of the same content —
+> was retired on 2026-10-17, after its open-work view was measured 25 of 54 rows behind while its headline
+> counts stayed right (the headline was computed, the list was typed; two mirrors cannot hold one truth).
+> **Every count in it is measured, not typed:** `scripts/check-master-checklist.mjs` checks its tables
+> against its own numbers, and `scripts/derive-counts.mjs` re-derives 78/321 from the appendix boxes.
+> The **build frontier is paused, not
 > gone**: `P2-9b` (the Hermes switchover) is the next build when development resumes, gated by the
 > owner's stale-timeout decision (see `HANDOVER.md` revision-34 banner). **No code has been written
 > since 2026-10-14.** What is open for the owner: the `P2-9b` stale-timeout trade, and whether to start
@@ -60,12 +65,16 @@ direction gets buried.
 **Tier A — the ones that fix the direction, the live decisions, and where we actually are:**
 
     a. library/WHAT-WE-ARE-BUILDING.md        <- the product in plain English. START HERE.
-    a2. library/development/MASTER-CHECKLIST.html
+    a2. library/development/MASTER-CHECKLIST.md
                                               <- THE ONE INDEX (owner asked for it 2026-10-16): every
                                                  checklist row, every open item with its trigger, the
-                                                 platform study, and the 53 SR requirements -- in plain
-                                                 English, with tick-boxes. Open it in a browser; its
-                                                 text twin is MASTER-CHECKLIST.md. Use it to resolve any
+                                                 platform study, and the SR requirements -- in plain
+                                                 English, with tick-boxes. THIS IS THE ONLY COPY: the
+                                                 MASTER-CHECKLIST.html that used to sit beside it was
+                                                 retired 2026-10-17 (it drifted -- 25 of 54 open rows
+                                                 missing). Its typed counts are re-measured by
+                                                 scripts/check-master-checklist.mjs and the 78/321 unit
+                                                 count by scripts/derive-counts.mjs. Use it to resolve any
                                                  code-name (CC-nn, G-nn, SR-nn) to what it means and
                                                  where it sits, without hunting across files
     b. INDEX.md                               <- the map of every folder

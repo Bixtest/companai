@@ -7,6 +7,59 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (late) — the master checklist became ONE file (owner ruling: no more two-mirror drift)
+
+No code was written. The owner read the top of `MASTER-CHECKLIST.html` and asked whether it was really
+still there and really updated — and in doing so found the defect this session had been walking past for
+two days. **It was right, and the measurement backs it.**
+
+**What was measured, not argued.** The same content lived in two hand-synced files. The
+`MASTER-CHECKLIST.html`'s **"Open work — every unfinished item, with its trigger" view held 29 of the 54
+open register rows — 25 behind**, and every one of the eleven new `CC-101`…`CC-111` findings was in the
+missing 25. The markdown twin had caught up; the HTML had not. Meanwhile the *headline* numbers in both
+files were correct — 47 rows, 12 phases, 32 done / 9 partial / 4 open / 2 absent, and 78 of 321 units —
+because the HTML **computed** its headline and the twin **typed** it, and the typed copy carried exactly
+one stale figure: *"11 phases"* where the truth is 12.
+
+**★ That is the whole lesson in one sentence:** the drift was invisible because the *numbers that were
+computed* looked maintained, so nobody re-read the *list that was typed* — and a quarter of the open
+work had quietly fallen out of the view. **A typed count drifts; a counted one cannot.**
+
+**What was built.**
+
+1. **`library/development/MASTER-CHECKLIST.md` is now THE ONE document.** 485 lines, where the old twin
+   was 1,072 — and **442 of those lines were the expanding frontier stack** the owner named as the thing
+   that gets harder to track. §2 is now two lines: one LAST DONE, one NEXT, and a pointer to this file
+   for the history. **§4 is a complete 54-row table** — every open register row, each with its trigger and
+   its state (11 startable now · 1 needs only a live database · 3 need an owner decision · 39 blocked on
+   a named trigger). §5 (the register), §6 (the platform study) and §7 (the SR requirements) carried over.
+2. **`scripts/check-master-checklist.mjs`** — re-derives §1's headline from §3 row by row (the row total,
+   the phase count, each status tally), requires §4 to list every open register row **in both
+   directions** (an open row with no line is a defect; a line for a closed row is a defect), and checks
+   §4's and §5's own count lines. **11 checks, all PASS.**
+3. **`scripts/__tests__/check-master-checklist.mutations.mjs`** — **5 mutations, all RED**: flip a §3
+   status while §1 keeps the old tally · delete a §4 open row · change §5's count line · invent a
+   dangling `CC-999` · change §4's own count. The file is restored byte-identical after each run and the
+   unmutated run re-passes.
+4. **`scripts/derive-counts.mjs`** — re-derives the one number from `platform_points.md`'s appendix
+   boxes under the rule already written there (A–K; `- ` is a whole point, `- ` **with** `▸ n/N` is a
+   split parent, `-   - ` is a sub-point, and **a line with no box glyph is prose, not a unit** — that
+   last clause is what stopped the over-count, because indented *"(was PART)"* notes all start with `- `).
+   Measured: **A 11/31 · B 7/38 · C 14/28 · D 4/39 · E 2/18 · F 0/14 · G 33/74 · H 1/13 · I 5/35 ·
+   J 0/18 · K 1/13 = 78 / 321 = 24.3 %**, reproducing the claimed figure exactly.
+5. **`MASTER-CHECKLIST.html` was removed.** `HANDOVER.md` and `START-PROMPT.md` (two references each) now
+   point at the markdown only. **It is in git history and should not be recreated** — the whole point is
+   that there is one copy.
+
+**★ And the lesson applied to my own tooling, deliberately:** both new scripts are recorded as **built
+but NOT ENFORCED**, because nothing calls them — not CI, not `.husky/pre-commit`. That is the `CC-101`
+defect in miniature, and naming it is cheaper than discovering it again in a fortnight.
+
+**▶ NEXT:** unchanged — `CC-101` first (wire the four uncalled checkers into `ci.yml`, at which point
+these two join them), then `CC-102`.
+
+---
+
 ## 2026-10-17 (night) — the donor cross-check: ten hostile critics, nine REVISITs, and the discovery that four "done" claims were unenforceable
 
 No code was written this session. Ten third-person hostile critics read the donors' **source** against our
