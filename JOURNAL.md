@@ -7,6 +7,42 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (night, later) — `8c56428e`'s docs pass: three documents that told the next agent to build what already existed
+
+The code landed at 20:03 and the session died at 20:04, one sentence into the documentation. So for the
+rest of the evening `PLAN-CC-107-bot-participant.md` §10.5, `MASTER-CHECKLIST.md` §2, the `CC-107` register
+row and the memory all asserted the same false thing — *"the participants POST body still accepts only a
+uuid, so adding an agent participant over HTTP is not yet reachable"* — while the route had accepted either
+axis for hours. **That is the worst kind of stale doc: not vague, but confidently wrong in a direction that
+costs work.**
+
+**What the pass corrected, and why each correction is a different kind of defect:**
+
+- **A missing item, not a stale one.** §8's progress table had no row for the POST body at all, so it read
+  "7 of 8" while a whole surface was unreachable. Added as **7b**, with the reason written down: an item
+  that never existed cannot go stale, and it is the harder one to notice.
+- **A rule misclassified as code.** Item 8, "idle-pruning exemption", reads like pending work. There is
+  **no participant pruning anywhere in the repo** — only run-registry pruning and OpenCode session-idle
+  detection — so there is nothing to exempt. It is a **rule to record** for whoever builds pruning.
+  Leaving it ⬜ implied code was owed that nobody could write.
+- **A proof number that did not reproduce.** "105 suites / 1,553 tests" appears in §10.4, the register row
+  and the memory. It is a **subset** — repositories + api + cli + lib — and `data/__tests__` was outside
+  it. The package measures **135 suites / 1,989 tests and is RED**. Rule 13: the number was committed as a
+  package claim, so the fix is committed by name rather than quietly replaced.
+- **A sentence that had lost its subject.** §2's `▶ IN PROGRESS` paragraph carried a fragment — *"Then
+  `SR-12` (per-tenant engine home). It is a bot-as-participant: two partial unique indexes, …"* — left
+  behind by an earlier edit. Removed; the paragraph reads as one argument again.
+
+**The red is recorded as NEXT, not as a footnote.** Two causes, neither from `8c56428e`: a stale
+index-order assertion left by `6b78a0ac`'s deliberate symmetry change, and three chat-route suites whose
+`jest.mock` factories never learned `requirePrincipal` when `e8ecde6d` added it. **A red tree makes every
+later green claim untrustworthy**, so it is cleared before `SR-12`, not after.
+
+Register unchanged at **63 closed · 55 open · 118 total** — `CC-107` stays open, because two agent-axis
+tests and one rule are genuinely outstanding. Checker: PASS.
+
+---
+
 ## 2026-10-17 (night) — `CC-102` closed, and the throwaway database caught a defect all 24 tests walked past
 
 `SR-02` slice 2 is done. Slice 1 had shipped a table whose `deleted_at` column had **no writer at all**, a

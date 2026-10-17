@@ -250,7 +250,8 @@ Postgres proof, and the probe is committed next to the migration with its run co
 | 5 | **INCREMENT 1: fix §3.1** — the subject-string-into-uuid-column defect | ✅ **DONE** — see §9 |
 | 6 | The migration: `agent_id` + `agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls` | ✅ **DONE** — see §10 |
 | 7 | The access predicate and the revoke route, both axes | ✅ **DONE** — see §10 |
-| 8 | Idle-pruning exemption | ⬜ |
+| 7b | **The participants POST body accepts either axis** — the item this table was missing until 2026-10-17 20:03, which is why "7 of 8" read as "the HTTP surface is done" when it was not | ✅ **DONE** — see §10.6 (`8c56428e`) |
+| 8 | Idle-pruning exemption | ⬜ **NOT CODE — a rule to record.** No participant pruning exists anywhere in the repo (only run-registry pruning and OpenCode session-idle detection), so there is nothing to exempt yet. See §10.6 |
 
 ---
 
@@ -381,7 +382,11 @@ hand-copied, so the probe cannot drift from the migration. Against a real `postg
 | a **retired** agent | frees its slot — 1 live row |
 | `down()` then `up()` | both columns and index drop; `user_id` back to NOT NULL; the previous index shape restored; `up()` repeatable |
 
-**Tests:** 105 suites / **1,553 passed / 1,553**, no suite failed to load. Mutation (remove the both-axes
+**Tests:** 105 suites / **1,553 passed / 1,553**, no suite failed to load. **★ Rule 13, 2026-10-17:
+that is a SUBSET claim, not a package claim** — the 105 covered *repositories + api + cli + lib*, and
+`data/__tests__` was outside it. The full `packages/ai-assistant` surface measures **135 suites / 1,989
+tests**, and it is **RED** (4 suites / 25 tests; two causes, neither from this increment — §10.6).
+Mutation (remove the both-axes
 and no-owner refusals) → **3 RED**, file restored byte-identical. `tsc -p packages/ai-assistant` **0**.
 Probe committed at
 `migrations/__probes__/participant-agent-axis.probe.sql` with its run command and the extraction
@@ -390,7 +395,40 @@ command.
 ### 10.5 What is still not done
 
 `loadParticipantFlag`'s human branch runs **first** and short-circuits, so an agent caller still reaches
-the agent axis only when the human one misses — correct, but untested against a real repository. The
-idle-pruning exemption (item 8) is still open. And the participants **POST** route still accepts only a
-uuid body (`addParticipantBodySchema`), so adding an *agent* participant over HTTP is not yet possible —
-only the schema, the repository and the access predicate can carry one.
+the agent axis only when the human one misses — correct, but untested against a real repository.
+**The participants POST route is no longer on this list:** §10.6 closed it at `8c56428e`. What remains is
+(1) the **idle-pruning exemption (item 8)**, which is a **rule to record**, not code — no participant
+pruning exists anywhere in the repo, so there is nothing to exempt yet; and (2) **two agent-axis test
+gaps** — `GET /participants`' agent serialisation is untested (all four tests added at `8c56428e` are
+POST-only), and `canAccessConversation` with an agent caller (`ctx.agentId`) is untested, so an agent
+participant can be **written** but nothing proves it can **read**.
+
+### 10.6 INCREMENT 2's last gap — the POST body, and the "only id" flaw it fixed (`8c56428e`, 2026-10-17 20:03)
+
+**Why the gap existed.** Increment 2 gave the schema, the repository and the access predicate a second
+identity axis, but the **route** still validated `addParticipantBodySchema` as a bare uuid — so an agent
+participant could be created by code and never over HTTP. The item was **missing from §8's table
+entirely**, which is why the table read "7 of 8" while a whole surface was unreachable.
+
+**What changed.** The body accepts **either** `userId` (uuid) or `agentId` (text), **exactly one** — a
+zod refine, not a defaulted field, so "both" and "neither" are refusals rather than a silent pick.
+Existence is checked **per axis**: a `User` row for a human, `getAgent` for an agent. `getAgent` is a
+global registry lookup (`agentsById.get`), not a tenant-scoped one — existence is proven, *"enabled for
+this tenant"* is not. That is a deliberate boundary rather than an oversight: agents are code-declared.
+
+**★ The flaw the build found — "a call that returned only an id".** The success path and the audit event
+reported only `userId`, which is **NULL for an agent**: a call that grants a machine access to a
+conversation said nothing about **which machine**. Now the response carries `userId` and `agentId` (both
+present, exactly one non-null), the audit event carries `participantAgentId`, and `GET /participants`
+serialises both. The revoke route deliberately keeps `participant: "<axis>:<id>"` — axis-qualified, and
+therefore unambiguous. *(A second, unrelated "only id" sighting in the same hour was a **test** defect:
+a mock returned `{ id }` where the handler reads `createdAt`, producing a 500. Fixed in the mock.)*
+
+**Proof.** `d2-gap-guard` **34/34**; mutation **3 RED**; `tsc -p packages/ai-assistant` **0**. **All four
+new tests are POST-only** — the GET serialisation they enable is therefore **untested** (§10.5).
+
+**★ And it was committed without a docs pass.** The session was cut at 20:04, one sentence into the docs
+edit, so for ~90 minutes this plan, `MASTER-CHECKLIST.md` §2, the `CC-107` register row and the memory all
+asserted that the POST body was uuid-only. **A code commit is not done until the documents that describe
+it agree with it** — this section is that pass, and §10.4's figure carries the correction that came with
+it.

@@ -1,218 +1,23 @@
 # Project memory — Companai / open-mercato
 
-> Detail → daily logs + `JOURNAL.md`; pre-2026-10-12: `extended_deep_memory.md`.
+> Detail → daily logs + `JOURNAL.md`; pre-2026-10-12 and the long 2026-10-17 form: `extended_deep_memory.md` (pre-compaction MEMORY.md verbatim). Docs `companai`; code `workspace/starting-kit`.
 
-## ARCHITECTURE WORKSHOP — `library/architecture/`
-Study platforms ONE AT A TIME against the three poles + escape hatch; map every pole across ALL platforms vs mercato → a clean SRS; then build one-tenant ↔ one-Hermes. **No development before a written requirement. Hermes is NOT forked or edited. Markdown is the source of truth.** **MAPPING FRAME (owner 2026-10-16): NOT limited by what mercato allows** — engineer the best version per pole.
-**Rule 1: docs are claims, code is the authority. Rule 13: a committed number can be wrong — re-measure, and commit the fix *by name*.**
+## RULES (owner)
+- **Rule 1: docs are claims, code is the authority. Rule 13: a committed number can be wrong — re-measure, and commit the fix *by name*.**
+- **Architecture workshop** (`library/architecture/`): one platform at a time vs the three poles + escape hatch → map every pole across all platforms vs mercato → SRS → one-tenant ↔ one-Hermes. No code before a written requirement; Hermes is never forked; markdown is the truth. Not limited by what mercato allows.
+- **DONOR RE-READ, mandatory on every `SR-*`** (`00-PIN-AND-METHOD.md` §4.1): plan fully → open the donor SOURCE at the cited line, never the digest → HARVEST what enriches, REFUSE the worse **by name**.
+- **CHAIN RULE** (§4.2, `L180`): who CREATES · CHECKS · CONSUMES · DELETES. A gate is only as good as what can EXIST in the state it checks.
+- **GLYPHS**: ✅ = the code is fully done; 🟡 = partly. **No remote = deployment state. No caller = defect.**
+- **STANDING FORMAT**: every turn states (1) done, (2) its `CC-nn`, (3) next; update `MASTER-CHECKLIST.md` §2 (short — history goes to `JOURNAL.md`) and run `node scripts/check-master-checklist.mjs`.
+- **ONE DOCUMENT**: `MASTER-CHECKLIST.md` is the single source of truth; the `.html` twin was retired 2026-10-17 — never recreate it.
 
-## ★ THE DONOR RE-READ — mandatory on every `SR-*` build (owner, 2026-10-17)
-Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1. Three steps, in order, the third not optional:
-1. **Plan it fully first** (written requirement, measured inventory, divergences named) — no code yet.
-2. **Then open the donor's SOURCE at the line the `SR-*` row cites** — not the forensics digest, not `07-SYNTHESIS`. Digests answer *"does this mechanism exist?"*; a build needs *"what is the best version of it?"*, and the donor's author was solving the same problem one file away from the quoted line.
-3. **Ask the enrichment question explicitly, in both directions, then proceed:** in that code's *structure, concepts, naming, invariants, constraints, error handling, migration discipline, tests* — what **improves, adds value, enriches, secures, or optimizes** the plan? **HARVEST** what is better (a constraint, a partial index, a state machine, a naming rule that makes a bug unrepresentable, a test). **REFUSE, by name, and say why** what is worse — a donor defect copied because it was there is the most expensive kind of fidelity. Record both in the discharge record.
-**Worked example (`SR-02`):** the digest gave the requirement; reading Multica's migration/entity code added the nullable-`daemon_id` defect (refused → `NOT NULL`) and the unconstrained `name` (harvested → its own partial unique index). Neither was in the digest; both changed the schema.
+## HAZARDS
+- Pure LF, never CRLF, never BOM. **Never `git add -A`** — explicit paths.
+- `check-master-checklist.mjs` and `derive-counts.mjs` re-derive the typed counts (mutation-proven) but **are not wired into CI** (`CC-101`). **A checker is not a control until something calls it.**
+- A bare-word grep is not a census (`^\s*capability\s*:`); CR truth is `tr -cd '\r' | wc -c`.
+- **Run package suites with `workspace/.toolchain/node24/node.exe`**, from inside the package, via `node_modules/jest/bin/jest.js`. Under node 22 two suites fail to LOAD and 109 tests never run.
+- **A green claim measured over a subset is a false claim.** The 2026-10-17 "105 suites / 1,553" was a subset; the package is 135 suites / 1,989 tests and RED.
 
-## ★ THE CHAIN RULE — before concluding anything about a control (owner, 2026-10-17)
-Full text: `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.2; lesson `L180`.
-Read **all four**, not the one the bug report named: **who CREATES** the thing the control examines ·
-**who CHECKS** it · **who CONSUMES** the answer · **who DELETES** it and whether that invalidates every
-cache of it. **A gate is only as good as what can EXIST in the state it checks.** `CC-103`'s gate was
-read three times in one day (me, a hostile critic, the register) and the credential factory **zero**
-times — so the product could not mint the kind of key the gate required, and its own MCP setup would
-have been locked out. **And explain every change in plain words before closing it: that paragraph is a
-review step, not a courtesy** — the owner's one-sentence question found two defects a purpose-built
-hostile critic missed.
-
-## ★ WHAT THE GLYPHS MEAN (owner ruling, 2026-10-17) — apply before re-grading anything
-**✅ = the code for that row is fully done. 🟡 = some of the row's tasks are done, some are not.**
-Nothing else. **"Not committed to a remote" and "no runner has called it yet" are NOT 🟡 reasons** —
-the owner's ruling: we commit **locally** as we work, the remote is prepared later, **private** when
-it exists, **history kept**. A commit is made the moment the work is done, so there is **no
-"uncommitted" marker** and none is needed. The distinction that *does* survive: **code that nothing
-calls is missing code**, not a deployment state (a checker with no CI step is an unfinished row —
-`CC-117`). **No remote = deployment state. No caller = defect.** Written into
-`MASTER-CHECKLIST.md` §5's preamble so the rule travels with the document.
-
-## STANDING FORMAT — every turn MUST state (owner, 2026-10-16, revised 2026-10-17)
-**(1) what was done, (2) its `CC-nn` address in `MASTER-CHECKLIST.md`, (3) what is next** — and update `MASTER-CHECKLIST.md` §2 (LAST DONE + NEXT, kept short on purpose; the full history goes to `JOURNAL.md`, never into §2). **Then run `node scripts/check-master-checklist.mjs`** and let it fail the turn if a typed count no longer matches the tables.
-
-## ★ ONE DOCUMENT, NOT TWO (owner ruling 2026-10-17)
-**`library/development/MASTER-CHECKLIST.md` is THE single source of truth. `MASTER-CHECKLIST.html` was RETIRED the same day** — it held the same content in a second, hand-synced copy and the copy drifted: its open-work view was measured **25 of 54 rows behind** (all eleven audit findings missing) while its headline counts stayed right, because the headline was *computed* and the list was *typed*. **Two mirrors cannot hold one truth — do not create a second copy of it.** Deep records (`AUDIT-*`, `PLAN-*`, `DECISION-*`) and the running history (`JOURNAL.md`) are separate by design and stay.
-
-## Standing hazards
-- **MASTER-CHECKLIST.md is measured, not trusted** — `scripts/check-master-checklist.mjs` re-derives §1/§4/§5's typed counts from their own tables (47 rows / 12 phases / 32·9·4·2; 54 open rows; 110 register rows / 56 closed) and fails on drift. `scripts/derive-counts.mjs` re-derives 78 of 321 from `platform_points.md`'s appendix boxes. Mutation-proven: `scripts/__tests__/check-master-checklist.mutations.mjs`, **5/5 RED**. **Neither script is wired into CI yet** — they are built but not enforced, and wiring them is `CC-101`'s work.
-- Pure LF, never CRLF; never a BOM.
-- **A bare-word grep is NOT a declaration census** — use `^\s*capability\s*:`. Git-Bash `grep -c` on CR LIES; byte truth is `tr -cd '\r' < f | wc -c`. **Never `git add -A`** — explicit paths.
-- **★ A CHECKER IS NOT A CONTROL UNTIL SOMETHING CALLS IT (found 2026-10-17, `CC-101`).** Four of seven drift checkers existed, passed their own tests and were mutation-proven — and were **called by nothing**. Before writing ✅ on any tooling item, name the caller: a CI step, a pre-commit hook, a gate. If the answer is "you can run it by hand", the honest state is **built but NOT ENFORCED**. *(The two new scripts above are recorded in exactly this state.)*
-- **★ A ✅ IS A CLAIM ABOUT THE BUILD, so it is the most dangerous glyph in the register.** When re-verifying, re-read the *caller*, not the artefact. `ci.yml:499` and `:509` are the only two checker invocations of seven — measured by reading the workflow, not by listing `package.json` scripts.
-- **★ THE ONE NUMBER'S DERIVATION (measured 2026-10-17):** 78 done / 321 units / 24.3%. The rule is at `platform_points.md` §"How the numbers are derived": sections A–K, a line starting `- ` is a whole point, `- ` **with** `▸ n/N` is a split parent (a unit, never done), `-   - ` is a sub-point, and **a line with no box glyph (☑☐⬜🟡✅) is prose, not a unit** — that last clause is what stops the over-count (indented `*(was PART)*` notes all start with `- `).
-
-## Live code frontier (`JOURNAL.md`)
-**LAST DONE = the master checklist was consolidated into ONE markdown file — 2026-10-17, and the drift it fixed.** The owner's ruling: stop keeping `MASTER-CHECKLIST.html` and `.md` as two hand-synced copies. The `.md` is now the only one (485 lines, down from the HTML's 1,072-line twin), §2's expanding history was cut to two lines (it lives in `JOURNAL.md`), §4 now lists **all 54** open register rows where the HTML's view listed 29, and two scripts make the typed counts un-driftable: `scripts/check-master-checklist.mjs` (47 rows / 12 phases / 32·9·4·2; 110 register rows / 56 closed / 54 open — all PASS) mutation-proven **5/5 RED**, and `scripts/derive-counts.mjs` (78/321 re-derived from the appendix boxes, reproduces exactly). **The HTML was `git rm`'d; it is in history, do not recreate it.**
-**LAST DONE (code) = the ten-analyst donor cross-check — 2026-10-17 (night), AUDITED and RECORDED, `CC-101`…`CC-111` opened.** No code written. Ten third-person hostile critics (one per delivered slice) re-read each donor's SOURCE; **every load-bearing claim re-verified by me against the real code before it entered a register.** Record: `library/development/AUDIT-2026-10-17-donor-crosscheck.md` (392 lines; claims stamped **[V]** / **[A]** / **[X]**). **VERDICT: 9 of 10 slices REVISIT, 1 KEEP-partial.** Register: **56 closed · 54 open · 110.**
-- **★ THE THROUGH-LINE — three failure modes, every one a DECLARED control that does nothing:** **(1) a check that never runs** — `ci.yml` runs 2 of 7 drift checkers (`:499`, `:509`); digital-twins / escape-hatches / one-truth / two-reads `:fail` are **called by nothing** (not CI, not `.husky/pre-commit`), so *"drift breaks the build"* (`SR-38/39/41/46`) was a claim, not a fact → **all four revert ✅ → 🟡 built but NOT ENFORCED** (the artefacts are sound; the claim about them was the defect). **(2) a control that discards its answer** — `authorizeEntityRead` (`business-ir-run.ts:214-251`) returns a boolean and throws away the `SearchEntityConfig` it just read, which our own `packages/search/ai-tools.ts:86` returns and uses → the column-level projection is **structurally impossible**; obligations computed at `decision.ts:440-463`, only **rendered** at `pendingActService.ts:506`. **(3) a permit written as a default** — `interceptors.ts:246` *"Gate permits the act to run now"* for an unrecognised gate; `agent-binding.ts:52` `{bound: true}` for every non-`ai_worker`, **one `!==` wide**.
-- **★ SECURITY (`CC-103`):** `principal.ts:127` — `isService = kind==='service' || auth.isApiKey === true` → an `ai_worker`-shaped key on a legacy envelope resolves `service` and **passes the gate with its binding never read**; the route above needs only `ai_assistant.view`.
-- **★ `CC-102` INDICTS SLICE 1:** `CC-99` removed a dead control and shipped another — **`deleted_at` has NO writer** (every `WHERE deleted_at IS NULL` inert) and **`retire()` does not exist** while the repo's own error text says *"retire it before registering a replacement"* (`:253`, `:260`). **The omission was applied to the WRONG COLUMN** (`status`/`last_seen_at` correctly withheld as unwritable; `deleted_at` shipped unwritten). Plus `register()` **throws** where the donor **upserts** (`runtime.sql:63-93`, `RETURNING *, (xmax=0) AS inserted`); `daemon_id` is caller-supplied text (donor → persistent UUID `048:1`); no liveness writer (donor's is ONE UPDATE on a request that already happens, `runtime.sql:178-193`, `WHERE status='online'` is load-bearing); null-org caller slides to `resolveAiRuntimeEngine(env)` — the fallback the registry's docblock forbids (`:27`, `:46`).
-- **★ MY OWN WRONG CITATIONS (§14), all corrected by name:** **`principal.ts` DOES exist** (I had it missing — it nearly cost the most serious security finding); `authorizeEntityAccess` is **OURS** (`packages/search`); twin count **3** not 4; census **4,832** not 4,823.
-- **Earlier the same day, `SR-02` slice 1 — an agent is not its runtime — `CC-99` closed.** Commits: code `be3f6258`, docs `df95472`.
-- **Why it existed:** the kernel `Agent` has carried a `runtime` binding since `AH-1` (`ce.ts:128-136`) and **nothing read it** — so the slice's job was to give it its **first reader** (`lib/agent-runtime-registry.ts`), not just add a table.
-- **`ai_agent_runtimes`** = the MACHINE (daemon/host/provider/tenant), **not** `ai_agent_runtime_overrides` (per-tenant config). Four partial unique indexes (house nullable-`org_id` pattern). **`daemon_id NOT NULL`** — the donor's nullable column voids its own uniqueness. `name` unique because the kernel agent stores its binding as **text** (`custom_entities_storage` cannot carry an FK) → resolves **by name**.
-- **Refused by name:** no `status`/`last_seen_at` (no writer exists → same dead-control defect), no `runtime_mode`/`device_info`, no CHECK on `provider` (vocabulary grows; validated at the repository boundary).
-- **`resolveTenantRuntime`**: 3 answers, 2 refusals — nothing falls back, nothing picks "the first". Selector: `engine` → `tenantRuntime.provider` → `AI_RUNTIME_ENGINE` → `opencode`.
-- **Proof:** 64 tests / 4 suites (9·19·11·25); **12/12 mutations**; **133 suites / 1,943 tests green under the pinned Node 24**; `tsc` 0.
-- **★ ALWAYS run the package suite with `workspace/.toolchain/node24/node.exe`** — under node 22.22.2 it reads "1,834/1,834 pass, 2 suites failing to LOAD" while **109 tests never ran**. A suite that fails to load reports no failures.
-- **★ `CC-100` OPEN:** the MikroORM snapshot is stale AND consumed — holds neither `ai_agent_bindings` nor `ai_agent_runtimes`; `commands.ts:100` decides from it and `migrator.create()` diffs against it. Fix = regenerate against a live DB, never hand-edit.
-**LAST DONE (docs, 2026-10-17) = the glyph rule applied and the register re-graded, `51e94f7`.** `CC-113`
-and `CC-116` → ✅ closed; **`CC-117` opened** (`check:client-boundaries` is called by nothing — and the
-repo has **eight** `check:*` checkers, not the seven `CC-101`'s message claimed); `SR-38` → ✅ (enforcing
-at `ci.yml:533`, proven); `SR-39`/`SR-41`/`SR-46` stay 🟡 for measured reasons that are **not** the old
-"called by nothing" note. Register **60 closed · 56 open · 116 total**. `docs.yml` committed.
-**★ My own error, twice the same shape:** I reported "14/14 mutations RED" from `tail`'s exit code, not
-the suite's — two mutations (M3/M14) had gone stale pinning the pre-CC-116 counts. Fixed and re-proven
-with the exit status captured directly. **Never read `$?` through a pipe.**
-**LAST DONE (code+docs, 2026-10-17) = `CC-117` closed, `CC-118` opened, `7851fc39` + `308234c`.** The
-eighth `check:*` checker is now called — `check:client-boundaries`, as a **REPORT** step, because
-`--fail` exits **1** today: **174** backend page roots carry a top-level `"use client"`, **74** client
-page roots exceed 300 LOC, and `.ai/client-boundary-allowlist.json` **does not exist**, so every
-backend page root is unallowlisted *by construction* — the gate is unreachable, not strict. All **eight**
-checkers now have a caller. `prove-ci-wiring.mjs` gained a `mode: 'report'` case that proves the checker
-**detects** while saying plainly that CI does **not gate** — two different claims, stated separately.
-`CC-118` = seed the allowlist with a **ratchet that may only shrink** (the `agents-md-budget.baseline.json`
-precedent), never a blanket allowlist (that is the whole-directory exclusion the donor refuted in `CC-110`).
-**★ M3/M14 went stale a THIRD time, so they were fixed at the cause:** both now regex the line and
-**decrement whatever it says**, so they cannot rot; verified against today's 61/56/117 and a hypothetical
-70/50/120.
-**LAST DONE (code+docs, 2026-10-17) = `CC-103` CLOSED, `e8ecde6d` + `7bd5cb1`.** The binding gate
-admitted every kind that was not `ai_worker` (`service`, `system`) with `toolAllowlist: null` — which
-`computeBoundRunScope` reads as **no narrowing**, so a `service` key with `ai_assistant.view` ran any
-agent with its full tool list. It now tests the one kind that passes (`human`) and refuses the rest with
-`not_ai_worker` — the reason the type always declared and nothing produced. **★ A hostile critic found
-TWO HIGH defects in the first attempt, both real:** (1) `api/chat/route.ts` — a *second* dispatch route —
-ran `ai_assistant.chat`, which **cannot be bound** (not a code-declared agent; the manage surface 404s),
-with only `ai_assistant.view`; it now refuses non-humans and gained its **first test**; (2) `lib/auth.ts`
-hardcoded `apiKeySubject()`, so an `ai_worker` key resolved as `service` and the new gate refused every
-MCP caller — fixed to carry the key's kind (`server.ts:357`), with permissions unchanged (`loadAcl`
-parses both prefixes, `rbacService.ts:320`). **WHY BOTH SURVIVED: the coverage gate was blind to the
-door** — after `CC-67`, dispatch goes through `resolveAiRuntimePort`, which was not a dispatch marker.
-**★ A RULE-13 CORRECTION to CC-103's own claim:** "an ai_worker key on a legacy envelope resolves as
-service" is **false** — measured by running `derivePrincipal`, the prefix wins (`:137`); the real
-residual is `isApiKey:true` with a **bare** subject, which no production path produces.
-**Breaking:** a `service` key can no longer run an agent — mark it `ai_worker` and bind it.
-**PROOF:** 113/113 across 10 suites, 3 mutations RED, `tsc` 0. Plan + discharge record:
-`library/development/PLAN-CC-103-binding-gate.md`.
-**LAST DONE (code+docs, 2026-10-17 night) = `CC-102` CLOSED — all five gaps, `b36e4ffa` + `2f372248` + `cd1ec88e`.**
-`SR-02` slice 2: `retire()` (idempotent, scoped like the reads) gives `deleted_at` its first writer; `register()`
-is now the donor's upsert with the partial index's predicate spelled and `(xmax = 0) AS inserted`; `daemon_id`
-is uuid-validated; `touch()` sets `last_seen_at` and nothing else; `organizationScope()` widens an org caller
-to the tenant-level rows and refuses the ambiguity that creates. **The CLI writer (`runtime:register` /
-`runtime:retire` / `runtime:touch`) makes all of it reachable** — the plan's headline item.
-**★ THE THROWAWAY-DB PROOF FOUND A DEFECT IN MY OWN WRITER:** `register()` omitted `created_at`/`updated_at`
-(both NOT NULL, no default; the entity's `onCreate` never fires on a raw-SQL path) so real Postgres refused
-every first registration while all 24 tests passed — a fake EM has no database. Fixed; the fake now enforces
-the same NOT NULL set, and reverting the INSERT turns 8 tests RED.
-**PROOF:** 1330/1330 across 87 suites, 3 mutations RED, `tsc` 0; the liveness migration proven on a real
-PostgreSQL 16 (phases A–E green, planner picks the index unaided). The probe is committed at
-`packages/ai-assistant/src/modules/ai_assistant/migrations/__probes__/ai_agent_runtime_liveness.probe.sql`
-with its run command. Plan: `library/development/PLAN-CC-102-runtime-registry.md` §7.
-**★ LESSON BANKED — a probe's own instrument can be wrong silently:** two of its queries were broken
-(`indispartial` does not exist in `pg_index`; `array_position` returns **NULL** for `int2vector`, so the
-key-direction CASE fell through to ASC for both columns). Read the raw value (`indoption` = `0 3`) before
-trusting a derived one.
-Register: **63 closed · 54 open · 117 total.** `CC-107`/`CC-104`/`CC-106` triggers FIRED with `CC-102`.
-
-**▶ IN PROGRESS — `SR-07` / `CC-107` (a bot is a participant), increment 1 of 8 landed.**
-**★ THE DONOR RE-READ CORRECTED THE REGISTER (L182).** The row said to mirror Zulip's *"TWO PARTIAL
-UNIQUE INDEXES … streams.py:410-418"*. Measured there: **ONE plain `unique_together
-("user_profile","recipient")` over two non-nullable FKs, plus a partial NON-unique index.** Zulip needs no
-two-index trick because **a bot IS a `UserProfile` row** (`is_bot`, `users.py:556`) joining through the
-same FK — it refuses the split our REFUSED list also refuses. So the two partial unique indexes are the
-right shape for OUR schema but they are **ours**, not borrowed. Corrected in the register by name.
-**★ THE CHAIN READ THEN FOUND A LIVE DEFECT (increment 1, CLOSED):** `auth.sub` is a SUBJECT STRING
-(`api_key:<id>` / `ai_worker:<id>`), `ai_chat_conversation_participants.user_id` is a **uuid** column, and
-`api/ai/chat/route.ts` (3 sites) + `api/ai/conversations/route.ts` (1 site) passed the former into the
-latter — so every key-backed caller got `22P02` from Postgres on the first persisted turn. A 500, not a
-wrong answer. `effectiveUserId()`, written for exactly this, was called **zero** times in both files.
-`git log -S` dates it to `1a0239dd` the upstream baseline — **it predates `CC-103`.** Fixed: resolve once
-with `effectiveUserId`, refuse `422 ai_acting_user_required` when a machine acts for nobody.
-**`checkAiChatRateLimit` and `loadAcl` deliberately KEEP `auth.sub` — they are subject-keyed.** Proof:
-105 suites / 1542 tests, 2 mutations RED, `tsc` 0, and a real-Postgres probe committed at
-`packages/ai-assistant/src/modules/ai_assistant/__probes__/acting-user-subject.probe.sql`.
-**Plan: `library/development/PLAN-CC-107-bot-participant.md` §9.** Remaining: `agent_id`,
-`agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls`, two-axis access
-predicate, revoke route, idle-pruning exemption.
-**★ INCREMENT 2 LANDED (`6b78a0ac`): `Migration20261017180000_ai_chat_participant_agent_axis`.**
-`agent_id` (text) + `agent_owner_user_id` (uuid, the bot_owner analogue) and `user_id` now NULLABLE, with
-**four partial unique indexes** (two per axis, two per org scope) and **two NOT-VALID CHECKs** —
-`num_nonnulls(user_id, agent_id) = 1` and a one-sided owner rule — landing in the **SAME** migration,
-closing the register's carried-forward risk rather than deferring it. NOT VALID is deliberate, so the
-repository re-checks at the boundary with a discriminated-union identity.
-**★ TIGHTENING FOUND WHILE WRITING IT:** the two user-axis uniques did NOT exclude retired rows, so a
-revoked participant blocked its own slot at the database while `addParticipant` compensated in application
-code — an invariant enforced nowhere a raw writer would see it.
-**★ THE SAME `auth.sub`-into-a-uuid DEFECT EXISTED IN THE PARTICIPANT ROUTES TOO** (POST, DELETE, context
-loader) — fixed here. The revoke route's path param keeps its **KEY** `userId` (Next.js hands the handler
-that key from the `[userId]` segment) but its **VALUE** names either axis: a bare uuid is a human,
-`agent:<id>` is a machine.
-**★ THE PROBE CAUGHT ME MEASURING WRONG:** a plan taken before `ANALYZE` read as an index design flaw and
-I "fixed" the column order; re-measured after `ANALYZE`, BOTH orderings are chosen. Real cause = stale
-statistics. Ordering kept for symmetry; the false cause removed from the comment.
-**★ AND THE CHECKER CAUGHT ME EDITING WRONG:** my register-row replacement dropped the `☐ open` state
-marker, so the row failed the parse and CC-107 vanished from every count — 3 red checks in one run.
-Proof: 105 suites / 1,553 tests, mutation 3 RED, `tsc` 0, probe green on real PG. Plan
-`PLAN-CC-107-bot-participant.md` §10.
-**▶ INCREMENT 2'S GAP WAS CLOSED AT `8c56428e` (20:03) — AND THAT IS WHERE THE SESSION WAS CUT OFF.** The
-participants POST body now accepts EITHER axis (`userId` uuid or `agentId` text, exactly one via a zod
-refine), the existence check is per-axis (`User` row for a human, `getAgent` for an agent), and the
-response and audit event name the axis (`userId`/`agentId` both, exactly one non-null; `participantAgentId`
-on the event). Proof: d2-gap-guard 34/34, mutation 3 RED, `tsc` 0. **NO DOCS PASS EXISTS FOR IT** — plan
-§10.5, `MASTER-CHECKLIST.md` §2 and the `CC-107` register row, and this file all still said "the POST body
-accepts only a uuid", which became FALSE at 20:03. That sentence is corrected here; the other three still
-carry it and are the first docs edit the next session owes.
-**▶ Remaining in `SR-07`: the idle-pruning rule (item 8), plus two test gaps — and item 8 is NOT code.**
-**No participant pruning exists anywhere in the repo** (only run-registry pruning and OpenCode session-idle
-detection), so item 8 is a RULE to record for whoever builds pruning, not a pending change. The two real
-gaps: `GET /participants`' agent serialisation is untested (the four new tests are POST-only), and
-`canAccessConversation` with an agent caller (`ctx.agentId`) is untested — an agent participant can be
-written but nothing proves it can READ. Also noted, not a defect: `getAgent` is a global registry lookup
-(`agentsById.get`), not tenant-scoped — existence is proven, "enabled for this tenant" is not.
-**★ THE "ONLY ID" FLAW WAS FOUND AND FIXED IN `8c56428e` — traced to the previous agent's own thread.** It
-had two layers: a test mock returned only `{ id }` (a 500, fixed in the mock), and the real one — the POST
-response and audit event reported only `userId`, which is NULL for an agent, so a grant said nothing about
-which machine got access. Now the response carries `userId` + `agentId` (both, exactly one non-null), the
-event carries `participantAgentId`, and the GET list serialises both. The revoke route keeps
-`participant: "<axis>:<id>"` deliberately.
-**★ TWO RED TEST CLASSES FOUND BY THE INTERRUPTION AUDIT (2026-10-17, 20:1x) — neither caused by
-`8c56428e`, both real.** The full `packages/ai-assistant` run is **135 suites / 4 failed / 25 failed tests**
-— the "105 suites / 1,553" proof was a SUBSET and does not reproduce as a package-wide claim.
-(a) `data/__tests__/schema-unique-indexes.test.ts` — `6b78a0ac` flipped the user-axis read index to
-identity-first (`tenant, org, user, conversation`) for symmetry, and this test still asserts the old
-`(tenant, org, conversation, user)`; the ENTITY is the intended shape (§10.3), so the TEST is what is stale.
-(b) `chat-route-cancel-complete` / `chat-route-through-port` / `chat-route-ownership` — all fail
-`requirePrincipal is not a function` at `api/chat/route.ts:291`; the import arrived with `e8ecde6d`
-(CC-103) and the three suites' `jest.mock('@open-mercato/shared/lib/auth/server')` factories never
-learned it (files last touched `be3f6258`). **A route that imports a new guard needs every mock of that
-module updated; the "affected surface" list did not include them.**
-**▶ NEXT after `SR-07` = `CC-104`/`CC-106` (same trigger)
-→ `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
-**→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.
-**★ `CC-119` — THE DATABASE REBUILD MILESTONE, opened 2026-10-17.** It fires **the moment the identity
-step closes** (`SR-02` done + `SR-07` + `SR-12`, which all move the same tables). The `CC-102`/`CC-103`
-migrations are proven only against throwaway containers whose tables were recreated by hand, and `CC-100`
-records the MikroORM snapshot as stale and consumed — so the *chain* has never run in order against a
-database shaped like ours. Deliberately not earlier: a rebuild mid-step would only prove a state about to
-change. Its five checks: full chain from zero with `down()` exercised; a clean `migrator.create()` diff
-(which also settles `CC-100`); every constraint and index present and named; the register's tables
-re-derived from that database; and the app boots and the affected paths run against it.
-Owner decided: **core architecture first — business modules generated from the core workspace.**
-
-**⟡ RESUME INFRASTRUCTURE (2026-10-17) — built so an interruption costs nothing.**
-`where_we_left.md` is now a live six-step resume recipe (set-up → read → **verify before you believe**
-→ plan → prove as you go → close the batch), and `library/development/RESUME-PROMPT.md` holds a
-paste-ready prompt encoding the whole thing. It deliberately carries **no status of its own** — it
-points at `MASTER-CHECKLIST.md` §2 and the memory, so it does not go stale the way the old 2026-08
-snapshot did. Verified toolchain commands are written down in both, including three traps found this
-month: **jest must run from inside the package** (from the repo root it fails with `TS5011` and reports
-"1 failed, 0 total" — a load failure that reads as nothing); **`.bin/*` are shell scripts**, so call
-`node_modules/jest/bin/jest.js` and `node_modules/corepack/dist/corepack.js` directly; and **`yarn`
-resolves to the pinned 4.17.1 only from the project directory**.
+## FRONTIER (2026-10-17)
+`SR-07` / `CC-107` (a bot is a participant): increments 1–2 plus the POST-body gap at `8c56428e` are **built**, and its **docs pass is DONE** (plan §7b/§10.5/§10.6, checklist §2/§4/register, `JOURNAL.md`). What remains: **the package is RED** — 4 suites / 25 tests, neither cause from `8c56428e` (a stale index-order assertion from `6b78a0ac`; three chat-route `jest.mock` factories missing `requirePrincipal` from `e8ecde6d`) — then **two agent-axis test gaps** (GET serialisation; `canAccessConversation` with an agent caller), then **item 8, a RULE** (no participant pruning exists anywhere).
+**NEXT = clear the red.** Then those two tests → `CC-104`/`CC-106` → `SR-12` → `P2-9b`; `CC-119` (DB rebuild) fires when identity closes.
