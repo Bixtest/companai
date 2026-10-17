@@ -508,6 +508,62 @@ jobs:
       - name: Check for time-bomb test literals
         run: yarn check:time-bombs:fail
 
+      # ---------------------------------------------------------------------------------------
+      # DRIFT CHECKERS — CC-101 (requirement: library/development/PLAN-tooling-set-SR-38-39-41-46.md §6)
+      #
+      # Each of these runs ONLY in the mode where it can actually fail. A step that cannot fail is
+      # worse than no step: it manufactures a green tick that reads as enforcement. Before this
+      # change, ci.yml called two of the repo's seven drift checkers; the four requirements below
+      # each say "drift breaks the build" in their own text and drift broke nothing.
+      #
+      # AFTER, MEASURED 2026-10-17 (night) — five steps, two of which can actually fail:
+      #   SR-38 digital-twins      :fail  — green today, ENFORCING
+      #   SR-39 one-truth          plain  — green today, ENFORCING (SKIP path exits 0; see below)
+      #   SR-46 two-reads          plain  — 89 findings today, REPORTING
+      #   SR-47 declared-controls  plain  — 5 of 6 controls uncovered today, REPORTING
+      #   SR-41 escape-hatches     plain  — 169 of 202 holes unnamed today, REPORTING
+      #
+      # Three report rather than enforce because each one is green-hostile on today's tree, and a
+      # step that fires so loudly it gets switched off is worse than a step that publishes a
+      # number. The ratchet that turns each report into a gate is its own register row — the repo
+      # already has this exact pattern in scripts/agents-md-budget.baseline.json (SR-40).
+
+      # SR-38 — digital twins: shape drift breaks the build. GREEN today.
+      - name: Check digital twins (SR-38)
+        run: yarn check:digital-twins:fail
+
+      # SR-39 — one truth: one fact, one canonical copy. GREEN today.
+      # KNOWN LIMITATION, recorded rather than hidden: main() returns 1 only on verdict FAIL, so a
+      # SKIP — fewer than two readable representations — exits 0. That is the "false green" its own
+      # docstring warns about. It is a real control for real drift; the SKIP path stays open until
+      # the checker itself is changed (its own row, not this one's).
+      - name: Check one truth (SR-39)
+        run: yarn check:one-truth
+
+      # SR-46 — two-reads: any setting read twice must be read once.
+      # REPORT-ONLY TODAY: 89 settings are read more than once. The check has no baseline support,
+      # so `:fail` is a permanently red build. Publishing the count every run is the honest middle
+      # state; ratcheting it down is the open row.
+      - name: Report two-reads (SR-46 — report only, not yet enforcing)
+        run: yarn check:two-reads
+
+      # SR-47 — declared controls: a control nobody reads is reported, not shipped.
+      # REPORT-ONLY TODAY, and by the checker's own design: its docstring states the census is
+      # "a REPORT that ships alongside it — a number to watch, not a gate to trip", and names the
+      # census count as the thing to pin as a baseline and ratchet down, exactly as SR-40 does.
+      # Measured: 5 of 6 declared controls have no production consumer — the dead-control shape
+      # this register exists to catch, found in our own repo.
+      - name: Report declared controls (SR-47 — report only, not yet enforcing)
+        run: yarn check:declared-controls
+
+      # SR-41 — escape hatches: a hole must carry a reason.
+      # REPORT-ONLY ON PURPOSE. `:fail` is all-or-nothing and there is no baseline, so it would
+      # report 169 unnamed holes of 202 and break the build on day one. Publishing the number every
+      # run is honest; the baseline that turns it into enforcement is CC-110 and is deliberately
+      # left to that decision.
+      - name: Report escape hatches (SR-41 — report only, not yet enforcing)
+        run: yarn check:escape-hatches
+
       - name: Check agent instruction budget
         # The root AGENTS.md must fit Codex's default 32 KiB project-instruction budget,
         # and the already-oversized root-to-module chains may only shrink (#4484).
