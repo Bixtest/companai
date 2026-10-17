@@ -19,11 +19,13 @@ export type ResolvedAgentBinding =
     }
 
 /**
- * Resolves whether an AI-user principal may run a given agent, from the DB.
+ * Resolves whether a machine principal may run a given agent, from the DB.
  *
- * **Enforcement is fail-closed for AI workers** (owner ruling 2026-10-11): when
- * the acting principal is `ai_worker` and there is no live `ai_agent_bindings`
- * row for `(principalId, agentId)` in the caller's tenant/org, `bound` is false.
+ * **Enforcement is fail-closed for every machine** (owner ruling 2026-10-11;
+ * widened to `service`/`system` by `CC-103`): only a **human** runs an agent
+ * directly. Every other kind — `ai_worker`, `service`, `system`, and any kind
+ * added later — must hold a live `ai_agent_bindings` row for
+ * `(principalId, agentId)` in the caller's tenant/org, or `bound` is false.
  *
  * A **human** principal is never bound here — humans keep today's behaviour
  * (`B4`), so the resolver returns `{ bound: true, … }` with nothing added.
@@ -48,9 +50,26 @@ export async function resolveAgentBinding(input: {
     return { bound: false, reason: 'no_binding' }
   }
 
-  // Human (or other non-AI-worker) principals are not subject to the binding check.
-  if (principal.kind !== 'ai_worker') {
+  // A human runs agents directly — the binding table governs machines (`B4`).
+  //
+  // ★ `CC-103`: the test is for the ONE kind that passes, not the one that
+  // fails. The previous form was `if (principal.kind !== 'ai_worker')`, which
+  // admitted `service` and `system` as well — and a `service` key with
+  // `ai_assistant.view` could therefore run any agent unbound, with the full
+  // declared tool list (`computeBoundRunScope` reads `toolAllowlist: null` as
+  // "no narrowing"). Testing for `human` puts every unknown future kind on the
+  // deny side by construction, which is the posture the donor states as
+  // "private (or any unknown mode) is deny-by-default".
+  if (principal.kind === 'human') {
     return { bound: true, toolAllowlist: null, requiredFeatures: [] }
+  }
+
+  // Every other kind is a machine. Only an `ai_worker` can hold a binding, so a
+  // `service`/`system` principal is refused here rather than passed through: the
+  // binding is a grant, and a credential that cannot be bound holds none. This
+  // finally produces `not_ai_worker`, the reason this type has always declared.
+  if (principal.kind !== 'ai_worker') {
+    return { bound: false, reason: 'not_ai_worker' }
   }
 
   const ctx = {

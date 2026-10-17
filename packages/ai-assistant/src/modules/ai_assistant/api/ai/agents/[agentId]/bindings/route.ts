@@ -6,6 +6,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import type { EntityManager } from '@mikro-orm/postgresql'
+import { ApiKey } from '@open-mercato/core/modules/api_keys/data/entities'
 import { getAgent, loadAgentRegistry } from '../../../../../lib/agent-registry'
 import { hasRequiredFeatures } from '../../../../../lib/auth'
 import { beginAiAssistantMutationGuard } from '../../../../mutation-guard'
@@ -26,7 +27,11 @@ const agentIdParamSchema = z.object({
 })
 
 const createBindingSchema = z.object({
-  principalId: z.string().min(1, 'principalId is required'),
+  // CC-103 — a uuid, not any non-empty string. `ai_agent_bindings.principal_id` is
+  // a `uuid` column, so a malformed id used to reach Postgres and come back as a
+  // 500; more importantly, the id was never checked against anything, so a binding
+  // could name a person, another tenant's credential, or nothing at all.
+  principalId: z.string().uuid('principalId must be a uuid'),
   toolAllowlist: z.array(z.string()).nullable().optional(),
   requiredFeatures: z.array(z.string()).nullable().optional(),
   notes: z.string().max(2000).optional(),
@@ -270,6 +275,39 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     const em = authResult.container.resolve<EntityManager>('em')
     const repo = new AiAgentBindingRepository(em)
 
+    // CC-103 — a binding may only name a principal that can HOLD one. Without
+    // this the row was written with whatever id the caller sent: no uuid, no
+    // existence, no kind, no tenant. A grant to a person is inert (humans never
+    // consult the table), a grant to another tenant's credential is a grant
+    // nobody can see, and a grant to nothing is a dead row that reads as policy.
+    // All four checks run BEFORE the mutation guard so a rejected binding never
+    // enters the approval pipeline.
+    const principalId = bodyResult.data.principalId
+    const principalKey = await em.findOne(ApiKey, { id: principalId, deletedAt: null })
+    if (!principalKey) {
+      return jsonError(
+        400,
+        `No API key "${principalId}" exists; an agent binding names an API key.`,
+        'validation_error',
+      )
+    }
+    if (principalKey.principalKind !== 'ai_worker') {
+      return jsonError(
+        400,
+        `API key "${principalId}" is a service credential (principal_kind=${
+          principalKey.principalKind ?? 'null'
+        }); only an ai_worker credential can hold an agent binding.`,
+        'validation_error',
+      )
+    }
+    if ((principalKey.tenantId ?? null) !== authResult.tenantId) {
+      return jsonError(
+        400,
+        `API key "${principalId}" belongs to a different tenant.`,
+        'validation_error',
+      )
+    }
+
     const guard = await beginAiAssistantMutationGuard({
       container: authResult.container,
       req,
@@ -330,6 +368,13 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
   const principalId = new URL(req.url).searchParams.get('principalId')?.trim()
   if (!principalId) {
     return jsonError(400, 'Query parameter "principalId" is required.', 'validation_error')
+  }
+  // CC-103 — the same uuid rule as POST. A non-uuid here reached a `uuid` column
+  // and came back as a 500 whose `error.message` (raw Postgres text) was echoed
+  // to the caller. No bypass — the tenant/org scope still applied — but a 400 is
+  // the honest answer and the driver's text is not ours to publish.
+  if (!z.string().uuid().safeParse(principalId).success) {
+    return jsonError(400, 'Query parameter "principalId" must be a uuid.', 'validation_error')
   }
 
   try {

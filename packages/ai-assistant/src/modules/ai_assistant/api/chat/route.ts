@@ -1,7 +1,7 @@
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
-import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { getAuthFromRequest, requirePrincipal } from '@open-mercato/shared/lib/auth/server'
 // OPEN — row 28 / R28-3: the chat route reaches the AI runtime THROUGH THE
 // PORT, never by importing an engine. The engine itself (OpenCode today) sits
 // behind the door as one implementation (`opencode-port-adapter.ts`) — see
@@ -274,6 +274,30 @@ export async function POST(req: NextRequest) {
 
   if (!auth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // ★ CC-103 — the dispatch site that has no binding check, and cannot have one.
+  //
+  // This route runs `ai_assistant.chat`, which is NOT a code-declared agent:
+  // `getAgent('ai_assistant.chat')` is undefined, and the manage surface 404s on
+  // an unknown agent, so **no binding row can ever authorise it**. Applying
+  // `resolveAgentBinding` here would refuse every machine forever, and skipping
+  // it left the one path where a `service` key reached an agent with no grant.
+  //
+  // So the decision is made on the principal instead: this endpoint is for
+  // interactive sessions. Machines have the bound route (`/api/ai/chat`, which
+  // resolves the binding and narrows the scope). Refusing here is the same
+  // posture as the resolver: a machine with no grant runs nothing.
+  const principal = requirePrincipal(auth)
+  if (principal?.kind !== 'human') {
+    return NextResponse.json(
+      {
+        error:
+          'This endpoint serves interactive sessions only. A machine principal must use a bound agent route.',
+        code: 'human_principal_required',
+      },
+      { status: 403 },
+    )
   }
 
   try {

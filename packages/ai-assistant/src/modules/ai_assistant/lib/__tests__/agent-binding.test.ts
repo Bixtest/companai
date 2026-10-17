@@ -109,16 +109,45 @@ describe('resolveAgentBinding — CC-27', () => {
     expect(findBindingMock).not.toHaveBeenCalled()
   })
 
-  it('treats a service principal (api_key:) as unbound', async () => {
-    // A service key is not an ai_worker, so it is NOT subject to the binding
-    // check — it keeps today's behaviour (returns bound, no DB read).
+  it('REFUSES a service principal (api_key:) — it cannot hold a binding', async () => {
+    // ★ CC-103 INVERTED THIS TEST. It used to assert `bound: true` on the
+    // reasoning "a service key is not an ai_worker, so it is NOT subject to the
+    // binding check". That reasoning admitted `service` and `system` to the
+    // passthrough, so a service key with `ai_assistant.view` ran any agent
+    // unbound with the full declared tool list. Only `human` passes unbound now.
     findBindingMock.mockResolvedValue(null)
     const result = await resolveAgentBinding({
       em: fakeEm,
       auth: { sub: 'api_key:key-9', tenantId: 'tenant-1', orgId: 'org-1' } as never,
       agentId: 'mod.agent',
     })
-    expect(result).toEqual({ bound: true, toolAllowlist: null, requiredFeatures: [] })
+    expect(result).toEqual({ bound: false, reason: 'not_ai_worker' })
+    expect(findBindingMock).not.toHaveBeenCalled()
+  })
+
+  it('REFUSES a system principal — the platform acting alone holds no grant', async () => {
+    // `system` is a machine with no credential behind it (principal.ts:194-210).
+    // It reaches the same branch as `service` and must be refused for the same
+    // reason: it cannot be bound, so it holds no grant.
+    findBindingMock.mockResolvedValue(null)
+    const result = await resolveAgentBinding({
+      em: fakeEm,
+      auth: {
+        sub: 'system-1',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+        principal: {
+          id: 'system-1',
+          kind: 'system',
+          onBehalfOfUserId: null,
+          displayName: null,
+          tenantId: 'tenant-1',
+          organizationId: 'org-1',
+        },
+      } as never,
+      agentId: 'mod.agent',
+    })
+    expect(result).toEqual({ bound: false, reason: 'not_ai_worker' })
     expect(findBindingMock).not.toHaveBeenCalled()
   })
 })

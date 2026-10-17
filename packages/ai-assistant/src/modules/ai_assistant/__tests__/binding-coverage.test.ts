@@ -78,6 +78,29 @@ const RUNTIME_ADAPTERS = [
 ]
 
 /**
+ * `CC-103` — dispatch sites gated by **principal kind** rather than by a binding
+ * row, because the agent they run cannot be bound at all.
+ *
+ * `api/chat/route.ts` runs `ai_assistant.chat`, which is not a code-declared
+ * agent: `getAgent('ai_assistant.chat')` is undefined and the manage surface
+ * 404s on an unknown agent, so **no binding row can ever authorise it**. Applying
+ * the resolver there would refuse every machine forever; skipping it left the one
+ * path where a `service` key reached an agent with no grant. It now refuses every
+ * non-`human` principal instead, and the pin below keeps that true.
+ *
+ * A file belongs here ONLY if it can be shown that the agent it runs cannot be
+ * bound. If a future route could be bound, it belongs in `AGENT_DISPATCH_ROUTES`.
+ */
+const GATED_BY_PRINCIPAL_KIND = [join('api', 'chat', 'route.ts')]
+
+/**
+ * `CC-103` — the file that DEFINES the door. It matches `resolveAiRuntimePort(`
+ * on its own `export function` line, so it would read as a caller. It is the
+ * thing being reached, exactly as `RUNTIME_DEFINITION` is.
+ */
+const DOOR_DEFINITION = join('lib', 'resolve-ai-runtime-port.ts')
+
+/**
  * `CC-67` — the files whose dispatch now happens THROUGH the door, and which
  * must therefore keep consulting the binding themselves (they are the gate).
  * The scan below cannot see them as dispatchers any more (they no longer call a
@@ -95,6 +118,15 @@ const DISPATCH_MARKERS = [
   // the last test in this file enforces that.
   'runAiAgentText',
   'runAiAgentObject',
+  // ★ CC-103 — and the DOOR. `CC-67` moved dispatch behind a port, so a file can
+  // now start a run without naming `runAiAgent*` at all: it calls
+  // `resolveAiRuntimePort(...)` and then `port.startRun(...)`. Neither marker was
+  // in this list, so `api/chat/route.ts` — which runs `ai_assistant.chat` through
+  // the port and consults NO binding — was invisible to this gate. That is
+  // exactly the hole this suite exists to catch, and it survived the gate because
+  // the gate could not see the door. Only callers import `resolveAiRuntimePort`;
+  // the module that defines it does not call it, so no exclusion is needed.
+  'resolveAiRuntimePort',
 ]
 
 /**
@@ -228,11 +260,13 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     const all = walk(MODULE_ROOT)
     const offenders: string[] = []
     const gatedCallers: string[] = []
+    const gatedByKind: string[] = []
 
     for (const abs of all) {
       const rel = relative(MODULE_ROOT, abs)
       if (AGENT_DISPATCH_ROUTES.includes(rel)) continue
       if (rel === RUNTIME_DEFINITION) continue
+      if (rel === DOOR_DEFINITION) continue
       // `CC-67` — the adapters ARE the door: the one legitimate place that names
       // the engine. They are not business callers and do not own the gate.
       if (RUNTIME_ADAPTERS.includes(rel)) continue
@@ -244,6 +278,10 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
       // Also alias-aware, so `resolveAgentBinding as gate` + `gate(...)` counts.
       if (resolveBindingCallRe(raw).test(stripComments(raw))) {
         gatedCallers.push(rel)
+      } else if (GATED_BY_PRINCIPAL_KIND.includes(rel)) {
+        // `CC-103` — gated by principal kind instead, because the agent it runs
+        // cannot be bound. The pin below asserts it really does refuse machines.
+        gatedByKind.push(rel)
       } else {
         offenders.push(rel)
       }
@@ -267,6 +305,39 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
         )).toBe(true)
       }
     }
+  })
+
+  it('CC-103 — a principal-kind-gated dispatch site really refuses non-human callers', () => {
+    // The allowlist above is only honest if each entry earns it. A route that is
+    // exempt from the binding gate because it CANNOT be bound must still refuse
+    // machines — otherwise "gated by principal kind" is a label on an open door.
+    expect(GATED_BY_PRINCIPAL_KIND.length).toBeGreaterThan(0)
+    for (const rel of GATED_BY_PRINCIPAL_KIND) {
+      const src = stripComments(read(rel))
+      expect(src).toMatch(/requirePrincipal\s*\(/)
+      expect(src).toMatch(/kind\s*!==\s*'human'/)
+      expect(src).toMatch(/403/)
+    }
+  })
+
+  it('CC-103 — every door caller is either binding-gated or principal-gated', () => {
+    // The scan above is only as good as its markers. This pins the OUTCOME: no
+    // file in the module calls `resolveAiRuntimePort(` without one of the two
+    // gates. It is the assertion that would have failed for `api/chat/route.ts`
+    // before `CC-103`.
+    const offenders: string[] = []
+    for (const abs of walk(MODULE_ROOT)) {
+      const rel = relative(MODULE_ROOT, abs)
+      if (rel === RUNTIME_DEFINITION) continue
+      if (rel === DOOR_DEFINITION) continue
+      if (RUNTIME_ADAPTERS.includes(rel)) continue
+      const raw = readFileSync(abs, 'utf8')
+      if (!/resolveAiRuntimePort\s*\(/.test(stripComments(bodyAfterImports(raw)))) continue
+      const gatedByBinding = resolveBindingCallRe(raw).test(stripComments(raw))
+      const gatedByKind = GATED_BY_PRINCIPAL_KIND.includes(rel)
+      if (!gatedByBinding && !gatedByKind) offenders.push(rel)
+    }
+    expect(offenders).toEqual([])
   })
 
   it('CC-57 / CC-67 — the one known in-process dispatch site is GATED (positive pin)', () => {

@@ -14,6 +14,10 @@ const listForAgentMock = jest.fn()
 const upsertMock = jest.fn()
 const revokeMock = jest.fn()
 const guardMock = jest.fn()
+const findOneMock = jest.fn()
+
+/** A real-shaped uuid: `principalId` is a uuid column and the schema now says so. */
+const KEY_ID = '11111111-1111-4111-8111-111111111111'
 
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: (...args: unknown[]) => authMock(...args),
@@ -36,6 +40,12 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
 
 jest.mock('../../../../../mutation-guard', () => ({
   beginAiAssistantMutationGuard: (...args: unknown[]) => guardMock(...args),
+}))
+
+jest.mock('@open-mercato/core/modules/api_keys/data/entities', () => ({
+  // CC-103 — the route looks the principal up by id; the class is only a query
+  // argument here, so a stub keeps the test about the route contract.
+  ApiKey: class ApiKey {},
 }))
 
 jest.mock('../../../../../../data/repositories/AiAgentBindingRepository', () => ({
@@ -100,23 +110,27 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
       isSuperAdmin: false,
     })
     createRequestContainerMock.mockResolvedValue({
-      resolve: (key: string) =>
-        key === 'rbacService'
-          ? {
-              loadAcl: loadAclMock,
-              hasAllFeatures: (required: string[], held: string[]) =>
-                required.every((f) => held.includes(f)),
-            }
-          : {},
+      resolve: (key: string) => {
+        if (key === 'rbacService') {
+          return {
+            loadAcl: loadAclMock,
+            hasAllFeatures: (required: string[], held: string[]) =>
+              required.every((f) => held.includes(f)),
+          }
+        }
+        if (key === 'em') return { findOne: findOneMock }
+        return {}
+      },
     })
     guardMock.mockResolvedValue({
       blockedResponse: undefined,
       runAfterSuccess: jest.fn(async () => undefined),
     })
+    findOneMock.mockResolvedValue({ id: KEY_ID, principalKind: 'ai_worker', tenantId: 'tenant-1' })
     listForAgentMock.mockResolvedValue([])
     upsertMock.mockResolvedValue({
       id: 'b-1',
-      principalId: 'key-1',
+      principalId: KEY_ID,
       agentId: 'mod.agent',
       toolAllowlist: null,
       requiredFeatures: [],
@@ -133,6 +147,7 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
   })
 
   it('GET lists the bindings for the agent', async () => {
+    findOneMock.mockResolvedValue({ id: KEY_ID, principalKind: 'ai_worker', tenantId: 'tenant-1' })
     listForAgentMock.mockResolvedValue([])
     const res = await GET(jsonReq(BASE, 'GET') as never, ctx('mod.agent') as never)
     expect(res.status).toBe(200)
@@ -148,7 +163,7 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
   it('POST creates a binding (200) and passes the payload to the repo', async () => {
     const res = await POST(
       jsonReq(BASE, 'POST', {
-        principalId: 'key-1',
+        principalId: KEY_ID,
         toolAllowlist: ['tool.a'],
         requiredFeatures: ['feat.x'],
       }) as never,
@@ -159,7 +174,7 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
     expect(body.ok).toBe(true)
     expect(upsertMock).toHaveBeenCalledWith(
       {
-        principalId: 'key-1',
+        principalId: KEY_ID,
         agentId: 'mod.agent',
         toolAllowlist: ['tool.a'],
         requiredFeatures: ['feat.x'],
@@ -181,7 +196,7 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
   it('POST 403s when the caller lacks the manage feature', async () => {
     loadAclMock.mockResolvedValue({ features: ['ai_assistant.view'], isSuperAdmin: false })
     const res = await POST(
-      jsonReq(BASE, 'POST', { principalId: 'key-1' }) as never,
+      jsonReq(BASE, 'POST', { principalId: KEY_ID }) as never,
       ctx('mod.agent') as never,
     )
     expect(res.status).toBe(403)
@@ -190,13 +205,13 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
 
   it('DELETE revokes with ?principalId=', async () => {
     const res = await DELETE(
-      jsonReq(`${BASE}?principalId=key-1`, 'DELETE') as never,
+      jsonReq(`${BASE}?principalId=${KEY_ID}`, 'DELETE') as never,
       ctx('mod.agent') as never,
     )
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.revoked).toBe(true)
-    expect(revokeMock).toHaveBeenCalledWith('key-1', 'mod.agent', {
+    expect(revokeMock).toHaveBeenCalledWith(KEY_ID, 'mod.agent', {
       tenantId: 'tenant-1',
       organizationId: 'org-1',
     })
@@ -211,13 +226,67 @@ describe('CC-27 — /api/ai_assistant/ai/agents/[agentId]/bindings', () => {
   it('unknown agentId 404s on every verb', async () => {
     const g = await GET(jsonReq(BASE, 'GET') as never, ctx('mod.nope') as never)
     const p = await POST(
-      jsonReq(BASE, 'POST', { principalId: 'key-1' }) as never,
+      jsonReq(BASE, 'POST', { principalId: KEY_ID }) as never,
       ctx('mod.nope') as never,
     )
     const d = await DELETE(
-      jsonReq(`${BASE}?principalId=key-1`, 'DELETE') as never,
+      jsonReq(`${BASE}?principalId=${KEY_ID}`, 'DELETE') as never,
       ctx('mod.nope') as never,
     )
     expect([g.status, p.status, d.status]).toEqual([404, 404, 404])
+  })
+
+  // ── CC-103 — a binding may only name a principal that can HOLD one ──────────
+  // Before this, `principalId` was `z.string().min(1)`: any non-empty string was
+  // written, with no existence, kind or tenant check. Each case below was a 200
+  // that created a row reading as policy.
+
+  it('POST 400s when the principal is not a uuid', async () => {
+    const res = await POST(
+      jsonReq(BASE, 'POST', { principalId: 'key-1' }) as never,
+      ctx('mod.agent') as never,
+    )
+    expect(res.status).toBe(400)
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
+  it('POST 400s when no such API key exists', async () => {
+    findOneMock.mockResolvedValue(null)
+    const res = await POST(
+      jsonReq(BASE, 'POST', { principalId: KEY_ID }) as never,
+      ctx('mod.agent') as never,
+    )
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error).toContain('No API key')
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
+  it('POST 400s when the key is a service credential, not an ai_worker', async () => {
+    findOneMock.mockResolvedValue({ id: KEY_ID, principalKind: 'service', tenantId: 'tenant-1' })
+    const res = await POST(
+      jsonReq(BASE, 'POST', { principalId: KEY_ID }) as never,
+      ctx('mod.agent') as never,
+    )
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error).toContain('only an ai_worker credential can hold an agent binding')
+    expect(upsertMock).not.toHaveBeenCalled()
+  })
+
+  it('POST 400s when the key belongs to another tenant', async () => {
+    findOneMock.mockResolvedValue({
+      id: KEY_ID,
+      principalKind: 'ai_worker',
+      tenantId: 'tenant-OTHER',
+    })
+    const res = await POST(
+      jsonReq(BASE, 'POST', { principalId: KEY_ID }) as never,
+      ctx('mod.agent') as never,
+    )
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error).toContain('different tenant')
+    expect(upsertMock).not.toHaveBeenCalled()
   })
 })

@@ -3,7 +3,7 @@ import type { AwilixContainer } from 'awilix'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { hasAllFeatures } from '@open-mercato/shared/lib/auth/featureMatch'
-import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
+import { apiKeySubject, aiWorkerSubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('ai_assistant')
 
@@ -81,7 +81,19 @@ export async function authenticateMcpRequest(
       return { success: false, error: 'Invalid or expired API key' }
     }
 
-    const userId = apiKeySubject(apiKey.id)
+    // ★ CC-103 — the subject must carry the key's KIND, exactly as the auth
+    // boundary does (`shared/src/lib/auth/server.ts:357`). Hardcoding
+    // `api_key:` made every MCP caller a `service` principal, so an `ai_worker`
+    // credential was indistinguishable from a service integration on this path.
+    // That was invisible while `service` passed the binding gate; the moment the
+    // gate stopped admitting `service`, it refused every machine here —
+    // including correctly-bound AI workers. `RbacService.loadAcl` parses the
+    // prefix and resolves both kinds from the same key row (`rbacService.ts:320`),
+    // so the permissions are unchanged; only the kind is now true.
+    const userId =
+      apiKey.principalKind === 'ai_worker'
+        ? aiWorkerSubject(apiKey.id)
+        : apiKeySubject(apiKey.id)
 
     const rbacService = container.resolve('rbacService') as {
       loadAcl: (
