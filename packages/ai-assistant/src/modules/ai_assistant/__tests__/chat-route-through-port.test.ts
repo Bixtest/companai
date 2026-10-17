@@ -24,6 +24,18 @@ const mockGetUserRoleIds = jest.fn()
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   __esModule: true,
   getAuthFromRequest: (...args: unknown[]) => mockGetAuthFromRequest(...args),
+  // `CC-103` (`e8ecde6d`) added `requirePrincipal` to the chat route's imports. A
+  // mock of this module that omits it turns every POST into
+  // "requirePrincipal is not a function" — a load-order defect wearing a 500's
+  // clothes. Mirrors the real helper: a blank subject identifies nobody, and a
+  // subject prefix selects the kind (`shared/src/lib/auth/principal.ts:121`).
+  requirePrincipal: (auth: { sub?: string; keyId?: string | null } | null) => {
+    if (!auth?.sub || !auth.sub.trim()) return null
+    const sub = auth.sub
+    if (sub.startsWith('ai_worker:')) return { kind: 'ai_worker', id: auth.keyId ?? sub.slice(10) }
+    if (sub.startsWith('api_key:')) return { kind: 'service', id: auth.keyId ?? sub.slice(8) }
+    return { kind: 'human', id: sub }
+  },
 }))
 
 jest.mock('@open-mercato/shared/lib/di/container', () => ({

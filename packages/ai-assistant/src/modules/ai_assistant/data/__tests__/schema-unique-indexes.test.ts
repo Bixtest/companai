@@ -72,8 +72,19 @@ describe('AI assistant nullable organization unique indexes', () => {
       'utf8',
     )
 
+    // Rule 13: `6b78a0ac` reordered this index to lead with `user_id` (identity
+    // first, mirroring the agent axis), so the previous expectation pinned an
+    // order the entity no longer declares. The assertion is about the
+    // DECLARATION, so it must read the declaration.
+    //
+    // ★ AND THAT REORDER MADE THIS INDEX A DUPLICATE: it is now column-for-column
+    // identical to `ai_chat_conv_participants_tenant_org_user_conv_idx` — same
+    // table, same columns, same `deleted_at is null` predicate, both non-unique.
+    // Two identical indexes cannot both be needed, and Postgres maintains both on
+    // every write. Recorded in `CC-107`, not silently accepted here: this test
+    // asserts what the entity SAYS, it does not bless the shape.
     expect(entitySource).toContain(
-      'create index "ai_chat_conv_participants_active_conv_user_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "conversation_id", "user_id") where "deleted_at" is null',
+      'create index "ai_chat_conv_participants_active_conv_user_idx" on "ai_chat_conversation_participants" ("tenant_id", "organization_id", "user_id", "conversation_id") where "deleted_at" is null',
     )
   })
 
