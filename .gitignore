@@ -156,6 +156,26 @@ analysis/d2-gap/d2.err
 # from the .zip files sitting next to them (which are themselves ignored above).
 library/architecture/platforms/_extracted/
 
+# The same hazard, one level over, found 2026-10-17: `workspace/platforms/_extract/`
+# holds 9,645 extracted donor files (buzz, openrig, paperclip and the rest) — a tree
+# one careless `git add -A` away from being committed, which is exactly the incident
+# this file's `git add` rule exists to prevent. The archives are ignored by `*.zip`;
+# this catches the extractions.
+workspace/platforms/_extract/
+
+# A stray SECOND copy of the platform zip folder at the repo root, holding the same
+# archives as `library/architecture/platforms/` (already covered by `*.zip`) plus a
+# 346-byte `references.md` that is NOT the canonical one — the tracked file is
+# `library/architecture/platforms/references.md` (546 bytes), and the two differ.
+# Ignored rather than deleted: it is the owner's to remove, and ignoring costs nothing.
+# NOTE the leading slash: a bare `platforms/` matches at ANY depth and would also
+# swallow `library/architecture/platforms/`, which is TRACKED (its `references.md` is
+# the canonical one). Root-anchored, so only the stray top-level copy is ignored.
+/platforms/
+
+# A 204-byte runtime log from a local run. Regenerable, and it is a log.
+debug.log
+
 # A SECOND copy of the Hermes forensics study, placed inside the workshop folder so
 # the architecture stage reads as one tree. The original `library/hermes-forensics/`
 # is already versioned (14 files); a duplicate adds no history and would silently
