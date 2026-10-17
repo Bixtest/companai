@@ -26,6 +26,28 @@ interface FakeTx {
   persist: (row: unknown) => { flush: () => Promise<void> }
 }
 
+/**
+ * The real column shape of `ai_agent_runtimes`, taken from
+ * `Migration20261017120000_ai_agent_runtimes.up()` — the parts a fake must not
+ * get wrong.
+ *
+ * ★ `CC-102` — the NOT-NULL-no-default set is the whole point of this table.
+ * The first version of `register` supplied `last_seen_at` but NOT these two, and
+ * every test passed, because a fake EM has no database. The throwaway-Postgres
+ * proof refused the write. So the fake now enforces the same rule Postgres does,
+ * and a missing column fails HERE, where it can be fixed.
+ */
+const AI_AGENT_RUNTIMES_NOT_NULL_NO_DEFAULT = ['created_at', 'updated_at']
+
+/** Pull the parenthesised column list out of a raw INSERT statement. */
+function insertColumnList(sql: string): string[] {
+  const match = sql.match(/insert\s+into\s+\S+\s*\(([^)]*)\)/i)
+  if (!match) return []
+  return match[1]
+    .split(',')
+    .map((column) => column.trim().replace(/^"|"$/g, ''))
+}
+
 function makeEm(options: {
   executeError?: unknown
   executeResult?: Array<Record<string, unknown>>
@@ -42,6 +64,22 @@ function makeEm(options: {
     execute: async (sql: string, params: unknown[]) => {
       calls.execute += 1
       executed.push({ sql, params })
+      // ★ CC-102 — the fake now refuses what Postgres refuses.
+      if (/^\s*insert\s+into\s+ai_agent_runtimes/i.test(sql)) {
+        const supplied = insertColumnList(sql)
+        const missing = AI_AGENT_RUNTIMES_NOT_NULL_NO_DEFAULT.filter(
+          (column) => !supplied.includes(column),
+        )
+        if (missing.length > 0) {
+          throw Object.assign(
+            new Error(
+              `null value in column "${missing[0]}" of relation "ai_agent_runtimes" ` +
+                'violates not-null constraint',
+            ),
+            { code: '23502', constraint: null, detail: `Failing row contains (…${missing.join(', ')}…).` },
+          )
+        }
+      }
       if (options.executeError) throw options.executeError
       return options.executeResult ?? [{ id: 'rt-1', inserted: true }]
     },
@@ -161,6 +199,45 @@ describe('SR-02 / CC-102 — AiAgentRuntimeRepository.register', () => {
       'hermes',
       JSON.stringify({}),
     ])
+  })
+
+  // ★ CC-102 — the defect the throwaway-database proof of the liveness migration
+  // found: the entity's `onCreate` default is ORM-level and does not run on this
+  // raw-SQL path, so a bare INSERT that omits the two NOT NULL columns is refused
+  // by real Postgres while every fake-based test still passed.
+  it('supplies created_at and updated_at in the INSERT — the entity onCreate default does not run here', async () => {
+    const { em, executed } = makeEm()
+    const repo = new AiAgentRuntimeRepository(em)
+
+    await repo.register({ daemonId: DAEMON, name: 'primary', provider: 'hermes' }, CTX)
+
+    // Column list …
+    expect(executed[0].sql).toMatch(/\(tenant_id, organization_id, daemon_id, name, provider, metadata, last_seen_at, created_at, updated_at\)/)
+    // … and the matching three `now()` values.
+    expect(executed[0].sql).toMatch(/values \(\?, \?, \?, \?, \?, \?::jsonb, now\(\), now\(\), now\(\)\)/)
+  })
+
+  it('the fake enforces the NOT NULL columns — a statement that omits them is refused', async () => {
+    // This is the proof that the guard above is live and cannot rot silently:
+    // it exercises `execute` directly with the exact SQL the bug produced.
+    const { em } = makeEm()
+    const raw = (em as unknown as {
+      getConnection: () => { execute: (sql: string, params: unknown[]) => Promise<unknown> }
+    }).getConnection()
+
+    await expect(
+      raw.execute(
+        `insert into ai_agent_runtimes (tenant_id, daemon_id, name, provider) values (?, ?, ?, ?)`,
+        ['t', 'd', 'n', 'hermes'],
+      ),
+    ).rejects.toMatchObject({ code: '23502', message: /violates not-null constraint/ })
+
+    await expect(
+      raw.execute(
+        `insert into ai_agent_runtimes (tenant_id, daemon_id, name, provider, metadata, last_seen_at) values (?, ?, ?, ?, ?::jsonb, now())`,
+        ['t', 'd', 'n', 'hermes', '{}'],
+      ),
+    ).rejects.toMatchObject({ code: '23502' })
   })
 
   it('trims the daemon id and the binding name', async () => {

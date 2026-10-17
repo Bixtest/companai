@@ -335,10 +335,16 @@ export class AiAgentRuntimeRepository {
 
     try {
       return await this.em.transactional(async (tx) => {
+        // `created_at`/`updated_at` are supplied HERE and not left to the entity's
+        // `onCreate` default: that default is ORM-level and never runs on this
+        // path. Both columns are NOT NULL with no database default, so a raw
+        // INSERT that omits them is refused by Postgres — which is exactly what
+        // the throwaway-database proof of this migration found, and why the test
+        // below asserts the column list rather than trusting the fake.
         const rows = (await tx.getConnection().execute(
           `insert into ai_agent_runtimes
-             (tenant_id, organization_id, daemon_id, name, provider, metadata, last_seen_at)
-           values (?, ?, ?, ?, ?, ?::jsonb, now())
+             (tenant_id, organization_id, daemon_id, name, provider, metadata, last_seen_at, created_at, updated_at)
+           values (?, ?, ?, ?, ?, ?::jsonb, now(), now(), now())
            ${conflictTarget}
            do update set
              name = excluded.name,
