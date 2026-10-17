@@ -87,6 +87,10 @@ describe('ensureMcpApiKey', () => {
         tenantId: 'tenant-1',
         organizationId: null,
         roles: ['role-1'],
+        // ★ CC-103 — a provisioned MCP key is an AI worker, not a service key.
+        // Two creators exist (this one and the settings route); fixing only one
+        // would leave this path refused by the binding gate.
+        principalKind: 'ai_worker',
         createdBy: 'user-1',
       }),
       expect.anything(),

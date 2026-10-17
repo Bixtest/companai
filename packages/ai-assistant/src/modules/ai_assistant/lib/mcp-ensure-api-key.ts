@@ -121,6 +121,11 @@ export async function ensureMcpApiKey(options: EnsureMcpApiKeyOptions): Promise<
       tenantId: owner.tenantId ?? null,
       organizationId: null,
       roles: roleIds,
+      // ★ CC-103 — same reason as the settings route: an MCP key is a machine
+      // acting as an AI worker, and a `service` key is refused by the binding
+      // gate. Two creators, one rule; fixing only one would have left the
+      // provisioned path broken and the hand-made path working.
+      principalKind: 'ai_worker',
       createdBy: owner.id,
     },
     { rbac: options.rbac },

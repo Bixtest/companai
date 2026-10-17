@@ -50,6 +50,11 @@ export async function POST(req: NextRequest) {
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId ?? null,
       roles: roleIds,
+      // ★ CC-103 — an MCP key exists to let a machine drive the AI tools, so it
+      // IS an AI worker. Without this the key was minted as a `service` key, and
+      // the binding gate refuses those: every MCP client would have been locked
+      // out by the very fix that was meant to make this path safe.
+      principalKind: 'ai_worker',
       createdBy: auth.sub,
     })
 

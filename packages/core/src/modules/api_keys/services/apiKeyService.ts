@@ -9,9 +9,25 @@ import { encryptWithAesGcm, decryptWithAesGcm } from '@open-mercato/shared/lib/e
 import { getSharedApiKeyAuthCache } from '@open-mercato/shared/lib/auth/apiKeyAuthCache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
+import { apiKeySubject, aiWorkerSubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('api_keys').child({ component: 'api-key-service' })
+
+/**
+ * `CC-103` — the subject a key's ACL cache is filed under.
+ *
+ * The cache is keyed by the **subject string**, and a key's subject carries its
+ * kind (`api_key:<id>` or `ai_worker:<id>`, `shared/src/lib/auth/server.ts:357`).
+ * Invalidating `api_key:<id>` for an AI-worker key therefore missed, leaving the
+ * `ai_worker:<id>` ACL entry live until its TTL — a deleted or re-scoped key
+ * could keep resolving its old permissions. This derives the prefix from the key
+ * itself so the two cannot drift.
+ */
+function keySubjectFor(record: Pick<ApiKey, 'id' | 'principalKind'>): string {
+  return record.principalKind === 'ai_worker'
+    ? aiWorkerSubject(record.id)
+    : apiKeySubject(record.id)
+}
 
 const BCRYPT_COST = 10
 
@@ -70,6 +86,17 @@ export type CreateApiKeyInput = {
   tenantId?: string | null
   organizationId?: string | null
   roles?: string[]
+  /**
+   * `CC-103` — what kind of actor this credential is. Defaults to `null`, which
+   * means `service` (every key issued before the column existed is exactly that).
+   *
+   * It had no way to be set at creation, so **every key this service minted was
+   * a `service` key** — including the MCP key the product hands to a client,
+   * whose whole purpose is to act as an AI worker. That was invisible while
+   * `service` passed the binding gate; once the gate stopped admitting it, every
+   * MCP integration was refused.
+   */
+  principalKind?: 'service' | 'ai_worker'
   expiresAt?: Date | null
   createdBy?: string | null
 }
@@ -110,13 +137,14 @@ export async function createApiKey(
     keyHash,
     keyPrefix: prefix,
     rolesJson: Array.isArray(input.roles) ? input.roles : [],
+    principalKind: input.principalKind ?? null,
     createdBy: input.createdBy ?? null,
     expiresAt: input.expiresAt ?? null,
     createdAt: new Date(),
   })
   await em.persist(record).flush()
   if (opts.rbac) {
-    await opts.rbac.invalidateUserCache(apiKeySubject(record.id))
+    await opts.rbac.invalidateUserCache(keySubjectFor(record))
   }
   return { record, secret }
 }
@@ -132,7 +160,7 @@ export async function deleteApiKey(
   await em.persist(record).flush()
   getSharedApiKeyAuthCache().invalidateByKeyId(record.id)
   if (opts.rbac) {
-    await opts.rbac.invalidateUserCache(apiKeySubject(record.id))
+    await opts.rbac.invalidateUserCache(keySubjectFor(record))
   }
 }
 

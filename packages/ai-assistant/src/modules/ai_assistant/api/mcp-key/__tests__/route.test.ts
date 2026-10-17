@@ -95,6 +95,10 @@ describe('POST /api/ai_assistant/mcp-key', () => {
     expect(input.tenantId).toBe('tenant-1')
     expect(input.organizationId).toBe('org-1')
     expect(input.createdBy).toBe('user-1')
+    // ★ CC-103 — an MCP key exists to let a machine drive the AI tools, so it
+    // must be minted as an ai_worker. As a `service` key the binding gate refuses
+    // it, and every MCP client would have been locked out by the gate fix.
+    expect(input.principalKind).toBe('ai_worker')
   })
 
   it('scopes the role lookup to the caller\'s tenant', async () => {
