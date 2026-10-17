@@ -22,11 +22,11 @@
  * Both were caught by a human reading the output, not by the suite. The suite has since been
  * extended with a case for each, and this harness is what proves those cases have teeth.
  *
- * ⚠️  IT MUTATES COMMITTED SOURCE — but only its own input, and only for the length of one run.
- * The checker is copied to `<checker>.orig`, each mutation is applied, the suite is run, and the
- * original is restored and compared byte-for-byte before the script exits. It refuses to report
- * success unless the restore is exact. Do not run it with the checker open in an editor that
- * autosaves.
+ * ⚠️  IT MUTATES COMMITTED SOURCE — but only its own inputs, and only for the length of one run.
+ * Each file a mutation can touch (the checker, and the shared lexer `lib/strip-code.mjs`) is copied
+ * to `<file>.orig`, the mutations are applied, the suite is run, and every original is restored and
+ * compared byte-for-byte before the script exits. It refuses to report success unless every restore
+ * is exact. Do not run it with a mutated file open in an editor that autosaves.
  *
  * USAGE
  * -----
@@ -42,8 +42,13 @@ import { fileURLToPath } from 'node:url'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const CHECKER = path.resolve(HERE, 'check-declared-controls.mjs')
+/**
+ * The shared lexer. Three of the mutations below live in it now that `strip()` was extracted to
+ * `scripts/lib/strip-code.mjs` (so `check-two-reads` can reuse it instead of growing a second
+ * lexer). A mutation declares its `target`; the default is the checker.
+ */
+const STRIP_LIB = path.resolve(HERE, 'lib', 'strip-code.mjs')
 const TEST = path.resolve(HERE, '__tests__', 'check-declared-controls.test.mjs')
-const BACKUP = `${CHECKER}.orig`
 
 /**
  * Each mutation is `{ find, replace }` applied to the checker's own text. `expects` names the test
@@ -52,18 +57,21 @@ const BACKUP = `${CHECKER}.orig`
 const MUTATIONS = [
   {
     name: 'regex literals are no longer stripped',
+    target: STRIP_LIB,
     expects: 'does NOT count its own registry as a consumer',
     find: "    if (c === '/' && !isDivision()) {",
     replace: "    if (c === '/' && false && !isDivision()) {",
   },
   {
     name: 'string literals are no longer stripped',
+    target: STRIP_LIB,
     expects: 'does NOT let prose fake a declaration or a consumer',
     find: "    if (c === '\"' || c === \"'\") {",
     replace: '    if (false) {',
   },
   {
     name: 'comments are no longer stripped',
+    target: STRIP_LIB,
     expects: 'does NOT let prose fake a declaration or a consumer',
     find: "    if (c === '/' && c2 === '/') {",
     replace: "    if (c === '\\u0000' && c2 === '/') {",
@@ -88,14 +96,24 @@ const MUTATIONS = [
   },
 ]
 
-const original = readFileSync(CHECKER, 'utf8')
-copyFileSync(CHECKER, BACKUP)
+// Every file a mutation can touch is snapshotted up front, so the run is reversible even when a
+// mutation targets the shared lexer rather than the checker itself.
+const TARGETS = [CHECKER, STRIP_LIB]
+const originals = new Map(TARGETS.map((file) => [file, readFileSync(file, 'utf8')]))
+const backups = new Map()
+for (const file of TARGETS) {
+  const backup = `${file}.orig`
+  copyFileSync(file, backup)
+  backups.set(file, backup)
+}
 
 let allProven = true
 try {
   for (const mutation of MUTATIONS) {
+    const targetFile = mutation.target || CHECKER
+    const original = originals.get(targetFile)
     if (!original.includes(mutation.find)) {
-      console.log(`SKIP        ${mutation.name} — anchor not found, the checker's code moved`)
+      console.log(`SKIP        ${mutation.name} — anchor not found in ${path.basename(targetFile)}`)
       allProven = false
       continue
     }
@@ -105,7 +123,7 @@ try {
       allProven = false
       continue
     }
-    writeFileSync(CHECKER, mutated)
+    writeFileSync(targetFile, mutated)
 
     const result = spawnSync(process.execPath, ['--test', TEST], { encoding: 'utf8' })
     const output = `${result.stdout}\n${result.stderr}`
@@ -122,21 +140,25 @@ try {
     }
   }
 } finally {
-  copyFileSync(BACKUP, CHECKER)
-  try {
-    unlinkSync(BACKUP)
-  } catch {
-    /* already gone */
+  for (const [file, backup] of backups) {
+    copyFileSync(backup, file)
+    try {
+      unlinkSync(backup)
+    } catch {
+      /* already gone */
+    }
   }
 }
 
-const restored = readFileSync(CHECKER, 'utf8')
-if (restored !== original) {
-  console.log('\nRESTORE FAILED — the checker is NOT byte-identical to before this run. Fix it by hand.')
-  process.exitCode = 1
-} else {
-  console.log('\nChecker restored — byte-identical to before this run.')
+let restored = true
+for (const file of TARGETS) {
+  if (readFileSync(file, 'utf8') !== originals.get(file)) {
+    console.log(`\nRESTORE FAILED — ${path.basename(file)} is NOT byte-identical to before this run.`)
+    restored = false
+  }
 }
+if (!restored) process.exitCode = 1
+else console.log('\nEvery mutated file restored — byte-identical to before this run.')
 
 console.log(
   allProven

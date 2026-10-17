@@ -83,6 +83,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { readStrippedLines } from './lib/strip-code.mjs'
 
 /** Where source lives. Same roots as `check-escape-hatches.mjs`, so the two censuses agree. */
 const SCAN_ROOTS = ['apps', 'packages', 'scripts']
@@ -222,154 +223,6 @@ const CONTROLS = [
   },
 ]
 
-/**
- * Replace the CONTENT of every string literal, comment and REGEX LITERAL with spaces, keeping the
- * length and the newlines so a line index still lines up afterwards. Template `${...}`
- * interpolations are KEPT — they are real code and may legitimately reference a control.
- *
- * This is the load-bearing part of the script, and it was wrong twice before it was right:
- *
- *  1. Without string/comment stripping, `auth/acl.ts:77`'s "...which is why it is never
- *     delegable..." counted as a read of `.delegable`, and the control looked wired.
- *  2. Without regex-literal stripping, THIS FILE counted as a consumer of itself: the registry's
- *     own `consumer: /\.delegable\b|\[['"]delegable['"]\]/` contains a quote inside a character
- *     class, which string-stripping alone reads as a string delimiter — so the `\.delegable`
- *     before it survives and the check reports its own source as the control's consumer.
- *
- * Both failures point the same way: a dead control looking WIRED. That is the one direction a
- * coverage check must never be wrong in.
- *
- * Regex vs division is disambiguated the way every lexer does it — by what precedes the slash.
- * After an identifier, number, `)` or `]` a `/` is division; anywhere else it opens a literal.
- * (`}` counts as a literal opener: a block boundary is far more often followed by a statement than
- * by a division.)
- */
-function strip(text) {
-  let out = ''
-  let i = 0
-  const n = text.length
-  /** Last significant character emitted — what a `/` would be operating on. */
-  let lastSig = ''
-
-  /** Is a `/` here division rather than the start of a regex literal? */
-  const isDivision = () => lastSig === ')' || lastSig === ']' || /[\w$]/.test(lastSig)
-
-  /** Blank `count` characters, preserving newlines. */
-  const blank = (count) => {
-    for (let k = 0; k < count; k += 1) out += ' '
-  }
-
-  while (i < n) {
-    const c = text[i]
-    const c2 = text[i + 1]
-
-    if (c === '/' && c2 === '/') {
-      while (i < n && text[i] !== '\n') {
-        out += ' '
-        i += 1
-      }
-      continue
-    }
-    if (c === '/' && c2 === '*') {
-      while (i < n && !(text[i] === '*' && text[i + 1] === '/')) {
-        out += text[i] === '\n' ? '\n' : ' '
-        i += 1
-      }
-      if (i < n) {
-        out += '  '
-        i += 2
-      }
-      continue
-    }
-    if (c === '"' || c === "'") {
-      const q = c
-      out += q
-      i += 1
-      while (i < n && text[i] !== q) {
-        if (text[i] === '\\') {
-          out += '  '
-          i += 2
-          continue
-        }
-        out += text[i] === '\n' ? '\n' : ' '
-        i += 1
-      }
-      if (i < n) {
-        out += q
-        i += 1
-      }
-      lastSig = q
-      continue
-    }
-    if (c === '`') {
-      out += '`'
-      i += 1
-      while (i < n && text[i] !== '`') {
-        if (text[i] === '\\') {
-          out += '  '
-          i += 2
-          continue
-        }
-        if (text[i] === '$' && text[i + 1] === '{') {
-          out += '${'
-          lastSig = '{'
-          i += 2
-          continue
-        }
-        out += text[i] === '\n' ? '\n' : ' '
-        i += 1
-      }
-      if (i < n) {
-        out += '`'
-        i += 1
-      }
-      lastSig = '`'
-      continue
-    }
-    // A regex literal. Blank everything to the closing `/`, respecting `[...]` classes where a `/`
-    // is an ordinary character and does not close the literal.
-    if (c === '/' && !isDivision()) {
-      out += '/'
-      i += 1
-      let inClass = false
-      while (i < n) {
-        const rc = text[i]
-        if (rc === '\\') {
-          out += '  '
-          i += 2
-          continue
-        }
-        if (rc === '[') inClass = true
-        else if (rc === ']') inClass = false
-        else if (rc === '/' && !inClass) {
-          out += '/'
-          i += 1
-          break
-        } else if (rc === '\n') {
-          // An unterminated literal on one line: stop, do not swallow the rest of the file.
-          out += '\n'
-          i += 1
-          break
-        }
-        out += rc === '\n' ? '\n' : ' '
-        i += 1
-      }
-      // Flags (`g`, `i`, `m`, …) follow the closing slash and are copied through.
-      while (i < n && /[a-z]/.test(text[i])) {
-        out += text[i]
-        lastSig = text[i]
-        i += 1
-      }
-      continue
-    }
-
-    out += c
-    if (!/\s/.test(c)) lastSig = c
-    i += 1
-  }
-  return out
-}
-
 function isTestFile(file) {
   return (
     /[\\/]__tests__[\\/]/.test(file) ||
@@ -425,24 +278,6 @@ function parseArgs(argv) {
     } else throw new Error(`Unknown option: ${arg}`)
   }
   return options
-}
-
-/**
- * Read a file once, stripped, and keep line boundaries so the caller can still report real line
- * numbers. `strippedLines[i]` corresponds to `lines[i]` in the original.
- */
-function readStrippedLines(file) {
-  let text
-  try {
-    text = readFileSync(file, 'utf8')
-  } catch {
-    return null
-  }
-  const stripped = strip(text)
-  // strip() preserves newlines, so the line counts match; split both and pair them.
-  const orig = text.split(/\r?\n/)
-  const bare = stripped.split('\n')
-  return orig.map((line, i) => (bare[i] === undefined ? strip(line) : bare[i]))
 }
 
 function checkControl(control, root) {
