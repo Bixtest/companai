@@ -292,3 +292,44 @@ That is an ordinary migration risk, not an unknown: the four current agent ids
 not caused here:** `CC-100` — the MikroORM snapshot is stale and consumed, so `migrator.create()` may
 diff against a snapshot that does not know this table. This migration is raw SQL and does not depend on
 the snapshot; generating the *next* one does.
+
+---
+
+## 9. A THIRD DEFECT, found by being asked to explain the breaking change
+
+The owner asked, in plain words, whether he should be happy that a `service` key can no longer run an
+agent. Answering that honestly required checking **who mints service keys** — and the answer was: the
+product does.
+
+**`CreateApiKeyInput` had no `principalKind` field.** So `createApiKey` — the one function every caller
+uses — could only ever produce a key with `principal_kind = null`, which resolves as **`service`**. Two
+of its callers exist specifically to hand a machine a credential to drive the AI tools:
+
+| Caller | What it is | Was minting |
+|---|---|---|
+| `api/ai/mcp-key/route.ts` | the settings screen's "create MCP key" | a `service` key |
+| `lib/mcp-ensure-api-key.ts` | `mcp:ensure-api-key`, the provisioned path | a `service` key |
+
+So the breaking change would not have hit some hypothetical third-party integration — **it would have
+hit the product's own MCP setup**, on both paths. The gate would have refused every MCP client, and the
+message would have said `agent_not_bound`, which points at the binding table rather than at the key.
+
+**FIXED:** `CreateApiKeyInput` gained `principalKind?: 'service' | 'ai_worker'`; `createApiKey` writes it
+(`?? null`, so every existing caller is unchanged and still means `service`); **both** MCP creators pass
+`'ai_worker'`. The generic `api_keys` CLI deliberately keeps the `service` default — it is a general
+tool, and a key it makes for an agent is refused loudly rather than quietly privileged.
+
+**A fourth defect, found in the same check — the cache invalidation used the wrong prefix.**
+`createApiKey` and `deleteApiKey` both called `invalidateUserCache(apiKeySubject(id))`. But the ACL cache
+is keyed by the **subject string**, and an AI-worker key's subject is `ai_worker:<id>` — so invalidating
+`api_key:<id>` **missed**, leaving the `ai_worker:<id>` entry live until its TTL. A deleted key could keep
+resolving its old permissions for that window. **FIXED:** both now derive the prefix from the key
+(`keySubjectFor(record)`), so the two cannot drift.
+
+**Proof:** `mcp-key/route.test.ts` and `mcp-ensure-api-key.test.ts` assert `principalKind: 'ai_worker'`
+(14/14 pass); removing **both** lines makes **2 tests fail** (restored byte-identical); the
+`apiKeyService` suites pass 11/11; `tsc` is 0 for **both** `core` and `ai-assistant`.
+
+**Why the hostile critic did not find this:** it reviewed the gate and its callers, not the code that
+**issues** credentials. A security review that stops at "who can call this" misses "who is allowed to
+exist". Recorded as a gap in the review method, not just in the code.
