@@ -141,6 +141,28 @@ with `effectiveUserId`, refuse `422 ai_acting_user_required` when a machine acts
 **Plan: `library/development/PLAN-CC-107-bot-participant.md` §9.** Remaining: `agent_id`,
 `agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls`, two-axis access
 predicate, revoke route, idle-pruning exemption.
+**★ INCREMENT 2 LANDED (`6b78a0ac`): `Migration20261017180000_ai_chat_participant_agent_axis`.**
+`agent_id` (text) + `agent_owner_user_id` (uuid, the bot_owner analogue) and `user_id` now NULLABLE, with
+**four partial unique indexes** (two per axis, two per org scope) and **two NOT-VALID CHECKs** —
+`num_nonnulls(user_id, agent_id) = 1` and a one-sided owner rule — landing in the **SAME** migration,
+closing the register's carried-forward risk rather than deferring it. NOT VALID is deliberate, so the
+repository re-checks at the boundary with a discriminated-union identity.
+**★ TIGHTENING FOUND WHILE WRITING IT:** the two user-axis uniques did NOT exclude retired rows, so a
+revoked participant blocked its own slot at the database while `addParticipant` compensated in application
+code — an invariant enforced nowhere a raw writer would see it.
+**★ THE SAME `auth.sub`-into-a-uuid DEFECT EXISTED IN THE PARTICIPANT ROUTES TOO** (POST, DELETE, context
+loader) — fixed here. The revoke route's path param keeps its **KEY** `userId` (Next.js hands the handler
+that key from the `[userId]` segment) but its **VALUE** names either axis: a bare uuid is a human,
+`agent:<id>` is a machine.
+**★ THE PROBE CAUGHT ME MEASURING WRONG:** a plan taken before `ANALYZE` read as an index design flaw and
+I "fixed" the column order; re-measured after `ANALYZE`, BOTH orderings are chosen. Real cause = stale
+statistics. Ordering kept for symmetry; the false cause removed from the comment.
+**★ AND THE CHECKER CAUGHT ME EDITING WRONG:** my register-row replacement dropped the `☐ open` state
+marker, so the row failed the parse and CC-107 vanished from every count — 3 red checks in one run.
+Proof: 105 suites / 1,553 tests, mutation 3 RED, `tsc` 0, probe green on real PG. Plan
+`PLAN-CC-107-bot-participant.md` §10.
+**▶ Remaining in `SR-07`: the idle-pruning exemption, and the participants POST body still accepts only a
+uuid, so adding an agent participant over HTTP is not yet reachable.**
 **▶ NEXT after `SR-07` = `CC-104`/`CC-106` (same trigger)
 → `SR-12`** (per-tenant engine home, the fix for open `CC-84`, and where the daemon's persistent id lives)
 **→ `P2-9b`.** Behind them the tooling ratchets: `CC-118`, `CC-114`, `CC-115`, `CC-110`.

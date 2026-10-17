@@ -248,8 +248,8 @@ Postgres proof, and the probe is committed next to the migration with its run co
 | 3 | The chain read, and the live defect it found | ✅ **DONE** — §3 |
 | 4 | The plan | ✅ **DONE** — §4/§5 |
 | 5 | **INCREMENT 1: fix §3.1** — the subject-string-into-uuid-column defect | ✅ **DONE** — see §9 |
-| 6 | The migration: `agent_id` + `agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls` | ⬜ |
-| 7 | The access predicate and the revoke route, both axes | ⬜ |
+| 6 | The migration: `agent_id` + `agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls` | ✅ **DONE** — see §10 |
+| 7 | The access predicate and the revoke route, both axes | ✅ **DONE** — see §10 |
 | 8 | Idle-pruning exemption | ⬜ |
 
 ---
@@ -303,3 +303,94 @@ Two things worth recording, both the `CC-102` lesson in a new place:
 It does not make a bot a participant. It removes the reason the participant table could not have one:
 an owner column that silently rejects every non-human subject. `agent_id`, the second identity axis, the
 partial unique pair and `num_nonnulls` are items 6–8.
+
+---
+
+## 10. INCREMENT 2 — CLOSED: the second identity axis (`6b78a0ac`)
+
+**The columns.** `agent_id text null`, `agent_owner_user_id uuid null`, and `user_id` now
+**nullable** — which is the change that alters the meaning of every existing `{ userId }` filter, and
+the reason `num_nonnulls(user_id, agent_id) = 1` and the one-sided owner CHECK land in the **same
+migration** rather than a later one.
+
+**Four partial unique indexes**, two per identity axis and two per org scope. A single plain unique
+over `(tenant, org, conv, user_id, agent_id)` would not dedupe agent rows — Postgres treats NULLs as
+distinct, and that is **measured in the probe** rather than assumed.
+
+**★ A tightening found while writing it:** the two user-axis uniques previously did **not** exclude
+retired rows, so a revoked participant blocked its own slot at the database level while
+`addParticipant` compensated in application code — an invariant enforced nowhere a raw writer would
+notice. Both now carry `user_id is not null` and `deleted_at is null`, matching what `ai_agent_runtimes`
+and `ai_agent_bindings` already do.
+
+**Both CHECKs are NOT VALID on purpose.** The table can be large and the application already
+maintains both, so a lock-and-scan on deploy would take the app down for an invariant that holds. The
+consequence is stated in the entity and the repository docblock: **the boundary must re-check**, because
+`NOT VALID` protects existing rows only where the code does.
+
+### 10.1 The repository, and why the type is a union
+
+`AiChatConversationParticipantIdentity` is a discriminated union, so a caller cannot pass both axes or
+neither without the compiler noticing — and `normalizeParticipantIdentity` re-checks it at the boundary,
+which is **necessary rather than belt-and-braces** precisely because the database CHECK is NOT VALID.
+
+The access predicate consults **both** axes as **two indexed queries, not one `$or`**: each axis has its
+own index (`..._active_conv_user_idx`, `..._active_conv_agent_idx`), and a combined
+`{userId} or {agentId}` filter cannot use either and would seq-scan the table. `list` unions the two
+axes the same way.
+
+### 10.2 The routes — and the increment-1 defect was in three of them, not two
+
+`participants/route.ts` (POST), `participants/[userId]/route.ts` (DELETE) and its `loadCallerContext`
+sibling all fed `userId: auth.sub` into contexts ending in a uuid column. All three fixed here.
+
+**The revoke route's path param keeps its KEY `userId`** — Next.js hands the handler that key from the
+`[userId]` segment, and renaming the schema field without renaming the directory broke the route, which
+the existing `d2-gap-guard` test suite caught immediately. Its **value** now names either axis: a bare
+uuid is a human (existing callers unchanged), `agent:<id>` is a machine. An explicit prefix rather than
+"looks like a uuid?", because that sniff is the ambiguity that caused the original defect.
+
+### 10.3 ★ THE PROBE FOUND ME MEASURING WRONG — recorded so it is not repeated
+
+At 2,000 rows the planner used the **user** index for an **agent** query, and I wrote that up as an
+index design flaw and "fixed" the column order. **Re-measured after `ANALYZE`, BOTH candidate orderings
+are chosen.** The real cause was stale statistics on a freshly bulk-inserted table. So:
+
+- the ordering is kept, but **for symmetry with the user axis**, and the migration says so;
+- the false cause was removed from the comment rather than left behind looking proven;
+- **the rule: a query plan taken before `ANALYZE` is a claim about the statistics, not about the
+  index.** A plan and a measurement are different things, and one can look like the other.
+
+### 10.4 The proof
+
+The migration's **own** SQL is extracted at runtime by invoking the class with a stub `addSql` — never
+hand-copied, so the probe cannot drift from the migration. Against a real `postgres:16-alpine`:
+
+| Case | Result |
+|---|---|
+| columns after `up()` | `agent_id text`, `agent_owner_user_id uuid`, `user_id uuid` — all three nullable |
+| indexes after `up()` | four participant uniques + two axis read indexes + pkey |
+| constraints after `up()` | `one_identity_ck` and `agent_owner_ck`, both `NOT VALID` as designed |
+| an **agent participant** | **accepted** — the thing that was impossible before |
+| a duplicate agent participant (org scope) | **refused** `23505 …_tenant_org_conv_agent_uq` |
+| a duplicate agent participant (tenant scope) | **refused** `23505 …_tenant_conv_agent_null_org_uq` |
+| no identity at all | **refused** `23514` (one_identity_ck) |
+| both identities at once | **refused** `23514` |
+| an agent with no owning human | **refused** `23514` (agent_owner_ck) |
+| a human with no owner | **accepted** — the MVP shape stays legal |
+| a **retired** agent | frees its slot — 1 live row |
+| `down()` then `up()` | both columns and index drop; `user_id` back to NOT NULL; the previous index shape restored; `up()` repeatable |
+
+**Tests:** 105 suites / **1,553 passed / 1,553**, no suite failed to load. Mutation (remove the both-axes
+and no-owner refusals) → **3 RED**, file restored byte-identical. `tsc -p packages/ai-assistant` **0**.
+Probe committed at
+`migrations/__probes__/participant-agent-axis.probe.sql` with its run command and the extraction
+command.
+
+### 10.5 What is still not done
+
+`loadParticipantFlag`'s human branch runs **first** and short-circuits, so an agent caller still reaches
+the agent axis only when the human one misses — correct, but untested against a real repository. The
+idle-pruning exemption (item 8) is still open. And the participants **POST** route still accepts only a
+uuid body (`addParticipantBodySchema`), so adding an *agent* participant over HTTP is not yet possible —
+only the schema, the repository and the access predicate can carry one.
