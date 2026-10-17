@@ -274,3 +274,72 @@ and `check-declared-controls.mjs` need is now one file — `scripts/lib/strip-co
 tests, and the declared-controls census is byte-stable (6 controls, 1 covered). While extracting it, a real
 lexer defect was found and fixed: template-literal `${…}` interpolations left an **unbalanced `{`**, which
 is what the rejected block-scope rule mis-nested on.
+
+---
+
+## 6. `CC-101` — wiring the checkers into CI *(the fifth slice; requirement written 2026-10-17 night, before the code)*
+
+**Why this is the fifth slice and not a footnote.** §5 delivered four artefacts that are built, tested and
+mutation-proven. Every one of them is, at this moment, **called by nothing**: `.github/workflows/ci.yml`
+runs exactly **two** of the repo's seven drift checkers — `check:dep-versions` (`ci.yml:499`) and
+`check:time-bombs:fail` (`ci.yml:509`). The four requirements' own text is the standard: *"drift breaks the
+build."* Measured, drift breaks nothing. **A control nobody calls is the same defect as a control that
+discards its answer** — `CC-101` is the toolchain instance of the dead-control doctrine, pointed at CI
+rather than at the runtime.
+
+**The rule this slice follows, stated once:** *a checker joins the build only in the mode where it can
+actually fail.* A step that cannot fail is worse than no step, because it manufactures a green tick that
+reads as enforcement. That is what `SR-41`'s own docstring warns about ("a false green") and what `SR-46`'s
+home-correction was about. So each of the five is assessed for whether it *can* fail before it is wired.
+
+### 6.1 The five, and the honest mode for each
+
+| # | Requirement | Script | Can it fail today? | Wired as |
+|---|---|---|---|---|
+| 1 | `SR-38` digital twins | `check:digital-twins:fail` | ✅ yes — `--fail` is the enforcement mode | **fail step** |
+| 2 | `SR-46` two-reads | `check:two-reads:fail` | ✅ yes | **fail step** |
+| 3 | `SR-47` declared controls | `check:declared-controls:fail` | ✅ yes | **fail step** |
+| 4 | `SR-39` one-truth | `check:one-truth` | ⚠️ **partly** — `main()` returns 1 only on verdict `FAIL`; a `SKIP` exits 0, which its own docstring calls *"a false green"* | **fail step, limitation recorded in the row** |
+| 5 | `SR-41` escape hatches | `check:escape-hatches:fail` | ❌ **no, not honestly** — `--fail` is all-or-nothing and there is no baseline, so it would report **169 unnamed holes of 202** and break the build on day one | **report step** (always exit 0), baseline deferred to `CC-110` |
+
+**Why #5 is a report step and not a fail step.** `CC-110` holds the baseline question: *there is no baseline
+file, which is why all-or-nothing `:fail` can never be turned on.* Wiring `:fail` today would produce a
+permanently red build — a control that fires so loudly it gets disabled, which is the failure mode this whole
+register exists to prevent. Wiring the report step instead publishes the number on every run and leaves
+exactly one decision between report and enforcement. **The gap is recorded, not papered over.**
+
+**Why #4 is still wired.** `check:one-truth` *does* exit 1 on real drift, so it is a genuine control for the
+case it was built for. The SKIP path remains open and is named in `CC-101`'s register row rather than
+silently accepted.
+
+### 6.2 What is NOT in this slice — and why it gets a row instead
+
+**The docs repo's own two checkers cannot be wired here.** `scripts/check-master-checklist.mjs` and
+`scripts/derive-counts.mjs` live in the **docs** repository (`companai`), not in this code repository
+(`companai/workspace/starting-kit`). `.github/workflows/ci.yml` here cannot run them, and a step that
+crosses a repo boundary to run a file it does not own is not a control either. They need their own workflow
+in the docs repo — **recorded as a new register row, not folded into this one**, because "wired into CI"
+would otherwise be claimed for a step that does not exist.
+
+### 6.3 Proof — what must be true before this is closed
+
+1. **The workflow is valid YAML** and the step names match what they do.
+2. **Every wired step runs green on the current tree** — run by hand, in the code repo, exactly as CI would.
+3. **Each fail-capable checker is proven to fail when its input is broken** — one mutation per checker, each
+   turning its step red. This is the check that matters: a wired step that stays green on broken input is
+   the same dead control in a new coat. *(The per-checker mutation proofs already exist for the artefacts;
+   what is proved here is that the **wiring** carries the failure through, not that the checker works.)*
+4. **The report step publishes its number** and exits 0.
+5. **The register row is updated with the measured before/after** — two checkers called → six steps.
+
+### 6.4 Order of work
+
+1. Write this requirement. *(done — this section)*
+2. Add the five steps to `ci.yml`, in the block that already runs `check:time-bombs:fail`.
+3. Run each step locally, in the code repo, as `yarn <script>`.
+4. Prove each fail-capable step can fail: break the input, observe the exit code, restore byte-identical.
+5. Update `CC-101`'s row with the measured result; open the new row for the docs-repo workflow.
+6. Update §2's frontier and commit.
+
+**Explicitly out of scope:** the `CC-110` baseline decision (owner's, or a ratchet I am authorized to set);
+the `SR-39` SKIP path (a code change to that checker, its own row); anything in the `preview/` triage.

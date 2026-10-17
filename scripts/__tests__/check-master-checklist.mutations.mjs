@@ -3,6 +3,17 @@ import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+/**
+ * Every mutation breaks MASTER-CHECKLIST.md on purpose, and the checker must go red.
+ *
+ * ★ THE GUARD THAT FOUND ITSELF (2026-10-17, night): three of these came back GREEN — not because
+ * the checker was blind, but because their `apply` targets had gone stale (they still aimed at
+ * "54 open" and "13 startable" after the document moved to 56 and 15). `String.replace` on a
+ * missing target is a silent no-op, so the file went in unchanged, the checker passed, and the
+ * suite reported three proofs that never happened. **A proof that cannot fail is worse than no
+ * proof** — the same finding as `CC-101`, one layer down, in the instrument instead of the thing it
+ * measures. So a mutation whose `apply` leaves the file unchanged is now itself a failure.
+ */
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const FILE = path.join(HERE, '..', '..', 'library', 'development', 'MASTER-CHECKLIST.md')
 const orig = fs.readFileSync(FILE, 'utf8')
@@ -20,8 +31,20 @@ const mutations = [
   },
   {
     name: 'M3 — change §5\'s count line',
-    apply: (s) => s.replace('56 closed \u00b7 54 open \u00b7 110 total', '57 closed \u00b7 54 open \u00b7 111 total'),
+    // anchored on §5's own sentence, not the bare number: §2 prints the same total, and a
+    // first-occurrence replace would hit the copy this checker does not read
+    apply: (s) => s.replace('the numbering skips it. **58 closed \u00b7 56 open \u00b7 114 total.**',
+                            'the numbering skips it. **57 closed \u00b7 54 open \u00b7 111 total.**'),
     expect: /§5 says 57\/54\/111/,
+  },
+  {
+    // ★ this mutation is why M3 above needed an anchor. The first version of check 5 ran its regex
+    // over the whole document, so it read the FIRST "N closed · N open · N total" it found — §2's
+    // headline — and never read §5's copy. Breaking §5's line went unseen; breaking §2's did not.
+    name: 'M14 — change §2\'s headline count, which the first version of check 5 read instead of §5',
+    apply: (s) => s.replace('**58 closed \u00b7 56 open \u00b7 114 total**, counted from \u00a75.',
+                            '**57 closed \u00b7 54 open \u00b7 111 total**, counted from \u00a75.'),
+    expect: /§2 says 57\/54\/111/,
   },
   {
     name: 'M4 — invent a CC code that has no register row',
@@ -30,12 +53,12 @@ const mutations = [
   },
   {
     name: 'M5 — change §4\'s own count line',
-    apply: (s) => s.replace('all **54** open', 'all **52** open'),
+    apply: (s) => s.replace('all **56** open', 'all **52** open'),
     expect: /§4 says 52 open rows/,
   },
   {
-    name: 'M6 — change §4\'s state tally (13 startable → 12)',
-    apply: (s) => s.replace('**13 startable now**', '**12 startable now**'),
+    name: 'M6 — change §4\'s state tally (15 startable → 12)',
+    apply: (s) => s.replace('**15 startable now**', '**12 startable now**'),
     expect: /state tally says 12 "startable now"/,
   },
   {
@@ -80,7 +103,16 @@ const mutations = [
 
 let allRed = true
 for (const m of mutations) {
-  fs.writeFileSync(FILE, m.apply(orig))
+  const mutated = m.apply(orig)
+  if (mutated === orig) {
+    // the target text is gone: the mutation is a no-op and any green it prints is a lie
+    allRed = false
+    console.log('GREEN ' + m.name + '  (DID NOT APPLY — its target text is no longer in the document;')
+    console.log('       a mutation that cannot fire is not a proof, so this suite cannot pass until')
+    console.log('       its target is re-aimed at the current text)')
+    continue
+  }
+  fs.writeFileSync(FILE, mutated)
   let out = ''
   let code = 0
   try {

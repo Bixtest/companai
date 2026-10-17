@@ -5,9 +5,11 @@
  * Every number in the file is typed by a human, so every number is a claim. This script reads the
  * file's own tables and fails loudly when a typed count disagrees with the rows that carry it.
  *
- * HONEST STATE (2026-10-17): this checker is BUILT BUT NOT ENFORCED. Nothing calls it — not CI,
- * not a pre-commit hook. Adding it to `.github/workflows/ci.yml` is exactly the work `CC-101`
- * describes for the other four checkers, and it should land with them. Until then, run it by hand:
+ * HONEST STATE (2026-10-17, night): this checker is BUILT BUT NOT ENFORCED — and `CC-101`, which
+ * wired the *code* repo's drift checkers, could not wire this one, because this file lives in the
+ * **docs** repository and the code repo's `ci.yml` cannot reach it. The honest wiring work is now
+ * `CC-113`: a small workflow in the docs repo, on push and PR, in a mode where it can fail. Until
+ * then it is run by hand:
  *
  *     node scripts/check-master-checklist.mjs      # from the docs repo root
  *
@@ -74,7 +76,14 @@ const sec5 = section('5')
 const reg = []
 for (const l of tables(sec5)) {
   const m = /^\| (CC-\d+) \| (.*?) \| ([^|]+?) \|\s*$/.exec(l)
-  if (m) reg.push({ id: m[1], state: m[3].replace(/[^a-z]/g, '') })
+  // The state word may carry prose after it — `✅ closed — **BUILT …**` is how a closed row records
+  // its own proof. Read the word after the glyph, not the whole cell: stripping non-letters from
+  // that cell yields `closedBUILT…`, which equals neither state, so the row silently counted as
+  // neither closed nor open and the totals came up one short. Found 2026-10-17 by this very run.
+  if (m) {
+    const w = /^\s*(?:\u2705|\u2610|\uD83D\uDFE1|\u26D4)\s*\*{0,2}(closed|open)/.exec(m[3])
+    reg.push({ id: m[1], state: w ? w[1] : m[3].replace(/[^a-z]/g, '') })
+  }
 }
 const closed = reg.filter((r) => r.state === 'closed').length
 const openReg = reg.filter((r) => r.state === 'open').length
@@ -209,12 +218,29 @@ const dangling = [...named].filter((id) => !regIds.has(id) && !SKIPPED.has(id))
 if (dangling.length) fail(dangling.length + ' CC code(s) named in this file have no \u00a75 register row: ' + dangling.join(', '))
 else ok('all ' + named.size + ' distinct CC codes named here resolve in \u00a75')
 
-// 5 — §5's own count line against its table
-const c5 = /(\d+) closed \u00b7 (\d+) open \u00b7 (\d+) total/.exec(md)
-if (!c5) fail('\u00a75: the "N closed \u00b7 N open \u00b7 N total" line was not found')
-else if (+c5[1] !== closed || +c5[2] !== openReg || +c5[3] !== reg.length) {
-  fail('\u00a75 says ' + c5[1] + '/' + c5[2] + '/' + c5[3] + '; its table holds ' + closed + '/' + openReg + '/' + reg.length)
-} else ok('\u00a75 count line ' + c5[1] + '\u00b7' + c5[2] + '\u00b7' + c5[3] + ' = its table')
+// 5 — the register's headline count, typed in TWO places, and BOTH must be read.
+//
+// ★ The first draft ran one regex over the whole file: `.exec(md)` returns the FIRST match, which is
+// §2's headline at line 50 — 184 lines before §5's own count line — so the check named §5 and
+// actually read §2, and §5's copy was never read at all. M3 proved it: the mutation changed §5's
+// line, the checker stayed green, and the suite reported a proof that never happened. A check that
+// names one line and reads another is the `CC-101` defect in miniature (a check that reads the wrong
+// thing is indistinguishable, from the outside, from a check that works).
+//
+// The Rule 13 history line ("The committed header read **52 closed · 44 open · 96 total**") is a
+// dated record of a past state, not a claim, and is deliberately excluded — it is left as it stands.
+const HEADLINE = [
+  ['\u00a72', /\*\*(\d+) closed \u00b7 (\d+) open \u00b7 (\d+) total\*\*, counted from \u00a75/],
+  ['\u00a75', /numbering skips it\. \*\*(\d+) closed \u00b7 (\d+) open \u00b7 (\d+) total\.\*\*/],
+]
+for (const [where, re] of HEADLINE) {
+  const m = re.exec(md)
+  const want = closed + '/' + openReg + '/' + reg.length
+  if (!m) fail(where + ': the "N closed \u00b7 N open \u00b7 N total" headline was not found')
+  else if (+m[1] !== closed || +m[2] !== openReg || +m[3] !== reg.length) {
+    fail(where + ' says ' + m[1] + '/' + m[2] + '/' + m[3] + '; its table holds ' + want)
+  } else ok(where + ' headline ' + m[1] + '\u00b7' + m[2] + '\u00b7' + m[3] + ' = its table')
+}
 
 // 5b — §7's row count against its own claim
 const srClaim = (sec7.join('\n').match(/(\d+) HAVE \u00b7 (\d+) BUILD \u00b7 (\d+) BORROW \u00b7 (\d+) RE-ENGINEER = (\d+)/) || []).slice(1).map(Number)
