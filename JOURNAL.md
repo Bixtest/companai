@@ -7,6 +7,100 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (late) — the identity step opens: `SR-02` slice 1 (`CC-99` closed), `CC-100` found
+
+The tooling set is closed, so the frontier moves to identity. The requirement was written before any code
+(`PLAN-identity-SR-02-SR-07.md`), and the **measurement came before the design**.
+
+**The measurement that decided the shape.** The kernel `Agent` object has carried a `runtime` field since
+`AH-1` (`ce.ts:128-136`), described as *"a binding name, not an embedded runtime"* — and **nothing read
+it**. Measured: `AiAgentDefinition` has no `runtime` field at all, and no module in `ai_assistant` reads
+one. A declared binding with no reader is not a control; it is a comment with a type. So this slice's real
+job was not "add a table" — it was to give that field its **first reader**, because a table nobody reads
+would have been the same defect wearing a schema.
+
+**`agent` ≠ `agent_runtime`.** `ai_agent_runtimes` is **the machine**: a daemon, on a host, for one
+provider, inside one tenant. One runtime hosts many agents, and an agent does not own a process. And it is
+**not** `ai_agent_runtime_overrides` — that existing table is per-tenant provider/model/baseURL
+*configuration*; this is an *instance*. A setting says which model a tenant prefers; a runtime says which
+process can serve it. Merging them would have repeated the conflation the slice exists to undo.
+
+**★ Where we refused the donor, by name.** Multica writes `UNIQUE (workspace_id, daemon_id, provider)` over
+a **nullable** `daemon_id`. In Postgres `NULL`s are distinct, so every null-daemon row falls **outside** its
+own uniqueness: the constraint holds for daemons and evaporates for exactly the rows it cannot describe.
+**A key with a hole is worse than no key** — ours is `daemon_id NOT NULL`. Four partial unique indexes on
+the house nullable-`organization_id` pattern (`Migration20260512090000.ts:7-8`): daemon+provider, and
+`name` — which the donor does not constrain at all, and which is load-bearing here because the kernel agent
+stores its binding as **text** (custom-entity records live in `custom_entities_storage`, which cannot carry
+a foreign key), so the binding resolves **by name**. Two rows with one name would make that resolution a
+coin flip.
+
+**★ Two omissions, held to the same standard as the object.** The donor's `status` / `last_seen_at` and
+`runtime_mode` / `device_info` are all absent. `runtime_mode` has one inhabitant. But `status` and
+`last_seen_at` are the interesting refusal: **they would have had no writer** — liveness is a heartbeat and
+no probe in this codebase beats one — so a column claiming "online" that nothing sets is the *same*
+dead-control defect this object exists to remove, pointed the other way. They land with the probe. And
+`provider` carries **no CHECK**, because the vocabulary (`AiRuntimeEngine`) grows; it is validated at the
+repository boundary against `lib/ai-runtime-engines.ts`, the same reasoning `Migration20260812180000.ts:24-27`
+records for `principal_kind`.
+
+**Three answers, two refusals.** `resolveTenantRuntime`: no tenant / no row → `null` (the caller keeps its
+pre-`SR-02` path); exactly one row → that row; a named binding that matches → that row. A binding matching
+**nothing throws**; several rows with **no** binding **throws**. Neither falls back and neither picks "the
+first" — a silent answer is how an agent ends up served by a machine nobody registered. The selector gained
+one rung: `engine` (caller override) → `tenantRuntime.provider` → `AI_RUNTIME_ENGINE` → `opencode`. A row
+outranks the environment because a row is a fact about **this tenant** while the variable is a fact about
+**the deployment**; an unknown provider read from a row **throws**, never falls through.
+
+**Proof.** 64 tests across 4 suites (schema **9** · repository **19** · registry **11** · selector **25**,
+6 of them new); **12/12 mutations PROVEN** with every file restored byte-identical; package
+**133 suites / 1,943 tests, all green under the pinned Node 24**; `tsc` clean.
+
+**★ The figure I first committed was wrong, and it was wrong in the most instructive way.** I ran the
+package suite under the shell's node 22.22.2 and reported **1,834 / 1,834 pass · 131 suites · 2 suites
+failing to *load***, on `isolated-vm`'s missing win32/abi=127 prebuild. Every part of that is true, and the
+whole of it is misleading: **109 tests never ran** (`sandbox` 65 + `codemode-tools` 44). Under the pinned
+toolchain — `workspace/.toolchain/node24`, v24.19.0 — it is **133 suites / 1,943 tests, all pass, nothing
+failing to load**. **A suite that fails to load reports no failures**, which makes it the same defect class
+as the mutation harness below: both produce green by not looking. And `BACKLOG.md:18` had already recorded
+this exact trap (*"the same run under the shell's node 22.22.2 falsely showed 2 unloadable suites"*) — so I
+walked into a documented trap by measuring with the wrong runtime, not by breaking the code. The correction
+is the point: the pinned runtime is the only honest number.
+
+**★ A harness bug found by the harness itself.** The first mutation run reported **0/12 PROVEN**. The
+mutations had all worked — the *detector* looked for `✕` (U+2715) while this jest build prints `×`
+(U+00D7), so twelve caught mutations read as twelve failures. **A mutation harness that cannot see a red
+test is the most dangerous kind of green**, because it fails toward "everything is fine". Fixed, then 12/12.
+
+**★ And a regression I caused, fixed honestly.** Wiring the read broke three chat-route suites (21 tests):
+their container mock was the bare sentinel `{ identityCacheKey: 'em' }`, written when the route queried
+nothing. The fix was **not** to weaken the route — the sentinel gained `find: async () => []`, which is the
+"no runtime registered" answer, so those suites now *also* pin the byte-identical path and pass unmodified
+in every assertion they make.
+
+**★ Rule-13 corrections, five of them, all mine.** (1) **The package figure** — `1,834 / 1,834 pass, 2
+suites failing to load` reads as green while **109 tests never ran**; under the pinned
+`workspace/.toolchain/node24` (v24.19.0) it is **133 suites / 1,943 tests, all pass** (see above — a suite
+that fails to load reports no failures). (2) The recorded `CC-73` figure *"92
+pre-existing `tsc` errors"* no longer reproduces; this slice's first run reported **2,090**, all stale
+diagnostics replayed from the gitignored `.tsbuildinfo`. Delete the cache and re-run: **0 errors**. Anyone
+reading 2,090 as "the code got worse" would have been reading a cache. (3) **`CC-100` NEW & OPEN:** the
+MikroORM snapshot lists **10** tables and contains **neither** `ai_agent_bindings` (`CC-27`'s slice)
+**nor** `ai_agent_runtimes` (this one) — and it is **consumed** (`packages/cli/src/lib/db/commands.ts:100`
+decides from its presence; MikroORM diffs entities against it), so the next `db migration:create` would
+emit a `create table` for a table that already exists. The fix is a regeneration against a live database,
+**not** a hand-edit: a snapshot that is *wrong* is worse than one that is *stale*. (4) The register header
+in `MASTER-CHECKLIST.md` §5 read **52 closed · 44 open · 96 total**, a figure that corresponded to **no
+state the table ever held** — measured at `HEAD`, the table already carried 97 rows (55 closed, 42 open).
+(5) The §7 SR header read **53** / **10 BUILD** while the table holds **54** rows since `SR-47` was added.
+
+**▶ NEXT:** `SR-02` slice 2 (the retire guard — the `ON DELETE RESTRICT` promise, held in code because our
+agent is a custom-entity record and the store cannot carry a foreign key) and `SR-07` (a bot is a
+participant), then `SR-12` → `P2-9b`. Also open and named: `CC-100`. Register: **56 closed · 43 open · 99
+total.**
+
+---
+
 ## 2026-10-17 (night, continued) — the tooling set is finished: `SR-38` + `SR-46` (`CC-91` closed)
 
 The SRS's *"land FIRST; make everything after cheaper"* set is whole. Its last two slices land here; the
