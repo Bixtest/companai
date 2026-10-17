@@ -362,6 +362,28 @@ are chosen.** The real cause was stale statistics on a freshly bulk-inserted tab
 - **the rule: a query plan taken before `ANALYZE` is a claim about the statistics, not about the
   index.** A plan and a measurement are different things, and one can look like the other.
 
+**★ AND THE REORDER MADE AN INDEX A DUPLICATE — found 2026-10-17 (23:3x), while clearing the red.**
+`active_conv_user_idx` was reordered to `(tenant, org, user, conversation)`; `tenant_org_user_conv_idx`
+already had **exactly** that column list and **exactly** the same `where deleted_at is null` predicate, and
+both are **non-unique**. So after `6b78a0ac` the table carries **two identical indexes**: Postgres
+maintains both on every insert, update and delete, the pair doubles the index footprint, and the planner
+has to choose between two paths that cannot differ. The migration is where it happened — it *drops and
+recreates* `tenant_org_user_conv_idx` in the same identity-first order
+(`Migration20261017180000_ai_chat_participant_agent_axis.ts:157-165`), which is the step that made the two
+collide.
+
+**Why it was invisible:** the schema test that should have caught it pinned the *old* column order, so it
+went red on the reorder and read as "a stale test" rather than as "a duplicate index". Fixing the
+expectation would have made the red disappear **and taken the evidence with it** — which is why the test
+now states what it asserts and explicitly does not bless the shape.
+
+**The fix is a decision, not a keystroke, so it is recorded rather than taken:** drop
+`active_conv_user_idx` (its access path is served by `tenant_org_user_conv_idx`, and conversation-first
+reads are served by the four uniques), **or** drop `tenant_org_user_conv_idx` and keep the `active_conv_*`
+pair for naming symmetry. Either way it needs a migration, and `CC-119` (the database rebuild) is where the
+chain gets proven — so it is **scheduled**, not urgent. **§10.4's "two axis read indexes" also undercounts:
+there are three, and one of them is this duplicate.**
+
 ### 10.4 The proof
 
 The migration's **own** SQL is extracted at runtime by invoking the class with a stub `addSql` — never
@@ -370,7 +392,7 @@ hand-copied, so the probe cannot drift from the migration. Against a real `postg
 | Case | Result |
 |---|---|
 | columns after `up()` | `agent_id text`, `agent_owner_user_id uuid`, `user_id uuid` — all three nullable |
-| indexes after `up()` | four participant uniques + two axis read indexes + pkey |
+| indexes after `up()` | four participant uniques + **three** axis read indexes (one of them the duplicate named in §10.3) + pkey |
 | constraints after `up()` | `one_identity_ck` and `agent_owner_ck`, both `NOT VALID` as designed |
 | an **agent participant** | **accepted** — the thing that was impossible before |
 | a duplicate agent participant (org scope) | **refused** `23505 …_tenant_org_conv_agent_uq` |
@@ -432,3 +454,21 @@ edit, so for ~90 minutes this plan, `MASTER-CHECKLIST.md` §2, the `CC-107` regi
 asserted that the POST body was uuid-only. **A code commit is not done until the documents that describe
 it agree with it** — this section is that pass, and §10.4's figure carries the correction that came with
 it.
+
+### 10.7 The red, cleared (2026-10-17, 23:3x) — two classes, neither from `8c56428e`
+
+The package run was **4 suites / 25 tests red**, and both causes were older than the commit that exposed
+them:
+
+| Suite(s) | Cause | Fix |
+|---|---|---|
+| `data/__tests__/schema-unique-indexes.test.ts` | `6b78a0ac` reordered `active_conv_user_idx` to identity-first; the test pinned the previous order | the expectation now reads the declaration as it is — and the reorder it revealed is the **duplicate** in §10.3 |
+| `chat-route-cancel-complete`, `chat-route-through-port`, `chat-route-ownership` | `e8ecde6d` (`CC-103`) added `requirePrincipal` to `api/chat/route.ts`; three `jest.mock('@open-mercato/shared/lib/auth/server')` factories never learned it, so every POST died at `route.ts:291` | the factories now carry the house pattern — the same route's newer suite already had it — mirroring the real helper: blank subject → `null`, prefix → kind |
+
+**Measured, not assumed:** those four suites were **4 failed / 25 failed tests** before the change and are
+**4 passed / 40 tests** after it. The pre-fix state *is* the mutation, so there is nothing to simulate: the
+same code, run twice, with only the two test-side classes differing.
+
+**The lesson is the one this row already carries:** a route that imports a new guard needs **every** mock
+of that module updated, and *"the affected surface"* is not the list of files you edited. Both red classes
+were invisible for the same reason — each commit measured a surface that excluded them.

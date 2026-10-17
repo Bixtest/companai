@@ -7,6 +7,40 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (late night) — the red cleared, and the stale test was covering a duplicate index
+
+The package had been red for hours: **4 suites / 25 tests**, and every commit since had measured a surface
+that excluded them. Clearing it took two test-side changes — and the first one turned out to be the
+interesting one.
+
+**Class 1, the mocks.** `e8ecde6d` (`CC-103`) added `requirePrincipal` to `api/chat/route.ts:291`, and
+three suites' `jest.mock('@open-mercato/shared/lib/auth/server')` factories still exported only
+`getAuthFromRequest` — so every POST died with *"requirePrincipal is not a function"*, a 500-shaped symptom
+of a mock that had fallen behind its module. The same route's **newer** suite already had the right
+factory, so this was not an unknown pattern; it was three files nobody re-opened.
+
+**Class 2, the index — and what it was hiding.** `schema-unique-indexes` pinned the column order of
+`ai_chat_conv_participants_active_conv_user_idx`, and `6b78a0ac` had reordered that index to lead with
+`user_id`. Reading the entity to fix the expectation showed why the reorder mattered more than it looked:
+`tenant_org_user_conv_idx` **already** had exactly that column list and exactly the same
+`where deleted_at is null` predicate, and neither index is unique. **The table now carries two identical
+indexes**, both maintained on every insert, update and delete — and the migration is where it happened: it
+drops and recreates `tenant_org_user_conv_idx` in the same identity-first order.
+
+**The uncomfortable part is the ordering of events.** Had I "fixed" the test first and looked no further,
+the red would have gone away and the duplicate would have stayed. **A stale assertion is evidence, not
+noise** — it goes stale *because* something changed, and the job is to ask what.
+
+**Not fixed, deliberately.** Dropping one of the two indexes needs a migration and a decision about which
+name survives; `CC-119` (the database rebuild) is where the chain gets proven, so it is scheduled there
+rather than bolted on. Recorded in `CC-107`'s row and the plan's §10.3/§10.7.
+
+**Measured after:** 4 failed / 25 failed tests → **4 passed / 40**; full package **135 suites / 1,989
+tests, all passing**; `tsc` 0. Register unchanged at 63 · 55 · 118 — `CC-107` stays open for its two
+agent-axis tests and the idle-pruning rule.
+
+---
+
 ## 2026-10-17 (night, later) — `8c56428e`'s docs pass: three documents that told the next agent to build what already existed
 
 The code landed at 20:03 and the session died at 20:04, one sentence into the documentation. So for the
