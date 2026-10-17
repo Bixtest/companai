@@ -268,4 +268,27 @@ red. A test that cannot fail is not a proof.
 | The 10 affected suites together | **113 passed / 113**, no suite failed to load |
 | `tsc -p packages/ai-assistant` | **0** |
 
-**Not done, and named:** the migration is not applied to a database here (none available). Its CHECK will fail loudly if any existing `agent_id` is non-canonical — that is the intended behaviour, and the four current ids (`business_ir.query_author`, `business_ir.query_runner`, `customers.deal_analyzer`, `customers.deal_analyzer_tool_loop`) all conform.
+**The migration — PROVEN on a real PostgreSQL 16, not merely written.** My first discharge record said
+*"not applied to a database here (none available)"*. That was true of the project's own database, but not
+of the claim: Docker was available, so the SQL was run against a throwaway `postgres:16-alpine` with the
+table created exactly as `Migration20261010180000` defines it. Four cases, all as designed:
+
+| Case | Result |
+|---|---|
+| **Before the fix** — insert `crm.sales` and `CRM.Sales` for the same principal | **both accepted** — the defect reproduced |
+| **Apply the CHECK while the bad row exists** | **fails**: *"check constraint … is violated by some row"* — it reports the defect instead of installing silently |
+| **Apply after removing the bad row** | `ALTER TABLE` + `CREATE INDEX` succeed |
+| **Insert `CRM.Sales` afterwards** | **refused**: *"new row … violates check constraint"* |
+| **Insert `customers.deal_analyzer`** | accepted — a legitimate id still works |
+| **Indexes present** | `ai_agent_bindings_tenant_agent_lower_idx` created; 2 rows kept |
+
+The container was removed afterwards; nothing was left running.
+
+**What is still not done, named:** the migration has not been applied to the **project's own** database —
+none is configured in this environment — so the first real deployment will run it for the first time.
+That is an ordinary migration risk, not an unknown: the four current agent ids
+(`business_ir.query_author`, `business_ir.query_runner`, `customers.deal_analyzer`,
+`customers.deal_analyzer_tool_loop`) all match the pattern, and the route is the only writer. **Adjacent,
+not caused here:** `CC-100` — the MikroORM snapshot is stale and consumed, so `migrator.create()` may
+diff against a snapshot that does not know this table. This migration is raw SQL and does not depend on
+the snapshot; generating the *next* one does.
