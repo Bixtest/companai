@@ -55,11 +55,13 @@ is unsound as a list operation** — `*`, `.own`, the superadmin short-circuit, 
 delegations-added-after each break it, and `invokerCeilingFor` already does it correctly and is **unwired**
 (`CC-123`); **a denial written in the encoding the schema itself documents never applies — a ban that does
 not ban** (`CC-124`, fail-open, startable now); no route declares human-only or machine-only (`CC-125`);
-`tenant_id` is NOT NULL everywhere, so **"platform level" has no schema home** (`CC-126`); and owner
+and the **type catalogue has only a code layer**, so a tenant can override a type and cannot create one
+(`CC-126` — *corrected 2026-10-18: this read "platform level has no schema home", which was my misreading
+of **types** as **agents**; agents are correctly tenant-scoped, 12 of 12 tables*); and owner
 departure is unmodelled, so a demoted user's assistant keeps working (`CC-127`). Register: **64 closed · 62 open · 126 total**, counted from §5.
 **★ Rule 13, corrected the same turn:** §4's prose read *"14 … 3 need a decision"* while its table held
-*"13 … 4"* — typed, and drifted in both directions. It is now **15 · 1 · 6 · 40**, re-derived after
-D2/D4 were settled.
+*"13 … 4"* — typed, and drifted in both directions. It is now **16 · 1 · 5 · 40**, re-derived after
+D2/D4 were settled and `CC-126` moved to startable.
 **★ AND THE RULE THAT WAS BROKEN GETS A NOTE AT THE TOP OF `WORKING-RULES.md` (owner, 2026-10-18):** four
 rulings were asked in one message, in this project's own vocabulary, and one of them was unanswerable as
 written — *"I have absolutely no idea what you are saying"* is a defect in the question. **§2.2 already
@@ -74,16 +76,23 @@ decides, at that moment, what happens to the related agents"* — so `CC-127` be
 not a policy engine, defaulting to deactivate-never-delete. **D1 is answered in principle** — the ceiling
 for machines is **configuration**, set by the platform admin and inherited by tenants, never hardcoded —
 with one narrow question left: the **floor**, the capabilities no configuration may raise, which are the
-ones that change the authority system itself. **★ And the owner's model replaced mine: a type is a ROLE
-for agents — a named, data-defined bundle of capabilities — so the chain is platform ceiling → type →
-instance → binding, each a subset of the one above, and an instance PINS its type version so editing a
-type never silently re-standardises assistants already hired** (`PLAN-2026-10-18-one-agent.md` §3.1).
+ones that change the authority system itself. **★ And the owner's model replaced mine: a type is a ROLE for agents — a named, data-defined bundle of
+capabilities — so the chain is platform ceiling → type → instance → binding, each a subset of the one
+above, and an instance PINS its type version so editing a type never silently re-standardises assistants
+already hired** (`PLAN-2026-10-18-one-agent.md` §3.1). **★ D3 IS VOID, and it was my error:** the owner
+said **types** can be platform-level or tenant-level, and I turned it into a question about **agents** —
+then explained it with a business example, which is why it made no sense in a platform that is an
+architecture rather than a vertical. A type has two layers (shipped, or tenant-created); an agent is
+always inside a tenant, and the 12-of-12 `tenant_id` requirement is correct rather than a gap. What that
+misreading surfaced is real and is now `CC-126`: **the type catalogue has only a code layer, so a tenant
+can override a type and cannot create one.**
 `CC-120`'s surface half still waits on its own ruling: **it expands what a machine can read over HTTP.**
 
 **▶ NEXT — `CC-124` first, because it needs nobody's decision and it is fail-open** (a denial written in
-the encoding the schema itself documents never applies). **Then the one open question, D3** — what a
-platform-level agent owns (§4.5 of the plan, asked in plain words). Then `CC-127` (the departure flow) and
-`CC-121` (the actor/credential split) behind `CC-119`; then `CC-123`'s chokepoint. `SR-12` (per-tenant
+the encoding the schema itself documents never applies). **Then `CC-126`** (the tenant-visible type
+catalogue — the thing "bulk packaged capabilities" actually needs), **and `CC-127`** (the departure flow).
+The only question left on the whole spine is the **floor** (`CC-125`, §4.5 of the plan). Then `CC-121`
+(the actor/credential split) behind `CC-119`; then `CC-123`'s chokepoint. `SR-12` (per-tenant
 engine home) carries the same trigger, and `CC-104`/`CC-106` are unblocked with it. **`CC-119` — the DATABASE
 REBUILD MILESTONE — fires the moment the identity step closes:** `CC-102`/`CC-103`'s migrations are proven
 only against throwaway containers whose tables were recreated by hand, and `CC-100` records the MikroORM
@@ -162,15 +171,14 @@ rather than silently copied.)*
 
 **The trigger is the observable event that makes an item startable.** *"When a command is next
 touched"* is a trigger; *"later"* is not. This is the complete list — all **62** open
-register rows, counted from §5, never typed. **15** can start right now,
-**1** needs only a database, **6** need a
+register rows, counted from §5, never typed. **16** can start right now,
+**1** needs only a database, **5** need a
 decision from you, and the rest wait on the trigger named in their row.
-*(Rule 13, corrected 2026-10-18: this paragraph read **"14 … 3 need a decision"** while the table
-held **13 … 4** — the prose was typed and had drifted from the table by one in each direction. It is
-now **15 · 1 · 6 · 40**, re-derived after the seven agent-spine rows `CC-121`…`CC-127` were added and
-after D2/D4 were settled the same day, which moved `CC-123` to blocked-on-`CC-124` and `CC-127` to
-startable. The `Grouped by state` line below is the one the checker reads; this paragraph was not,
-and that is why it drifted.)*
+*(Rule 13, corrected 2026-10-18 twice: this paragraph read **"14 … 3 need a decision"** while the table
+held **13 … 4** — typed, and drifted in both directions. It then read **15 · 1 · 6 · 40** after D2/D4
+were settled, and is now **16 · 1 · 5 · 40** because `CC-126` turned out to be a misreading rather than a
+ruling and moved to startable. The `Grouped by state` line below is the one the checker reads; this
+paragraph was not, and that is why it drifted.)*
 
 | Item | LIST row | What is unfinished | Trigger | State |
 |---|---|---|---|---|
@@ -235,10 +243,10 @@ and that is why it drifted.)*
 | `CC-123` | — | **"Intersection of permissions" is unsound as a list operation.** `*`, `.own`, superadmin short-circuit, denials-after and delegations-after each break it; `invokerCeilingFor` already does the right thing and is unwired. **D2 is SETTLED by default (2026-10-18): the human half is read live, never frozen — there is no legitimate setting on the other side, and the code already refuses to cache delegations for the same reason.** | **`CC-124`** — one canonical encoding before anything is intersected. | **blocked on its trigger** |
 | `CC-124` | — | **A denial written in the documented encoding never applies.** `subject_principal_id` is `text` for the `ai_worker:<id>` form, but `blocking()` matches the bare id and the route does not normalise. Fail-open. The same mismatch makes a machine-grantee delegation inert and bypasses the self-delegation ceiling check. | **None — startable now.** | **startable now** |
 | `CC-125` | — | **No route declares human-only or machine-only.** Any key holding `ai_assistant.view` reaches the assistant surface, so every new surface is machine-writable by default — and a Staiff is the design that makes that the product. **D1 is ANSWERED IN PRINCIPLE (2026-10-18): the ceiling for machines is configuration — the platform admin sets it and tenants inherit a subset, never hardcoded. What remains is the FLOOR: the short list no configuration may raise, which is the capabilities that change the authority system itself.** | **A yes/no on the proposed floor** (mint or widen credentials · grant roles or write delegations · edit the capability catalogue or the type bundles · write or erase the audit ledger · cross-tenant). | **needs you** |
-| `CC-126` | — | **"Platform level" has no schema home.** `tenant_id` is NOT NULL everywhere; a sentinel is refused by name. Also decides per-tenant home vs per-user state, and the paired partial indexes. | **The D3 ruling** (what a platform-level agent owns). | **needs you** |
+| `CC-126` | — | **The type catalogue has only a code layer — a tenant cannot create a type.** A tenant can only *override* a platform type, so "bulk packaged capabilities" works for the platform and not for a tenant. *(The earlier framing here — "platform level has no schema home" — was my misreading of **types** as **agents**; agents are correctly tenant-scoped, 12 of 12 tables.)* | **None — startable now.** | **startable now** |
 | `CC-127` | — | **Owner departure is unmodelled.** `User` has no `isActive`; key revocation is by `createdBy` only; nothing cascades to bindings or delegations; the ACL cache holds five minutes. A demoted user's assistant keeps working. **D4 is ANSWERED (2026-10-18): the admin doing the deactivation decides, at that moment, what happens to the related agents — so the build is a departure FLOW that lists them and asks, defaulting to deactivate-never-delete.** | **None — the shape is decided; the flow can start.** | **startable now** |
-*Grouped by state:* **15 startable now** · **1 needs a database** ·
-**6 need you** · **40 blocked** on a named trigger.
+*Grouped by state:* **16 startable now** · **1 needs a database** ·
+**5 need you** · **40 blocked** on a named trigger.
 *(Rule 13, corrected 2026-10-17 (night): this line read **11 startable / 39 blocked** — typed, and two
 rows had moved past their triggers without it being re-derived. `CC-92`'s triage finished on 2026-10-16
 (what remains is *scheduling*, a decision) and `CC-72`'s stale-timeout gate was **ruled closed** the same
@@ -415,7 +423,7 @@ be the thing that drifts.)*
 
 | CC-125 | **NO ROUTE DECLARES HUMAN-ONLY OR MACHINE-ONLY, SO EVERY NEW SURFACE IS MACHINE-WRITABLE BY DEFAULT** — 2026-10-18, OPEN, named as the missing prerequisite by the hostile review and confirmed by the analysis's own §2.7. There is no route classification that says *this surface is for people* or *this one is for agents*. The consequence is already measured: **any API key holding `ai_assistant.view` reaches the assistant surface** — the gate the route above it relies on does not distinguish the caller's kind. **Why it is a prerequisite and not a cleanup:** every workstream in `PLAN-2026-10-18-one-agent.md` adds a surface, and each one built before this gate exists is machine-writable by default. The owner's **Staiff** — *an AI user that behaves like a normal user* — is precisely the design in which this gap stops being a gap and becomes the product. **FIX:** every route declares `human-only`, `machine-only`, or `both`; the default is **neither**, and a route with no declaration fails a build-time check; the declaration is read by the same chokepoint `CC-123` routes through. **Precedent for the shape:** `SR-04`'s two-surface rule (policy set by code, never config) and the `effect-class` matrix that exists to bound machines. **Needs the D1 ruling** (what a machine may hold) before the vocabulary can be written. | ☐ open |
 
-| CC-126 | **"PLATFORM LEVEL" HAS NO SCHEMA HOME — EVERY TABLE HAS `tenant_id` NOT NULL** — 2026-10-18, OPEN, measured for `PLAN-2026-10-18-one-agent.md` §4 D3. The owner's model says an agent may be defined *"on an overall platform level or by tenant"*. Measured: `tenant_id` is `NOT NULL` on every agent-side row (`ai_assistant/data/entities.ts:56,278,624,1091,1200`), so there is **no row shape for a platform-level agent** — and the only ways to fake one are a sentinel tenant id or a nullable column on some tables only. **Refused by name: a magic tenant id.** A sentinel that every query must remember to exclude is a latent cross-tenant read, and this repo has already recorded that class (`CC-103`: a permit written as a default, one `!==` wide). **The three options, with the recommendation:** (a) **template only** — a platform-level agent is a code-declared definition that must be **hired** into a tenant to exist, so there is no new ownership problem and no new column; **(b) a real platform-owned instance** — then four questions must be answered first: whose audit ledger records its acts, who pays for its runs, who may suspend it, and what happens to its memory when the platform retires it; **(c) a sentinel** — refused. **Recommend (a) now, (b) only when a real platform-level consumer exists — there is none today.** **Related and measured in the same pass: per-user HOMES are refused.** 200 users × 2 assistants = 400 home directories at roughly 3.8 MB of skills seed each plus config, state and a memory index — 2–8 GB **per tenant**, 400 SQLite files to back up and delete atomically, on one shared volume with no per-tenant boundary. The one-writer rule is satisfied by a per-profile lock, not a process, so the cost is disk and restore time. **Decision: per-tenant home, per-user STATE.** **Also required: paired PARTIAL unique indexes** — a plain unique over a nullable `organization_id` lets `(t, o, c, NULL, 'a')` duplicate freely, a failure recorded twice in this repo (`Migration20261017120000:44-65`, `Migration20261017180000:20-33`). **Needs the D3 ruling.** | ☐ open |
+| CC-126 | **THE TYPE CATALOGUE HAS ONLY A CODE LAYER — A TENANT CANNOT CREATE A TYPE** — 2026-10-18, OPEN, and it is the real requirement underneath a question I had asked wrongly. **THE CORRECTION FIRST:** the owner's sentence was about **TYPES** — *"all that can be on an overall platform level or by tenant"*, said of *"all the types and settings of agents"* — and I turned it into a question about *agents*, then explained it with a business example, which is why it read as a product feature in a platform that is meant to be an architecture. **Restated correctly, and it is not a decision: a TYPE has two layers — shipped by the platform, or created by a tenant from the same capability catalogue (exactly how roles work: some ship with the system, some a tenant defines); an AGENT is always inside a tenant.** All twelve agent tables require a `tenant_id` (measured: 12 of 12, 0 nullable) and that is **correct, not a gap** — an agent is a thing that acts inside somebody's data. The earlier wording here, *"platform level has no schema home"*, framed a correct constraint as a defect. **No tenant-less agent should exist.** **THE REAL GAP, measured:** `AiAgentDefinition` (`lib/ai-agent-definition.ts`) is global code loaded from a generated registry (`lib/agent-registry.ts`), and the only tenant-side rows are **overrides** — `AiAgentPromptOverride`, `AiAgentRuntimeOverride`, `AiAgentMutationPolicyOverride`, `AiTenantModelAllowlist`. So a tenant can **narrow** an existing type and cannot **create** one, which means the owner's *"bulk packaged capabilities, so a standardised agent is cheap to create"* works for the platform and not yet for a tenant. **FIX:** a type row (name, capability bundle, version, owning tenant or null for platform, status) whose bundle is validated at write time as a **subset** of the platform ceiling; a version pin on every instance (`CC-122`); and the capability catalogue as the single vocabulary both layers draw from. **REFUSED by name: a sentinel tenant id** — a value every query must remember to exclude is a latent cross-tenant read, the `CC-103` class (a permit written as a default). **Measured in the same pass and also refused: per-user HOMES.** 200 users × 2 assistants = 400 home directories at roughly 3.8 MB of skills seed each plus config, state and a memory index — 2–8 GB **per tenant**, 400 SQLite files to back up and delete atomically, on one shared volume with no per-tenant boundary; the one-writer rule is satisfied by a per-profile lock, not a process, so the cost is disk and restore time. **Decision: per-tenant home, per-user STATE.** **Also required: paired PARTIAL unique indexes** — a plain unique over a nullable `organization_id` lets `(t, o, c, NULL, 'a')` duplicate freely, a failure recorded twice in this repo (`Migration20261017120000:44-65`, `Migration20261017180000:20-33`). **Startable now; needs no ruling.** | ☐ open |
 
 | CC-127 | **OWNER DEPARTURE IS UNMODELLED — A DEMOTED OR OFFBOARDED USER'S ASSISTANTS KEEP WORKING** — 2026-10-18, OPEN, found by the identity-and-authority review and confirmed against the code. Measured: `User` has `deletedAt` and **no `isActive`** (`auth/data/entities.ts:14-50`), so *"deactivate"* is not a state that exists; `user-deleted-revoke-keys.ts:70` revokes keys **by `createdBy` only**, and `createdBy` is documented as **provenance, not identity** (`shared/lib/auth/server.ts:274-281`); nothing cascades to `ai_agent_bindings` or `authority_delegations`, and `rbacService` holds resolved ACLs for **five minutes** (`:37`). **So a user who loses a role keeps an assistant acting on the old one, and a user who is removed leaves bindings and delegations pointing at a person who is gone.** The bots analysis established that the donors **disagree with each other** here, so there is no standard to copy: Zulip **deactivates** and keeps the row (renamed, `actions/users.py:470-509`); Multica **refuses to delete the owner** (`001_init.up.sql:46`); Buzz leaves the agent and its owner link is immutable; Slack's bot is app-level. **So this is a ruling, not a port.** The decision is **three independent settings** — reach (own rooms, or the owner's rights as a **floor**) · on-owner-departure (**deactivate / leave / block**) · human-per-request (always, or only to start) — and then a cascade that reaches every binding, delegation, cache and open run. **Needs the D4 ruling.** | ☐ open |
 

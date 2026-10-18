@@ -48,7 +48,7 @@ them was a scoping error, not a judgement. They are now the primary donors for W
 | 2 | Types are settings | **CONFIRMED AS A BUNDLE — and the owner's framing is better than mine** | A type **is** a role for agents: a named, data-defined bundle of capabilities, so "standardised agents" become cheap to create (§3.1). The only thing a type must not do is **select the permission rule** — that is a different kind of field that happens to share the name. |
 | 3 | Aissistant = intersection | **AMENDED, AND IT IS THE MOST IMPORTANT ONE** | Intersection of permission **lists** is unsound and can widen. It must be intersection of **decisions**, computed live, through one function (§3.3). |
 | 4 | Staiff behaves like a normal user | **CONFIRMED; the ceiling is configuration, not code** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). The owner's ruling: the platform admin sets the ceiling for machines and tenants inherit a subset (D1). One floor remains — capabilities that change the authority system itself. |
-| 5 | Platform level or tenant level | **AMENDED — ONE QUESTION OPEN** | `tenant_id` is NOT NULL on every table, so "platform level" has **no schema home** today. It is either a template (and must be hired to exist) or a real owner with a ledger, a bill and a switch. That is the single open question (§4.5, D3). |
+| 5 | Platform level or tenant level | **RESOLVED — and my question was a misreading** | It was said of **types**, not agents. Types have **two layers** (shipped by the platform, or created by a tenant); agents are **always** inside a tenant, which is why all twelve agent tables require one. What the misreading surfaced is real: the type catalogue has only a **code** layer, so a tenant cannot create one (`CC-126`). |
 | 6 | Same method for the four surfaces | **CONFIRMED, WITH AN ORDER** | The method is right; doing it concurrently is not. One spine, one proving surface, then attach (§6). |
 
 **One precondition, and it is not optional:** a **human-only / machine-only route classification** does
@@ -152,6 +152,12 @@ everything the platform can do
              └─ a hired INSTANCE                 ← tenant-scoped, per-user state
                   └─ a BINDING or DELEGATION     ← per person, per task
 ```
+
+**Two layers of type, and only two.** A type is either **shipped by the platform** — part of the product,
+visible to every tenant, versioned with the code — or **created by a tenant** for its own use, from the
+same capability catalogue. That is exactly how roles already work: some roles ship with the system, some a
+tenant defines. **An agent, by contrast, is always inside a tenant** — all twelve agent tables require a
+tenant, and that is correct, because an agent is a thing that acts inside somebody's data.
 
 **One consequence of the analogy that has to be built in, not discovered later.** A role is edited,
 and the edit changes everybody who holds it. If the *Aissistant* type is edited tomorrow, does every
@@ -272,15 +278,31 @@ sensible default exists, take it, do the work, and say so.* The code already ref
 delegations for exactly this reason (`delegationService.ts:23-31`: *"a revoke that takes effect
 'within five minutes' is not a revoke"*). **If you disagree, say so and it becomes a setting.**
 
-### D3 — OPEN, and it is the only question that needs you
-A platform-level agent has no `tenant_id` value to hold (`tenant_id` is NOT NULL everywhere). Three
-options, only one of them cheap: **(a) a template** that must be hired into a tenant to exist — no new
-ownership problem; **(b) a real platform-owned instance** — then four things must be answered: whose
-audit ledger records its acts, who pays for its runs, who may suspend it, and what happens to its
-memory when the platform retires it; **(c) a magic tenant id** — **refused by name**: a value every
-query must remember to exclude is a latent cross-tenant read.
-**Recommendation: (a) now, (b) only when a real platform-level consumer exists.** There is none today.
-**The question, in plain words, is in §4.5.**
+### D3 — VOID. I misread one word, and the question does not exist
+
+The owner's sentence was about **types** — *"all that can be on an overall platform level or by tenant"*,
+said of *"all the types and settings of agents"*. **I turned it into a question about *agents***, and then
+explained it with a business example (a support assistant every customer talks to). That made an
+architecture question sound like a product feature, which is why it made no sense: *"what is on this
+platform I built a school management system… we are building an architecture."*
+
+Restated correctly, this is not a decision. It is the architecture:
+
+| What | Where it lives | Why |
+|---|---|---|
+| **A type** — a named bundle of capabilities | **two layers**: shipped by the platform (every tenant sees it), or created by a tenant for itself | exactly how roles already work — some roles ship with the system, some a tenant defines |
+| **An agent** — a hired instance | **always inside a tenant** | there is no tenant-less agent, and there should not be |
+
+**And the `tenant_id NOT NULL` measurement is not a defect — it is the design working.** All twelve agent
+tables require a tenant (measured: 12 of 12, 0 nullable) because an agent is a thing that acts *inside
+somebody's data*. My earlier wording — "platform level has no schema home" — framed a correct constraint
+as a gap. The honest reading is: **no such thing should exist.**
+
+**What the misreading did surface, and it is real.** The **type catalogue has only a code layer.**
+`AiAgentDefinition` is global code loaded from a generated registry, and a tenant can only **override** an
+existing type — prompt, runtime, policy, model allowlist — it cannot **create** one. So "bulk packaged
+capabilities, so a standardised agent is cheap to create" works for the platform and does not yet work for
+a tenant. That is `CC-126`, rewritten, and **it needs no ruling.**
 
 ### D4 — ANSWERED
 > *"When owner departs, an admin (or someone with the right permissions) will deactivate or delete his
@@ -296,34 +318,25 @@ delete the owner; Buzz leaves the agent) stops being a decision to make and beco
 default. **`CC-127` stays, and its shape changes:** it is no longer "invent a policy", it is "make the
 departure flow exist, list the agents, and default to deactivate".
 
-### 4.5 The one question, in plain words
+### 4.5 What is actually left to ask
 
-*(Written to the 14-year-old test in `WORKING-RULES.md`'s NOTE, because the first version failed it.)*
+**One thing, and it is small:** the **floor** (`CC-125`). Everything else is settled — D2 by default, D3
+by correction, D4 by the owner.
 
-**The situation.** You said an agent can be defined "at platform level". Every table in our database
-requires a customer to belong to — there is no empty slot where a platform-level thing can sit. So I
-need to know what "platform level" is, and there are only three honest answers.
+The floor is the short list of capabilities that **no configuration may ever grant to a machine**, because
+they are the capabilities that change the authority system itself. My proposed list, for a yes/no:
 
-**Think of a job description versus an employee.** A job description sits in a folder. Nobody is doing
-that job until someone is hired into it. An employee is a real person on payroll: they do work, they
-get paid, and they have a manager who can stop them.
+1. minting or widening credentials (creating keys, changing a key's kind)
+2. granting roles, or writing delegations
+3. editing the capability catalogue or the type bundles
+4. writing to, or erasing, the audit ledger
+5. anything that reaches across tenants
 
-**Which one do you mean?**
-
-- **(a) A job description.** The platform publishes a standard recipe — "our standard Aissistant" — and
-  a customer hires it into their own account. The agent only exists inside a customer, once hired.
-  Nothing new to own, nothing new to pay for, nothing new to audit.
-- **(b) A platform employee.** An agent that belongs to **us**, not to any customer — for example a
-  support assistant every customer can talk to. It exists on its own. Then three things must be
-  decided, and only you can decide them: **whose activity log records what it did**, **who pays for its
-  AI usage**, and **who is allowed to switch it off**.
-- **(c) Pretend it lives in a fake customer called "tenant zero".** I recommend against this: every
-  query in the system would have to remember to skip it, and one forgotten skip means one customer
-  sees another customer's data.
-
-**My answer: (a) now.** It costs nothing, it is reversible, and (b) can be added later without redoing
-(a) — because (a) already gives us the thing (b) would need: a versioned, named type. **Say "b" and I
-will design it, but it needs the three answers above first.**
+**Why a floor at all, if the ceiling is configuration:** a machine that can grant itself authority makes
+every other control decoration — the locks would be held by the thing they are meant to lock out.
+**Everything else — every business capability — is a setting the platform admin controls and tenants
+inherit a subset of.** Say "no floor" and I will build it without one, but I would be recording a known
+hole rather than a decision.
 
 ---
 

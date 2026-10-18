@@ -7,6 +7,42 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (last) — I read "types" as "agents", and explained an architecture with a business example
+
+The owner's reply was blunt and correct: *"This makes absolutely no sense… what is on this platform I built
+a school management system. How is any of what you said above stay relevant to anything? When we build we
+don't build to serve a certain business case (like crm, sales, etc.), we are building an architecture."*
+
+**Two errors, and they compounded.**
+
+**1. I read the wrong noun.** His sentence was about **types** — *"all that can be on an overall platform
+level or by tenant"*, said of *"all the types and settings of agents"*. I turned it into a question about
+**agents**. So I went looking for a place to put a tenant-less agent, found that every table requires a
+`tenant_id`, and reported that as a defect. **It is not a defect. It is the design working** — an agent is
+a thing that acts inside somebody's data, so 12 of 12 agent tables requiring a tenant is exactly right.
+I had written *"platform level has no schema home"* about a constraint that should have no exception.
+
+**2. I explained a structural question with a business story.** "A support assistant every customer can
+talk to" is a *product feature*. The owner is building an **architecture** — the school management system
+is one tenant-shaped application on top of it, not the thing being designed. Using a vertical example made
+a structural question look like a feature request, which is why it was unanswerable: **there was nothing
+in it to decide.** The rule this produces, and it is now in the working rules: **when explaining a design
+decision, the example must be structural, never a business case.**
+
+**What is actually true, restated.** A **type** has two layers — shipped by the platform, or created by a
+tenant from the same capability catalogue, exactly how roles already work. An **agent** is always inside a
+tenant. **D3 is void; there was no question.**
+
+**And the misreading surfaced a real gap, which is the only useful thing to come out of it.** The type
+catalogue has **only a code layer**: `AiAgentDefinition` is global code from a generated registry, and the
+only tenant-side rows are *overrides*. So a tenant can **narrow** a platform type and cannot **create**
+one — which means the owner's *"bulk packaged capabilities, so a standardised agent is cheap to create"*
+works for the platform and does not yet work for a tenant. **`CC-126` is rewritten to that**, and it needs
+no ruling. Register §4 re-derived to **16 · 1 · 5 · 40**; the only question left on the whole spine is the
+**floor** (`CC-125`).
+
+---
+
 ## 2026-10-18 (latest) — the questions were the defect, and the owner's model was better than mine
 
 Two things happened in one message, and the second is the more important.
