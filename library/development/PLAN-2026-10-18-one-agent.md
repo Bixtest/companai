@@ -1,0 +1,478 @@
+# PLAN — the one agent: strategy, rulings, and the work
+
+**Status:** OPEN — a written requirement and a work breakdown. **No code has been written for it.**
+**Date:** 2026-10-18 · **Owner:** the strategy statement below · **Reviewers:** four, independent (see §8)
+**Inputs:** the nine platform studies, `08-THE-SRS.md` (54 `SR-*`), `MASTER-CHECKLIST.md` (119 register
+rows), and four measurements of our own code taken for this document (§2).
+
+---
+
+## 0. What was asked, and the one-sentence answer
+
+The owner's statement, in his words:
+
+> One agent, and its functionality differs based on the settings, so it ends up covering one or a
+> combination of the types. **Aissistants** are AI agents hired by a user as assistants — one user may
+> have one or many — and their authority is the intersection of the user's permissions and the
+> assistant's. **Staiff** is an AI user that behaves like a normal platform user, with roles and
+> permissions. All of it at platform level or by tenant. Achieve the ultimate agent — rich, versatile,
+> adaptable, secure, integrable — then organically add it to platform core, adapting both sides; same
+> method for workspaces, workspaces↔ai_agents, Automation, and widgets.
+
+**The answer: the direction is right, the mechanism is one field away from a security defect, and the
+order is wrong in one place.**
+
+- **Right:** one agent core, one capability surface, one engine seam, one identity model. Four separate
+  agent implementations would be four dialects, and the donors all agree on this.
+- **One field away:** "type" must not be a *setting*. If a mutable field selects which permission rule
+  applies, the system can be talked into granting the wrong thing by editing data. The type is a **name
+  for three facts set once at hire** (§3), and every *setting* may only narrow what those facts allow.
+- **Order wrong in one place:** the four surfaces are not peers. Workspaces do not exist as a module,
+  Automation cannot wake durably, and Widgets sit behind both. Attaching all four now is four
+  migrations wearing one plan. The spine lands first; **chat** — the one surface that already works —
+  proves it; then the others attach one at a time.
+
+**And the correction this document owes the record:** the two analyses written before it covered
+Zulip, Multica, Buzz and Slack. Those answer *"what is a bot to a room"*. They do not answer *"what is
+an agent"* — and the two donors that do are **Paperclip** (our ancestor: four separable layers, a
+gated hire, finite runs) and **Hermes** (the engine: profile, soul, skills, memory, tools). Omitting
+them was a scoping error, not a judgement. They are now the primary donors for W1, W2, W4 and W5.
+
+---
+
+## 1. The verdict, in six lines
+
+| # | The strategy says | The verdict | Why |
+|---|---|---|---|
+| 1 | One agent core | **CONFIRMED** | Paperclip's four layers and Hermes's profile are the same conclusion from opposite directions. Four cores would be four permission dialects. |
+| 2 | Types are settings | **AMENDED** | A field that selects the permission algorithm is the confused-deputy shape. Types are **named combinations of three axes**, resolved at one chokepoint (§3). |
+| 3 | Aissistant = intersection | **AMENDED, AND IT IS THE MOST IMPORTANT ONE** | Intersection of permission **lists** is unsound and can widen. It must be intersection of **decisions**, computed live, through one function (§3.2). |
+| 4 | Staiff behaves like a normal user | **CONFIRMED IN PRINCIPLE, BLOCKED ON A RULING** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). But `SR-18` caps machine actors at approve-first. The owner must rule which wins (D1). |
+| 5 | Platform level or tenant level | **AMENDED** | `tenant_id` is NOT NULL on every table, so "platform level" has **no schema home** today. It is either a template (and must be hired to exist) or a real owner — and if it is a real owner, four questions follow that nobody has answered (§4, D3). |
+| 6 | Same method for the four surfaces | **CONFIRMED, WITH AN ORDER** | The method is right; doing it concurrently is not. One spine, one proving surface, then attach (§6). |
+
+**One precondition, and it is not optional:** a **human-only / machine-only route classification** does
+not exist. Any API key holding `ai_assistant.view` reaches the assistant surface. Every new surface
+built before that gate exists is machine-writable by default, and "Staiff behaves like a user" turns
+that from a gap into a design.
+
+---
+
+## 2. What the code actually has — measured, not assumed
+
+Rule 1 applies: docs are claims, code is the authority. Four measurements, all taken for this
+document, plus three defects found while taking them.
+
+### 2.1 The four load-bearing facts
+
+**F1 — Agents are declared in code; nothing is hired.** `AiAgentDefinition`
+(`lib/ai-agent-definition.ts`) is a code object: model, tools, loop controls, budgets,
+`requiredFeatures`. It is loaded from a generated registry (`lib/agent-registry.ts`). The database holds
+**overrides** (`AiAgentPromptOverride`, `AiAgentRuntimeOverride`, `AiAgentMutationPolicyOverride`,
+`AiTenantModelAllowlist`), **bindings**, **runtimes** and **conversations** — twelve entities in
+`data/entities.ts`, and **not one of them is an agent instance**. Consequence: `agentId` is
+code-declared, so two tenants' assistants are *the same object*; "one user, many Aissistants" has no
+row to live in.
+
+**F2 — The narrowing already exists, and it is the right shape.** `AiAgentBinding`
+(`data/entities.ts:1077`) carries `principal_id` (the `api_keys` id), `tool_allowlist` — *"a subset of
+the agent's own `allowedTools` … the effective set is the INTERSECTION with the agent's declaration — a
+binding can narrow, never widen (B3)"* — and `required_features`, which is a **UNION** with the
+agent's declaration. So "the assistant's own permissions" and "the user's permissions" are already two
+gates that compose, at the tool and feature level, for a binding. This is the strongest thing we have
+and it should be the template for the rest.
+
+**F3 — A machine already resolves roles, from its credential.** `rbacService.loadAcl`
+(`:294-360`) parses the subject; for an API-key-backed kind (`service`, `ai_worker`) it loads the
+**key row** and reads `roles_json` → `RoleAcl` features and `isSuperAdmin`. The comment is explicit:
+*"Both service keys and AI workers resolve their permissions from the key row they authenticate
+with."* So a Staiff's *authority resolution* is not missing. What is missing is everything that makes
+it a *person*: a stable actor id, a name, a home, a lifecycle.
+
+**F4 — Delegation exists, with a ceiling that narrows.** `AuthorityDelegation`
+(`auth/data/entities.ts:728`) carries `capability_id`, `authority_ceiling` (*"at or below what they
+hold themselves"*), a non-null `expires_at`, a non-null `reason`, and `revoked_at`;
+`DelegationService.activeFor` is deliberately **never cached** (*"a revoke that takes effect 'within
+five minutes' is not a revoke"*). The grant path already checks the grantor actually holds what they
+lend (`CC-94`, built 2026-10-17). This is the mechanism an Aissistant's "acts for Priya" should use.
+
+### 2.2 The three defects found while measuring
+
+**X1 — The actor's authority hangs off its credential, so rotation un-hires it.**
+`AiAgentBinding.principal_id` is the **`api_keys` id** (uuid, **no FK**). A machine's roles live on the
+key row (`api_keys.roles_json`). Rotation is delete-and-create — there is no `rotate` in
+`apiKeyService`. So rotating a key: loses the actor's roles, orphans its bindings (no FK to catch it),
+dangles its delegations, and splits one agent's audit trail into N actors. **An assistant that cannot
+outlive its own password is not a colleague.**
+
+**X2 — A denial written the way the schema documents never applies.**
+`AuthorityDenial.subject_principal_id` is `text`, and its own docblock says why: *"an API key acting is
+`api_key:<id>`, and a `uuid` column would make machine actors undeniable"*. But
+`DenialService.blocking` (`:110-121`) matches on the **bare** id that `parseSubject` returns, and the
+route's schema is `z.string()` with no normalisation (`denials/route.ts:35`). So a denial stored as
+`ai_worker:<uuid>` — the encoding the schema recommends — **is accepted, audited, and never matches**.
+That is a ban that does not ban: **fail-open**. The same encoding mismatch makes a machine-grantee
+delegation silently inert (fail-closed), and lets a self-delegation bypass the ceiling check at
+`delegations/route.ts:186` by writing the prefixed form.
+
+**X3 — "Intersection" as a list operation is unsound.** Our permission model is not a list. `*` is
+everything; `module.*` is a family; `.own` is a *different capability*, not a modifier; a superadmin
+short-circuits before features are read (`rbacService.ts:620-625`); a denial is **subtracted after** the
+grant; a delegation is **added after** the grant has said no, and does not re-check the grantor at use
+time. Intersecting the lists gives `['*'] ∩ ['users.view'] = ∅` — denying everything — while
+`['x.own'] ∩ ['x.view']` can *widen* row scope by stripping the qualifier. **Intersect answers, never
+lists.**
+
+---
+
+## 3. The model: three axes and one chokepoint
+
+### 3.1 Plain words
+
+"One agent, many settings" is true about the **body** (what runs the model) and the **toolkit** (what
+it may call). It is false about **authority**, and the distinction is the whole design.
+
+Imagine a company where every employee's badge is printed with a "type": *assistant*, *contractor*,
+*employee*. Now imagine that changing the word on the badge changes which doors open — and that the
+word is editable by the person wearing it. That is what a `type` column that selects a permission rule
+is. Nobody would build it that way in a building; we should not build it in a database.
+
+Instead, the type is a **name** for three facts that are set once, at hire, and are not settings:
+
+| Axis | The question | Values | Why it is not a setting |
+|---|---|---|---|
+| **A — Identity** | *What is it?* | a machine principal, with a credential and a stable actor id | Changing identity is a different actor, not a different mode. |
+| **B — Standing** | *Where does its authority come from?* | **own** (roles/ACL — the Staiff) · **delegated** (a human lent it — the Aissistant) · **run-scoped** (the task carries it — the worker) | This is the permission algorithm. A field that selects it is the defect. |
+| **C — Placement** | *Where does it live, and what is it attached to?* | platform **template** · **tenant** instance · **per-user state**; attached to a room, a task, a schedule, a record | Ownership and lifecycle, not capability. |
+
+Everything a user or tenant can then change — model, persona, skills, tools, memory, budget, autonomy
+ceiling — is a **setting**, and **every setting may only narrow**. That single invariant is what makes
+one agent safe across all the types at once, and it is already the rule the code uses for bindings
+(F2).
+
+### 3.2 The intersection, in plain words
+
+*"Keep what both have"* only works if both sides are the same kind of thing. Ours are not.
+
+- `*` means everything. `users.*` means a family. Intersecting them as strings gives **nothing**, so
+  the assistant would be denied everything its owner can do.
+- `.own` is a *separate capability*, not a suffix. Strip it and the intersection **widens** row scope.
+- A superadmin never reads a feature list at all — the list is empty and the answer is still yes.
+- A **denial** is subtracted *after* the grant is read. It is not an element of the list.
+- A **delegation** is added *after* the grant says no, and it does not re-check the grantor at use time.
+
+So the intersection must be of **answers, not lists**. One function, asked twice, at the same instant:
+
+```
+may(principal = the human,   capability, scope)  AND  may(principal = the assistant, capability, scope)
+```
+
+Both must be yes, from the same chokepoint, against the same clock. And the human's half must be read
+**live** — not frozen at hire — or revoking Priya's permission never reaches Priya's assistant, and the
+assistant becomes a way to keep using authority the person no longer has.
+
+**Where this already exists, partially:** `invokerCeilingFor`
+(`authorityEnforcementService.ts:488`) is the only real decision-intersection in the platform. It is
+reached only through `decideFor` (`:270`); the **HTTP RBAC path is the one door that does not pass an
+invoker** and so resolves the actor alone — its own comment calls that *"wider, not narrower"*
+(`tool-authority.ts:100-102`) — and `refusalFor` returns `null` outright unless the tenant's mode is
+`enforce` (`:233`), while `CC-11` records that `enforce` is armed for **no tenant**. So the mechanism is
+built, proven, and reached by nobody on the path that matters — the `CC-101` shape this project keeps
+finding. W3 is not "invent intersection"; it is **route every path through the one that exists**.
+
+### 3.3 The type names, once the axes exist
+
+The four names the owner used are then **lookups, not branches**:
+
+| Name | A — Identity | B — Standing | C — Placement |
+|---|---|---|---|
+| **Aissistant** | machine | delegated from one human, live | per-user state under a tenant instance |
+| **Staiff** | machine | **own** roles, capped (D1) | tenant instance |
+| **Worker** | machine | run-scoped | tenant instance, attached to a schedule or task |
+| **Colleague** | machine | delegated **or** own, per the room | tenant instance, attached to a room |
+
+No `if (type === ...)` anywhere outside the resolver. If a module needs to branch on the type, the
+axes are missing a value.
+
+---
+
+## 4. The four rulings that block code
+
+Per the standing protocol, no code before a written requirement. These four are **product decisions**,
+not engineering ones, and each one changes the schema.
+
+**D1 — The cap on a Staiff.** `SR-18` is marked HAVE and is test-pinned: *machine actors are capped at
+approve-first*. The owner's statement says a Staiff holds *"roles and permissions just like a normal
+user"*. These are different products. The ruling needed: **may a Staiff exercise a role outright, or
+only propose and let a human approve?** If outright, then name the **never-granted set** — the
+capabilities a machine may never hold regardless of role, which Paperclip does and we do not.
+
+**D2 — Live or frozen.** Is an Aissistant's authority recomputed from the human at every act, or
+captured at hire? **Recommendation: live**, for the reason in §3.2, and because the code already refuses
+to cache delegations for exactly this reason.
+
+**D3 — What "platform level" owns.** A platform-level agent has no `tenant_id` value to hold
+(`tenant_id` is NOT NULL everywhere). Three options, and only one of them is cheap:
+(a) a **template** that must be hired into a tenant to exist — no new ownership problem;
+(b) a **real platform-owned instance** — then answer four questions: whose audit ledger records its
+acts, who pays for its runs, who may suspend it, and what happens to its memory when the platform
+retires it;
+(c) a magic tenant id — **refused by name**: a sentinel that every query must remember to exclude is a
+latent cross-tenant read.
+**Recommendation: (a) now, (b) only when a real platform-level consumer exists.** There is none today.
+
+**D4 — Owner departure.** From the bots analysis, three independent settings: **reach** (own rooms, or
+the owner's rights as a floor), **on-owner-departure** (deactivate / leave / block), **human-per-request**
+(always, or only to start). The measured donors disagree with each other, so there is no standard to
+copy: Zulip deactivates and keeps the row, Multica refuses to delete the owner at all, Buzz leaves the
+agent, Slack is app-level. **Nothing in the code today models departure**: `User` has `deletedAt` and
+no `isActive`, and `user-deleted-revoke-keys` revokes by `createdBy` only — nothing cascades to
+bindings or delegations, and the ACL cache holds for five minutes.
+
+---
+
+## 5. The work — eight workstreams
+
+Each workstream names: the **R&D question** it must answer, the **expert lens** that reviews it, what
+**lands**, and the **gate** that must be green before the next one starts. The register rows are in
+`MASTER-CHECKLIST.md` §5.
+
+### W1 — The actor, not the credential · `CC-121`
+**Question.** What is the stable actor id that a binding, a delegation, a denial, a role assignment and
+an audit row all point at — such that rotating a credential changes nothing else? Paperclip separates
+identity (Ed25519, survives restarts, never silently replaced) from permissions; Zulip puts the key *on*
+the identity row. We put the identity *on* the key, which is the one arrangement that loses it.
+**Lens.** Identity & authority architect.
+**Lands.** An `agent_identity` row; credential rows that hang off it; a migration for every existing
+`principal_id`; a documented rule that no authority structure may key on a credential id.
+**Gate.** Rotate a key in a test: bindings, roles, delegations, denials and audit rows all survive,
+and the audit trail stays one actor.
+
+### W2 — Hire: the instance · `CC-122`
+**Question.** What is the smallest row set that makes "hired" a fact — kind, owner axis, lifecycle
+state, soul home, budget, stable audit id — and how does a code-declared definition version without
+rewriting the instances already hired from it?
+**Lens.** Agent-platform engineer (Paperclip's gated hire: prepare → verify with a **real liveness
+probe** → ready; a failed verification must not repeat setup).
+**Lands.** `agent_instance` (tenant-scoped; per-user **state**, not per-user home — see W6); a lifecycle
+state machine with a probe; `template_version` pinned on the instance, upgraded explicitly, never in
+place.
+**Gate.** Two tenants hire the same definition and get two different objects; an instance cannot reach
+`ready` without its body having been probed; a version bump does not silently change a hired instance.
+
+### W3 — One chokepoint, three sources · `CC-123`, `CC-124`, `CC-125`
+**Question.** How does one function answer *"may this actor do this, here, now"* for all three standings
+— own, delegated, run-scoped — such that every source only narrows, and the human half of a delegation
+is read live?
+**Lens.** Identity & authority architect; hostile reviewer.
+**Lands.** The chokepoint (route `invokerCeilingFor`'s proven logic through every path, including HTTP
+and the non-enforce mode); the decision-intersection for Aissistants; **the X2 fix** (normalise the
+principal id at every write and read, or store one canonical form — and prove it with a test that
+writes the prefixed form and expects it to apply); **the actor-class gate** (`CC-125`): every route
+declares human-only, machine-only, or both, and the default is neither.
+**Gate.** A delegation written in the prefixed form applies; a denial written in the prefixed form
+blocks; a machine cannot reach a human-only route; a delegate can never exceed the grantor *at act
+time*, proven by revoking the grantor mid-flight.
+
+### W4 — The settings that only narrow · (extends `SR-06`, `SR-09`)
+**Question.** Which parts of the agent are settings, who owns each, and which of them must be
+**impossible** to set because they would change a security property?
+**Lens.** Agent-platform engineer.
+**Lands.** The capability surface, with an owner per item: **persona/soul** (core owns the folder and
+its versioning; the engine owns the meaning — Paperclip owns the folder, Hermes owns the meaning, and
+we need the first without losing the second); **skills** (`SR-06`, versioned `SKILL.md`, with
+provenance, approve and revoke — an unapproved skill is a permission widening by document);
+**memory** (core owns the binding and what may enter a prompt; the engine owns retrieval — and memory is
+**never** business truth); **tools** (already narrowing, F2); **model and budget** (per task class, with
+background traffic never on the expensive lane).
+**Never a setting, named:** the tool ceiling, the mutation policy upward, `requiredFeatures` removal,
+tenant/principal/run identity, secret values, `baseUrl` as free text, loop budget above the declared
+maximum, and approval mode for unattended runs.
+**Gate.** Every item on the "never a setting" list has a test that attempts to widen it and fails.
+
+### W5 — Durable runs · (`C4-1`, `C4-2`, `C4-3`, `C4-4`, `C4-8`)
+**Question.** What is the smallest set that makes an agent a *worker* rather than a pet — and what is
+the convergence test that proves it?
+**Lens.** Agent-platform engineer (Paperclip's automations, read at source).
+**Lands.** Finite runs with continuity in the database; the three-way invariant (*live path · durable
+wait · visible disposition*); continuations with **idempotency keys**; a reconciler that honours human
+cancellation; a budget ceiling that pauses. **And `C4-5` as an acceptance test, not a component:** the
+DOT-2 loop is a completion contract that never converges, and the cure is the contract, never a slower
+poller.
+**Deferred by name:** the watchdog, routines, idle-sleep, and the runner (Hermes is already
+out-of-process behind the port).
+**Gate.** Kill the process mid-run; work resumes; no duplicate effect; the DOT-2 test is green.
+
+### W6 — Placement and tenancy · `CC-126`, `CC-127`
+**Question.** Per-user instances or per-user state — and where does a platform-level agent live?
+**Lens.** Multi-tenant SaaS architect.
+**Lands.** The placement matrix; **per-tenant home, per-user state** (measured reasoning in §8.2 — a
+home per user is a home per assistant, on one shared volume, with no per-tenant boundary); paired
+**partial** unique indexes, because a plain unique over a nullable `organization_id` lets duplicates
+through — a failure this repo has already recorded twice; the departure state machine from D4.
+**Gate.** 200 users with two assistants each do not create 400 homes; a duplicate is rejected by the
+database, not by a convention; offboarding a user reaches every binding, delegation and cache.
+
+### W7 — One surface proves the spine, then the others attach
+**Question.** Which surface is the cheapest *complete* proof that the spine works end to end?
+**Answer: chat.** It is the only one that exists, and it is where the machine axis is already
+half-built (`CC-107` closed the read half; `CC-120` closed the identity half and is waiting on a
+ruling). The order after that is by maturity, not by ambition: **workspaces** (does not exist as a
+module), **automation** (cannot wake durably until W5), **widgets** (sits behind automation and the
+risk-on-command work, `CC-63`: 0 of ~93 commands declare risk).
+**Gate.** A surface may not start until it has its own written `SR-*` and the spine's conformance test
+passes from inside it. No surface may add a second way to answer "may this act here".
+
+### W8 — The ratchets that stop the drift
+**Question.** What can be *measured* that tells us the spine is being forked?
+**Lands.** Three checks, each of which is a count, not a feeling:
+1. **One representation of "platform level"** — any second encoding, or any new nullable `tenant_id`,
+   fails. *(Signal the red team named: four scope dialects.)*
+2. **One authority predicate** — at most one function taking an agent id answers "may this act here";
+   a second one fails. *(Signal: four authority predicates.)*
+3. **One type branch** — at most one `type ===` site, and it lives in the resolver. *(Signal: four type
+   switches.)*
+**Gate.** These are wired into CI, not left as scripts somebody can run — `CC-101`'s lesson: *a checker
+is not a control until something calls it.*
+
+---
+
+## 6. The sequence, and what it costs to skip it
+
+```
+D1..D4 rulings  ──────────────────────────────►  (no code before these)
+        │
+W1 actor ≠ credential  (CC-121)
+        │
+        ├── W3 chokepoint + actor-class gate  (CC-123/124/125)   ← X2 fix lands here, first
+        │
+        └── W2 hire: the instance  (CC-122)
+                │
+                ├── W4 settings that only narrow
+                ├── W6 placement (CC-126/127)
+                └── W5 durable runs
+                        │
+                        └── W7 chat proves it → workspaces → automation → widgets
+                                │
+                                └── W8 ratchets, wired to CI
+```
+
+**Why W1 before W2.** Hiring onto a credential id means every hire is un-hired by the next rotation.
+**Why W3 before W2.** An instance that can be created but whose authority cannot be decided is a row
+with no behaviour — the exact "contract after the code" defect the register already names (`CC-12`).
+**Why chat before workspaces.** Chat exists. A proof that costs one route is worth more than a design
+that costs four.
+
+---
+
+## 7. Refused, by name
+
+- **A `kind` / `type` column that selects the permission algorithm.** The confused-deputy shape, and
+  the branch asymmetry `principal.ts` was written to abolish.
+- **Intersecting permission *lists*.** It denies everything in one direction (`*`) and widens row scope
+  in the other (`.own`).
+- **A magic tenant id for "platform level".** A sentinel every query must remember to exclude is a
+  latent cross-tenant read.
+- **A home directory per user.** Measured cost, one shared volume, no per-tenant boundary, and a backup
+  and deletion problem at offboarding (§8.2).
+- **Freezing the Aissistant's authority at hire.** It converts a revoked permission into a working one.
+- **Building the four surfaces concurrently.** Four maturities, four migrations, one plan.
+- **A second authority predicate per surface.** The drift signal, and the thing W8 counts.
+- **Importing Hermes's profile model as the tenant boundary.** Hermes's own docs say a profile is
+  isolation of *state*, not a sandbox, and not tenancy.
+- **A `rotate` implemented as delete-and-create.** That is the current behaviour and it is X1.
+
+---
+
+## 8. The reviews — what each one changed
+
+Four independent reviewers, each given the code paths rather than a summary. What follows is only what
+**changed this document**; agreement is not repeated.
+
+### 8.1 Identity & authority architect
+
+- **Corrected my model of the subject.** `derivePrincipal` prefers `auth.keyId` over the parsed prefix
+  (`principal.ts:133`), so **the prefix is not authoritative**. Consequence: never let a string encoding
+  be the security-relevant identity; resolve from the row. This is now W1's core requirement.
+- **Disproved the intersection as stated** (§3.2 is his argument, verified against
+  `featureMatch.ts:25-77`, `rbacService.ts:405-409,620-625`). This is the single largest change to the
+  plan.
+- **Found X2** (the denial encoding) and **the delegation counterpart** — I verified both at source
+  before recording them.
+- **Named the inversion in our RFC 8693 mapping:** we mint `sub` = machine with the human riding as a
+  non-standard `onBehalfOfUserId`. Delegation semantics want `sub` = assistant, `act` = human. That
+  changes what the token should be, and it is now part of D2.
+- **Ranked the three worst defects**, and the first two are W1 and W3.
+
+### 8.2 Multi-tenant SaaS architect
+
+- **Corrected F3's neighbour:** `AiAgentRuntime` is a *host/daemon*, not an agent — "one runtime hosts
+  many agents" (`entities.ts:1142`). An instance is a new table, never a column there.
+- **Answered W6 decisively: per-user instances are NOT viable.** 200 users × 2 assistants = 400 homes,
+  ~3.8 MB of skills seed each plus config, state, and a memory index — 2–8 GB **per tenant**, 400 SQLite
+  files to back up and delete atomically, on one shared volume with no per-tenant boundary. The
+  one-writer rule is satisfied by a profile lock, not a process, so the cost is disk and restore time,
+  not concurrency. **Per-tenant home + per-user state.**
+- **Found the schema blocker for "platform level":** `tenant_id` is NOT NULL on every row. There is no
+  home for a platform-level agent, and it will be faked with a sentinel unless D3 is answered.
+- **Found the precedent I had missed:** `AiChatConversationParticipant.agent_owner_user_id`
+  (`entities.ts:917`) already exists — a per-user agent axis, shipped, in the one surface that works.
+- **Named the index failure mode with two in-repo precedents:** a plain unique over a nullable
+  `organization_id` lets `(t, o, c, NULL, 'a')` duplicate freely; both
+  `Migration20261017120000:44-65` and `Migration20261017180000:20-33` record it.
+
+### 8.3 Agent-platform engineer
+
+- **Mapped the four layers onto our code and found the conflation:** body is present and richer than
+  Paperclip's three-method contract; **soul is conflated** — `AiAgentPromptOverride` is a prompt *patch*,
+  not a home, with nothing the agent writes back; **identity is missing as an agent property** (a binding
+  is a grant, not an identity; `agentKind` is a free string on the envelope); permissions are correct
+  and are the strongest layer.
+- **Named `F1`, which I had not seen:** `AiAgentDefinition` holds body, soul *and* permission ceiling in
+  one code object, so one edit can change the model and the tool ceiling with no review boundary.
+- **Gave the minimal complete capability set** (14 rows) and marked three as absent: instance, durable
+  run, memory binding.
+- **Decided the Hermes boundary per item** — core owns *what may enter a prompt and what may leave the
+  tenant*; Hermes owns *how*. That sentence is now W4's rule.
+- **Found two settings that can widen today:** `loop-override/route.ts:30` accepts 1–1000 with no
+  comparison to the declared maximum, and `entities.ts:293`'s `baseUrl` is free text.
+
+### 8.4 Hostile red team
+
+- **Named the weakest assumption, and it survived the other three reviews:** that *type* is a
+  configuration axis, so authority is one set operation. The falsifier is a ticket-worker whose assignee
+  lacks a permission the task requires and which must still run — Multica's entire design. If that must
+  work, the single-set-operation model is dead, which is why standing is an **axis** and not a formula.
+- **Named the three drift signals** that became W8, each with an observable count.
+- **Named the deferrals that this document adopted:** platform/tenant duality until a real consumer
+  exists; the Aissistant intersection until the Hermes path stops carrying one superadmin identity;
+  and the four-surface adaptation while `CC-63` records 0 of ~93 commands declaring risk.
+- **Named the avoided decision** — *is an agent a principal in its own right, or only ever a human's
+  hands?* — which is D1, and observed that "same agent, different settings" is the mechanism for not
+  answering it. That is the most useful sentence in the review and it is why D1 is first.
+- **Named the under-engineering:** the actor-class gate, the departure state machine, platform-level
+  ownership semantics, DB-enforced cardinality, and a migration path gated on `CC-119`. All five are now
+  in the work.
+
+**What all four agreed on:** one core, one identity row shape, one binding table. And all four said
+some version of the same warning — *the surfaces are not the work; the spine is.*
+
+---
+
+## 9. What this document does not claim
+
+1. **It is not a build plan for the surfaces.** It sequences them and gates them; it does not design
+   workspaces, automation or widgets. Those need their own `SR-*`.
+2. **It does not overturn `SR-18`.** D1 asks the owner to rule; until then the cap stands.
+3. **It does not claim the four reviews are exhaustive.** They read the paths named in §2 and §8. They
+   did not read 1M lines, and no review can.
+4. **It does not re-measure the platform's tenancy.** `SR-12` and `CC-84` are quoted from the register;
+   neither was re-verified in code for this document, and `CC-119` exists precisely because the
+   database state behind them has never been proven.
+5. **It does not claim the X2 fix is large.** It is small. It is in the register because a *small*
+   fail-open is still fail-open, and because this project's through-line is controls that look alive.
+
+---
+
+*Written 2026-10-18. No code. The register rows are `CC-121` … `CC-127`; the rulings are D1–D4 and
+they are the owner's.*

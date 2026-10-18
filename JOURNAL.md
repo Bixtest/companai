@@ -7,6 +7,123 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (later) — the strategy was right in direction, wrong in one field, and the donors I had left out were the two that mattered
+
+The owner stated the agent strategy in full: **one agent**, whose behaviour differs by settings, covering
+the types — **Aissistant** (an assistant hired by a user; one or many; authority is the intersection of the
+user's and the assistant's), **Staiff** (an AI user with roles, behaving like a normal user) — at platform or
+tenant level. Then: add it organically to core, adapting both sides, and do the same for workspaces,
+workspaces↔ai_agents, Automation and widgets. He asked for a verdict on the strategy and a task breakdown
+reviewed by seasoned experts, so that the work stops drifting.
+
+He also caught a real omission: **Paperclip and Hermes were absent from my two analyses.** He was right, and
+the reason matters. Those analyses answered *"what is a bot to a room"* — Zulip, Multica, Buzz, Slack. They
+did not answer *"what is an agent"*, and the two donors that do are the ones I left out: Paperclip is our
+**ancestor** (four separable layers, a gated hire, finite runs), Hermes is the **engine** (profile, soul,
+skills, memory, tools). That was a scoping error and it is corrected in the plan, where they become the
+primary donors for the spine.
+
+**What I did before writing anything.** Four measurements of our own code, because the strategy's feasibility
+is a fact about the codebase and not about the strategy:
+
+1. **Agents are declared in code and never hired.** `AiAgentDefinition` is a code object loaded from a
+   generated registry; the twelve DB entities are overrides, bindings, runtimes and conversations, and **not
+   one is an instance**. So `agentId` is code-declared — two tenants' assistants are *the same object* — and
+   "one user, many assistants" has no row to live in.
+2. **The narrowing already exists and is the right shape.** `AiAgentBinding` narrows tools ("a binding can
+   narrow, never widen", B3) and unions required features. That is the template, not the gap.
+3. **A machine already resolves roles — from its credential.** `rbacService.loadAcl` reads
+   `api_keys.roles_json` → `RoleAcl` for API-key-backed kinds. So a Staiff's *authority* is not missing;
+   everything that makes it a *person* is.
+4. **Delegation exists with a ceiling that narrows** — capability-scoped, non-null expiry and reason,
+   revocable, never cached, and the grantor-holds check `CC-94` added.
+
+**Then four independent reviewers, each given code paths rather than a summary.** What they changed:
+
+- **The intersection, as stated, is unsound — and this is the largest correction.** "Keep what both have"
+  only works if both sides are the same kind of thing. Ours are not: `*` means everything (so intersecting
+  strings denies everything); `.own` is a **separate capability**, not a suffix (so merging it widens row
+  scope); a superadmin short-circuits **before** features are read; a denial is **subtracted after** the
+  grant; a delegation is **added after** the grant says no and does not re-check the grantor. **Intersect
+  answers, never lists.** And the mechanism to do it already exists — `invokerCeilingFor` — reached only
+  through `decideFor`, while the HTTP RBAC path is the one door that does not pass an invoker and
+  `refusalFor` returns `null` unless the mode is `enforce` (armed for no tenant, `CC-11`). Built, proven,
+  reached by nobody: the `CC-101` shape again.
+- **A fail-open defect found while measuring, and re-verified at source.** `AuthorityDenial`'s own docblock
+  says the encoding for a machine is `api_key:<id>`; `DenialService.blocking` matches the **bare** id and the
+  route does not normalise. So **a denial written the way the schema documents is accepted, audited, and
+  never applies — a ban that does not ban.** The same mismatch makes a machine-grantee delegation silently
+  inert and lets a self-delegation slip past the ceiling check. `CC-124`, startable now.
+- **Per-user instances are not viable**, with numbers: 200 users × 2 assistants = 400 homes, 2–8 GB per
+  tenant, 400 SQLite files to back up and delete atomically on one shared volume with no per-tenant
+  boundary. **Per-tenant home, per-user state.**
+- **"Platform level" has no schema home** — `tenant_id` is NOT NULL everywhere, and a sentinel tenant id is
+  refused by name: a value every query must remember to exclude is a latent cross-tenant read.
+- **The avoided decision**, named by the hostile reviewer and the most useful sentence in the review: *is an
+  agent a principal in its own right, or only ever a human's hands?* — and *"same agent, different settings"
+  is the mechanism for not answering it.* That is why the four rulings come before any code.
+
+**The verdict written down:** the direction is right; **"type" must not be a setting**, because a field that
+selects the permission algorithm is the confused-deputy shape — the type is a **name for three facts set
+once at hire** (identity · standing · placement), and every setting may only **narrow**. And the order is
+wrong in one place: the four surfaces are not peers, so the spine lands first and **chat** proves it.
+
+**Seven register rows, `CC-121`…`CC-127`** — all measured defects or missing prerequisites, none a wish.
+Register **64 closed · 62 open · 126**. And one stale number fixed by name under rule 13: §4's prose said
+*"14 … 3 need a decision"* while its table held *"13 … 4"*, typed and drifted in both directions.
+
+**What this turn did not do:** no code. The four rulings are the owner's, and the plan says so.
+
+---
+
+## 2026-10-18 — the question I was asking was the wrong question, and the owner said so
+
+The owner's message was, in effect: *I have no idea what any of that means, you are defying the rule of
+explaining it so I can understand it.* That is correct, and the diagnosis is worth keeping.
+
+**What I had been doing.** I reported `CC-120` as a choice between "the credential axis" and "the addressed
+agent". Both are answers to *"which field feeds `ctx.agentId`?"*. Neither is the decision the product needs.
+The owner could not decide because **there was nothing to decide** — the framing was a technical fork with no
+consequence a person could weigh.
+
+**What the decision actually is.** Whether a machine may hold access **in its own right**, or only ever as
+somebody's hands. And the answer is not open: the code already chose the second, silently, because
+`assertContext` requires `ctx.userId` unconditionally while the type's own comment (`:38-43`) says an agent
+caller *"still carries the person it acts for in `userId`"*. **A default in a validator is an architecture
+decision that nobody argued for.**
+
+**What the research found.** Four donors, read at source, plus one standard:
+
+- **Zulip** — the bot IS a `UserProfile` (`is_bot`, `bot_type`, `bot_owner`); access is a `Subscription`; the
+  API key resolves straight to the identity because the key lives ON the identity row. No bridge, because no
+  refusal.
+- **Buzz** — *"AI agents and humans are first-class equals"*; the agent has its own keypair and
+  `users.agent_owner_pubkey` links it to an owner.
+- **Multica** — a `mat_` task token carries `(user_id, agent_id, task_id, workspace_id)`; the middleware
+  **strips** client-sent `X-Agent-ID`/`X-Task-ID` and re-stamps them from the token row. The comment records
+  why: both ids were readable by any workspace member, so a member could replay a live pair and be resolved
+  as that agent (MUL-3428, fixed in #4313). **That is the exact bug shape the owner's ruling refused, found
+  in the wild, in a donor.**
+- **Slack** — bot tokens read only *"any conversation the relevant bot is a member of"*; `not_in_channel`
+  otherwise. A bot is strictly less privileged than a person.
+- **RFC 8693** — a delegation token carries `sub` (who it is for) and `act` (who is acting). Our
+  `effectiveUserId` is `sub`; our `agentAxis` is `act`. We re-derived a standard, which is a good sign.
+
+**And the measurement that made the whole framing moot.** `getTranscript` has exactly one caller — the
+transcript route — and that route passes `userId: auth.sub` (`[conversationId]/route.ts:167`). For a machine
+`auth.sub` is `ai_worker:<uuid>`, and `loadParticipantFlag` puts it into a **`uuid` column**. So a machine
+caller gets `22P02` from Postgres — a 500 — **before** the access check runs. The one door an agent would use
+is not missing a key; it is broken. Same class as the defect `CC-107` increment 1 fixed in the chat route,
+in the route that was missed.
+
+**Conclusion recorded, not acted on:** do not build the bot's door now (`SR-12` does not exist, so there is
+no caller — the exact defect `CC-120` was opened to remove); fix the broken line; adopt Multica's hybrid as
+the target shape when the daemon exists. Analysis: `ANALYSIS-2026-10-18-agent-identity.md`.
+
+**Lesson.** *"Explain it so I can decide"* is a test of the analysis, not a request for a summary. If the
+decision cannot be stated as a consequence a non-implementer can weigh, the analysis has not been done —
+it has only been formatted.
+
 ## 2026-10-18 (early) — `CC-120`'s bridge, and the version of it I deleted before committing
 
 The ruling was **the credential axis**: an `ai_worker` credential, not the agent a request happens to name.
