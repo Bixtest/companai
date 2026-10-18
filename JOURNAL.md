@@ -7,7 +7,56 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-18 (latest) — `CC-129` closed: the row was half wrong, and the half it missed was the security half
+## 2026-10-18 (latest) — `CC-126`'s requirement is written: the owner's "cheap to create" needs a tenant to be able to *create*, and the row's own prescription was a sentinel in disguise
+
+**No code this phase — the owner's rule is no code before a written requirement.** The deliverable is
+`library/development/PLAN-CC-126-tenant-type-catalogue.md`, and what it records is a measurement, not a
+design preference.
+
+**The defect.** The type catalogue has one layer and it is code: `AiAgentDefinition` is an interface, the
+registry is a module-level `Map` (`agent-registry.ts:16`) with `getAgent(id)` taking only an id (`:301`),
+and every tenant-side row is an **override of a code-declared agent** — `AiAgentPromptOverride`,
+`AiAgentRuntimeOverride`, `AiAgentMutationPolicyOverride`, `AiTenantModelAllowlist` — whose paired partial
+unique indexes on `(tenant_id, [organization_id,] agent_id, …)` quietly assume the agent already exists in
+code. So a tenant can narrow a type and cannot create one, which is exactly the owner's distinction: the
+platform's *"bulk packaged capabilities, so a standardised agent is cheap to create"* works for the
+platform and not for a tenant.
+
+**★ What the measurement changed, twice over (Rule 13).**
+
+1. **The row prescribes *"owning tenant or null for platform"* — and refuses the same shape one paragraph
+   later.** `tenant_id IS NULL` meaning *platform level* is a value every query must remember to exclude:
+   the `CC-103` class, a permit written as a default. The platform layer needs no row at all, because the
+   code registry already *is* that layer — so the type row is `tenant_id NOT NULL`, always. That is the
+   answer `RoleAcl.tenant_id` already gives (`NOT NULL`, *"Tenant scope is mandatory for ACL evaluation"*),
+   including for system roles. The catalogue is the union of two homes, not one table with a magic value.
+2. **The row's *"validated at write time as a subset of the platform ceiling"* cannot hold.** The ceiling
+   has no store — that is `CC-128`'s own first measurement — and the tool registry is a mutable singleton
+   (`registerTool`/`unregisterTool`), which is why the code catalogue itself tolerates unregistered names
+   (`registered: Boolean(tool)`). So shape is validated at write and per-tool authority at run
+   (`tool_unknown`). The ceiling check is named in `CC-128`, not faked here.
+
+**Why the resolver is in the same change as the table.** `checkAgentPolicy` refuses an unknown id with
+`agent_unknown` and `computeBoundRunScope` resolves `agent?.allowedTools ?? []` — an unknown id yields the
+**empty** tool set. A type row without runtime resolution would be an agent that appears in the catalogue
+and can never run: the `CC-101` shape, code that nothing calls. So the build is table + repository +
+`lib/agent-type-catalog.ts` (code-first precedence, the key in the `ai_agent_bindings.agent_id` dialect so
+it flows through the binding machinery unchanged, `layer: 'platform' | 'tenant'` tagging) + the gate handed
+its subject at the five call sites + the routes + the read surfaces — and the instance/pin (`CC-122`), the
+floor (`CC-125`) and the ceiling (`CC-128`) are refused by name.
+
+**The security row in the requirement is the collision case.** A later platform deploy shipping a key a
+tenant already squatted must resolve **code-first**: tenant-first precedence would hand a tenant a
+wider-than-platform definition under the platform's own id, arriving silently at a deploy — D1's violation.
+Code-first makes that unrepresentable, and the shadowed tenant row is *shown* shadowed in the catalogue
+rather than silently inert.
+
+**NEXT (register §2):** the build, in the plan's order — entity + migration → repository → resolver → the
+gate's five call sites → routes → read surfaces → tests + mutation proof → record and commit.
+
+---
+
+## 2026-10-18 — `CC-129` closed: the row was half wrong, and the half it missed was the security half
 
 **The defect, in one sentence:** the trust route took `principalId` as a free-form string while
 `evidenceFor` joins `action_logs.actor_user_id`, which holds the **bare** id — so only the bare spelling
