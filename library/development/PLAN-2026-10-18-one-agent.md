@@ -45,10 +45,10 @@ them was a scoping error, not a judgement. They are now the primary donors for W
 | # | The strategy says | The verdict | Why |
 |---|---|---|---|
 | 1 | One agent core | **CONFIRMED** | Paperclip's four layers and Hermes's profile are the same conclusion from opposite directions. Four cores would be four permission dialects. |
-| 2 | Types are settings | **AMENDED** | A field that selects the permission algorithm is the confused-deputy shape. Types are **named combinations of three axes**, resolved at one chokepoint (§3). |
-| 3 | Aissistant = intersection | **AMENDED, AND IT IS THE MOST IMPORTANT ONE** | Intersection of permission **lists** is unsound and can widen. It must be intersection of **decisions**, computed live, through one function (§3.2). |
-| 4 | Staiff behaves like a normal user | **CONFIRMED IN PRINCIPLE, BLOCKED ON A RULING** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). But `SR-18` caps machine actors at approve-first. The owner must rule which wins (D1). |
-| 5 | Platform level or tenant level | **AMENDED** | `tenant_id` is NOT NULL on every table, so "platform level" has **no schema home** today. It is either a template (and must be hired to exist) or a real owner — and if it is a real owner, four questions follow that nobody has answered (§4, D3). |
+| 2 | Types are settings | **CONFIRMED AS A BUNDLE — and the owner's framing is better than mine** | A type **is** a role for agents: a named, data-defined bundle of capabilities, so "standardised agents" become cheap to create (§3.1). The only thing a type must not do is **select the permission rule** — that is a different kind of field that happens to share the name. |
+| 3 | Aissistant = intersection | **AMENDED, AND IT IS THE MOST IMPORTANT ONE** | Intersection of permission **lists** is unsound and can widen. It must be intersection of **decisions**, computed live, through one function (§3.3). |
+| 4 | Staiff behaves like a normal user | **CONFIRMED; the ceiling is configuration, not code** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). The owner's ruling: the platform admin sets the ceiling for machines and tenants inherit a subset (D1). One floor remains — capabilities that change the authority system itself. |
+| 5 | Platform level or tenant level | **AMENDED — ONE QUESTION OPEN** | `tenant_id` is NOT NULL on every table, so "platform level" has **no schema home** today. It is either a template (and must be hired to exist) or a real owner with a ledger, a bill and a switch. That is the single open question (§4.5, D3). |
 | 6 | Same method for the four surfaces | **CONFIRMED, WITH AN ORDER** | The method is right; doing it concurrently is not. One spine, one proving surface, then attach (§6). |
 
 **One precondition, and it is not optional:** a **human-only / machine-only route classification** does
@@ -125,32 +125,66 @@ lists.**
 
 ---
 
-## 3. The model: three axes and one chokepoint
+## 3. The model: bundles for what it may do, facts for how it is judged
 
-### 3.1 Plain words
+### 3.1 A type is a role for agents — the owner's framing, and it is the right one
 
-"One agent, many settings" is true about the **body** (what runs the model) and the **toolkit** (what
-it may call). It is false about **authority**, and the distinction is the whole design.
+> *"Agent capabilities will be identified by what we select for this agent from the full capacity
+> available for AI agents. Types are like roles for permissions in human users — some sort of bulk
+> packaged capabilities that makes creating new AI agents with standardised capabilities possible."*
+> — the owner, 2026-10-18
 
-Imagine a company where every employee's badge is printed with a "type": *assistant*, *contractor*,
-*employee*. Now imagine that changing the word on the badge changes which doors open — and that the
-word is editable by the person wearing it. That is what a `type` column that selects a permission rule
-is. Nobody would build it that way in a building; we should not build it in a database.
+That is the model, and it maps onto machinery we already run, one level down:
 
-Instead, the type is a **name** for three facts that are set once, at hire, and are not settings:
+| Human side | Agent side | Where it lives |
+|---|---|---|
+| a **permission** — one thing you may do | a **capability** — one thing the agent may do | code (`capabilities.ts` descriptors) |
+| a **role** — a named bundle of permissions | a **type** — a named bundle of capabilities | **data**, the way `RoleAcl` is |
+| a person's **assignment** to a role | **hiring** an agent from a type | data |
+| a per-person extra grant or removal | a per-agent binding or ceiling | data |
+
+Four levels, and each one is a **subset** of the level above it:
+
+```
+everything the platform can do
+   └─ the platform's ceiling for machines        ← the platform admin sets this   (D1)
+        └─ a TYPE — a named bundle               ← "Aissistant", "Staiff", "Analyst"
+             └─ a hired INSTANCE                 ← tenant-scoped, per-user state
+                  └─ a BINDING or DELEGATION     ← per person, per task
+```
+
+**One consequence of the analogy that has to be built in, not discovered later.** A role is edited,
+and the edit changes everybody who holds it. If the *Aissistant* type is edited tomorrow, does every
+assistant already hired from it change? **It must not.** An instance **pins the type version it was
+hired with**, and an upgrade is an explicit act (`CC-122`). Otherwise "standardised capabilities"
+quietly becomes "re-standardised without asking".
+
+**What a type must never be is a switch for *how* permission is calculated.** A role grants
+permissions; it does not change the way the system checks them. Same rule here: a type **bundles
+capabilities**, and it must not select the permission rule. Those are two different things that both
+happen to be called "type", and only the first one is a bundle. The second is the badge problem:
+
+> Imagine a company where every employee's badge is printed with a type — *assistant*, *contractor*,
+> *employee* — and changing the word on the badge changes which doors open, and the person wearing it
+> can edit the word. That is a `type` column that selects a permission rule. Nobody builds a building
+> that way.
+
+### 3.2 The three facts that are not a bundle
+
+A bundle says **how much** an agent may do. It cannot say **where its authority comes from**, because
+that is not a quantity — it is a different source. Three facts are fixed at hire and are not settings:
 
 | Axis | The question | Values | Why it is not a setting |
 |---|---|---|---|
 | **A — Identity** | *What is it?* | a machine principal, with a credential and a stable actor id | Changing identity is a different actor, not a different mode. |
-| **B — Standing** | *Where does its authority come from?* | **own** (roles/ACL — the Staiff) · **delegated** (a human lent it — the Aissistant) · **run-scoped** (the task carries it — the worker) | This is the permission algorithm. A field that selects it is the defect. |
+| **B — Standing** | *Where does its authority come from?* | **own** (roles/ACL — the Staiff) · **delegated** (a human lent it — the Aissistant) · **run-scoped** (the task carries it — the worker) | This *is* the permission algorithm. A field that selects it is the defect. |
 | **C — Placement** | *Where does it live, and what is it attached to?* | platform **template** · **tenant** instance · **per-user state**; attached to a room, a task, a schedule, a record | Ownership and lifecycle, not capability. |
 
-Everything a user or tenant can then change — model, persona, skills, tools, memory, budget, autonomy
-ceiling — is a **setting**, and **every setting may only narrow**. That single invariant is what makes
-one agent safe across all the types at once, and it is already the rule the code uses for bindings
-(F2).
+Everything else — the capability bundle, model, persona, skills, tools, memory, budget, autonomy
+ceiling — is a **setting**, and **every setting may only narrow**. That invariant is what makes one
+agent safe across all the types at once, and it is already the rule the code uses for bindings (F2).
 
-### 3.2 The intersection, in plain words
+### 3.3 The intersection, in plain words
 
 *"Keep what both have"* only works if both sides are the same kind of thing. Ours are not.
 
@@ -180,7 +214,7 @@ invoker** and so resolves the actor alone — its own comment calls that *"wider
 built, proven, and reached by nobody on the path that matters — the `CC-101` shape this project keeps
 finding. W3 is not "invent intersection"; it is **route every path through the one that exists**.
 
-### 3.3 The type names, once the axes exist
+### 3.4 The type names, once the axes exist
 
 The four names the owner used are then **lookups, not branches**:
 
@@ -196,38 +230,100 @@ axes are missing a value.
 
 ---
 
-## 4. The four rulings that block code
+## 4. The rulings — three answered, one open
 
-Per the standing protocol, no code before a written requirement. These four are **product decisions**,
-not engineering ones, and each one changes the schema.
+Per the standing protocol, no code before a written requirement. **The owner's principle, given
+2026-10-18, settles most of this:**
 
-**D1 — The cap on a Staiff.** `SR-18` is marked HAVE and is test-pinned: *machine actors are capped at
-approve-first*. The owner's statement says a Staiff holds *"roles and permissions just like a normal
-user"*. These are different products. The ruling needed: **may a Staiff exercise a role outright, or
-only propose and let a human approve?** If outright, then name the **never-granted set** — the
-capabilities a machine may never hold regardless of role, which Paperclip does and we do not.
+> *"Can't we dictate such limitations across the platform by the platform superadmins (and tenants'
+> admin capabilities to decide on that gets inherited by superadmin allowed settings)? Instead of
+> hardcoding it."*
 
-**D2 — Live or frozen.** Is an Aissistant's authority recomputed from the human at every act, or
-captured at hire? **Recommendation: live**, for the reason in §3.2, and because the code already refuses
-to cache delegations for exactly this reason.
+**Yes — and it is the better answer than what I asked for.** A hardcoded list in code is a list nobody
+can adjust without a deploy; a **ceiling set by the platform admin and inherited downward, where a
+tenant may only choose a subset**, is the same safety property with the control in the right hands. It
+is also the shape the code already uses for roles and for bindings: *narrow, never widen*. So the
+chain in §3.1 becomes the implementation, and the words "never granted" below mean *"not in the
+platform ceiling, and no configuration may raise it"* — not *"hardcoded in TypeScript"*.
 
-**D3 — What "platform level" owns.** A platform-level agent has no `tenant_id` value to hold
-(`tenant_id` is NOT NULL everywhere). Three options, and only one of them is cheap:
-(a) a **template** that must be hired into a tenant to exist — no new ownership problem;
-(b) a **real platform-owned instance** — then answer four questions: whose audit ledger records its
-acts, who pays for its runs, who may suspend it, and what happens to its memory when the platform
-retires it;
-(c) a magic tenant id — **refused by name**: a sentinel that every query must remember to exclude is a
-latent cross-tenant read.
+**One thing must still be a floor rather than a setting**, and it is the only part of D1 that survives:
+**a machine may never hold the capabilities that change the authority system itself.** Not because we
+distrust the admin, but because if a machine can grant itself authority then every other control in
+the chain is decoration. Paperclip reaches the same conclusion by a different route (its default
+permission set deliberately excludes `agents:create`, `users:manage_permissions`, `tools:admin`, and
+anything that can rewrite its own execution). **The floor is small, and it is the answer to D1's
+second half.**
+
+### D1 — ANSWERED IN PRINCIPLE; one narrow question left
+**Settled:** the ceiling is **configuration**, set by the platform admin, inherited by tenants, and a
+tenant may only narrow it. **No** hardcoded capability list.
+**Left:** *which* capabilities sit on the floor. My proposed floor, for a yes/no: **creating or
+widening credentials** (minting keys, changing a key's kind) · **granting roles or writing
+delegations** (the authority layer itself) · **editing the capability catalogue or the type bundles**
+(the thing that defines what it may do) · **writing or erasing the audit ledger** · **anything across
+tenants**. Everything else — every business capability — is a setting. See §4.5 for the question in
+plain words.
+
+### D2 — TAKEN AS A DEFAULT, not asked
+An Aissistant's authority is **re-checked against the human on every act** (live), never captured at
+hire. **This is not offered as a setting**, because there is no legitimate configuration on the other
+side: "keep the powers my owner lost" has no use case that is not a defect. Rule 2.2 applies — *if a
+sensible default exists, take it, do the work, and say so.* The code already refuses to cache
+delegations for exactly this reason (`delegationService.ts:23-31`: *"a revoke that takes effect
+'within five minutes' is not a revoke"*). **If you disagree, say so and it becomes a setting.**
+
+### D3 — OPEN, and it is the only question that needs you
+A platform-level agent has no `tenant_id` value to hold (`tenant_id` is NOT NULL everywhere). Three
+options, only one of them cheap: **(a) a template** that must be hired into a tenant to exist — no new
+ownership problem; **(b) a real platform-owned instance** — then four things must be answered: whose
+audit ledger records its acts, who pays for its runs, who may suspend it, and what happens to its
+memory when the platform retires it; **(c) a magic tenant id** — **refused by name**: a value every
+query must remember to exclude is a latent cross-tenant read.
 **Recommendation: (a) now, (b) only when a real platform-level consumer exists.** There is none today.
+**The question, in plain words, is in §4.5.**
 
-**D4 — Owner departure.** From the bots analysis, three independent settings: **reach** (own rooms, or
-the owner's rights as a floor), **on-owner-departure** (deactivate / leave / block), **human-per-request**
-(always, or only to start). The measured donors disagree with each other, so there is no standard to
-copy: Zulip deactivates and keeps the row, Multica refuses to delete the owner at all, Buzz leaves the
-agent, Slack is app-level. **Nothing in the code today models departure**: `User` has `deletedAt` and
-no `isActive`, and `user-deleted-revoke-keys` revokes by `createdBy` only — nothing cascades to
-bindings or delegations, and the ACL cache holds for five minutes.
+### D4 — ANSWERED
+> *"When owner departs, an admin (or someone with the right permissions) will deactivate or delete his
+> account, right? So, while doing so that same admin decides what to do with the related AI agents."*
+
+**Yes — and that is simpler than the three-setting model I proposed.** The decision is made **at the
+moment of departure, by the person doing it**, as part of the deactivation flow. What that means for
+the build, and it is engineering rather than a question: the deactivation screen must **list the
+related agents and ask**, and the default when nobody chooses must be the safe one — **deactivate,
+never delete**, because deletion destroys the history that explains what the agent did. The donor
+disagreement recorded in the bots analysis (Zulip deactivates and keeps the row; Multica refuses to
+delete the owner; Buzz leaves the agent) stops being a decision to make and becomes evidence for the
+default. **`CC-127` stays, and its shape changes:** it is no longer "invent a policy", it is "make the
+departure flow exist, list the agents, and default to deactivate".
+
+### 4.5 The one question, in plain words
+
+*(Written to the 14-year-old test in `WORKING-RULES.md`'s NOTE, because the first version failed it.)*
+
+**The situation.** You said an agent can be defined "at platform level". Every table in our database
+requires a customer to belong to — there is no empty slot where a platform-level thing can sit. So I
+need to know what "platform level" is, and there are only three honest answers.
+
+**Think of a job description versus an employee.** A job description sits in a folder. Nobody is doing
+that job until someone is hired into it. An employee is a real person on payroll: they do work, they
+get paid, and they have a manager who can stop them.
+
+**Which one do you mean?**
+
+- **(a) A job description.** The platform publishes a standard recipe — "our standard Aissistant" — and
+  a customer hires it into their own account. The agent only exists inside a customer, once hired.
+  Nothing new to own, nothing new to pay for, nothing new to audit.
+- **(b) A platform employee.** An agent that belongs to **us**, not to any customer — for example a
+  support assistant every customer can talk to. It exists on its own. Then three things must be
+  decided, and only you can decide them: **whose activity log records what it did**, **who pays for its
+  AI usage**, and **who is allowed to switch it off**.
+- **(c) Pretend it lives in a fake customer called "tenant zero".** I recommend against this: every
+  query in the system would have to remember to skip it, and one forgotten skip means one customer
+  sees another customer's data.
+
+**My answer: (a) now.** It costs nothing, it is reversible, and (b) can be added later without redoing
+(a) — because (a) already gives us the thing (b) would need: a versioned, named type. **Say "b" and I
+will design it, but it needs the three answers above first.**
 
 ---
 

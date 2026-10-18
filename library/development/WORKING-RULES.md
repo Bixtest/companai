@@ -1,5 +1,25 @@
 # Working rules — the owner's standing instructions, in one place
 
+> ## ★ NOTE — HOW TO ASK THE OWNER A QUESTION
+> *(owner, 2026-10-18. It is first because it was broken first.)*
+>
+> **Before asking anything, rewrite the question as if explaining it to a 14-year-old.** One everyday
+> example. No project vocabulary. Say what each answer would change. **If the rewritten question still
+> needs a diagram to be understood, it is not a question yet — it is unfinished thinking.**
+>
+> **Then apply §2.2: give the answer, then at most ONE question. Do not batch decisions into one turn.**
+>
+> **The failure this note exists for.** On 2026-10-18 four rulings were asked in one message, in this
+> project's own words — *"what may a machine never hold"*, *"live or frozen"*, *"what does
+> platform-level own"*. The owner answered one, gave a general principle for two, and said of the
+> third *"I have absolutely no idea what you are saying"*. **That is a defect in the question, not in
+> the reader.** And §2.2 already said *"at most ONE question"*: the rule was not missing, it was not
+> followed.
+>
+> **The test before sending:** *could a smart person who has never opened this codebase answer this in
+> one sentence?* If not, rewrite it. **If a sensible default exists, take it, do the work, and tell him
+> what changed** — §2.2, and it is the cheapest way to not spend his attention.
+
 **What this file is.** The owner's rules that apply to **every session, every task**, gathered in one
 page so they are not scattered across the prompt, the handover and the cookbook. It is a **list and a
 pointer**: each rule says what it binds, and where the full reasoning lives. It does not duplicate the
@@ -405,6 +425,9 @@ from the artefact, research-validate-write-then-build. Read them once, before to
 - **Always reply in English.** Plain, everyday words — he is not a developer. **No jargon** (words
   like "upstream", "the resolver", "the barrel file" explain nothing). Name the thing: what it is,
   who needs it, and what breaks without it.
+- **A QUESTION gets the 14-year-old test — see the NOTE at the top of this file.** Plain language is
+  not enough for a question: it must be answerable **in one sentence** by somebody who has never seen
+  the code. If it is not, it is not ready to be asked.
 - **One line of plain reasoning beats a paragraph of framing.**
 
 ### 2.4 The front-end rule — build it reachable as soon as it works as a piece

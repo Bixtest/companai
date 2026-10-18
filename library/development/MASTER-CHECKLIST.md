@@ -58,17 +58,32 @@ not ban** (`CC-124`, fail-open, startable now); no route declares human-only or 
 `tenant_id` is NOT NULL everywhere, so **"platform level" has no schema home** (`CC-126`); and owner
 departure is unmodelled, so a demoted user's assistant keeps working (`CC-127`). Register: **64 closed · 62 open · 126 total**, counted from §5.
 **★ Rule 13, corrected the same turn:** §4's prose read *"14 … 3 need a decision"* while its table held
-*"13 … 4"* — typed, and drifted in both directions. It is now **14 · 1 · 8 · 39**, re-derived.
+*"13 … 4"* — typed, and drifted in both directions. It is now **15 · 1 · 6 · 40**, re-derived after
+D2/D4 were settled.
+**★ AND THE RULE THAT WAS BROKEN GETS A NOTE AT THE TOP OF `WORKING-RULES.md` (owner, 2026-10-18):** four
+rulings were asked in one message, in this project's own vocabulary, and one of them was unanswerable as
+written — *"I have absolutely no idea what you are saying"* is a defect in the question. **§2.2 already
+said "at most ONE question"; it was not followed.** The note now binds: rewrite every question to the
+**14-year-old test** — one everyday example, no project words, answerable in one sentence by somebody who
+has never opened this codebase — and if a sensible default exists, take it and say so instead of asking.
 
-**▶ IN PROGRESS — four rulings, and they are the owner's, not the code's.** **D1** what a machine may hold
-in its own right (`SR-18` caps machine actors at approve-first; the owner's Staiff holds roles) · **D2** is
-an Aissistant's authority read **live** or frozen at hire (recommend live) · **D3** what a platform-level
-agent owns — template, real owner, or sentinel (sentinel refused) · **D4** owner departure — reach,
-on-departure, human-per-request. `CC-120`'s surface half still waits on its own ruling: **it expands what a
-machine can read over HTTP.**
+**▶ IN PROGRESS — the rulings are nearly done, and the owner's framing improved the model.** **D2 is
+settled by default** (an Aissistant's authority is read **live**; "keep the powers my owner lost" has no
+legitimate setting, so it is not offered as one). **D4 is answered** — *"the admin doing the deactivation
+decides, at that moment, what happens to the related agents"* — so `CC-127` becomes a departure **flow**,
+not a policy engine, defaulting to deactivate-never-delete. **D1 is answered in principle** — the ceiling
+for machines is **configuration**, set by the platform admin and inherited by tenants, never hardcoded —
+with one narrow question left: the **floor**, the capabilities no configuration may raise, which are the
+ones that change the authority system itself. **★ And the owner's model replaced mine: a type is a ROLE
+for agents — a named, data-defined bundle of capabilities — so the chain is platform ceiling → type →
+instance → binding, each a subset of the one above, and an instance PINS its type version so editing a
+type never silently re-standardises assistants already hired** (`PLAN-2026-10-18-one-agent.md` §3.1).
+`CC-120`'s surface half still waits on its own ruling: **it expands what a machine can read over HTTP.**
 
-**▶ NEXT — `CC-124` first, because it needs nobody's decision and it is fail-open.** Then the four rulings;
-then `CC-121` (the actor/credential split) behind `CC-119`; then `CC-123`'s chokepoint. `SR-12` (per-tenant
+**▶ NEXT — `CC-124` first, because it needs nobody's decision and it is fail-open** (a denial written in
+the encoding the schema itself documents never applies). **Then the one open question, D3** — what a
+platform-level agent owns (§4.5 of the plan, asked in plain words). Then `CC-127` (the departure flow) and
+`CC-121` (the actor/credential split) behind `CC-119`; then `CC-123`'s chokepoint. `SR-12` (per-tenant
 engine home) carries the same trigger, and `CC-104`/`CC-106` are unblocked with it. **`CC-119` — the DATABASE
 REBUILD MILESTONE — fires the moment the identity step closes:** `CC-102`/`CC-103`'s migrations are proven
 only against throwaway containers whose tables were recreated by hand, and `CC-100` records the MikroORM
@@ -147,14 +162,15 @@ rather than silently copied.)*
 
 **The trigger is the observable event that makes an item startable.** *"When a command is next
 touched"* is a trigger; *"later"* is not. This is the complete list — all **62** open
-register rows, counted from §5, never typed. **14** can start right now,
-**1** needs only a database, **8** need a
+register rows, counted from §5, never typed. **15** can start right now,
+**1** needs only a database, **6** need a
 decision from you, and the rest wait on the trigger named in their row.
 *(Rule 13, corrected 2026-10-18: this paragraph read **"14 … 3 need a decision"** while the table
 held **13 … 4** — the prose was typed and had drifted from the table by one in each direction. It is
-now **14 · 1 · 8 · 39**, re-derived after the seven agent-spine rows `CC-121`…`CC-127` were added.
-The `Grouped by state` line below is the one the checker reads; this paragraph was not, and that is
-why it drifted.)*
+now **15 · 1 · 6 · 40**, re-derived after the seven agent-spine rows `CC-121`…`CC-127` were added and
+after D2/D4 were settled the same day, which moved `CC-123` to blocked-on-`CC-124` and `CC-127` to
+startable. The `Grouped by state` line below is the one the checker reads; this paragraph was not,
+and that is why it drifted.)*
 
 | Item | LIST row | What is unfinished | Trigger | State |
 |---|---|---|---|---|
@@ -216,13 +232,13 @@ why it drifted.)*
 | `CC-120` | — | **The machine axis on the read path has no producer.** `AiChatConversationContext.agentId` is read by `loadParticipantFlag` and by `list()`'s axis union, and **no route anywhere constructs a context that carries it** — every `agentId` in the conversation routes is a *conversation field* or a *target identity*, never the caller's machine axis. So an agent can be written as a participant and the repository can honour it, but nothing in the product ever asks. Same class as `CC-101` (*a checker nothing calls*), and it is why "a bot is a participant" is only half true. | **Needs a ruling first**: which principal maps to which registry agent id. An `ai_worker:<uuid>` credential has an id of its own and an `onBehalfOfUserId`, but nothing bridges it to a registry id like `catalog.assistant`; the alternative (treat the agent being *addressed* in a turn as the caller's machine axis) is a different, weaker claim. Both are design choices, so the requirement is written before any wiring. **★ 2026-10-18 — the framing above was TOO NARROW and the owner was right to push back: the mapping question is the easy half. The real decision is whether a machine can hold access in its own right or only as somebody's hands — and the code has already chosen the second by accident, because `assertContext` requires `ctx.userId` unconditionally while the type's own comment says an agent caller "still carries the person it acts for in `userId`". Full analysis, four donors read at source (Zulip, Buzz, Multica, Slack) plus RFC 8693: `ANALYSIS-2026-10-18-agent-identity.md`. **★ And the ownership claim in that analysis was itself too strong: "the bot dies with its owner" is FALSE as a general rule — nobody hard-deletes a bot with its owner.** Zulip *deactivates* it (row survives, renamed "Deactivated bot", `actions/users.py:470-509`) and treats its own membership as primary with the owner's rights as a **floor** (`lib/streams.py:632-637`, `:712-717`); Multica **refuses to delete the owner** (`owner_id` FK with no `ON DELETE`, `001_init.up.sql:46`) and lets the human in the chain be **NULL** for autopilot; Buzz's link is immutable and never cascades; Slack's bot is app-level. So the decision is **three independent settings, not A/B**: reach (own / owner-as-floor) · on-owner-departure (deactivate / leave / block) · human-per-request (always / only-to-start). What a bot *does* is a 7-job privilege ladder (messenger · responder · helper-in-room · private assistant · **colleague** · worker-on-ticket · delegate), and ours is the colleague. Record: `ANALYSIS-2026-10-18-bots-use-cases-and-ownership.md`.** It also found the door is **broken before the design question is reached**: `api/ai/conversations/[conversationId]/route.ts:167` passes `auth.sub` (i.e. `ai_worker:<uuid>`) into a `uuid` column, so a machine caller gets a 500 from Postgres — the same class `CC-107` increment 1 fixed in the chat route, in the one route an agent would actually use. | **needs you** |
 | `CC-121` | — | **The actor's authority hangs off its credential.** Bindings, delegations, denials and roles all key on the `api_keys` id, and rotation is delete-and-create — so a rotated key loses the actor's roles, orphans its bindings and splits its audit trail. An Aissistant must outlive its credential. | **`CC-119`** (it is a schema move, and the rebuild milestone settles the chain). | **blocked on its trigger** |
 | `CC-122` | — | **There is no agent instance — nothing is ever hired.** `AiAgentDefinition` is a code object; the twelve DB entities are overrides, bindings, runtimes and conversations. "One user, many Aissistants" has no row. | **`CC-121`** — never hire onto a credential id. | **blocked on its trigger** |
-| `CC-123` | — | **"Intersection of permissions" is unsound as a list operation.** `*`, `.own`, superadmin short-circuit, denials-after and delegations-after each break it; `invokerCeilingFor` already does the right thing and is unwired. | **The D2 ruling** (live or frozen), and **`CC-124`** (one canonical encoding first). | **needs you** |
+| `CC-123` | — | **"Intersection of permissions" is unsound as a list operation.** `*`, `.own`, superadmin short-circuit, denials-after and delegations-after each break it; `invokerCeilingFor` already does the right thing and is unwired. **D2 is SETTLED by default (2026-10-18): the human half is read live, never frozen — there is no legitimate setting on the other side, and the code already refuses to cache delegations for the same reason.** | **`CC-124`** — one canonical encoding before anything is intersected. | **blocked on its trigger** |
 | `CC-124` | — | **A denial written in the documented encoding never applies.** `subject_principal_id` is `text` for the `ai_worker:<id>` form, but `blocking()` matches the bare id and the route does not normalise. Fail-open. The same mismatch makes a machine-grantee delegation inert and bypasses the self-delegation ceiling check. | **None — startable now.** | **startable now** |
-| `CC-125` | — | **No route declares human-only or machine-only.** Any key holding `ai_assistant.view` reaches the assistant surface, so every new surface is machine-writable by default — and a Staiff is the design that makes that the product. | **The D1 ruling** (what a machine may hold) before the vocabulary can be written. | **needs you** |
+| `CC-125` | — | **No route declares human-only or machine-only.** Any key holding `ai_assistant.view` reaches the assistant surface, so every new surface is machine-writable by default — and a Staiff is the design that makes that the product. **D1 is ANSWERED IN PRINCIPLE (2026-10-18): the ceiling for machines is configuration — the platform admin sets it and tenants inherit a subset, never hardcoded. What remains is the FLOOR: the short list no configuration may raise, which is the capabilities that change the authority system itself.** | **A yes/no on the proposed floor** (mint or widen credentials · grant roles or write delegations · edit the capability catalogue or the type bundles · write or erase the audit ledger · cross-tenant). | **needs you** |
 | `CC-126` | — | **"Platform level" has no schema home.** `tenant_id` is NOT NULL everywhere; a sentinel is refused by name. Also decides per-tenant home vs per-user state, and the paired partial indexes. | **The D3 ruling** (what a platform-level agent owns). | **needs you** |
-| `CC-127` | — | **Owner departure is unmodelled.** `User` has no `isActive`; key revocation is by `createdBy` only; nothing cascades to bindings or delegations; the ACL cache holds five minutes. A demoted user's assistant keeps working. | **The D4 ruling** (reach · on-departure · human-per-request). | **needs you** |
-*Grouped by state:* **14 startable now** · **1 needs a database** ·
-**8 need you** · **39 blocked** on a named trigger.
+| `CC-127` | — | **Owner departure is unmodelled.** `User` has no `isActive`; key revocation is by `createdBy` only; nothing cascades to bindings or delegations; the ACL cache holds five minutes. A demoted user's assistant keeps working. **D4 is ANSWERED (2026-10-18): the admin doing the deactivation decides, at that moment, what happens to the related agents — so the build is a departure FLOW that lists them and asks, defaulting to deactivate-never-delete.** | **None — the shape is decided; the flow can start.** | **startable now** |
+*Grouped by state:* **15 startable now** · **1 needs a database** ·
+**6 need you** · **40 blocked** on a named trigger.
 *(Rule 13, corrected 2026-10-17 (night): this line read **11 startable / 39 blocked** — typed, and two
 rows had moved past their triggers without it being re-derived. `CC-92`'s triage finished on 2026-10-16
 (what remains is *scheduling*, a decision) and `CC-72`'s stale-timeout gate was **ruled closed** the same

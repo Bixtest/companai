@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (latest) — the questions were the defect, and the owner's model was better than mine
+
+Two things happened in one message, and the second is the more important.
+
+**First, the questions.** I asked four rulings in one message, in this project's own vocabulary:
+*"what may a machine never hold"*, *"live or frozen"*, *"what does platform-level own"*. The owner could
+answer one, gave a general principle for two, and said of the third: *"I have absolutely no idea what you
+are saying."* **That is a defect in the question.** And the worst part is that **`WORKING-RULES.md` §2.2
+already said "at most ONE question"** — the rule was not missing, it was not followed. So the note is now
+at the **top** of that file, where it cannot be missed: rewrite the question to the **14-year-old test** —
+one everyday example, no project words, answerable in one sentence by somebody who has never opened this
+codebase — and **if a sensible default exists, take it and say so** instead of spending his attention.
+
+**Second, and this is the part worth keeping: the owner supplied the model I had been circling.**
+*"Agent capabilities will be identified by what we select for this agent from the full capacity available
+for AI agents. Types are like roles for permissions in human users — some sort of bulk packaged
+capabilities that makes creating new AI agents with standardised capabilities possible."*
+
+That is right, and it dissolves the tension I had turned into a false question. I had been asking "may a
+type be a setting?", which conflates two different things that share the name:
+
+- **a type as a bundle of capabilities** — a role for agents. Data. Good, and it is what makes
+  "standardised agents" cheap to create.
+- **a type as a selector of the permission rule** — the badge problem. Never a setting.
+
+So the chain is `platform ceiling → type → instance → binding`, each a **subset** of the one above, and
+one consequence of the role analogy has to be built in rather than discovered: **a role is edited and the
+edit reaches everyone holding it**, so an instance must **pin the type version it was hired with**, or
+"standardised capabilities" quietly becomes "re-standardised without asking" (`CC-122`).
+
+**And his principle answered D1 and D2 without needing the question I had written.** *"Can't we dictate
+such limitations across the platform by the platform superadmins (and tenants' admin capabilities to
+decide on that gets inherited by superadmin allowed settings)? Instead of hardcoding it."* **Yes, and it
+is better than a hardcoded list** — the same safety property with the control in the right hands. So D1
+becomes configuration with one narrow remainder: the **floor**, the capabilities no configuration may
+raise, because a machine that can grant itself authority makes every other control decoration.
+
+**D2 I stopped asking.** "Live or frozen" has no legitimate setting on the frozen side — "keep the powers
+my owner lost" is a defect, not a preference — so rule 2.2 applies: take the safe default, say so, let him
+override. **D4 he answered himself:** the admin doing the deactivation decides about the related agents,
+so `CC-127` becomes a **departure flow that lists them and asks**, defaulting to deactivate-never-delete.
+
+**One question survives, and it is now written to the test he set** (`PLAN` §4.5): is a platform-level
+agent a **job description** (a template a customer hires, so it only exists inside a customer) or a
+**platform employee** (it exists on its own, and then whose ledger, who pays, who switches it off)?
+Recommendation: the job description, because it is reversible and it already gives the employee what it
+would need.
+
+Register **64 closed · 62 open · 126**; §4 re-derived to **15 · 1 · 6 · 40**; checker PASS.
+
+---
+
 ## 2026-10-18 (later) — the strategy was right in direction, wrong in one field, and the donors I had left out were the two that mattered
 
 The owner stated the agent strategy in full: **one agent**, whose behaviour differs by settings, covering
