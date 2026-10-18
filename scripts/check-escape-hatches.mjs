@@ -183,7 +183,7 @@ function scan(root) {
   let total = 0
   let named = 0
 
-  for (const file of files.sort()) {
+  for (const file of files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
     let text
     try {
       text = readFileSync(file, 'utf8')

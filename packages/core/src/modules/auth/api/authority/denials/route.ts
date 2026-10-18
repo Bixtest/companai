@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { normalizePrincipalSubject } from '@open-mercato/shared/lib/auth/principal'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { denialProblem } from '@open-mercato/shared/modules/denials'
@@ -116,8 +117,28 @@ export async function POST(req: Request): Promise<NextResponse> {
   })
   if (problem) return NextResponse.json({ error: problem }, { status: 400 })
 
+  // The subject as the table stores it: the **bare id**, with `subject_kind`
+  // carrying the kind. `CC-124` is this half missing — the route accepted the
+  // prefixed form the entity docblock advertises (`ai_worker:<id>`) and
+  // `withheldFromThisPerson` looks the bare id up, so a machine was undenied and
+  // nobody could tell from the screen, the CLI or the audit row. A prefix that
+  // disagrees with the declared kind is refused rather than resolved by picking
+  // one half: a ban aimed at a machine must not land on a person.
+  let subjectPrincipalId: string
+  try {
+    subjectPrincipalId = normalizePrincipalSubject(
+      parsed.data.subjectPrincipalId,
+      parsed.data.subjectKind,
+    )
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'the subject is not a principal' },
+      { status: 400 },
+    )
+  }
+
   const withheld = await denials.withhold({
-    subjectPrincipalId: parsed.data.subjectPrincipalId,
+    subjectPrincipalId,
     subjectKind: parsed.data.subjectKind,
     featurePattern: parsed.data.featurePattern,
     reason: parsed.data.reason,

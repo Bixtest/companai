@@ -57,6 +57,12 @@ export class RbacService {
         granteePrincipalId: string,
         capabilityId: string,
         scope: { tenantId: string | null; organizationId: string | null },
+        /**
+         * The grantee's kind, sent beside the id. `CC-124`: the row stores the
+         * pair, and a lookup that passes only the id asks for a row that was
+         * never written.
+         */
+        granteeKind?: string | null,
       ) => Promise<unknown | null>
     } | null,
     /**
@@ -70,6 +76,8 @@ export class RbacService {
         subjectPrincipalId: string,
         required: readonly string[],
         scope: { tenantId: string | null; organizationId: string | null },
+        /** The subject's kind, sent beside the id — `CC-124`, as above. */
+        subjectKind?: string | null,
       ) => Promise<{ feature: string; denial: { reason: string; expiresAt: Date | null } } | null>
     } | null,
   ) {
@@ -526,10 +534,16 @@ export class RbacService {
     scope: { tenantId: string | null; organizationId: string | null },
   ): Promise<boolean> {
     if (!this.denialService || !required.length || !scope.tenantId) return false
-    const principalId = parseSubject(userId).id
+    // The bare id **and** the kind, which is the other half of the pair
+    // `authority_denials` stores: `subject_principal_id` holds the bare id and
+    // `subject_kind` holds the kind. Passing only the id was `CC-124` — a denial
+    // written for a machine, in the encoding the entity documents, was listed,
+    // audited and never applied.
+    const subject = parseSubject(userId)
+    const principalId = subject.id
     if (!principalId) return false
 
-    const blocking = await this.denialService.blocking(principalId, required, scope)
+    const blocking = await this.denialService.blocking(principalId, required, scope, subject.kind)
     if (!blocking) return false
 
     authorityLogger.warn('Withheld from this account', {
@@ -564,11 +578,15 @@ export class RbacService {
     scope: { tenantId: string | null; organizationId: string | null },
   ): Promise<boolean> {
     if (!required.length || !scope.tenantId || !this.delegationService) return false
-    const principalId = parseSubject(userId).id
+    // Bare id + kind, the same pair the delegation row stores. A delegation
+    // granted to `ai_worker:<id>` was never found because the lookup passed the
+    // bare id alone.
+    const subject = parseSubject(userId)
+    const principalId = subject.id
     if (!principalId) return false
 
     for (const feature of required) {
-      const delegation = await this.delegationService.activeFor(principalId, feature, scope)
+      const delegation = await this.delegationService.activeFor(principalId, feature, scope, subject.kind)
       if (!delegation) return false
     }
     return true

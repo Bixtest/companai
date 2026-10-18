@@ -7,7 +7,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { AUTONOMY_GATES } from '@open-mercato/shared/modules/capabilities'
 import { MAX_DELEGATION_DAYS, delegationWindowProblem } from '@open-mercato/shared/modules/delegations'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
-import { derivePrincipal } from '@open-mercato/shared/lib/auth/principal'
+import { derivePrincipal, normalizePrincipalSubject } from '@open-mercato/shared/lib/auth/principal'
 import type { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { beginAuthMutationGuard } from '../../mutation-guard'
@@ -126,6 +126,25 @@ export async function POST(req: Request): Promise<NextResponse> {
   const principal = derivePrincipal(auth)
   if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // The grantee as the authority tables store it: a **bare id**, with the kind
+  // beside it. `CC-124` is the write side of that rule missing — the route
+  // accepted a prefixed subject, the enforcement path passed the bare id, and a
+  // delegation granted to `ai_worker:<id>` was never found. A prefix that
+  // disagrees with the declared kind is refused here rather than resolved by
+  // guessing which half the caller meant.
+  let granteePrincipalId: string
+  try {
+    granteePrincipalId = normalizePrincipalSubject(
+      parsed.data.granteePrincipalId,
+      parsed.data.granteeKind,
+    )
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : 'the grantee subject is not a principal' },
+      { status: 400 },
+    )
+  }
+
   // ★ What the route used to miss (T-01, critical/urgent): the guard config
   // above requires `auth.delegations.manage` — the permission to *manage*
   // delegations — and never the capability being *lent*. A caller holding
@@ -182,7 +201,16 @@ export async function POST(req: Request): Promise<NextResponse> {
   //    yourself an unbounded capability therefore outlives the very holdings
   //    that justified it. A self-delegation *with* an explicit ceiling is
   //    still allowed: the ceiling bounds it and the reasoning is on record.
-  if (parsed.data.granteePrincipalId === principal.id && parsed.data.authorityCeiling == null) {
+  //
+  //    **Compared as the pair (id, kind), not as a string.** `principal.id` is
+  //    the bare id for a machine (`auth.keyId ?? parsed.id`), so comparing the
+  //    raw request field let `ai_worker:<the caller's own key>` through as a
+  //    stranger — a self-delegation wearing a prefix. That was the open half of
+  //    `CC-124`: a string comparison walked a caller past a check that was
+  //    written to stop exactly this.
+  const isSelfDelegation =
+    parsed.data.granteeKind === principal.kind && granteePrincipalId === principal.id
+  if (isSelfDelegation && parsed.data.authorityCeiling == null) {
     return NextResponse.json(
       { error: 'a delegation to yourself needs an explicit authority ceiling' },
       { status: 403 },
@@ -190,7 +218,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   }
 
   const granted = await delegations.grant({
-    granteePrincipalId: parsed.data.granteePrincipalId,
+    granteePrincipalId,
     granteeKind: parsed.data.granteeKind,
     // The caller, always. See the note at the top of this file.
     grantorPrincipalId: principal.id,

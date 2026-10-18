@@ -181,7 +181,7 @@ function scan(root, includeTests) {
   const filesWithFindings = []
   const rootNorm = root.split(path.sep).join('/')
 
-  for (const file of files.sort()) {
+  for (const file of files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
     if (!includeTests && isTestPath(file)) {
       skippedTests += 1
       continue

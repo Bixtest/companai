@@ -110,14 +110,22 @@ describe('what it must not do', () => {
 })
 
 describe('the principal, not the subject string', () => {
-  it('looks up an API key by its id rather than its prefixed subject', async () => {
+  it('looks up an API key by its id and its kind, not by its prefixed subject', async () => {
     // A delegation is held by a principal. Looking up `api_key:abc` verbatim
     // would never match a row written against `abc`, and the delegation would
     // silently do nothing.
+    //
+    // **And the kind goes with it** (`CC-124`'s read half). The lookup used to
+    // pass `parseSubject(sub).id` alone, while the table stores the id **and**
+    // `grantee_kind`. A delegation granted to `ai_worker:<id>` was therefore
+    // never found — a grant that should have applied and did not, which fails
+    // *closed* and stays invisible until somebody reports a permission missing.
+    // The fourth argument is the sibling column, and the pair is what makes
+    // "row" and "lookup" describe the same actor.
     const { service, activeFor } = makeService({ aclAllows: false, delegatedCapabilities: [APPROVE] })
 
     await service.userHasAllFeatures('api_key:abc', [APPROVE], SCOPE)
 
-    expect(activeFor).toHaveBeenCalledWith('abc', APPROVE, SCOPE)
+    expect(activeFor).toHaveBeenCalledWith('abc', APPROVE, SCOPE, 'service')
   })
 })

@@ -95,6 +95,84 @@ export function parseSubject(subject: string): { kind: PrincipalKind; id: string
   return { kind: 'human', id: subject }
 }
 
+/**
+ * The bare id of a subject, with any encoding prefix removed.
+ *
+ * `null` when the subject is empty or carries nothing after its prefix — the
+ * caller's business, but a control that is asked "may this act" by an empty
+ * subject must not silently get an answer derived from `''`.
+ */
+export function principalIdOf(subject: string): string | null {
+  const trimmed = typeof subject === 'string' ? subject.trim() : ''
+  if (!trimmed) return null
+  const { id } = parseSubject(trimmed)
+  return id.trim().length > 0 ? id : null
+}
+
+/**
+ * A principal subject the way the authority tables store it: **the bare id**.
+ *
+ * This is the write path's other half. The platform's convention — stated once
+ * on `audit_logs`.`actor_user_id` and followed by every table in the authority
+ * family — is that the **identifier is the bare id and the kind lives in its own
+ * column**, never inside the id: `subject_kind`, `grantor_kind`/`grantee_kind`,
+ * `principal_kind`, `actor_kind`. A text column exists precisely so the id can
+ * be the id of a credential while the kind stays first-class.
+ *
+ * It exists because the write paths accepted a free-form string while the
+ * enforcement paths passed the bare id, and nothing checked the two agreed. The
+ * result (`CC-124`) was a denial naming a machine, written in the encoding the
+ * entity's own docblock advertised, that was audited, listed and **never
+ * applied**. `AI_WORKER_SUBJECT_PREFIX` was added so no machine would ever be
+ * undeniable; the denial lookup ignored it and a machine was undeniable.
+ *
+ * **Three rules, and the middle one is the whole point:**
+ *
+ *  - a subject carrying the prefix that **agrees** with the declared kind is
+ *    accepted and returned **bare** — the admin followed the documentation and
+ *    the storage stays the convention;
+ *  - a subject whose prefix **disagrees** with the declared kind **throws**.
+ *    A permission taken away from a machine and landing on a person is a worse
+ *    bug than the one being fixed, so a mismatch is an operator's mistake to be
+ *    answered with a message, never a guess about which half was meant;
+ *  - a bare subject with a machine kind is **accepted** — the bare id is the
+ *    convention, and the kind is what the sibling column is for.
+ *
+ * `human` and `system` take the bare id and no prefix is defined for either, so
+ * a `system`-kind subject is returned exactly as given.
+ */
+export function normalizePrincipalSubject(
+  subject: string,
+  kind: PrincipalKind | string | null | undefined,
+): string {
+  const trimmed = typeof subject === 'string' ? subject.trim() : ''
+  if (!trimmed) throw new Error('a principal subject must name somebody')
+
+  // Which prefix, if any, the subject carries. `null` means the subject is bare —
+  // the convention, and the form a machine's row has taken since the tables were
+  // created — so a bare subject is compatible with **any** declared kind.
+  const prefixKind = trimmed.startsWith(AI_WORKER_SUBJECT_PREFIX)
+    ? 'ai_worker'
+    : trimmed.startsWith(API_KEY_SUBJECT_PREFIX)
+      ? 'service'
+      : null
+
+  const id = principalIdOf(trimmed)
+  if (!id) throw new Error('a principal subject must name somebody')
+
+  const declared = typeof kind === 'string' ? kind.trim() : ''
+  // A prefixed subject tells us what the caller meant in a second place. When
+  // the two disagree the request is wrong, and quietly trusting one half would
+  // silently retarget the row onto a different actor.
+  if (prefixKind && declared && prefixKind !== declared) {
+    throw new Error(
+      `subject "${trimmed}" names a ${prefixKind} but the request says ${declared} — ` +
+      'they must be the same actor, so one of the two is wrong',
+    )
+  }
+  return id
+}
+
 /** The minimum an auth context must expose for a principal to be derived from it. */
 type PrincipalSource = {
   sub?: string | null

@@ -7,6 +7,7 @@ import {
 } from '@open-mercato/shared/modules/delegations'
 import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { AUTONOMY_GATES } from '@open-mercato/shared/modules/capabilities'
+import { normalizePrincipalSubject } from '@open-mercato/shared/lib/auth/principal'
 
 export type DelegationScope = {
   tenantId?: string | null
@@ -48,15 +49,24 @@ export class DelegationService {
    * The database narrows to the rows that could possibly apply; the decision of
    * whether one actually does is `selectActiveDelegation`, the same pure function
    * the resolver uses, so the grant path and the ceiling path cannot disagree.
+   *
+   * **`granteeKind`, when given, narrows the query** to the actor's kind. The id
+   * is a credential's id for a machine and a user's id for a person — disjoint
+   * spaces in practice, but the column that would tell them apart is right there,
+   * and a control that matches on "this id, any kind" is the shape that fails the
+   * day somebody seeds a colliding id. Omitting the kind gives exactly the old
+   * answer.
    */
   async activeFor(
     granteePrincipalId: string,
     capabilityId: string,
     scope: DelegationScope,
+    granteeKind?: string | null,
     now: Date = new Date(),
   ): Promise<DelegationRecord | null> {
     if (!scope.tenantId || !granteePrincipalId || !capabilityId) return null
 
+    const kind = typeof granteeKind === 'string' && granteeKind.trim() ? granteeKind.trim() : null
     const rows = await this.em.find(AuthorityDelegation, {
       tenantId: scope.tenantId,
       granteePrincipalId,
@@ -65,6 +75,7 @@ export class DelegationService {
       // Bounds the scan; the authoritative window check is in the pure function,
       // so a clock difference here cannot widen the answer.
       expiresAt: { $gt: now },
+      ...(kind ? { granteeKind: kind } : {}),
     })
 
     return selectActiveDelegation(rows.map((row) => this.toRecord(row)), {
@@ -94,6 +105,14 @@ export class DelegationService {
    */
   async grant(input: GrantDelegationInput, scope: DelegationScope): Promise<DelegationRecord> {
     if (!scope.tenantId) throw new Error('[internal] a delegation needs a tenant')
+
+    // Bare ids, with the kind beside them — the platform's convention, and the
+    // half of `CC-124` that made a delegation granted to `ai_worker:<id>`
+    // un-findable by a lookup that passes the bare id. Normalised in the service
+    // as well as the route: a disagreement throws instead of choosing a half.
+    const granteePrincipalId = normalizePrincipalSubject(input.granteePrincipalId, input.granteeKind)
+    const grantorPrincipalId = normalizePrincipalSubject(input.grantorPrincipalId, input.grantorKind)
+
     const problem = delegationWindowProblem(input.startsAt, input.expiresAt)
     if (problem) throw new Error(`[internal] ${problem}`)
     if (!input.reason?.trim()) throw new Error('[internal] a delegation needs a reason')
@@ -101,9 +120,9 @@ export class DelegationService {
     const created = this.em.create(AuthorityDelegation, {
       tenantId: scope.tenantId,
       organizationId: input.organizationId ?? null,
-      grantorPrincipalId: input.grantorPrincipalId,
+      grantorPrincipalId,
       grantorKind: input.grantorKind,
-      granteePrincipalId: input.granteePrincipalId,
+      granteePrincipalId,
       granteeKind: input.granteeKind,
       capabilityId: input.capabilityId,
       authorityCeiling: input.authorityCeiling ?? null,

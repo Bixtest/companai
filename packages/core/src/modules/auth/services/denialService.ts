@@ -6,6 +6,7 @@ import {
   type DenialRecord,
 } from '@open-mercato/shared/modules/denials'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { normalizePrincipalSubject } from '@open-mercato/shared/lib/auth/principal'
 
 /** Matches the API route's kind so both paths land in one place in the log. */
 const RESOURCE_KIND = 'authority.denial'
@@ -105,18 +106,28 @@ export class DenialService {
    * does is `findBlockingDenial`, the same pure function the screen and the CLI
    * use, so what an administrator is shown and what the check enforces cannot
    * drift apart.
+   *
+   * **`subjectKind`, when given, narrows the query.** The identifier of a
+   * principal is its **bare id** and its kind lives in `subject_kind`, which is
+   * the platform's convention — see `normalizePrincipalSubject`, which is the
+   * write path's half. Passing the kind here is what stops a row that was
+   * written for a credential from being read back for a person who happens to
+   * share an id. The caller that omits it gets exactly today's answer.
    */
   async blocking(
     subjectPrincipalId: string,
     required: readonly string[],
     scope: DenialScope,
+    subjectKind?: string | null,
     now: Date = new Date(),
   ): Promise<{ feature: string; denial: DenialRecord } | null> {
     if (!scope.tenantId || !subjectPrincipalId || !required.length) return null
 
+    const kind = typeof subjectKind === 'string' && subjectKind.trim() ? subjectKind.trim() : null
     const rows = await this.em.find(AuthorityDenial, {
       tenantId: scope.tenantId,
       subjectPrincipalId,
+      ...(kind ? { subjectKind: kind } : {}),
       liftedAt: null,
     })
     if (!rows.length) return null
@@ -148,6 +159,14 @@ export class DenialService {
   async withhold(input: WithholdInput, scope: DenialScope): Promise<DenialRecord> {
     if (!scope.tenantId) throw new Error('[internal] a denial needs a tenant')
 
+    // The bare id, and the kind that goes with it. Normalised here as well as in
+    // the route, because the service is reachable directly (`CC-124`'s other
+    // half: the write side accepted the prefixed encoding the docblock
+    // advertised, the enforcement side passed the bare id, and a machine was
+    // undeniable). A disagreement between the subject and the kind throws rather
+    // than picking a half.
+    const subjectPrincipalId = normalizePrincipalSubject(input.subjectPrincipalId, input.subjectKind)
+
     const startsAt = input.startsAt ?? new Date()
     const expiresAt = input.expiresAt ?? null
     const problem = denialProblem({
@@ -161,7 +180,7 @@ export class DenialService {
     const created = this.em.create(AuthorityDenial, {
       tenantId: scope.tenantId,
       organizationId: input.organizationId ?? null,
-      subjectPrincipalId: input.subjectPrincipalId,
+      subjectPrincipalId,
       subjectKind: input.subjectKind,
       featurePattern: input.featurePattern.trim(),
       startsAt,

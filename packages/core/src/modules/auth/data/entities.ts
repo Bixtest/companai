@@ -961,9 +961,20 @@ export class AuthorityProjectRecord {
  * other things they still needed — or to invent a bespoke role, which is how an
  * organisation ends up with forty roles and no idea what any of them mean.
  *
- * **`subject_principal_id` is `text`, not `uuid`**, for the same reason as
- * delegations: an API key acting is `api_key:<id>`, and a `uuid` column would
- * make machine actors undeniable, which is the opposite of what R1 was for.
+ * **`subject_principal_id` holds the BARE id; `subject_kind` holds the kind.**
+ * That is the platform's convention — the one `audit_logs`.`actor_user_id`
+ * states on its own column — and the text type is here so the id stays the id of
+ * a *credential* while the kind stays first-class, which is the opposite of
+ * making machines undeniable (R1).
+ *
+ * **A prefixed subject is accepted on write and stored bare.**
+ * `normalizePrincipalSubject` performs the narrowing, and a prefix that
+ * disagrees with `subject_kind` is refused rather than resolved by guessing
+ * which half the caller meant. *(Corrected 2026-10-18: this docblock used to say
+ * *"an API key acting is `api_key:<id>`"*, as though the column carried the
+ * prefix. It does not, and it must not — the enforcement path passes the bare id,
+ * so a denial written the way this comment instructed was listed, audited and
+ * never applied. `CC-124`.)*
  *
  * **`reason` is not null.** A permission that vanished with no reason cannot be
  * safely lifted six months later by somebody who was not there.

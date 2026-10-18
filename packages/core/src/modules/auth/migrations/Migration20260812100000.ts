@@ -8,9 +8,18 @@ import { Migration } from '@mikro-orm/migrations'
  * still needed, or inventing a bespoke role. Neither is a control; the first is
  * collateral damage and the second is how role lists become unreadable.
  *
- * **`subject_principal_id` is `text`, not `uuid`.** An API key acting is
- * `api_key:<id>`, and a `uuid` column would make machine actors undeniable —
- * exactly the asymmetry R1 exists to prevent.
+ * **`subject_principal_id` is `text`, not `uuid`, and holds the BARE id.**
+ * `subject_kind` holds the kind — the convention `audit_logs`.`actor_user_id`
+ * states on its own column. A text column is what keeps a *credential's* id in a
+ * column that also holds a *person's*, which is the opposite of making machine
+ * actors undeniable (R1). A prefixed subject is accepted at the boundary and
+ * narrowed to the bare id on the way in.
+ *
+ * *(Corrected 2026-10-18, `CC-124`: this comment used to read *"an API key acting
+ * is `api_key:<id>`"*, as though the column carried the prefix. It does not and
+ * must not — the enforcement path passes the bare id, so a denial written the way
+ * this comment instructed was written, audited and never applied. The column was
+ * right; the sentence was the defect.)*
  *
  * **`reason` is `not null`, `expires_at` is nullable.** The pair is deliberate
  * and is the mirror image of `authority_delegations`, where the reason is
