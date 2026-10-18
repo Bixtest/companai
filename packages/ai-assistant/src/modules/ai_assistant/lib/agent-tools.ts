@@ -2,16 +2,18 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { dynamicTool, type Tool } from 'ai'
 import type { AwilixContainer } from 'awilix'
 import type { ZodType } from 'zod'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { AiAgentDefinition, AiAgentMutationPolicy } from './ai-agent-definition'
 import type { AiChatRequestContext, AiUiPart } from './attachment-bridge-types'
 import type { AiToolDefinition, McpToolContext } from './types'
-import { loadAgentRegistry } from './agent-registry'
+import { getAgent, loadAgentRegistry } from './agent-registry'
 import {
   checkAgentPolicy,
   resolveEffectiveMutationPolicy,
   type AgentPolicyDenyCode,
 } from './agent-policy'
+import { resolveAgentDefinition } from './agent-type-catalog'
 import { hasRequiredFeatures } from './auth'
 import { toolRegistry } from './tool-registry'
 import { toSafeZodSchema } from './schema-utils'
@@ -334,8 +336,30 @@ export async function resolveAiAgentTools(
 
   const policyAuth = toPolicyAuthContext(input.authContext)
   const mutationPolicyOverride = input.mutationPolicyOverride ?? null
+
+  // CC-126 — the subject is resolved, not assumed: the code layer first, a
+  // tenant-authored type second, inside the caller's tenant. The tenant read
+  // needs a DB handle, which this path takes from the caller's container —
+  // the runtime dispatchers always supply one. A container-less caller (the
+  // legacy pass-through shape) cannot reach the tenant layer and fails
+  // CLOSED with `agent_unknown`: a key neither layer can confirm is refused,
+  // never guessed. A key neither layer holds is refused here rather than
+  // reaching the gate as a silent unknown.
+  let agent = getAgent(input.agentId) ?? null
+  if (!agent) {
+    agent = await resolveAgentDefinition({
+      agentId: input.agentId,
+      scope: { tenantId: input.authContext.tenantId ?? '' },
+      em: input.container?.resolve<EntityManager>('em') ?? null,
+    })
+  }
+  if (!agent) {
+    throw new AgentPolicyError('agent_unknown', `Agent "${input.agentId}" is not registered.`)
+  }
+
   const agentDecision = checkAgentPolicy({
     agentId: input.agentId,
+    agent,
     authContext: policyAuth,
     requestedExecutionMode: input.requestedExecutionMode ?? 'chat',
     mutationPolicyOverride,
@@ -344,7 +368,8 @@ export async function resolveAiAgentTools(
     throw new AgentPolicyError(agentDecision.code, agentDecision.message)
   }
 
-  const { agent } = agentDecision
+  // `agent` above IS the decision's subject — the gate returns what it was
+  // handed — so there is no second lookup here.
 
   // CC-55 — apply the bound scope (NARROWING-ONLY). A binding may never widen:
   // the run's tool set is the INTERSECTION with the agent's declared tools, and
@@ -382,8 +407,11 @@ export async function resolveAiAgentTools(
     effectiveMutationPolicy !== 'read-only' && typeof input.container !== 'undefined'
 
   for (const toolName of effectiveAllowedTools) {
+    // CC-126 — the per-tool check is handed the same resolved subject; the
+    // gate never re-resolves from the global map (a tenant type is a row).
     const toolDecision = checkAgentPolicy({
       agentId: input.agentId,
+      agent,
       authContext: policyAuth,
       toolName,
       mutationPolicyOverride,

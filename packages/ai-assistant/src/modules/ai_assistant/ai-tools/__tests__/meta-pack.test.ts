@@ -4,16 +4,22 @@
  * Covers `list_agents` empty-registry graceful case, RBAC filtering,
  * super-admin bypass, `describe_agent` not-found / forbidden / happy,
  * `update_task_plan` sanitization, and the `output.schema` JSON-Schema
- * fallback.
+ * fallback. `CC-126`: both tools read the caller's tenant catalogue, tagged.
  */
 import { z } from 'zod'
 import type { AiAgentDefinition } from '../../lib/ai-agent-definition'
+import type { AiAgentType } from '../../data/entities'
 import {
   resetAgentRegistryForTests,
   seedAgentRegistryForTests,
 } from '../../lib/agent-registry'
 import * as agentRegistry from '../../lib/agent-registry'
+import { AiAgentTypeRepository } from '../../data/repositories/AiAgentTypeRepository'
 import metaAiTools from '../meta-pack'
+
+jest.mock('../../data/repositories/AiAgentTypeRepository')
+
+const MockRepo = AiAgentTypeRepository as jest.MockedClass<typeof AiAgentTypeRepository>
 
 /**
  * `metaAiTools` is a tuple of three tools with three different input types, so
@@ -58,12 +64,16 @@ function makeCtx(overrides: Partial<{
   userId: string | null
   userFeatures: string[]
   isSuperAdmin: boolean
+  /** A DB handle the handler context can resolve — presence is what makes the
+   *  tenant layer reachable (CC-126). Omit it and the caller sees code only. */
+  em: unknown
 }> = {}) {
+  const em = overrides.em
   return {
     tenantId: 'tenant-1',
     organizationId: 'org-1',
     userId: 'user-1',
-    container: { resolve: jest.fn() },
+    container: { resolve: (key: string) => (key === 'em' ? em : undefined) },
     userFeatures: ['ai_assistant.view'],
     isSuperAdmin: false,
     ...overrides,
@@ -331,5 +341,146 @@ describe('meta-pack tool surface', () => {
       expect(tool.isMutation).not.toBe(true)
       expect(tool.requiredFeatures).toEqual(['ai_assistant.view'])
     }
+  })
+})
+
+// ── CC-126 — the meta tools read the catalogue in the caller's tenant ────────
+describe('CC-126 — meta tools over the tenant type catalogue', () => {
+  const CODE_AGENT = makeAgent({
+    id: 'platform.agent',
+    moduleId: 'ai_assistant',
+    label: 'Platform agent',
+    allowedTools: ['meta.list_agents'],
+  })
+
+  function typeRow(overrides: Partial<AiAgentType> = {}): AiAgentType {
+    return {
+      id: 'row-1',
+      tenantId: 'tenant-1',
+      key: 'billing.assistant',
+      bundle: {
+        label: 'Billing assistant',
+        description: 'Answers billing questions.',
+        systemPrompt: 'You are a billing assistant.',
+        allowedTools: ['invoices.list'],
+      },
+      version: 3,
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    } as AiAgentType
+  }
+
+  beforeEach(() => {
+    resetAgentRegistryForTests()
+    MockRepo.mockReset()
+  })
+
+  afterAll(() => {
+    resetAgentRegistryForTests()
+  })
+
+  it('list_agents merges the tenant layer, tagged, with the version carried', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(
+      () => ({ listActive: async () => [typeRow()] }) as never,
+    )
+    const tool = findTool('meta.list_agents')
+    const result = (await tool.handler({}, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    const agents = result.agents as Array<Record<string, unknown>>
+    const platform = agents.find((a) => a.id === 'platform.agent')
+    const tenant = agents.find((a) => a.id === 'billing.assistant')
+    expect(platform?.layer).toBe('platform')
+    expect(tenant?.layer).toBe('tenant')
+    expect(tenant?.version).toBe(3)
+    expect(tenant?.moduleId).toBe('ai_assistant')
+    // a tenant type is structurally a chat agent — both markers hold
+    expect(tenant?.hasOutputSchema).toBe(false)
+    expect(tenant?.hasPageContextResolver).toBe(false)
+  })
+
+  it('list_agents honours a tenant type\'s requiredFeatures under the caller\'s RBAC', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(
+      () =>
+        ({
+          listActive: async () => [
+            typeRow(),
+            typeRow({
+              key: 'secret.assistant',
+              id: 'row-2',
+              bundle: { ...typeRow().bundle, requiredFeatures: ['invoices.manage'] },
+            }),
+          ],
+        }) as never,
+    )
+    const tool = findTool('meta.list_agents')
+    const result = (await tool.handler({}, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    const ids = (result.agents as Array<Record<string, unknown>>).map((a) => a.id)
+    expect(ids).toContain('billing.assistant')
+    expect(ids).not.toContain('secret.assistant')
+  })
+
+  it('list_agents does not offer a shadowed tenant row beside the platform entry', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(
+      () => ({ listActive: async () => [typeRow({ key: 'platform.agent', id: 'row-2' })] }) as never,
+    )
+    const tool = findTool('meta.list_agents')
+    const result = (await tool.handler({}, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    const ids = (result.agents as Array<Record<string, unknown>>).map((a) => a.id)
+    expect(ids.filter((id) => id === 'platform.agent')).toHaveLength(1)
+  })
+
+  it('list_agents sees the platform layer alone with no DB handle', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(() => {
+      throw new Error('the repository must not be constructed without an em')
+    })
+    const tool = findTool('meta.list_agents')
+    const result = (await tool.handler({}, makeCtx() as any)) as Record<string, unknown>
+    const agents = result.agents as Array<Record<string, unknown>>
+    expect(agents).toHaveLength(1)
+    expect(agents[0].layer).toBe('platform')
+  })
+
+  it('describe_agent describes a tenant type as layer "tenant"', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(
+      () => ({ findActiveByKey: async (key: string) => (key === 'billing.assistant' ? typeRow() : null) }) as never,
+    )
+    const tool = findTool('meta.describe_agent')
+    const result = (await tool.handler({ agentId: 'billing.assistant' }, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    const agent = result.agent as Record<string, unknown>
+    expect(result.reason).toBeUndefined()
+    expect(agent.id).toBe('billing.assistant')
+    expect(agent.layer).toBe('tenant')
+    // the prompt rides under `prompt`, not the summary — and a tenant type has
+    // no dynamic page-context hook to report
+    const prompt = agent.prompt as Record<string, unknown>
+    expect(prompt.systemPrompt).toBe('You are a billing assistant.')
+    expect(prompt.hasDynamicPageContext).toBe(false)
+  })
+
+  it('describe_agent reports a code agent as layer "platform" even when a tenant row collides', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(
+      () => ({ findActiveByKey: async () => typeRow({ key: 'platform.agent' }) }) as never,
+    )
+    const tool = findTool('meta.describe_agent')
+    const result = (await tool.handler({ agentId: 'platform.agent' }, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    const agent = result.agent as Record<string, unknown>
+    expect(agent.layer).toBe('platform')
+    expect(agent.label).toBe('Platform agent')
+  })
+
+  it('describe_agent still returns not_found for a key neither layer holds', async () => {
+    seedAgentRegistryForTests([CODE_AGENT])
+    MockRepo.mockImplementation(() => ({ findActiveByKey: async () => null }) as never)
+    const tool = findTool('meta.describe_agent')
+    const result = (await tool.handler({ agentId: 'nope.nope' }, makeCtx({ em: {} }) as any)) as Record<string, unknown>
+    expect(result.agent).toBeNull()
+    expect(result.reason).toBe('not_found')
   })
 })

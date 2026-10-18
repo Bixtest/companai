@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { requirePrincipal, type AuthContext } from '@open-mercato/shared/lib/auth/server'
 import { AiAgentBindingRepository } from '../data/repositories/AiAgentBindingRepository'
-import { getAgent } from './agent-registry'
+import type { AiAgentDefinition } from './ai-agent-definition'
 
 /**
  * The resolved binding for one `(principal, agent)` pair.
@@ -123,12 +123,19 @@ export async function resolveAgentBinding(input: {
  *   so a binding can only ADD a requirement, never remove one (`B3`).
  *
  * Pure and synchronous so it is trivially testable; the DB read is the caller's.
+ *
+ * `CC-126` — takes the **agent definition** directly rather than resolving it
+ * from the global registry: a tenant-authored type is a row, not a registry
+ * entry, so the caller resolves one (code layer first, tenant type second —
+ * `lib/agent-type-catalog.ts`) and hands it in. An absent or `null` agent
+ * yields the empty tool set and the binding's features alone — the same
+ * fail-closed result an unknown id always had.
  */
 export function computeBoundRunScope(input: {
-  agentId: string
+  agent?: AiAgentDefinition | null
   binding: Extract<ResolvedAgentBinding, { bound: true }>
 }): { allowedTools: string[]; requiredFeatures: string[] } {
-  const agent = getAgent(input.agentId)
+  const agent = input.agent
   const declaredTools = agent?.allowedTools ?? []
   const declaredFeatures = agent?.requiredFeatures ?? []
 

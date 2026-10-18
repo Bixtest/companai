@@ -100,6 +100,7 @@ jest.mock('../../../../lib/baseurl-allowlist', () => ({
 
 const tenantAllowlistGetSnapshotMock = jest.fn()
 const agentRuntimeOverrideGetExactMock = jest.fn()
+const agentTypeFindActiveByKeyMock = jest.fn()
 
 jest.mock('../../../../data/repositories/AiTenantModelAllowlistRepository', () => ({
   AiTenantModelAllowlistRepository: jest.fn().mockImplementation(() => ({
@@ -110,6 +111,16 @@ jest.mock('../../../../data/repositories/AiTenantModelAllowlistRepository', () =
 jest.mock('../../../../data/repositories/AiAgentRuntimeOverrideRepository', () => ({
   AiAgentRuntimeOverrideRepository: jest.fn().mockImplementation(() => ({
     getExact: (...args: unknown[]) => agentRuntimeOverrideGetExactMock(...args),
+  })),
+}))
+
+// CC-126 — the gate resolves its subject through the tenant type catalogue
+// first. Mocked like the module's other repositories: the route contract is
+// what this file tests, and an unknown id must stay a 404 whatever the tenant
+// layer holds.
+jest.mock('../../../../data/repositories/AiAgentTypeRepository', () => ({
+  AiAgentTypeRepository: jest.fn().mockImplementation(() => ({
+    findActiveByKey: (...args: unknown[]) => agentTypeFindActiveByKeyMock(...args),
   })),
 }))
 
@@ -268,6 +279,34 @@ describe('POST /api/ai/chat', () => {
     expect(response.status).toBe(404)
     const json = await response.json()
     expect(json.code).toBe('agent_unknown')
+  })
+
+  // CC-126 — a tenant-authored type reaches the gate through the tenant layer:
+  // the code registry is empty, the row resolves, and the turn runs. This is
+  // the end-to-end wiring of the gate's handed subject.
+  it('runs a tenant-authored type the code registry does not hold', async () => {
+    registerMcpTool(makeTool({ name: 'invoices.list' }), { moduleId: 'ai_assistant' })
+    agentTypeFindActiveByKeyMock.mockResolvedValue({
+      key: 'billing.assistant',
+      bundle: {
+        label: 'Billing assistant',
+        description: 'Answers billing questions.',
+        systemPrompt: 'You are a billing assistant.',
+        allowedTools: ['invoices.list'],
+      },
+    })
+
+    const response = await POST(
+      buildRequest({
+        agent: 'billing.assistant',
+        body: { messages: [{ role: 'user', content: 'list my invoices' }] },
+      }) as any,
+    )
+
+    expect(response.status).toBe(200)
+    expect(runAiAgentTextMock).toHaveBeenCalledTimes(1)
+    const callArg = runAiAgentTextMock.mock.calls[0][0] as { agentId: string }
+    expect(callArg.agentId).toBe('billing.assistant')
   })
 
   it('returns 403 when the agent requires features the user lacks', async () => {

@@ -1,5 +1,6 @@
 import { OptionalProps } from '@mikro-orm/core'
 import {
+  Check,
   Entity,
   Index,
   PrimaryKey,
@@ -1255,4 +1256,131 @@ export class AiAgentRuntime {
 
   @Property({ name: 'deleted_at', type: Date, nullable: true })
   deletedAt?: Date | null
+}
+
+/**
+ * `CC-126` — a **tenant-created agent type**: the data layer of the type
+ * catalogue.
+ *
+ * The catalogue has two layers and they are two homes, not one table with a
+ * magic value: the platform ships types as **code** (`AiAgentDefinition`, held
+ * by `lib/agent-registry.ts`), and a tenant authors one here. The owner's
+ * *"bulk packaged capabilities, so a standardised agent is cheap to create"*
+ * needs the second home — before this row a tenant could only **narrow** a
+ * platform type (`AiAgentPromptOverride`, `AiAgentRuntimeOverride`,
+ * `AiAgentMutationPolicyOverride`, `AiTenantModelAllowlist`), never author
+ * one.
+ *
+ * **`tenant_id` is NOT NULL, always — no "platform" row and no sentinel.**
+ * `tenant_id IS NULL` meaning *platform level* would be a value every query
+ * must remember to exclude: the `CC-103` class (a permit written as a
+ * default), and the refusal plan §7 names by name. `RoleAcl.tenant_id`
+ * already answers this the same way — *"Tenant scope is mandatory for ACL
+ * evaluation"* — and even system roles live in a tenant. The platform layer
+ * needs no row because the code registry already IS that layer.
+ *
+ * **`key` speaks the `ai_agent_bindings.agent_id` dialect** (lowercase, one
+ * dot) because a type's key must flow through the binding/override machinery,
+ * which is text-keyed and CHECK-constrained the same way
+ * (`Migration20261017160000_ai_agent_bindings_agent_id_format`). A CHECK
+ * makes the second spelling unrepresentable, which is stronger than
+ * remembering to normalise.
+ *
+ * **One plain unique index, over ALL rows regardless of `status`.** A retired
+ * key is never reusable: re-creating it would silently re-point every binding
+ * written for the old definition at the new one. The paired partial indexes
+ * the override tables carry exist for a nullable `organization_id`; this
+ * table has no org column — the owner's two layers are platform and tenant —
+ * so there is one index and no pair.
+ *
+ * **`status`, and how it differs from `AiAgentRuntime`'s refusal.** The
+ * runtime refused a `status` column because a liveness verdict needs a sweeper
+ * to stay true. This is the other kind: an **authorial** state, written at
+ * the exact moment a human decides and never derived. `'active' → 'retired'`
+ * is one-way, because a retired key is never reusable.
+ *
+ * **No `deleted_at`.** `CC-102` measured that the override family's
+ * `deleted_at` has no writer, so every `where deleted_at is null` is inert; a
+ * soft-delete column nobody writes is the defect, not the fix. This table
+ * retires through `status`, and the write exists.
+ *
+ * **`label`, `description` and `systemPrompt` live INSIDE `bundle`, not in
+ * columns.** Two homes for one string is the one-truth defect `SR-39` exists
+ * to catch, expressed as drift; the code layer keeps all three in one object
+ * and so does this. `bundle` is the JSON-safe subset of `AiAgentDefinition` —
+ * `resolvePageContext`, `output.schema` and `loop.prepareStep` cannot be
+ * stored, so a tenant type is structurally a chat agent with a concrete tool
+ * list. The row itself stays untyped (`Record<string, unknown>`): the shape is
+ * owned by `lib/agent-type-catalog.ts`, which validates it at the write
+ * boundary and narrows it field by field when a run materializes it — the
+ * same split `AiAgentRuntime.provider` uses against
+ * `lib/ai-runtime-engines`.
+ *
+ * `version` is bumped on every edit and pinned by each instance (`CC-122`);
+ * nothing pins it yet, which is that row's debt, not this one's.
+ *
+ * The generated entity registry (`apps/mercato/.mercato/generated/entities/`)
+ * does not carry this table yet — the same staleness `CC-119` records for
+ * `ai_agent_bindings` and `ai_agent_runtimes`. It lands with that rebuild,
+ * not by a hand-run `generate` in the middle of a build.
+ */
+@Entity({ tableName: 'ai_agent_types' })
+@Index({
+  name: 'ai_agent_types_tenant_key_uq',
+  expression:
+    'create unique index "ai_agent_types_tenant_key_uq" on "ai_agent_types" ("tenant_id", "key")',
+})
+@Check({
+  name: 'ai_agent_types_key_format_ck',
+  expression: `"key" ~ '^[a-z0-9_]+\\.[a-z0-9_]+$'`,
+})
+@Check({
+  name: 'ai_agent_types_status_ck',
+  expression: `"status" in ('active', 'retired')`,
+})
+export class AiAgentType {
+  [OptionalProps]?: 'createdAt' | 'updatedAt'
+
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  /**
+   * The type key in the agent-id dialect (`<area>.<role>`, e.g.
+   * `billing.assistant`). Unique within the tenant for all time — a retired
+   * key is never reused, so a binding written against it can never silently
+   * re-point at a later, different definition.
+   */
+  @Property({ name: 'key', type: 'text' })
+  key!: string
+
+  /**
+   * The JSON-safe definition body: `label`, `description`, `systemPrompt`,
+   * `allowedTools` and every optional setting a tenant may set, minus the
+   * three fields that cannot be JSON (`AiAgentDefinition.resolvePageContext`,
+   * `output.schema`, `loop.prepareStep`). One home for all of it — see the
+   * docblock above.
+   */
+  @Property({ name: 'bundle', type: 'jsonb', default: '{}' })
+  bundle: Record<string, unknown> = {}
+
+  /** Bumped on every edit; pinned by an instance (`CC-122`). */
+  @Property({ name: 'version', type: 'int' })
+  version: number = 1
+
+  /**
+   * `'active' | 'retired'`. Authorial, never derived: a human retires a type,
+   * and retirement is one-way. CHECK-constrained so a third spelling is
+   * unrepresentable.
+   */
+  @Property({ name: 'status', type: 'text', default: 'active' })
+  status: string = 'active'
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
 }

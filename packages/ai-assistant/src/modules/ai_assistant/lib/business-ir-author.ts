@@ -54,6 +54,7 @@ import {
 import type { BusinessQueryIR } from '@open-mercato/shared/lib/business-ir/types'
 import type { AuthContext } from '@open-mercato/shared/lib/auth/server'
 import { computeBoundRunScope, resolveAgentBinding } from './agent-binding'
+import { findCodeAgentDefinition } from './agent-type-catalog'
 // OPEN — row 28 / `CC-67`: the author reaches the platform's own AI SDK runtime
 // THROUGH THE DOOR, never by importing `agent-runtime` by name. The engine sits
 // behind the door as one implementation (`agent-runtime-port-adapter.ts`).
@@ -161,7 +162,13 @@ export async function authorBusinessQueryIr(
     // CC-55 / CC-57 — the binding's NARROWING (tools INTERSECT, features UNION)
     // is applied to the run, exactly as the routes do. `binding.bound` is true
     // here, so the scope is well-typed.
-    const boundScope = computeBoundRunScope({ agentId: BUSINESS_IR_AGENT_ID, binding })
+    //
+    // CC-126 — the agent is the fixed CODE agent this path names, resolved
+    // through the code layer (never a tenant row): a fixed id is the one case
+    // where the subject is known without a tenant scope, and
+    // `findCodeAgentDefinition` keeps the load-order discipline in one place.
+    const agentDefinition = await findCodeAgentDefinition(BUSINESS_IR_AGENT_ID)
+    const boundScope = computeBoundRunScope({ agent: agentDefinition, binding })
 
     // The AI runtime door (`CC-67`). The engine is never named; `port` decides
     // what sits behind it. The auth context, container and narrowed scope — the

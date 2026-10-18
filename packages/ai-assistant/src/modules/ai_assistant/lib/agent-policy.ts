@@ -42,6 +42,19 @@ export interface AgentPolicyAuthContext {
 
 export interface AgentPolicyCheckInput {
   agentId: string
+  /**
+   * `CC-126` — the **pre-resolved subject**. The runtime resolves the
+   * definition before asking this gate anything — the code layer first, a
+   * tenant-authored type second (`lib/agent-type-catalog.ts`) — and hands it
+   * here, so a tenant-authored type reaches this gate at all. When present,
+   * the global registry is never consulted.
+   *
+   * Omitted ⇒ the code layer only, which is the fail-CLOSED direction: a
+   * tenant id passed without its subject is refused `agent_unknown` rather
+   * than guessed at. An explicit `null` (resolved to nothing) refuses the
+   * same way.
+   */
+  agent?: AiAgentDefinition | null
   authContext: AgentPolicyAuthContext
   toolName?: string
   attachmentMediaTypes?: string[]
@@ -164,12 +177,26 @@ export function checkAgentPolicy(input: AgentPolicyCheckInput): AgentPolicyDecis
     mutationPolicyOverride,
   } = input
 
-  const agent = getAgent(agentId)
+  // CC-126 — the subject is handed in when the caller resolved one; the
+  // global registry is the fallback for code-only callers. A tenant id
+  // without its subject is refused, never guessed (fail-closed).
+  const agent = input.agent !== undefined ? input.agent : getAgent(agentId)
   if (!agent) {
     return {
       ok: false,
       code: 'agent_unknown',
       message: `Agent "${agentId}" is not registered.`,
+    }
+  }
+  // The handed subject must be the definition of the id being asked about.
+  // A mismatch is the `CC-124` class in miniature — two halves naming
+  // different things, one of them trusted silently — and it is refused
+  // rather than reconciled.
+  if (agent.id !== agentId) {
+    return {
+      ok: false,
+      code: 'agent_unknown',
+      message: `Agent "${agentId}" was resolved to a different definition ("${agent.id}").`,
     }
   }
 

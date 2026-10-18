@@ -6,10 +6,16 @@
  * possible, otherwise a `non-serializable` marker). Both tools treat a
  * missing agent registry as an empty list — the chat runtime must not
  * crash if `ai-agents.generated.ts` has not been emitted yet.
+ *
+ * `CC-126` — both tools read the **catalogue in the caller's tenant**: the
+ * code layer first, then the tenant's own types, each tagged `layer`. The
+ * tenant layer is reached through the handler's container; a caller with no
+ * tenant (or no container) sees the platform layer alone, never an error.
  */
 import { z } from 'zod'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { AiAgentDefinition } from '../lib/ai-agent-definition'
-import { listAgents, getAgent, loadAgentRegistry } from '../lib/agent-registry'
+import { listAgentCatalog, resolveAgentCatalogEntry } from '../lib/agent-type-catalog'
 import { hasRequiredFeatures } from '../lib/auth'
 import { defineAiTool } from '../lib/ai-tool-definition'
 import {
@@ -22,10 +28,15 @@ import {
   sanitizeAgentTaskPlanInput,
 } from '../lib/task-plan-labels'
 
-function summarizeAgent(agent: AiAgentDefinition): Record<string, unknown> {
+/** Provenance tags a catalog entry carries onto the wire. */
+function summarizeAgent(
+  agent: AiAgentDefinition,
+  meta?: { layer: 'platform' | 'tenant'; version?: number; shadowedByCode?: boolean },
+): Record<string, unknown> {
   return {
     id: agent.id,
     moduleId: agent.moduleId,
+    layer: meta?.layer ?? 'platform',
     label: agent.label,
     description: agent.description,
     requiredFeatures: agent.requiredFeatures ?? [],
@@ -42,6 +53,11 @@ function summarizeAgent(agent: AiAgentDefinition): Record<string, unknown> {
     dataCapabilities: agent.dataCapabilities ?? null,
     hasOutputSchema: Boolean(agent.output),
     hasPageContextResolver: typeof agent.resolvePageContext === 'function',
+    // Tenant rows only. A shadowed row is never offered by a picker (code owns
+    // the key), so on the wire this is `false` at best — it is the manage
+    // surface that shows a shadow.
+    version: meta?.version,
+    shadowedByCode: meta?.shadowedByCode ?? false,
   }
 }
 
@@ -83,30 +99,39 @@ const listAgentsTool = defineAiTool({
   name: 'meta.list_agents',
   displayName: 'List agents',
   description:
-    'List registered AI agents the caller can invoke. Filters by requiredFeatures RBAC; returns { agents: [] } if the registry is empty.',
+    'List registered AI agents the caller can invoke — platform-shipped and tenant-created (`CC-126`), each tagged `layer`. Filters by requiredFeatures RBAC; returns { agents: [] } if the registry is empty.',
   inputSchema: listAgentsInput,
   requiredFeatures: ['ai_assistant.view'],
   tags: ['read', 'meta'],
   handler: async (rawInput, ctx) => {
     const input = listAgentsInput.parse(rawInput)
-    let all: AiAgentDefinition[] = []
+    let catalog: Awaited<ReturnType<typeof listAgentCatalog>> = []
     try {
-      // Lazy-load the registry on first use. The in-app agents route loads it
-      // at request time; standalone MCP servers have no such bootstrap, so the
-      // tool must ensure it itself. Idempotent — subsequent calls are no-ops.
-      await loadAgentRegistry()
-      all = listAgents()
+      // Lazy-loads the registry on first use (see the route equivalent) and
+      // merges the caller's tenant layer. The handler context carries both a
+      // tenant and a container; either missing means the platform layer alone.
+      const em = ctx.container?.resolve<EntityManager>('em') ?? null
+      catalog = await listAgentCatalog({ tenantId: ctx.tenantId ?? '' }, em)
     } catch {
-      all = []
+      catalog = []
     }
-    const filtered = all.filter((agent) => {
-      if (input.moduleId && agent.moduleId !== input.moduleId) return false
-      const features = agent.requiredFeatures ?? []
+    const filtered = catalog.filter((entry) => {
+      if (input.moduleId && entry.definition.moduleId !== input.moduleId) return false
+      const features = entry.definition.requiredFeatures ?? []
       return hasRequiredFeatures(features, ctx.userFeatures, ctx.isSuperAdmin)
     })
+    // A shadowed tenant row resolves to the platform's definition under the
+    // same id; listing it beside that entry would offer one id twice.
+    const offered = filtered.filter((entry) => !(entry.layer === 'tenant' && entry.shadowedByCode))
     return {
-      agents: filtered.map(summarizeAgent),
-      total: filtered.length,
+      agents: offered.map((entry) =>
+        summarizeAgent(entry.definition, {
+          layer: entry.layer,
+          version: entry.version,
+          shadowedByCode: entry.shadowedByCode,
+        }),
+      ),
+      total: offered.length,
     }
   },
 })
@@ -119,30 +144,37 @@ const describeAgentTool = defineAiTool({
   name: 'meta.describe_agent',
   displayName: 'Describe agent',
   description:
-    'Return metadata, RBAC, allowed tools, execution mode, output schema (JSON-Schema when representable), and prompt shape for a single agent. Never throws — returns { agent: null, reason } if missing or forbidden.',
+    'Return metadata, RBAC, allowed tools, execution mode, output schema (JSON-Schema when representable), and prompt shape for a single agent — platform-shipped or tenant-created. Never throws — returns { agent: null, reason } if missing or forbidden.',
   inputSchema: describeAgentInput,
   requiredFeatures: ['ai_assistant.view'],
   tags: ['read', 'meta'],
   handler: async (rawInput, ctx) => {
     const input = describeAgentInput.parse(rawInput)
-    let agent: AiAgentDefinition | undefined
+    let resolved: Awaited<ReturnType<typeof resolveAgentCatalogEntry>> = null
     try {
-      // Lazy-load the registry on first use (see meta.list_agents). Idempotent.
-      await loadAgentRegistry()
-      agent = getAgent(input.agentId)
+      // The code layer first, then the caller's tenant layer — the same
+      // precedence the runtime gate uses, with the layer reported so a tenant
+      // type is never silently described as platform-shipped.
+      const em = ctx.container?.resolve<EntityManager>('em') ?? null
+      resolved = await resolveAgentCatalogEntry({
+        agentId: input.agentId,
+        scope: { tenantId: ctx.tenantId ?? '' },
+        em,
+      })
     } catch {
-      agent = undefined
+      resolved = null
     }
-    if (!agent) {
+    if (!resolved) {
       return { agent: null, reason: 'not_found' as const }
     }
+    const agent = resolved.definition
     const features = agent.requiredFeatures ?? []
     if (!hasRequiredFeatures(features, ctx.userFeatures, ctx.isSuperAdmin)) {
       return { agent: null, reason: 'forbidden' as const }
     }
     return {
       agent: {
-        ...summarizeAgent(agent),
+        ...summarizeAgent(agent, { layer: resolved.layer }),
         output: serializeStructuredOutput(agent.output),
         prompt: serializePrompt(agent),
       },

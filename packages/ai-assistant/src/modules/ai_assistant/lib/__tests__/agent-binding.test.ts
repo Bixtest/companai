@@ -170,35 +170,40 @@ describe('computeBoundRunScope — narrowing only (CC-27 / B3)', () => {
   })
 
   it('intersects tools with the binding allowlist (never widens)', () => {
-    seedAgentRegistryForTests([
-      makeAgent({ id: 'mod.agent', moduleId: 'mod', allowedTools: ['tool.a', 'tool.b'] }),
-    ])
+    const agent = makeAgent({ id: 'mod.agent', moduleId: 'mod', allowedTools: ['tool.a', 'tool.b'] })
+    // CC-126 — the subject is handed in; a tenant type is a row, not a registry
+    // entry, so the gate never resolves one from the global map.
     const scope = computeBoundRunScope({
-      agentId: 'mod.agent',
+      agent,
       binding: { bound: true, toolAllowlist: ['tool.a', 'tool.zzz-nope'], requiredFeatures: [], agentAxis: 'mod.agent' },
     })
     expect(scope.allowedTools).toEqual(['tool.a'])
   })
 
   it('union of features: binding can only ADD a requirement', () => {
-    seedAgentRegistryForTests([
-      makeAgent({ id: 'mod.agent', moduleId: 'mod', requiredFeatures: ['feat.base'] }),
-    ])
+    const agent = makeAgent({ id: 'mod.agent', moduleId: 'mod', requiredFeatures: ['feat.base'] })
     const scope = computeBoundRunScope({
-      agentId: 'mod.agent',
+      agent,
       binding: { bound: true, toolAllowlist: null, requiredFeatures: ['feat.extra'], agentAxis: 'mod.agent' },
     })
     expect(scope.requiredFeatures.sort()).toEqual(['feat.base', 'feat.extra'])
   })
 
   it('a null allowlist means "all of the agent tools"', () => {
-    seedAgentRegistryForTests([
-      makeAgent({ id: 'mod.agent', moduleId: 'mod', allowedTools: ['tool.a', 'tool.b'] }),
-    ])
+    const agent = makeAgent({ id: 'mod.agent', moduleId: 'mod', allowedTools: ['tool.a', 'tool.b'] })
     const scope = computeBoundRunScope({
-      agentId: 'mod.agent',
+      agent,
       binding: { bound: true, toolAllowlist: null, requiredFeatures: [], agentAxis: null },
     })
     expect(scope.allowedTools).toEqual(['tool.a', 'tool.b'])
+  })
+
+  it('an absent agent yields the empty tool set (fail-closed)', () => {
+    const scope = computeBoundRunScope({
+      agent: null,
+      binding: { bound: true, toolAllowlist: null, requiredFeatures: ['feat.x'], agentAxis: null },
+    })
+    expect(scope.allowedTools).toEqual([])
+    expect(scope.requiredFeatures).toEqual(['feat.x'])
   })
 })

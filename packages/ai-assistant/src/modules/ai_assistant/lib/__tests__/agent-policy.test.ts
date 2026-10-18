@@ -383,3 +383,99 @@ describe('agent-policy', () => {
     }
   })
 })
+
+/**
+ * `CC-126` — the gate is HANDED its subject. Before this, a definition that
+ * was not in the global registry could not reach the gate at all, which is
+ * why a tenant-authored type needs its resolver in the same change as its
+ * table. These four cases are the fail directions of that seam.
+ */
+describe('agent-policy — the handed subject (CC-126)', () => {
+  beforeEach(() => {
+    resetAgentRegistryForTests()
+    toolRegistry.clear()
+  })
+
+  it('approves a hand-resolved subject the global registry does not hold — a tenant-authored type', () => {
+    registerMcpTool(
+      makeTool({ name: 'invoices.list', requiredFeatures: ['invoices.view'] }),
+      {},
+    )
+    const tenantAgent = makeAgent({
+      id: 'billing.assistant',
+      moduleId: 'ai_assistant',
+      allowedTools: ['invoices.list'],
+    })
+    // the registry is EMPTY on purpose: this subject came from a row
+    const decision = checkAgentPolicy({
+      agentId: 'billing.assistant',
+      agent: tenantAgent,
+      authContext: { userFeatures: ['*'], isSuperAdmin: false },
+      toolName: 'invoices.list',
+    })
+    expect(decision.ok).toBe(true)
+    if (decision.ok) {
+      expect(decision.agent).toBe(tenantAgent)
+      expect(decision.tool?.name).toBe('invoices.list')
+    }
+  })
+
+  it('refuses a tenant id passed WITHOUT its subject (fail-closed fallback)', () => {
+    const decision = checkAgentPolicy({
+      agentId: 'billing.assistant',
+      authContext: { userFeatures: ['*'], isSuperAdmin: false },
+    })
+    expect(decision.ok).toBe(false)
+    if (!decision.ok) {
+      expect(decision.code).toBe('agent_unknown')
+    }
+  })
+
+  it('refuses an explicitly null subject (resolved to nothing)', () => {
+    const decision = checkAgentPolicy({
+      agentId: 'billing.assistant',
+      agent: null,
+      authContext: { userFeatures: ['*'], isSuperAdmin: false },
+    })
+    expect(decision.ok).toBe(false)
+    if (!decision.ok) {
+      expect(decision.code).toBe('agent_unknown')
+    }
+  })
+
+  it('refuses a handed subject whose id is not the id being asked about', () => {
+    const otherAgent = makeAgent({
+      id: 'billing.other',
+      moduleId: 'ai_assistant',
+    })
+    const decision = checkAgentPolicy({
+      agentId: 'billing.assistant',
+      agent: otherAgent,
+      authContext: { userFeatures: ['*'], isSuperAdmin: false },
+    })
+    expect(decision.ok).toBe(false)
+    if (!decision.ok) {
+      expect(decision.code).toBe('agent_unknown')
+      expect(decision.message).toContain('billing.other')
+    }
+  })
+
+  it('enforces the per-tool feature gate for a tenant type exactly as for code', () => {
+    registerMcpTool(makeTool({ name: 'invoices.list', requiredFeatures: ['invoices.view'] }), {})
+    const tenantAgent = makeAgent({
+      id: 'billing.assistant',
+      moduleId: 'ai_assistant',
+      allowedTools: ['invoices.list'],
+    })
+    const decision = checkAgentPolicy({
+      agentId: 'billing.assistant',
+      agent: tenantAgent,
+      authContext: { userFeatures: ['ai_assistant.view'], isSuperAdmin: false },
+      toolName: 'invoices.list',
+    })
+    expect(decision.ok).toBe(false)
+    if (!decision.ok) {
+      expect(decision.code).toBe('tool_features_denied')
+    }
+  })
+})

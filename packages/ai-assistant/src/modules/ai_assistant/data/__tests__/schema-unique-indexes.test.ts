@@ -117,3 +117,77 @@ describe('AI assistant nullable organization unique indexes', () => {
     }
   })
 })
+
+/**
+ * CC-126 — `ai_agent_types` is NOT the nullable-org pattern above and must
+ * never be edited into it. One plain unique index over every row regardless of
+ * status (a retired key is never reusable), no org column, and the dialect
+ * CHECK shipped WITH the table.
+ *
+ * The snapshot is not asserted here: this table joins the set `CC-119`
+ * regenerates at the rebuild milestone, so a snapshot expectation would be a
+ * claim about a generated artifact that is currently stale.
+ */
+describe('CC-126 ai_agent_types unique index and checks', () => {
+  const migrationSource = readFileSync(
+    new URL('../../migrations/Migration20261018120000_ai_agent_types.ts', import.meta.url),
+    'utf8',
+  )
+  const entitySource = readFileSync(new URL('../entities.ts', import.meta.url), 'utf8')
+  // Whitespace-normalised so the statement is asserted as written, not as wrapped.
+  const flatMigration = migrationSource.replace(/\s+/g, ' ')
+
+  it('creates the tenant_key unique index over every row — no partial pair', () => {
+    expect(flatMigration).toContain(
+      'create unique index "ai_agent_types_tenant_key_uq" on "ai_agent_types" ("tenant_id", "key");',
+    )
+    // NOT partial: the retired rows are inside the index, which is what makes a
+    // retired key unreusable. A `where` here would retire-and-recreate.
+    expect(flatMigration).not.toMatch(/create unique index "ai_agent_types_tenant_key_uq"[^;]*where/)
+  })
+
+  it('ships the dialect CHECK with the table, not as a later alter', () => {
+    // The expression is captured from BOTH files and compared byte-for-byte
+    // rather than retyped: the dialect carries a backslash, and a test that
+    // re-types it tests the test's escaping, not the schema's. The CHECK's
+    // teeth are proved on real Postgres by the migration probe (`23514` on
+    // `Billing.Assistant`).
+    const migrationExpr = flatMigration.match(
+      /constraint "ai_agent_types_key_format_ck" check \((.+?)\), constraint/,
+    )?.[1]
+    const entityExpr = entitySource.match(
+      /name: 'ai_agent_types_key_format_ck',\s*expression: `([^`]+)`/,
+    )?.[1]
+    expect(migrationExpr).toBeDefined()
+    expect(entityExpr).toBeDefined()
+    expect(entityExpr).toBe(migrationExpr)
+    // ...and it is the agent-id dialect, anchored at both ends.
+    expect(migrationExpr).toContain('"key" ~')
+    expect(migrationExpr).toContain('[a-z0-9_]+')
+    expect(migrationExpr).toContain('$')
+
+    expect(migrationSource).not.toContain(' add constraint ')
+    expect(migrationSource).not.toContain('alter table')
+  })
+
+  it('ships the status CHECK — no third status is representable', () => {
+    expect(flatMigration).toContain(
+      'constraint "ai_agent_types_status_ck" check ("status" in (\'active\', \'retired\'))',
+    )
+  })
+
+  it('requires tenant_id — the sentinel has no column to live in', () => {
+    expect(flatMigration).toContain('"tenant_id" uuid not null,')
+  })
+
+  it('declares the same index expression on the entity — no migration/entity drift', () => {
+    expect(flatMigration).toContain(
+      'create unique index "ai_agent_types_tenant_key_uq" on "ai_agent_types" ("tenant_id", "key");',
+    )
+    expect(entitySource).toContain(
+      '\'create unique index "ai_agent_types_tenant_key_uq" on "ai_agent_types" ("tenant_id", "key")\'',
+    )
+    expect(entitySource).toContain('ai_agent_types_status_ck')
+    expect(entitySource).toContain("tableName: 'ai_agent_types'")
+  })
+})

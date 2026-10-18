@@ -12,6 +12,7 @@ import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
 import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
 import { AgentPolicyError } from '../../../lib/agent-tools'
+import { resolveAgentDefinition } from '../../../lib/agent-type-catalog'
 // OPEN — row 28 / `CC-67`: this route reaches the platform's own AI SDK runtime
 // THROUGH THE DOOR, never by importing `agent-runtime`'s engine functions by
 // name. The engine sits behind the door as one implementation
@@ -563,8 +564,18 @@ export async function POST(req: NextRequest): Promise<Response> {
       organizationId: auth.orgId,
     })
 
+    // CC-126 — resolve the subject BEFORE the gate asks about it: the code
+    // layer first, a tenant-authored type second, inside this caller's
+    // tenant. The gate is handed its subject from here on.
+    const agentSubject = await resolveAgentDefinition({
+      agentId,
+      scope: { tenantId: auth.tenantId ?? '' },
+      em: container.resolve('em'),
+    })
+
     const decision = checkAgentPolicy({
       agentId,
+      agent: agentSubject,
       authContext: {
         userFeatures: acl.features,
         isSuperAdmin: acl.isSuperAdmin,
@@ -597,7 +608,9 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     // CC-55 — apply the binding's NARROWING (tools INTERSECT, features UNION) to
     // the run. `binding.bound` is always true here, so the scope is well-typed.
-    const boundScope = computeBoundRunScope({ agentId, binding })
+    // CC-126 — the agent is the resolved subject (code layer or tenant row),
+    // never a global lookup.
+    const boundScope = computeBoundRunScope({ agent: decision.agent, binding })
 
     const agentDef = decision.agent
 

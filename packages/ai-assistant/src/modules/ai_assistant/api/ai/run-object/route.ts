@@ -9,6 +9,7 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
 import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
+import { resolveAgentDefinition } from '../../../lib/agent-type-catalog'
 // OPEN — row 28 / `CC-67`: this route reaches the platform's own AI SDK runtime
 // THROUGH THE DOOR, never by importing `agent-runtime` by name. The engine sits
 // behind the door as one implementation (`agent-runtime-port-adapter.ts`) — see
@@ -155,8 +156,17 @@ export async function POST(req: NextRequest): Promise<Response> {
       organizationId: auth.orgId,
     })
 
+    // CC-126 — resolve the subject BEFORE the gate asks about it (the code
+    // layer first, a tenant-authored type second, in this caller's tenant).
+    const agentSubject = await resolveAgentDefinition({
+      agentId: bodyResult.data.agent,
+      scope: { tenantId: auth.tenantId ?? '' },
+      em: container.resolve('em'),
+    })
+
     const decision = checkAgentPolicy({
       agentId: bodyResult.data.agent,
+      agent: agentSubject,
       authContext: {
         userFeatures: acl.features,
         isSuperAdmin: acl.isSuperAdmin,
@@ -185,7 +195,8 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     // CC-55 — apply the binding's NARROWING (tools INTERSECT, features UNION) to
     // the run. `binding.bound` is always true here, so the scope is well-typed.
-    const boundScope = computeBoundRunScope({ agentId: bodyResult.data.agent, binding })
+    // CC-126 — the agent is the resolved subject (code layer or tenant row).
+    const boundScope = computeBoundRunScope({ agent: decision.agent, binding })
 
     // The AI runtime door (`CC-67`). The engine sits behind it; this route never
     // names one. The rich deps the envelope cannot hold — the container, the
