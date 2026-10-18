@@ -37,7 +37,12 @@ type ParticipantRow = {
   tenantId: string
   organizationId: string | null
   conversationId: string
-  userId: string
+  // `CC-107` — the two identity axes are mutually exclusive: a row names a
+  // person OR a machine, never both. The mock carries both fields so a test can
+  // prove the repository consults the right one.
+  userId: string | null
+  agentId?: string | null
+  agentOwnerUserId?: string | null
   role: 'owner' | 'viewer' | 'commenter'
   lastReadAt: Date | null
   createdAt: Date
@@ -196,7 +201,9 @@ function mockEm(options: { orgs?: OrgRow[] } = {}) {
           tenantId: data.tenantId,
           organizationId: data.organizationId ?? null,
           conversationId: data.conversationId,
-          userId: data.userId,
+          userId: data.userId ?? null,
+          agentId: data.agentId ?? null,
+          agentOwnerUserId: data.agentOwnerUserId ?? null,
           role: data.role ?? 'owner',
           lastReadAt: data.lastReadAt ?? null,
           createdAt: data.createdAt instanceof Date ? data.createdAt : new Date(),
@@ -1095,6 +1102,82 @@ describe('CC-107 — an agent caller reads through the agent axis', () => {
         userId: 'u-on-behalf',
         agentId: 'not.a.member',
       }),
+    ).resolves.toBeNull()
+  })
+})
+
+/**
+ * The block above proves the agent axis is CONSULTED — its fake `findOne`
+ * returns a membership row for any filter that carries an `agentId` key, so it
+ * would stay green if the repository filtered by the wrong agent, or by no agent
+ * at all. That is the "a test that is green whether or not the control is right"
+ * failure this project has already paid for once.
+ *
+ * The tests below use `mockEm`, whose `findOne` matches real filter values, so
+ * they fail unless the repository looks up the SAME agent id the caller carries.
+ */
+describe('CC-107 — the agent axis is checked against the right agent', () => {
+  const ownerCtx = { tenantId: 't-1', organizationId: null, userId: 'u-owner' }
+  // a person who is neither the owner nor a participant: if access is granted,
+  // it can only have come from the agent axis.
+  const strangerCtx = { tenantId: 't-1', organizationId: null, userId: 'u-stranger' }
+
+  async function seedSharedWithAgent() {
+    const em = mockEm()
+    const repo = new AiChatConversationRepository(em)
+    await repo.createOrGet({ conversationId: 'c-shared', agentId: 'business_ir.query_author' }, ownerCtx)
+    await repo.addParticipant(
+      'c-shared',
+      { agentId: 'business_ir.query_author', agentOwnerUserId: 'u-owner' },
+      'viewer',
+      ownerCtx,
+    )
+    return { em, repo }
+  }
+
+  it('grants read access to the agent that holds the membership row', async () => {
+    const { repo } = await seedSharedWithAgent()
+    const found = await repo.getById('c-shared', {
+      ...strangerCtx,
+      agentId: 'business_ir.query_author',
+    })
+    expect(found?.conversationId).toBe('c-shared')
+  })
+
+  it('refuses a DIFFERENT agent — the membership is per-agent, not per-agent-kind', async () => {
+    const { repo } = await seedSharedWithAgent()
+    await expect(
+      repo.getById('c-shared', { ...strangerCtx, agentId: 'business_ir.some_other_agent' }),
+    ).resolves.toBeNull()
+  })
+
+  it('refuses an agent context whose human axis also misses, with no agentId at all', async () => {
+    const { repo } = await seedSharedWithAgent()
+    await expect(repo.getById('c-shared', { ...strangerCtx })).resolves.toBeNull()
+  })
+
+  it('list() surfaces the conversation for the member agent and hides it from another', async () => {
+    const { repo } = await seedSharedWithAgent()
+    const mine = await repo.list({ ...strangerCtx, agentId: 'business_ir.query_author' })
+    expect(mine.items.map((row) => row.conversationId)).toEqual(['c-shared'])
+    const theirs = await repo.list({ ...strangerCtx, agentId: 'business_ir.some_other_agent' })
+    expect(theirs.items).toHaveLength(0)
+  })
+
+  it('a revoked agent membership stops granting access', async () => {
+    const { repo } = await seedSharedWithAgent()
+    // `revokeParticipant` runs the same identity validator as `addParticipant`,
+    // so it demands an owner even though a revoke grants nothing and discards
+    // the value. The HTTP route supplies the acting user
+    // (`participants/[userId]/route.ts:102`), so no caller is harmed; the
+    // spurious requirement is recorded rather than blessed.
+    await repo.revokeParticipant(
+      'c-shared',
+      { agentId: 'business_ir.query_author', agentOwnerUserId: 'u-owner' },
+      ownerCtx,
+    )
+    await expect(
+      repo.getById('c-shared', { ...strangerCtx, agentId: 'business_ir.query_author' }),
     ).resolves.toBeNull()
   })
 })

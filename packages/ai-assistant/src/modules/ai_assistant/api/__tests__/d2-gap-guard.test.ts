@@ -101,6 +101,7 @@ const storageMock = {
   importLocalConversation: jest.fn(),
   addParticipant: jest.fn(),
   revokeParticipant: jest.fn(),
+  listParticipants: jest.fn(),
 }
 jest.mock('../../lib/conversation-storage', () => ({
   createConversationStorage: () => storageMock,
@@ -174,7 +175,7 @@ import { POST as promptPost } from '../ai/agents/[agentId]/prompt-override/route
 import { POST as convPost } from '../ai/conversations/route'
 import { POST as convImportPost } from '../ai/conversations/import/route'
 import { PATCH as convPatch, DELETE as convDelete } from '../ai/conversations/[conversationId]/route'
-import { POST as participantsPost } from '../ai/conversations/[conversationId]/participants/route'
+import { GET as participantsGet, POST as participantsPost } from '../ai/conversations/[conversationId]/participants/route'
 import { DELETE as participantDelete } from '../ai/conversations/[conversationId]/participants/[userId]/route'
 import { POST as chatPost } from '../ai/chat/route'
 import { POST as confirmPost } from '../ai/actions/[id]/confirm/route'
@@ -617,6 +618,54 @@ describe('ai_assistant conversation participants — the D2-gap guard is really 
     expect(res.status).toBe(400)
     await expect(res.json()).resolves.toMatchObject({ code: 'validation_error' })
     expect(storageMock.addParticipant).not.toHaveBeenCalled()
+  })
+
+  // ── CC-107 — the read half: GET must SERIALISE both axes ────────────────────
+  // Every test above is POST-only, so before this one nothing proved an agent
+  // participant could be *seen*. The route used to emit `userId` alone, which
+  // renders an agent member as a row with a null user — indistinguishable from
+  // a malformed human row, and unusable by a client that wants to show who
+  // holds access.
+  it('GET serialises BOTH axes, so an agent member is visible as an agent', async () => {
+    storageMock.getById.mockResolvedValue({
+      conversationId: 'c-1',
+      ownerUserId: 'user-1',
+      agentId: AGENT_ID,
+      status: 'open',
+      visibility: 'shared',
+      createdAt: new Date('2026-10-17T00:00:00Z'),
+      updatedAt: new Date('2026-10-17T00:00:00Z'),
+    })
+    storageMock.listParticipants.mockResolvedValue([
+      {
+        userId: 'user-2',
+        agentId: null,
+        role: 'viewer',
+        lastReadAt: null,
+        createdAt: new Date('2026-10-17T00:00:00Z'),
+      },
+      {
+        userId: null,
+        agentId: AGENT_ID,
+        role: 'viewer',
+        lastReadAt: null,
+        createdAt: new Date('2026-10-17T00:01:00Z'),
+      },
+    ])
+
+    const res = await participantsGet(
+      req('http://x/api/ai_assistant/ai/conversations/c-1/participants', 'GET') as any,
+      convCtx(),
+    )
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as { participants: Array<Record<string, unknown>> }
+    expect(body.participants).toHaveLength(2)
+    // The human row names a person and no machine.
+    expect(body.participants[0]).toMatchObject({ userId: 'user-2', agentId: null })
+    // The agent row names a machine and no person — `agentId` is PRESENT and
+    // non-null, which is the whole assertion: `userId: null` alone cannot say
+    // whether this row is a bot or a broken person.
+    expect(body.participants[1]).toMatchObject({ userId: null, agentId: AGENT_ID })
   })
 })
 
