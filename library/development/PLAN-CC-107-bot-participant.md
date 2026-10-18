@@ -251,7 +251,8 @@ Postgres proof, and the probe is committed next to the migration with its run co
 | 6 | The migration: `agent_id` + `agent_owner_user_id`, nullable `user_id`, four partial unique indexes, `num_nonnulls` | ✅ **DONE** — see §10 |
 | 7 | The access predicate and the revoke route, both axes | ✅ **DONE** — see §10 |
 | 7b | **The participants POST body accepts either axis** — the item this table was missing until 2026-10-17 20:03, which is why "7 of 8" read as "the HTTP surface is done" when it was not | ✅ **DONE** — see §10.6 (`8c56428e`) |
-| 8 | Idle-pruning exemption | ⬜ **NOT CODE — a rule to record.** No participant pruning exists anywhere in the repo (only run-registry pruning and OpenCode session-idle detection), so there is nothing to exempt yet. See §10.6 |
+| 8 | Idle-pruning exemption | ✅ **RECORDED — a rule, not code.** No participant pruning exists anywhere in the repo (only run-registry pruning and OpenCode session-idle detection), so there is nothing to exempt yet. The rule now lives in §10.9 and binds the future prune |
+| 9 | **The read half** — `GET /participants`' agent serialisation, and an agent caller's access proven against real filter matching | ✅ **DONE 2026-10-18** — §10.8, 6 tests, **4 mutations RED**, package 135 / 1,995, `tsc` 0. ★ It found `CC-120`: `ctx.agentId` has no producer |
 
 ---
 
@@ -416,14 +417,14 @@ command.
 
 ### 10.5 What is still not done
 
-`loadParticipantFlag`'s human branch runs **first** and short-circuits, so an agent caller still reaches
-the agent axis only when the human one misses — correct, but untested against a real repository.
-**The participants POST route is no longer on this list:** §10.6 closed it at `8c56428e`. What remains is
-(1) the **idle-pruning exemption (item 8)**, which is a **rule to record**, not code — no participant
-pruning exists anywhere in the repo, so there is nothing to exempt yet; and (2) **two agent-axis test
-gaps** — `GET /participants`' agent serialisation is untested (all four tests added at `8c56428e` are
-POST-only), and `canAccessConversation` with an agent caller (`ctx.agentId`) is untested, so an agent
-participant can be **written** but nothing proves it can **read**.
+**Superseded 2026-10-18 — both items below are now closed; kept because the reasoning still holds.**
+`loadParticipantFlag`'s human branch runs **first** and short-circuits, so an agent caller reaches the
+agent axis only when the human one misses — correct, and now proven against a real filter-matching store
+(§10.8). The participants POST route left this list at `8c56428e` (§10.6); the two agent-axis test gaps
+left it on 2026-10-18 (§10.8); and the idle-pruning exemption is **recorded as a rule** (§10.9), which is
+what it always was — no participant pruning exists anywhere in the repo, so there is nothing to exempt yet.
+**What genuinely remains is not this row's code: `CC-120`** — the machine axis has no producer, so the read
+path is proven and unreachable.
 
 ### 10.6 INCREMENT 2's last gap — the POST body, and the "only id" flaw it fixed (`8c56428e`, 2026-10-17 20:03)
 
@@ -472,3 +473,63 @@ same code, run twice, with only the two test-side classes differing.
 **The lesson is the one this row already carries:** a route that imports a new guard needs **every** mock
 of that module updated, and *"the affected surface"* is not the list of files you edited. Both red classes
 were invisible for the same reason — each commit measured a surface that excluded them.
+
+### 10.8 The read half, proven — and the two defects the tests found (2026-10-18)
+
+**Why this step existed.** §10.5's second gap. An agent could be **written** as a participant and nothing
+proved it could **read**. The gap had two halves, and one of them was already half-closed by accident.
+
+**Half 1 — `GET /participants`' agent serialisation.** All four tests added at `8c56428e` were POST-only,
+so the route's read path had no coverage at all. Added: the response must carry **both** axes, with the
+agent row asserting `{ userId: null, agentId: '<id>' }`. `userId: null` alone cannot distinguish a bot from
+a malformed human row, which is the whole point of the second axis. **Mutation:** deleting
+`agentId: p.agentId ?? null` from the response turns exactly this test RED.
+
+**Half 2 — the agent caller's access, and a test that was green for the wrong reason.** A block titled
+*"an agent caller reads through the agent axis"* already existed (committed at `6b78a0ac`), and it proves
+the agent branch is **consulted**. It does not prove it is **correct**: its fake `findOne` returns a
+membership row for *any* filter carrying an `agentId` key, so it would stay green if the repository looked
+up the wrong agent, or no agent at all — the "green whether or not the control is right" failure this
+project has already paid for. Added five tests over `mockEm`, whose `findOne` matches real filter values:
+
+| Test | What it pins |
+|---|---|
+| the member agent reads | the axis grants when the row names that agent |
+| a **different** agent does not | membership is per-agent, not per-agent-kind |
+| no membership on either axis is refused | the human branch missing does not leak into a grant |
+| `list()` surfaces it to the member and hides it from another | the axis union at `:314-316`, a **separate** code path from `loadParticipantFlag` |
+| a revoked membership stops granting | the soft-delete actually closes the path |
+
+**Mutations, 4 for 4 RED, each on the test that names it:** (1) drop `agentId` from the GET response;
+(2) `return false` where the agent branch begins; (3) replace `agentId: ctx.agentId` with
+`agentId: { $ne: null }` — *any* agent, not *this* agent; (4) drop the agent axis from `list()`'s union.
+All restored byte-identical (the source diff is empty; only the two test files changed).
+**Package: 135 suites / 1,995 tests (1,989 + 6), `tsc` 0.**
+
+**★ The tests found a defect the tests could not fix: `ctx.agentId` HAS NO PRODUCER.** No route anywhere
+constructs a repository context carrying it. Every `agentId` in the conversation routes is a *conversation
+field*, a *target identity*, or a *path parameter* — never the caller's machine axis. So the read path is
+**proven and unreachable**: exactly `CC-101`'s shape (*a checker nothing calls*). Opened as **`CC-120`**
+with the two candidate producers and why the cheap one is wrong. **This is the honest state of "a bot is a
+participant": the participant machinery is complete; the caller that would use it does not exist yet.**
+
+**★ And a smaller one:** `revokeParticipant` runs the *grant* validator (`normalizeParticipantIdentity`), so
+it demands an `agentOwnerUserId` for an identity it then discards — a revocation grants nothing. The HTTP
+route supplies the acting user (`participants/[userId]/route.ts:102`), so no caller breaks; the test passes
+one and says why. Recorded rather than blessed: if a second revoke caller ever appears, it will trip on a
+requirement with no reason behind it.
+
+### 10.9 Item 8 — the idle-pruning RULE, recorded
+
+**The rule, so it is not lost:** *a participant whose `agent_id` is non-null is not a person and is exempt
+from human idle-pruning.* Harvested from the donor, where the predicate reads `is_bot` off the **joined**
+`userprofile` row (`subscription_info.py:654`) — it only works there because a bot *is* a user, which is the
+design we refused, so we take the **rule** and not the SQL.
+
+**Why it is recorded and not built:** measured — **no participant pruning exists anywhere in the repo.**
+The only pruning-shaped code is the run-registry's (`CC-102`) and OpenCode's session-idle detection, and
+neither touches `ai_chat_conversation_participants`. Writing an exemption for a prune that does not exist
+would be a control with nothing to control — the defect class this project keeps finding. The rule is
+therefore a constraint on the **future** prune: whoever writes it must exclude the agent axis, and this
+paragraph is where that requirement lives.
+

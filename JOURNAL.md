@@ -7,6 +7,55 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (early) — the read half proven, and the test that was green for the wrong reason
+
+`CC-107` had been carrying the same sentence for a day: *"an agent can be **written** as a participant and
+nothing proves it can **read**."* Two gaps, and closing them took six tests — of which the interesting one
+was the gap that was **already closed and did not work**.
+
+**Half 1, the missing test.** `GET /participants` serialises both axes, and nothing tested it: all four
+tests added at `8c56428e` were POST-only. The new test fails unless the response carries `agentId` for an
+agent row. That matters because `userId: null` alone cannot distinguish a bot from a malformed human row —
+which is the entire reason the second axis exists.
+
+**Half 2, the test that proved the wrong thing.** A block titled *"an agent caller reads through the agent
+axis"* was already committed at `6b78a0ac`, and reading it was the useful part: its fake `findOne` returns a
+membership row for **any** filter carrying an `agentId` key. So it proves the agent branch is *consulted*,
+and it would stay green if the repository looked up the wrong agent, or no agent at all. **A test that is
+green whether or not the control is right** — the failure mode this project has already paid for once, in
+a mutation harness that could not see a red test.
+
+The replacement runs over a store whose `findOne` matches real filter values, so the assertions can be
+specific: the member agent reads; a **different** agent does not; no membership is refused; `list()`
+surfaces it to the member and hides it from another (a separate code path — the axis union, not
+`loadParticipantFlag`); a revoked membership stops granting. **4 mutations, 4 RED**, each on the test that
+names it, every file restored byte-identical.
+
+**What the tests found that they could not fix.** `ctx.agentId` **has no producer.** It is read in two
+places and written by nobody: every `agentId` in the conversation routes is a *conversation field*, a
+*target identity* being granted, or a *path parameter* — never the caller's machine axis. The chat route
+builds its repository context with `{ tenantId, organizationId, userId }` and nothing else. So the read
+half is **proven and unreachable**, which is `CC-101`'s shape exactly (*a checker nothing calls*). Opened as
+**`CC-120`** rather than patched, because the two candidate producers claim different things: the credential
+(`ai_worker:<uuid>`, with no bridge to a registry id like `catalog.assistant`) is the correct claim and needs
+an identity mapping that does not exist; the agent being *addressed* is cheap and wrong, because it grants
+on the strength of which agent the turn is for rather than who is calling. **No code before that ruling.**
+
+**A smaller one, recorded not blessed:** `revokeParticipant` runs the *grant* validator, so it demands an
+`agentOwnerUserId` for an identity it then discards — a revocation grants nothing. The HTTP route supplies
+the acting user, so no caller breaks; if a second revoke caller ever appears it will trip on a requirement
+with no reason behind it.
+
+**The idle-pruning exemption is now recorded as the RULE it always was** (§10.9): a participant whose
+`agent_id` is non-null is not a person and is exempt from human idle-pruning. It is a constraint on the
+future prune, because there is no participant prune to exempt today.
+
+**Measured after:** package **135 suites / 1,995 tests** (1,989 + 6), `tsc` 0. Register **64 · 55 · 119**;
+`CC-107` closes, `CC-120` opens. Both checkers PASS. **The honest state of "a bot is a participant": the
+participant machinery is complete and the caller that would use it does not exist yet.**
+
+---
+
 ## 2026-10-17 (late night) — the red cleared, and the stale test was covering a duplicate index
 
 The package had been red for hours: **4 suites / 25 tests**, and every commit since had measured a surface
