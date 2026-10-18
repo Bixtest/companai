@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import { normalizePrincipalSubject } from '@open-mercato/shared/lib/auth/principal'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -42,12 +43,26 @@ export async function GET(req: Request): Promise<NextResponse> {
   const trust = container.resolve('trustService') as TrustService
 
   const url = new URL(req.url)
-  const principalId = url.searchParams.get('principalId')
+  const rawPrincipalId = url.searchParams.get('principalId')
   const capabilityGroup = url.searchParams.get('capabilityGroup')
 
   // Asking about one principal returns its evidence too, because "may this be
   // promoted, and on what grounds?" is one question rather than two.
-  if (principalId && capabilityGroup) {
+  if (rawPrincipalId && capabilityGroup) {
+    // No sibling kind on this route, so there is nothing to disagree with — an
+    // agreeing prefix strips to the bare id and a bare subject is accepted.
+    // `evidenceFor` joins `action_logs.actor_user_id`, which holds the bare id
+    // the platform narrows to on the way in, so a prefixed query used to find
+    // nothing and refuse a promotion that was otherwise earned.
+    let principalId: string
+    try {
+      principalId = normalizePrincipalSubject(rawPrincipalId, null)
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Invalid principal' },
+        { status: 400 },
+      )
+    }
     const [tier, evidence] = await Promise.all([
       trust.tierFor(principalId, capabilityGroup, { tenantId: auth.tenantId }),
       trust.evidenceFor(principalId, capabilityGroup, { tenantId: auth.tenantId }),
@@ -71,6 +86,22 @@ export async function POST(req: Request): Promise<NextResponse> {
   const container = await createRequestContainer()
   const trust = container.resolve('trustService') as TrustService
 
+  // The schema names the actor twice — `principalId` and its kind — and the two
+  // halves have never been checked against each other. A request that says
+  // `ai_worker:<id>` with `kind: human` names two different actors, and the
+  // platform used to trust one of them silently. Same rule CC-124 put on the
+  // authority routes: a prefix that disagrees with the declared kind is
+  // refused, never guessed.
+  let granteePrincipalId: string
+  try {
+    granteePrincipalId = normalizePrincipalSubject(parsed.data.principalId, parsed.data.principalKind)
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Invalid principal' },
+      { status: 400 },
+    )
+  }
+
   // Structural mutation guard, before the promotion attempt. This is the only
   // surface in the platform that *widens* authority, so it is the one that most
   // needs a registered guard actually to run; the evidence check below is a
@@ -82,14 +113,17 @@ export async function POST(req: Request): Promise<NextResponse> {
     userId: auth.sub ?? null,
     req,
     resourceKind: RESOURCE_KIND,
-    resourceId: `${parsed.data.principalId}:${parsed.data.capabilityGroup}`,
+    resourceId: `${granteePrincipalId}:${parsed.data.capabilityGroup}`,
     operation: 'update',
-    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+    // The normalised id, not the raw one: this is what the grant will be keyed
+    // on, so a prefixed request and a bare one naming the same actor must land
+    // on the same resource rather than two.
+    mutationPayload: { ...parsed.data, principalId: granteePrincipalId } as unknown as Record<string, unknown>,
   })
   if (guard.blockedResponse) return guard.blockedResponse
 
   const outcome = await trust.promote(
-    parsed.data.principalId,
+    granteePrincipalId,
     parsed.data.principalKind,
     parsed.data.capabilityGroup,
     { tenantId: auth.tenantId },
@@ -110,7 +144,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     organizationId: auth.orgId ?? null,
     action: 'updated',
     resourceKind: RESOURCE_KIND,
-    resourceId: `${parsed.data.principalId}:${parsed.data.capabilityGroup}`,
+    resourceId: `${granteePrincipalId}:${parsed.data.capabilityGroup}`,
     snapshotAfter: {
       tier: outcome.grant.tier,
       reason: parsed.data.reason,
