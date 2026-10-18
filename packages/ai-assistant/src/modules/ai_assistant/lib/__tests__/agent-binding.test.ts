@@ -56,7 +56,7 @@ describe('resolveAgentBinding — CC-27', () => {
     })
   })
 
-  it('is bound for an ai_worker principal WITH a binding', async () => {
+  it('is bound for an ai_worker principal WITH a binding, and reports the machine axis', async () => {
     findBindingMock.mockResolvedValue({
       toolAllowlist: ['tool.a'],
       requiredFeatures: ['feat.x'],
@@ -70,6 +70,9 @@ describe('resolveAgentBinding — CC-27', () => {
       bound: true,
       toolAllowlist: ['tool.a'],
       requiredFeatures: ['feat.x'],
+      // `CC-120` — the binding IS the proof that this credential acts as this
+      // agent, so the axis is reported from here rather than looked up again.
+      agentAxis: 'mod.agent',
     })
   })
 
@@ -80,7 +83,15 @@ describe('resolveAgentBinding — CC-27', () => {
       auth: { sub: 'user-1', tenantId: 'tenant-1', orgId: 'org-1' } as never,
       agentId: 'mod.agent',
     })
-    expect(result).toEqual({ bound: true, toolAllowlist: null, requiredFeatures: [] })
+    // `CC-120` R3 — a human carries NO machine axis, even though this call names
+    // an agent. Giving them one would turn "which agent the turn is for" into an
+    // authorisation, which is the design the ruling rejected.
+    expect(result).toEqual({
+      bound: true,
+      toolAllowlist: null,
+      requiredFeatures: [],
+      agentAxis: null,
+    })
     expect(findBindingMock).not.toHaveBeenCalled()
   })
 
@@ -164,7 +175,7 @@ describe('computeBoundRunScope — narrowing only (CC-27 / B3)', () => {
     ])
     const scope = computeBoundRunScope({
       agentId: 'mod.agent',
-      binding: { bound: true, toolAllowlist: ['tool.a', 'tool.zzz-nope'], requiredFeatures: [] },
+      binding: { bound: true, toolAllowlist: ['tool.a', 'tool.zzz-nope'], requiredFeatures: [], agentAxis: 'mod.agent' },
     })
     expect(scope.allowedTools).toEqual(['tool.a'])
   })
@@ -175,7 +186,7 @@ describe('computeBoundRunScope — narrowing only (CC-27 / B3)', () => {
     ])
     const scope = computeBoundRunScope({
       agentId: 'mod.agent',
-      binding: { bound: true, toolAllowlist: null, requiredFeatures: ['feat.extra'] },
+      binding: { bound: true, toolAllowlist: null, requiredFeatures: ['feat.extra'], agentAxis: 'mod.agent' },
     })
     expect(scope.requiredFeatures.sort()).toEqual(['feat.base', 'feat.extra'])
   })
@@ -186,7 +197,7 @@ describe('computeBoundRunScope — narrowing only (CC-27 / B3)', () => {
     ])
     const scope = computeBoundRunScope({
       agentId: 'mod.agent',
-      binding: { bound: true, toolAllowlist: null, requiredFeatures: [] },
+      binding: { bound: true, toolAllowlist: null, requiredFeatures: [], agentAxis: null },
     })
     expect(scope.allowedTools).toEqual(['tool.a', 'tool.b'])
   })

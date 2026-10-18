@@ -16,6 +16,20 @@ export type ResolvedAgentBinding =
       bound: true
       toolAllowlist: string[] | null
       requiredFeatures: string[]
+      /**
+       * `CC-120` — the caller's **machine** identity, when it has one.
+       *
+       * `agentId` for a bound `ai_worker`: this credential acts as that agent, and
+       * the binding row is the proof. `null` for a human — a person chatting with
+       * agent X is still a person, and handing them the axis would turn *"which
+       * agent the turn is for"* into an authorisation.
+       *
+       * It lives here because this function is the one that **proves** the claim;
+       * a second lookup elsewhere would be a second source of truth for it. The
+       * consumers that need it are the conversation repository contexts
+       * (`ctx.agentId`), which had no producer before this (`CC-120`).
+       */
+      agentAxis: string | null
     }
 
 /**
@@ -61,7 +75,8 @@ export async function resolveAgentBinding(input: {
   // deny side by construction, which is the posture the donor states as
   // "private (or any unknown mode) is deny-by-default".
   if (principal.kind === 'human') {
-    return { bound: true, toolAllowlist: null, requiredFeatures: [] }
+    // `CC-120` — a human has no machine axis. See the type's `agentAxis` note.
+    return { bound: true, toolAllowlist: null, requiredFeatures: [], agentAxis: null }
   }
 
   // Every other kind is a machine. Only an `ai_worker` can hold a binding, so a
@@ -91,6 +106,10 @@ export async function resolveAgentBinding(input: {
     bound: true,
     toolAllowlist: binding.toolAllowlist ?? null,
     requiredFeatures: binding.requiredFeatures ?? [],
+    // `CC-120` — the live binding IS the proof that this credential acts as this
+    // agent, and it was resolved in the caller's tenant/org above, so the axis
+    // cannot cross a tenant boundary.
+    agentAxis: agentId,
   }
 }
 
