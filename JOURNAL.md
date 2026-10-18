@@ -7,7 +7,60 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-18 (latest) — `CC-124` closed: a ban that did not ban, and the fix the donor reversed
+## 2026-10-18 (latest) — `CC-129` closed: the row was half wrong, and the half it missed was the security half
+
+**The defect, in one sentence:** the trust route took `principalId` as a free-form string while
+`evidenceFor` joins `action_logs.actor_user_id`, which holds the **bare** id — so only the bare spelling
+worked, and a caller who sent `ai_worker:<uuid>` (the spelling the principal's own `kind` field invites) had
+its evidence look-up quietly return nothing.
+
+**It fails closed, which is why nobody has reported it.** A promotion that requires evidence is refused, and
+that looks exactly like *"this actor has not earned it yet"* rather than *"we asked the wrong question"*. The
+first defect of the day failed the other way — `CC-124` permitted what it should have refused. Two failures
+in one family, opposite directions, and the one that fails closed is the one that survives review.
+
+**★ The chain rule earned its keep twice, and once by making the fix smaller.** Reading all four — CREATES ·
+CHECKS · CONSUMES · DELETES — rather than the one the row named:
+
+1. **The row's own prescription was half wrong.** It said to normalise `principalId` on the trust route
+   *"and read with the same normaliser at `:426`"*. Measured: `decideFor` calls `parseSubject(subject)` at
+   `authorityEnforcementService.ts:268` and passes `principal.id` at `:279`, and `parseSubject` **already
+   strips any agreeing prefix**. So that reader is bare by construction, and a normaliser there would be a
+   no-op that *implies* a guarantee the code already has. Rule 13 — the fix shipped is smaller than the
+   record, and the record says why.
+2. **The chain named the security half the row had not.** `promoteSchema` states the actor **twice** —
+   `principalId` and `principalKind` — and **nothing ever checked the two halves against each other**. So
+   `ai_worker:<id>` with `kind: human` names two different actors, and the platform trusted one of them
+   silently: evidence looked up under the bare id, grant written with `principalKind: 'human'` on a row keyed
+   by a machine's id. That is `CC-124`'s laundering shape arriving through a different door, and it was
+   invisible in a row whose stated consequence was only "the promotion is refused".
+
+**And grepping every caller, rather than trusting the one the row named, is what proved the two boundaries
+are the only places a spelling enters.** `trust/route.ts:52,53` and `:91` (the boundaries);
+`auth/di.ts:104`, a pass-through proxy whose consumer is `:426`; and `promote`/`demote`'s own internals. Four
+methods, six call sites, two doors.
+
+**Built:** both boundaries normalise. A disagreeing pair is refused **400 before the mutation guard is
+asked** — ordering matters, because the guard records a resource, and recording one for a request that names
+two actors would leave a trail for an act that should never have been attempted. The guard and audit
+`resourceId` now use the normalised id, so a prefixed request and a bare one naming the same actor land on
+**one** resource instead of two. **Refused by name:** a `kind` parameter on `tierFor`/`evidenceFor` — their
+callers are already bare, and widening signatures to defend against a caller that does not exist is
+speculative surface.
+
+**Verified by mutation, not by confidence.** I reverted the route and re-ran the new tests: **7 of 9 went
+RED**. The 2 that stayed green are the already-bare cases, which worked before the fix — that is the profile
+a real test suite has, and a suite where all 9 fail on the defect would be asserting wiring rather than
+behaviour. Auth module **96 suites / 840 tests green** (up from 95/831); core and shared typecheck clean.
+
+**One thing is deliberately left open rather than closed:** `CC-124`'s migration rewrites three authority
+tables, and **`authority_trust_grants` is not one of them**. A row written before this fix under a prefixed id
+would still be unreadable. Measured: the route was the only writer and there is no evidence it was ever called
+with a prefix — but *"no evidence"* is not *"no rows"*, so it is recorded as a follow-up, not a ✅.
+
+---
+
+## 2026-10-18 (last) — `CC-124` closed: a ban that did not ban, and the fix the donor reversed
 
 **The defect, in one sentence:** the authority path's write side accepted any string while its read side
 always passed the bare id, so a denial naming `ai_worker:<key>` was written, audited, listed and **never
@@ -92,7 +145,7 @@ first defect I have found whose damage was scheduled for a moment nobody was wat
 
 ---
 
-## 2026-10-18 (last) — the owner found the layer that isn't there: no platform ceiling over tenants
+## 2026-10-18 (later) — the owner found the layer that isn't there: no platform ceiling over tenants
 
 The owner's sentence, after being told agents are always tenant-scoped: *"one architectural flaw this
 discussion exposed, the lack of control of platform superadmins on what is allowed or not within each
@@ -137,7 +190,7 @@ latent cross-tenant read, the `CC-126` refusal for the same reason.
 
 Register: **64 closed · 63 open · 127 total**; §4 tally **16 · 1 · 5 · 41**. Checker green.
 
-## 2026-10-18 (later) — I read "types" as "agents", and explained an architecture with a business example
+## 2026-10-18 (earlier) — I read "types" as "agents", and explained an architecture with a business example
 
 The owner's reply was blunt and correct: *"This makes absolutely no sense… what is on this platform I built
 a school management system. How is any of what you said above stay relevant to anything? When we build we
@@ -173,7 +226,7 @@ no ruling. Register §4 re-derived to **16 · 1 · 5 · 40**; the only question 
 
 ---
 
-## 2026-10-18 (earlier) — the questions were the defect, and the owner's model was better than mine
+## 2026-10-18 — the questions were the defect, and the owner's model was better than mine
 
 Two things happened in one message, and the second is the more important.
 
