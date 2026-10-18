@@ -7,6 +7,52 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (early) — `CC-120`'s bridge, and the version of it I deleted before committing
+
+The ruling was **the credential axis**: an `ai_worker` credential, not the agent a request happens to name.
+So the first job was to find out what a credential actually carries — and the answer was that **the bridge
+already existed**. `resolveAgentBinding` has always called `findBinding(principal.id, agentId, ctx)`, where
+`principal.id` is the API-key id and `agentId` is the registry id; `ai_agent_bindings.principal_id` is
+documented as *"the `api_keys` id of the AI-user principal"*. Nothing read it for this purpose, which is a
+different defect from having no bridge at all.
+
+**The donor, read at the line the row cites.** Zulip resolves an API key **straight to the identity**:
+`get_user_profile_by_api_key(api_key)` then `request.user = user_profile`
+(`zerver/decorator.py:313-334`). There is no bridge because the key lives **on** the identity row, and a bot
+authenticates as itself. `bot_owner` is administration (`users.py:781`) and message routing
+(`bot_owner_user_ids`), never *who the credential is*. We refuse "agents are rows in the auth User table",
+so our credential is a separate object — **the bridge is the price of that refusal**, not an accident.
+
+**What shipped:** `resolveAgentBinding`'s bound arm reports `agentAxis` — `agentId` for a bound
+`ai_worker`, `null` for a human — so the function that *proves* the claim is the function that *reports* it.
+One resolution, no second source of truth. Three mutations, three RED, including the negative that matters:
+setting the axis for humans too fails the pre-existing exact-`toEqual` assertion on a human conversation
+context, which is an independent confirmation that the human path was already pinned.
+
+**Then I deleted the rest of it.** The obvious next step was to thread `binding.agentAxis` into the chat
+route's two context builders, and I wrote it, ran it, and it was green. Then I checked what those contexts
+*feed*: `createOrGet` and `appendMessage`, both of which are owner-only and **never consult the axis**. The
+only readers are `loadParticipantFlag` — called from `getById` alone — and `list()`'s union, and **no
+machine-facing route reaches either**. So the wiring would have been inert: a value produced into a context
+whose consumers ignore it. That is `CC-101`, the row I opened six hours ago to remove exactly this. Reverted;
+the chat route and its test are byte-identical to `HEAD`.
+
+**The uncomfortable sentence, written down rather than softened:** `CC-120`'s original claim — *"the read
+path is proven and unreachable"* — is **still true after the bridge lands**. The bridge closed the
+**identity** half. The **surface** half is that a machine has no route to the read path at all.
+
+**Why I did not just build the surface.** The requirement is written (`PLAN-CC-120` §7.1): the axis is a
+**set** (a credential may hold several bindings, and `listForPrincipal` already exists), and the minimal
+consumer is the transcript route. But that **expands what a machine credential can read over HTTP** — a
+security-bearing change, and the same rule that made the producer a question in the first place. The cheap
+version is refused by name: set the axis from the agent the request names, which needs no lookup and lets
+any credential that can name an agent read that agent's conversations. Authorisation by request parameter.
+
+**Measured after:** 135 suites / 1,996 tests, `tsc` 0, 3 mutations RED. `CC-120` stays open, half done, and
+says which half.
+
+---
+
 ## 2026-10-18 (early) — the read half proven, and the test that was green for the wrong reason
 
 `CC-107` had been carrying the same sentence for a day: *"an agent can be **written** as a participant and
