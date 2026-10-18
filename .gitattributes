@@ -1,0 +1,30 @@
+# Line endings — this repository is pure LF, and that is measured, not assumed.
+#
+# Measured 2026-10-18: `core.autocrlf` is `true` in this repo and there was no
+# `.gitattributes`, so git would rewrite every text file to CRLF the next time it
+# touched the working copy. That silently breaks the project's byte-truth
+# discipline (`tr -cd '\r' < f | wc -c`, the check the master checklist's
+# "grep -c on CR lies" warning depends on) and re-marks every measured count.
+#
+# Verified before pinning: not one text file in HEAD contains a CR. The only
+# files that do are binaries (images, PDFs, .docx), so no text file changes.
+
+# Everything else is LF, in the blob and in the working copy.
+* text=auto eol=lf
+
+# Binaries — their CR bytes are data, never line endings. These come after the
+# wildcard because the last matching rule wins. `binary` is the standard macro
+# for `-diff -merge -text`, so no line-ending conversion is even attempted.
+*.png   binary
+*.ico   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.docx  binary
+*.xlsx  binary
+*.zip   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary

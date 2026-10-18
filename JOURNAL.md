@@ -75,6 +75,21 @@ no i18n or template files, so nothing is hidden this time; but it is the same cl
 here — **a declared control that does nothing** — and it belongs beside `CC-115`'s census rather than being
 noticed by luck.
 
+**★ And the most consequential one of all, found while proving that commit had not corrupted a single
+byte: `git config core.autocrlf` is `true` in this repo and there is no `.gitattributes`, so the NEXT
+checkout would have rewritten every text file to CRLF.** That includes `MASTER-CHECKLIST.md`, whose whole
+measurement discipline is byte truth — *"a bare-word grep is NOT a declaration census"*, and the check
+behind it is `tr -cd '\r' < f | wc -c`. A CRLF checkout makes `grep -c` lie in exactly the way the
+standing hazard warns about, and it would have done so **silently, on an ordinary `git checkout`**, long
+after this session. **I measured before fixing, so the fix is provably inert:** not one **text** file in
+HEAD contains a CR — the only five that do are binaries (`companai.ico`, `companai.png`, two PDFs, one
+`.docx`), where a CR is data and not a line ending. So `.gitattributes` now pins `* text=auto eol=lf`, with
+the binaries marked `binary` **afterwards** — order matters, because the last matching rule wins and a
+trailing wildcard would erase the override. **Proof, not assertion:** `autocrlf` is still `true`, and a
+forced `git checkout --` of the checklist now leaves **0 CR bytes** and a byte-identical file, while a
+re-checkout of the `.png` leaves its **sha256 unchanged**. No blob moved. This is `CC-131`, and it is the
+first defect I have found whose damage was scheduled for a moment nobody was watching.
+
 ---
 
 ## 2026-10-18 (last) — the owner found the layer that isn't there: no platform ceiling over tenants
