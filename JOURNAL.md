@@ -7,6 +7,55 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-127`'s requirement: the departure flow, and a row whose danger had already been disarmed
+
+**D4 is answerable now.** The owner's ruling — *"the admin doing the deactivation decides, at that
+moment, what happens to the related agents"* — becomes `PLAN-CC-127-departure-flow.md`. But the first
+thing the measurement did was take the row's headline apart, and that is the entry's real content.
+
+**The row said two things, and one of them is no longer true.** *"A demoted or offboarded user's
+assistants keep working"* — measured: a role change runs through `auth.users.update`, which calls
+`invalidateUserCache` **in the same request** (`commands/users.ts:650`), so the five-minute ACL TTL never
+gets its window; and a departure kills the credential **twice over** — the `api_keys` subscriber revokes
+by `createdBy` (`user-deleted-revoke-keys.ts:70`) and the auth lookup rejects any key that resolves
+through a user row that is gone (`shared/lib/auth/server.ts:284`). *"Nothing cascades to bindings or
+delegations"* — true, and **not an access hole**: `delegationCeilingFor` resolves the grantor as
+themselves and takes their own gate as the ceiling (`:443-465`), so a grantor who no longer exists holds
+nothing (`:511`) and the grant resolves to `A0`; a binding's principal is an `api_keys` id
+(`data/entities.ts:1098-1100`), so it dies with the key. **The assistant stops.** The row was written
+before three guards that landed later, and nobody had re-measured it.
+
+**★ So the defect is not access — it is that nobody is asked and nothing is recorded.** D4's answer was
+never built, and the platform's departure behaviour is an *accident of three unrelated guards*. What
+survives a departure is rows: a binding pointing at a revoked credential, a delegation pointing at a
+person who is gone, and no record that anybody decided anything. An admin cannot tell an orphan from a
+live agent. That is `CC-101`'s class on the data side.
+
+**★ And the donor vocabulary does not survive the identity model.** The bots analysis offered
+*deactivate / leave / block*; measured here, `block` needs a policy store the platform does not have
+(`CC-128`), and **"leave" cannot mean "keeps working"** — a binding's identity is a credential, and the
+credential dies with its creator. So the flow offers **deactivate** (default) and **leave** (the row is
+preserved, inert), and the receipt says the difference is *the record, not the capability*. An agent
+that outlives its owner needs an identity of its own: `CC-121`'s instance, not a setting.
+
+**The shape the requirement prescribes.** A preview (`GET /api/ai/departures/[userId]`) listing bindings
+through **both** key links — `session_user_id` (the key *acts as* the person) and `created_by` (the key
+was *minted by* them), where the existing cascade sees only the second. Then a departure (`POST`,
+`{ decision }` defaulting to `deactivate`) that runs `auth.users.delete` through the command bus **with
+the decision in its audit metadata**, so `auth` records a fact about agents without knowing what an agent
+is. Then the cascade: bindings revoked **tenant-wide** — the existing `revoke` filters on
+`organizationId` and would silently miss a binding in another organization of the same tenant, and a
+person leaves a *tenant*, not an organization — and delegations revoked in **both** directions with
+`revoked_by_user_id` naming the admin. `leave` writes nothing. Nothing is ever hard-deleted.
+
+**The fail direction is the one that matters.** A cascade that throws *after* the delete returns
+`departure_partial` and leaves orphan rows — **inert, never open**, because the credential was already
+dead by two independent guards. A cascade that throws *before* it changes nothing. And the receipt is
+built from the **write results**, not from the preview, so "deactivated" can never be printed over a
+binding that is still live.
+
+---
+
 ## 2026-10-18 (latest) — `CC-126`'s build: a tenant can create a type, and every refusal in the path has a mutation behind it
 
 **The requirement was written in the previous phase; this phase built it.** The owner's *"bulk packaged
