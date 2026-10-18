@@ -338,6 +338,70 @@ every other control decoration — the locks would be held by the thing they are
 inherit a subset of.** Say "no floor" and I will build it without one, but I would be recording a known
 hole rather than a decision.
 
+### 4.6 NOTE — the platform has no ceiling over its tenants *(owner, 2026-10-18 — to revisit)*
+
+> *"One architectural flaw this discussion exposed, the lack of control of platform superadmins on what
+> is allowed or not within each tenant. And the fact that we can't have agents that serve superadmins…
+> If each tenant has its own superadmin, then later we will need to develop a control hub on the top of
+> all that. If superadmins set the system for all tenants then we need to use instance 1 and a
+> foundational tenant where we do settings, develop functionalities, templates, etc. and allow other
+> tenants to inherit it (or limit other tenants to what we allow for that one)… when a new functionality
+> is developed and served to all tenants to use (for free or subscription) where will that one land if
+> there is no platform level management (which would include what will the platform allow tenants to use
+> from the overall agents capacities. One capacity may include changing platform architecture — that
+> should maybe be platform level, not tenants)."*
+
+**This is not a question a ruling can close. It is a missing layer, and it is larger than the agent
+spine.** Recorded here so it is not lost, and measured so the record is fact rather than impression.
+
+**1. There is no per-tenant ceiling store — so D1's answer has nowhere to live.** `Tenant`
+(`directory/data/entities.ts:5-26`) holds `name`, `is_active`, timestamps, and nothing else. There is
+**no plan, feature, limit or settings table** anywhere in `packages/` (searched for `TenantModule`,
+`TenantFeature`, `TenantSetting`: no hits). D1's answer — *"the platform admin sets the ceiling, a tenant
+may only narrow it"* — is the right answer **with no column to be stored in**. `CC-125`'s ceiling cannot
+be built before this layer exists; that ordering is now a dependency, not a preference.
+
+**2. "Platform level" is currently a tenant row that is read globally.** Both ACL tables declare their
+tenant scope **mandatory** — `UserAcl.tenantId` and `RoleAcl.tenantId` are `uuid NOT NULL`, each
+commented *"Tenant scope is mandatory for ACL evaluation"* (`auth/data/entities.ts:346-347`, `:381-382`).
+But `isGlobalSuperAdmin` queries them **with no tenant filter** (`rbacService.ts:242`, `:267`), and when
+it answers true, `loadAcl` returns `{ isSuperAdmin: true, features: ['*'], organizations: null }`
+**before the requested scope is consulted at all** (`:309-314`). So **a superadmin of one tenant is a
+superadmin of every tenant.** This is precisely the second encoding of "platform level" the red team
+counted (W8, check 1) — and it is the load-bearing one, not a stray helper.
+
+**3. The entry into another tenant is a cookie.** `applySuperAdminScope`
+(`shared/lib/auth/server.ts:189-220`) overwrites `next.tenantId` from the tenant cookie, sets
+`isSuperAdmin = true`, and performs **no membership check** — there is nothing to check against, because
+no table says which tenants a person belongs to.
+
+**4. And the flag can be minted from inside a tenant.** `PUT /auth/users/acl` accepts
+`isSuperAdmin: z.boolean().optional()` (`:24`) and, when the **actor's** ACL is superadmin, **skips every
+target guard** (`:61`) before writing. Combined with (2), a tenant's superadmin can mint more *global*
+superadmins.
+
+**What the owner's direction gives us — the shape to design against, none of it built:**
+
+| The owner's words | What it means structurally |
+|---|---|
+| *"instance 1 and a foundational tenant"* | one tenant is the **source**: settings, templates, functionalities and types are authored there |
+| *"allow other tenants to inherit it (or limit other tenants to what we allow for that one)"* | inheritance is a **narrowing** relation — the foundation is the ceiling, never a peer |
+| *"where will that one land if there is no platform level management"* | a new capability needs **one place to be switched on**, and a per-tenant answer to free-vs-subscription — which is item 1 above |
+| *"one capacity may include changing platform architecture — that should maybe be platform level, not tenants"* | that capability belongs on **the floor** (`CC-125`), never in a tenant's bundle — the same floor, seen from the other side |
+
+**And it answers the question about agents that serve superadmins.** An agent is always inside a tenant
+(§3.1), so an agent serving the platform's superadmins has no home until this layer decides *what the
+platform itself is* — a tenant with extra rights, or something above every tenant. The gap and the
+agent's placement are the same gap.
+
+**Deliberately left open, to decide on the revisit — and it must be decided before `CC-125` is built,
+not during it:** whether the platform's own superadmins live **in** the foundational tenant (making the
+foundation a tenant with extra rights — two meanings of "tenant", the ambiguity this code already
+suffers) or **above** every tenant (which needs a row that is not tenant-scoped: the first genuinely
+platform-level table). **Register:** `CC-128`.
+**Refused now, by name:** a **sentinel tenant id** for "the platform" — the same refusal as `CC-126` and
+for the same reason: a value every query must remember to exclude is a latent cross-tenant read.
+
 ---
 
 ## 5. The work — eight workstreams
@@ -412,15 +476,21 @@ poller.
 out-of-process behind the port).
 **Gate.** Kill the process mid-run; work resumes; no duplicate effect; the DOT-2 test is green.
 
-### W6 — Placement and tenancy · `CC-126`, `CC-127`
+### W6 — Placement and tenancy · `CC-126`, `CC-127`, `CC-128`
 **Question.** Per-user instances or per-user state — and where does a platform-level agent live?
 **Lens.** Multi-tenant SaaS architect.
 **Lands.** The placement matrix; **per-tenant home, per-user state** (measured reasoning in §8.2 — a
 home per user is a home per assistant, on one shared volume, with no per-tenant boundary); paired
 **partial** unique indexes, because a plain unique over a nullable `organization_id` lets duplicates
 through — a failure this repo has already recorded twice; the departure state machine from D4.
+**`CC-128` is the prerequisite the owner named (§4.6), and it is the one part of this workstream that
+cannot be built by us alone:** *where does a platform-level agent live* has no answer until the platform
+has a place to be — today "platform level" is a tenant row read globally, so an agent serving the
+platform's superadmins would have to live in some tenant and be read everywhere. The ceiling store and
+the foundation-vs-above decision come first.
 **Gate.** 200 users with two assistants each do not create 400 homes; a duplicate is rejected by the
-database, not by a convention; offboarding a user reaches every binding, delegation and cache.
+database, not by a convention; offboarding a user reaches every binding, delegation and cache; and no
+agent reads across tenants to serve "the platform".
 
 ### W7 — One surface proves the spine, then the others attach
 **Question.** Which surface is the cheapest *complete* proof that the spine works end to end?
@@ -577,11 +647,13 @@ some version of the same warning — *the surfaces are not the work; the spine i
    did not read 1M lines, and no review can.
 4. **It does not re-measure the platform's tenancy.** `SR-12` and `CC-84` are quoted from the register;
    neither was re-verified in code for this document, and `CC-119` exists precisely because the
-   database state behind them has never been proven.
+   database state behind them has never been proven. **What §4.6 *did* measure is the ACL and superadmin
+   layer only** — four reads, named by line — and that is the whole of the evidence behind `CC-128`.
 5. **It does not claim the X2 fix is large.** It is small. It is in the register because a *small*
    fail-open is still fail-open, and because this project's through-line is controls that look alive.
 
 ---
 
-*Written 2026-10-18. No code. The register rows are `CC-121` … `CC-127`; the rulings are D1–D4 and
-they are the owner's.*
+*Written 2026-10-18. No code. The register rows are `CC-121` … `CC-128`; the rulings are D1–D4 and
+they are the owner's. **§4.6 is a note, not a workstream:** it records a missing layer the owner named,
+measured, and left to revisit before `CC-125` is built.*

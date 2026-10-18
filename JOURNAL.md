@@ -7,7 +7,122 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-18 (last) — I read "types" as "agents", and explained an architecture with a business example
+## 2026-10-18 (latest) — `CC-124` closed: a ban that did not ban, and the fix the donor reversed
+
+**The defect, in one sentence:** the authority path's write side accepted any string while its read side
+always passed the bare id, so a denial naming `ai_worker:<key>` was written, audited, listed and **never
+applied**.
+
+I measured it before touching it, and three consequences fell out rather than one:
+
+1. **A machine was un-denyable** — fail-open. Write `ai_worker:<key>`, and the denial exists in every
+   listing while `blocking()` matches `parseSubject(sub).id`.
+2. **A machine-grantee delegation was inert** — fail-closed, which is why nobody had reported it.
+3. **The self-delegation ceiling check could be walked past.** `delegations/route.ts:185` compared the raw
+   request string to `principal.id`, so spelling your own key `ai_worker:<that key>` sailed through the
+   authority-laundering guard.
+
+**★ The donor re-read reversed the recorded fix, and this is the part worth keeping.** The row said
+*"one canonical encoding, normalised at every write and read"* — which reads, on the page, as "store the
+prefixed form". Then I opened the donor's source at the line the row pointed at: not the forensics digest,
+the platform's own audit entity. `audit_logs.actor_user_id` is a **uuid** and states the rule on its own
+column — *the subject is narrowed to one on the way in* — with the kind in a **sibling** column. And it is
+not one table: `subject_kind`, `grantor_kind`, `grantee_kind`, `principal_kind` — the whole authority family
+was built that way. So **the bare id is the convention, and the write path is what had drifted.** Had I
+shipped the recorded version I would have added a *third* encoding while the correct columns sat unused.
+The digest answered *"does the mechanism exist?"*; the source answered *"what is the best version of it?"* —
+and the two answers were opposites.
+
+The invariant that came out of it is the one to keep: **a prefix that disagrees with the declared kind must
+throw, not be guessed.** A ban aimed at a machine must never land on a person because two spellings of one
+string were accepted.
+
+**Built:** `normalizePrincipalSubject` + `principalIdOf`; both routes refuse a disagreeing pair with a 400;
+`withhold`/`grant` normalise on write; the ceiling check compares (id, kind); `rbacService` passes the kind,
+so a machine's denial is filtered by what it *is*; and a migration that strips an agreeing prefix from every
+existing row, raising a Postgres **warning** on a disagreeing one and **leaving the row** — the migration
+does not guess either.
+
+**★ The chain rule did the second half of the work.** Reading all four — who CREATES, who CHECKS, who
+CONSUMES, who DELETES — instead of the one the bug report named found two more of the same defect in the
+same pass: `CC-129` (trust evidence joins on the bare id, fails **closed**, so it is invisible until
+somebody looks for it) and `CC-130` (a third free-form column, no production caller — blocked until it gets
+one). Naming the row twice in one pass is cheaper than rediscovering it twice.
+
+**And the second-order effect, re-derived rather than typed:** `CC-123`'s only trigger was `CC-124`, so
+closing it makes `CC-123` startable. §4 is now **17 startable · 1 DB · 5 you · 41 blocked** across 64 rows.
+While re-deriving I found §2 still carried a third hand-copied tally reading `16 · 1 · 5 · 40` — it had
+**never moved when `CC-128` was added**, and §4's own counted line had already moved past it twice. Rule 13,
+committed by name, with the note that §4's line is the only copy that is counted.
+
+**Two things I would have missed without running the whole suite:**
+
+- **`packages/core` was red, and not from my work.** `explicit-sort-comparators.test.ts` caught
+  `scripts/check-two-reads.mjs:184` and `scripts/check-escape-hatches.mjs:186` doing a bare `files.sort()` —
+  while the audit's own docstring forbids exactly that for `scripts/`. **Two declared controls violating
+  themselves.** Two-line fix, no behaviour change (path arrays are strings). I had touched neither file,
+  which is the point: a red build is a red build.
+- **`packages/shared` reports one failed suite and zero failed tests.** Jest says `Tests: 2594 passed, 2594
+  total`; the failure is an `afterAll` that removes the suite's own temp cache, blocked by this sandbox's
+  delete guard. The suite is `dynamicLoader.tsconfig.test.ts`, which imports nothing this change touches
+  (`dynamicLoader.ts` reaches `appResolver`, `entityIds`, `generatedCacheRecovery` — no `auth/`). So the
+  honest record is *the assertion set is green; the cleanup step is blocked by the sandbox* — not "flaky".
+
+**One more, measured while committing:** `.husky/pre-commit` exists and does i18n + template sync — and
+`git config core.hooksPath` is **unset**, with `.git/hooks/` holding only `.sample` files. So the hook has
+**never run in this clone**, even though `package.json` declares `"prepare": "husky"`. This commit touches
+no i18n or template files, so nothing is hidden this time; but it is the same class as everything else
+here — **a declared control that does nothing** — and it belongs beside `CC-115`'s census rather than being
+noticed by luck.
+
+---
+
+## 2026-10-18 (last) — the owner found the layer that isn't there: no platform ceiling over tenants
+
+The owner's sentence, after being told agents are always tenant-scoped: *"one architectural flaw this
+discussion exposed, the lack of control of platform superadmins on what is allowed or not within each
+tenant… If each tenant has its own superadmin, then later we will need to develop a control hub on the
+top of all that."* He asked for it **documented as a note, to revisit**, then to proceed.
+
+**He was right, and the measurement is worse than "no ceiling".** Four reads, none of which had been
+taken before in this project:
+
+1. **No place to store a ceiling.** `Tenant` is `name`, `is_active`, timestamps. No plan, feature, limit
+   or settings table exists in `packages/` at all. So D1's answer — *the platform admin sets the ceiling,
+   a tenant narrows it* — is correct and **has no column to live in**. `CC-125`'s ceiling now has an
+   ordering constraint it did not have an hour ago.
+2. **"Platform level" is a tenant row read globally.** `UserAcl.tenantId` and `RoleAcl.tenantId` are
+   `uuid NOT NULL` — *"Tenant scope is mandatory for ACL evaluation"* — yet `isGlobalSuperAdmin` queries
+   with **no tenant filter**, and `loadAcl` returns `features: ['*']` **before the requested scope is
+   read**. A superadmin of one tenant is a superadmin of every tenant. **This is the second encoding of
+   "platform level"** the red team counted in W8 check 1 — and it is the load-bearing one.
+3. **The door is a cookie.** `applySuperAdminScope` overwrites `tenantId` from the tenant cookie and sets
+   `isSuperAdmin = true`, with **no membership check** — there is nothing to check against, because no
+   table records which tenants a person belongs to.
+4. **The flag can be minted from inside.** `PUT /auth/users/acl` takes `isSuperAdmin` and, when the
+   actor's ACL is superadmin, **skips every target guard** before writing. A tenant's superadmin can
+   make more *global* superadmins.
+
+**Why it is bigger than the agent spine, and why it was invisible from inside it:** an agent is always
+inside a tenant (correctly), so *"an agent that serves the platform's superadmins"* has nowhere to live
+until **the platform itself has a place to be**. The placement question and the control question are one
+question. Every review in this session read the agent tables and the authority chokepoints; none of them
+asked *"what limits a tenant"*, because none of them was asked to.
+
+**Recorded, not built** — plan §4.6, register `CC-128`, and the owner's direction kept in his own words:
+**instance 1 / a foundational tenant** where settings, templates and functionality are authored; other
+tenants **inherit or are limited to what it allows**; a new capability needs **one place to be switched
+on** plus a per-tenant free-vs-subscription answer; and *"changing platform architecture"* belongs at
+platform level — i.e. on the **floor** (`CC-125`), not in a tenant bundle. **The decision left open, and
+it must be made before `CC-125` is built rather than during it:** does the platform superadmin live *in*
+the foundational tenant (a tenant with extra rights — two meanings of "tenant", which is this code's
+current ambiguity) or *above* every tenant (the first genuinely platform-level table)? **Refused by
+name:** a sentinel tenant id for "the platform" — a value every query must remember to exclude is a
+latent cross-tenant read, the `CC-126` refusal for the same reason.
+
+Register: **64 closed · 63 open · 127 total**; §4 tally **16 · 1 · 5 · 41**. Checker green.
+
+## 2026-10-18 (later) — I read "types" as "agents", and explained an architecture with a business example
 
 The owner's reply was blunt and correct: *"This makes absolutely no sense… what is on this platform I built
 a school management system. How is any of what you said above stay relevant to anything? When we build we
@@ -43,7 +158,7 @@ no ruling. Register §4 re-derived to **16 · 1 · 5 · 40**; the only question 
 
 ---
 
-## 2026-10-18 (latest) — the questions were the defect, and the owner's model was better than mine
+## 2026-10-18 (earlier) — the questions were the defect, and the owner's model was better than mine
 
 Two things happened in one message, and the second is the more important.
 
@@ -95,7 +210,7 @@ Register **64 closed · 62 open · 126**; §4 re-derived to **15 · 1 · 6 · 40
 
 ---
 
-## 2026-10-18 (later) — the strategy was right in direction, wrong in one field, and the donors I had left out were the two that mattered
+## 2026-10-18 — the strategy was right in direction, wrong in one field, and the donors I had left out were the two that mattered
 
 The owner stated the agent strategy in full: **one agent**, whose behaviour differs by settings, covering
 the types — **Aissistant** (an assistant hired by a user; one or many; authority is the intersection of the
@@ -5274,7 +5389,7 @@ Neither error would have been visible from re-running my own command.
 
 ---
 
-## 2026-10-06 (latest) — directive 1 completed in full, and the sort audit fixed
+## 2026-10-06 (later) — directive 1 completed in full, and the sort audit fixed
 
 **The owner asked whether his two directives were documented, and when they would be done.** The honest
 answer, measured rather than asserted:
@@ -5324,7 +5439,7 @@ prior cache, so the file no longer depends on scheduling order.
 
 ---
 
-## 2026-10-06 (latest) — the owner's three directives, and D2-wide reaches `dashboards`
+## 2026-10-06 (earlier) — the owner's three directives, and D2-wide reaches `dashboards`
 
 **The owner set three directives this turn, and asked me to sort the priorities and connect them to
 the development chain.** This entry records the chain, what shipped, and what it measured.
@@ -5437,7 +5552,7 @@ D2-wide will be solved, when, and where it is written down.**
 
 ---
 
-## 2026-10-06 (latest) — D1: the tier mapping stopped being code and became a setting
+## 2026-10-06 (early) — D1: the tier mapping stopped being code and became a setting
 
 **D1 is done (code `558cfab`).** The owner's instruction was *"concerning tiers, default ones and
 concerning fallbacks. let's not make it hardcoded but a setting a superadmin can change."* Before this,
