@@ -4844,3 +4844,94 @@ problem the donor does not have, and attributing it to the donor.** It is a corr
 5. **Correct the row in the same edit you discover the error in, by name.** A register that carries a mis-attributed design is worse than one that carries none, because the next agent will trust the citation and skip the re-read.
 
 *Cross-ref: L181 (two wrong figures inherited from a record, found by re-measuring — the same lesson on the *measurement* side), `00-PIN-AND-METHOD.md` §4.1 (the donor re-read rule) and §4.2 (the chain rule, which then found the live `22P02` defect in `CC-107`), `PLAN-CC-107-bot-participant.md` §1; `zerver/models/streams.py`, `zerver/models/users.py`, `zerver/lib/subscription_info.py`.*
+
+---
+
+## L21 — A proof that names the wrong suite proves nothing — and `[key]` is how it happens
+
+**What happened.** The `CC-126` mutation proof ran 18 deliberate defects against
+10 suites and reported 16 PROVEN, 2 NOT PROVEN. Both survivors targeted the same
+file — `api/ai/agent-types/[key]/route.ts`. The harness had that path in its
+suite list verbatim, character for character.
+
+**The compounding error.** **Jest reads a positional argument as a regular
+expression, not a path.** `[key]` in a regex is a character class matching one
+of `k`, `e`, `y` — so the pattern `.../agent-types/[key]/__tests__/...` does not
+match the real path `.../agent-types/[key]/__tests__/...` (five literal
+characters). Jest matched nothing, exited 0, and the harness faithfully recorded
+"the suite still passed with the bug present." Re-running the one suite by hand
+showed the test red in three seconds — the test had teeth the whole time.
+
+**And then the guard written for it had the same disease.** The harness now
+asserts the denominator before calling anything proven — and its first version
+matched `Test Suites: (\d+) passed, (\d+) total`, which is the **all-green**
+summary format. A run with a failure prints `Test Suites: 1 failed, 9 passed, 10
+total`, so the guard matched nothing on exactly the runs it was written to read
+and reported NO SUITE COUNT nineteen times. A pattern written to notice a
+*different* format than the one the tool emits fails silently in the same way:
+it reads a true statement about nothing.
+
+**Why this is L15 again, and why it is worth its own entry.** L15's runner stops
+early; this one runs to completion and reports a complete-looking result. A
+mutation proof's entire value is *"the suite noticed"* — and a suite that never
+executed has not noticed anything. The harness reported two **real gaps** where
+there were none, which is worse than a false green: it sends the next agent to
+write tests that already exist, and it makes a harness with a typo look like a
+codebase with holes.
+
+**What to do instead.**
+
+1. **Escape the brackets: `agent-types/\[key\]/__tests__/...`.** Any dynamic
+   path segment Next.js writes as `[param]` is a regex metacharacter.
+2. **Assert the denominator before trusting a ratio.** A proof over N suites
+   must print the number of suites jest actually ran and compare it to the
+   length of the list it was given. **A proof that cannot state how many suites
+   it executed has not proved anything.** And write the guard's pattern against
+   the format the tool emits *on failure* — the total is the last number on the
+   line (`… 1 failed, 9 passed, 10 total`), not the one after "passed". A guard
+   that only reads the green format is a guard that only works when nothing is
+   wrong.
+3. **A run that finishes suspiciously fast is evidence.** Eighteen mutations in
+   eight seconds meant the suites were not running. Duration is a cheap sanity
+   check on any repeated-run harness.
+4. **Re-prove a survivor by hand before believing it.** One targeted run
+   separated a broken harness from a missing test in under a minute — cheaper
+   than writing two tests that already existed.
+
+**The general form:** *a tool that selects by pattern can silently select
+nothing.* grep with a bad regex prints an error; a test runner with a bad
+pattern prints a green summary. The failure mode of the selector is the same
+either way — the evidence belongs to a different run than the one you wanted.
+
+---
+
+## L22 — Python's text-mode write turns the whole repo CRLF, and `git` hides it
+
+**What happened.** Three documents and the mutation harness ended up with CRLF line
+endings while every other file in both repos is pure LF. The cause was not the editor
+and not `git`: it was **`open(path, 'w')` in a Python patch script**. On Windows,
+text mode translates every `\n` it writes into `\r\n` — so a one-line surgical patch
+silently rewrote the line endings of the *entire file*.
+
+**Why it stayed invisible.** `core.autocrlf=true` makes `git` normalize CRLF→LF on
+commit, so `git diff` showed a tidy 57-line change and the committed blob was correct.
+The damage was only in the working copy — which is exactly where the next tool reads.
+`grep -q $'\r'` in a shell loop reported "LF-only" on a file with 337 CR bytes; the
+check that finally worked was Python counting `b'\r'` in binary mode. **A line-ending
+check that goes through a shell string is not a line-ending check.**
+
+**What to do instead.**
+
+1. **Patch with `newline=''`.** `open(p, 'w', encoding='utf-8', newline='')` preserves
+   the file's own `\n`. Or read binary, `replace(b'\r\n', b'\n')`, write binary.
+2. **Verify with bytes, not with grep.** `b.count(b'\r') == 0` on the file object.
+3. **`git`'s autocrlf warning is evidence, not noise.** "CRLF will be replaced by LF"
+   means the working copy *is* CRLF right now. Every commit that prints it is a commit
+   made on top of a dirty working copy.
+4. **Check the whole touched set, not the file you were thinking about.** The one file
+   that looked fine (written by the editor) sat next to four that did not.
+
+**The general form:** a patch tool that rewrites more than the lines you targeted is
+the same failure class as a test runner that selects nothing (L21) — the operation
+succeeded, the artifact changed in a way nobody asked for, and the tool reported
+success. Surgical edits need surgical writers.

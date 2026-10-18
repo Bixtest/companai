@@ -88,6 +88,18 @@ cannot is refused rather than faked:
   (`agent-policy.ts:197-204`, `tool_unknown`). The ceiling-subset check arrives
   with `CC-128`'s store and is named there — not faked here.
 
+**Third correction (found while writing the migration, Rule 13): the row's
+"paired PARTIAL unique indexes" prescription does not apply here.** The pair
+exists for the override tables because their `organization_id` is **nullable** —
+a plain unique over `(tenant, org, agent, …)` lets `(t, o, c, NULL, 'a')` duplicate
+freely, which is why those tables carry one partial index per null-combination.
+This table has **no org column** (§6), so there is one nullable column fewer and
+one index: a plain unique over `(tenant_id, key)`, **not** partial on
+`status = 'active'`. What protects the retired key is that the index covers
+*every row regardless of status* — a partial-on-active index would make a
+retired key reusable, which is the re-pointing failure the index exists to
+prevent. Carried in §4.2.
+
 ## 4. The fix
 
 **1. `AiAgentType`** — the thirteenth `Ai*` entity (`data/entities.ts`):
@@ -113,9 +125,20 @@ migration fails, it is reporting a real defect.
 
 **4. `AiAgentTypeRepository`** — tenant-scoped exactly like
 `AiAgentBindingRepository` (the context carries `tenantId`; no wildcard, no
-cross-tenant fallback): version bump on edit, `retire` as the only delete, and a
-**key-collision refusal against the loaded code registry** at write. The
-collision check is the loud half; the guarantee is §5's.
+cross-tenant fallback): version bump on edit, `retire` as the only delete, and
+a **key-collision refusal against existing rows** at write — active or retired
+alike, carried as a typed error the route maps to 409, with the unique index
+as the backstop. **★ Amended at build, 2026-10-18 (night), by re-measuring
+where the check can live:** the requirement first placed the *code-registry*
+collision check here too. The data layer must not import the code registry —
+`agent-registry` loads the generated module and pulls the provider chain with
+it, and `AiAgentRuntime.provider`'s precedent (validate the vocabulary at the
+boundary against a lib that imports nothing) points the other way. More
+fundamentally, **the guarantee never lived at the write**: resolution is
+code-first (§5), so a tenant-authored definition cannot run under a
+platform-claimed key even if a collision slipped through. The loud half is
+the route's (it already loads the registry), the fail-closed half is the
+resolver's.
 
 **5. `lib/agent-type-catalog.ts`** — the single home for *"the catalogue in
 tenant T"*:
@@ -166,6 +189,19 @@ already holds `auth.tenantId` (`:47-58`) and filters by features uniformly
 that governs code agents. The meta tools follow (`meta-pack.ts:82-151`; their
 `McpToolContext` carries `tenantId` and a container).
 
+**Read-surface policy on a shadowed row (build amendment):** the catalogue
+function lists it flagged; a **picker drops it**. Both pickers
+(`GET /api/ai/agents`, `meta.list_agents`) key their result by agent id, and a
+shadowed tenant row resolves to the platform's definition under that same id —
+listing both entries would offer one id twice, which is a duplicate-key defect
+in the consumer, not visibility. The shadow stays visible where it is
+actionable: `GET /api/ai/agent-types/[key]` reports `shadowedByCode`, `PUT`
+refuses the edit with *"Retire it to remove the shadow"*, and the list route
+shows the tombstone. Provenance is **not derivable from the definition** — a
+tenant type carries `AGENT_TYPE_MODULE_ID`, which is also a real module id — so
+`resolveAgentCatalogEntry` reports the layer and `describe_agent` asks it rather
+than guessing.
+
 ## 5. Fail-direction proof, branch by branch
 
 | Case | Before | After | Direction |
@@ -207,6 +243,16 @@ deploy. Code-first precedence makes that unrepresentable.
 - `business-ir-author.ts:164` names a **fixed code agent**. Whether it holds a
   tenant scope is measured at build time; the rule is uniform either way — no
   tenant scope, no tenant resolution.
+- **The five per-agent management routes stay code-only.** `agents/[agentId]/
+  bindings`, `loop-override`, `models`, `mutation-policy`, `prompt-override`
+  each resolve `getAgent(agentId)` and 404 an unknown id — that refusal is
+  correct for an id neither layer holds, and this change does not widen it to
+  tenant rows. Consequence, recorded: a tenant type can be authored, resolved
+  at the gate, picked in both pickers and retired, but cannot be **bound or
+  overridden** through its per-agent manage surface yet. The runtime row that
+  needs it is `CC-122` (the hire pins a version and takes a binding); extending
+  those five routes to `resolveAgentDefinition` is that row's build, not this
+  one's — named here so it is a decision, not an omission.
 - The migration has never been applied to a project-shaped database. That is
   `CC-119`'s milestone, and this table joins the set it will carry (bindings,
   runtimes, the participant axis, types).
@@ -222,5 +268,10 @@ row must be unreachable from the first (unit, with the repository context
 forged); the gate's fail-closed branches with a tenant-shaped subject (unit);
 the CHECK and the unique index **by mutation**, RED-then-GREEN, in the
 schema-unique-indexes house style (`data/__tests__/schema-unique-indexes.test.ts`);
-and the five call sites each still refusing an unknown id. A hostile critic
-reads the finished slice against this document before anything is committed.
+and the five call sites each still refusing an unknown id. The routes prove
+their contract with the repository mocked (201, the two 409s, the bundle 400,
+tombstones in the list, the retired/shadowed PUT refusals before the guard
+opens, idempotent retirement); the read surfaces prove the merge, the tag, the
+uniform feature filter, the shadowed-duplicate drop and the null-tenant
+degradation. A hostile critic reads the finished slice against this document
+before anything is committed.

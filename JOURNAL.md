@@ -7,6 +7,49 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-18 (latest) — `CC-126`'s build: a tenant can create a type, and every refusal in the path has a mutation behind it
+
+**The requirement was written in the previous phase; this phase built it.** The owner's *"bulk packaged
+capabilities, so a standardised agent is cheap to create"* now has a tenant-side home: `AiAgentType`
+(`ai_agent_types`, `tenant_id NOT NULL` always), a tenant-scoped repository, `lib/agent-type-catalog.ts`
+as the single home for *"the catalogue in tenant T"*, the gate handed its subject at the five call sites,
+routes at `api/ai/agent-types/`, and both read surfaces tagged. **Nineteen mutations, all proven** —
+`scripts/verify-cc126-mutations.mjs` breaks the precedence, both PUT refusals, the collision mapping, the
+retired-key rule, the picker's duplicate filter, the CHECKs, the unique index and the entity drift, and
+the suites go red in the aimed case every time.
+
+**★ Three things the build itself settled, recorded because the requirement could not:**
+
+1. **Provenance is not derivable from a definition.** A tenant type carries `AGENT_TYPE_MODULE_ID` —
+   `'ai_assistant'` — which is *also a real module id*, so `describe_agent` cannot tell a shipped agent
+   from a tenant-authored one by reading the definition. `resolveAgentCatalogEntry` returns the layer
+   alongside the definition and the precedence lives in that one function; `resolveAgentDefinition` is
+   now a thin wrapper over it. One decision, one home.
+2. **The read-surface policy on a shadowed row.** The catalogue lists it flagged; **a picker drops it.**
+   Both pickers key their result by agent id, and a shadowed tenant row resolves to the platform's
+   definition under that same id — listing both entries offers one id twice, which is a duplicate-key
+   defect in the consumer. The shadow stays visible where it is actionable: `GET ...[key]` reports
+   `shadowedByCode`, `PUT` refuses with *"Retire it to remove the shadow"*, and the list route shows the
+   tombstone. Visibility belongs where a decision is possible.
+3. **The five per-agent manage routes stay code-only, by decision rather than omission.** `bindings`,
+   `loop-override`, `models`, `mutation-policy`, `prompt-override` each 404 an id neither layer holds —
+   correct, and unchanged. A tenant type can be authored, resolved at the gate, picked and retired, but
+   cannot yet be *bound or overridden* through its per-agent surface; that is `CC-122`'s build, and it is
+   written into the requirement's §7 so it is a decision with a name.
+
+**What the full suite caught, and the two traps it hid in.** The gate refactor broke one existing case:
+`POST /api/ai/chat` returned 500 where it must return 404 for an unknown agent, because the route now
+resolves its subject through the tenant layer and the test's container stubbed `em` as `{}` — a real
+repository against a non-manager. Fixed the house way (the repository module joined the file's other
+repository mocks) and a new test proves a tenant-authored type runs end-to-end through chat. Then the
+mutation proof itself lied twice over: **jest reads a positional argument as a regex**, so the suite
+pattern containing `[key]` matched nothing, ran zero tests, exited 0, and the harness reported "the
+suite still passed" — two NOT PROVEN lines that were false. Escaping the brackets proved both mutations
+red in three seconds. That is now `LESSONS.md` **L21** and the harness asserts the denominator
+(`Test Suites: N passed, M total`) before it will call anything proven. A mutation proof's whole value is
+"the suite noticed" — a suite that never executed has not noticed anything.
+
+---
 ## 2026-10-18 (latest) — `CC-126`'s requirement is written: the owner's "cheap to create" needs a tenant to be able to *create*, and the row's own prescription was a sentinel in disguise
 
 **No code this phase — the owner's rule is no code before a written requirement.** The deliverable is
