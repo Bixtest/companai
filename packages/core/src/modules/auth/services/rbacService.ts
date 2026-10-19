@@ -491,7 +491,12 @@ export class RbacService {
    * )
    * // Returns true if user has 'entities.*', '*', or 'entities.records.view'
    */
-  async userHasAllFeatures(userId: string, required: string[], scope: { tenantId: string | null; organizationId: string | null }): Promise<boolean> {
+  async userHasAllFeatures(
+    userId: string,
+    required: string[],
+    scope: { tenantId: string | null; organizationId: string | null },
+    options: { onBehalfOfUserId?: string | null } = {},
+  ): Promise<boolean> {
     const fromAcl = await this.decideAllFeatures(userId, required, scope)
     // Delegations are consulted **only after** the ordinary ACL has said no.
     //
@@ -506,7 +511,7 @@ export class RbacService {
     this.shadowResolver(userId, required, scope, allowed)
     if (!allowed) return false
     if (await this.withheldFromThisPerson(userId, required, scope)) return false
-    return !(await this.refusedByAuthority(userId, required, scope))
+    return !(await this.refusedByAuthority(userId, required, scope, options))
   }
 
   /**
@@ -607,18 +612,48 @@ export class RbacService {
     userId: string,
     required: string[],
     scope: { tenantId: string | null; organizationId: string | null },
+    options: { onBehalfOfUserId?: string | null } = {},
   ): Promise<boolean> {
     if (!this.authorityEnforcement) return false
 
-    const refusal = await this.authorityEnforcement.refusalFor(userId, required, scope)
-    if (!refusal) return false
+    const onBehalfOfUserId = options.onBehalfOfUserId ?? null
+    const actor = parseSubject(userId)
 
-    authorityLogger.warn('Refused by the authority resolver', {
-      capability: refusal.capabilityId,
-      bindingRule: refusal.decision.bindingRule,
-      because: refusal.decision.reasons.find((reason) => reason.rule === refusal.decision.bindingRule)?.detail,
-      actorId: parseSubject(userId).id,
-      actorKind: parseSubject(userId).kind,
+    // 1. The capability-aware half. Every feature some module describes is settled
+    //    here, with the person this actor acts for supplied as a ceiling.
+    const refusal = await this.authorityEnforcement.refusalFor(userId, required, scope, { onBehalfOfUserId })
+    if (refusal) {
+      authorityLogger.warn('Refused by the authority resolver', {
+        capability: refusal.capabilityId,
+        bindingRule: refusal.decision.bindingRule,
+        because: refusal.decision.reasons.find((reason) => reason.rule === refusal.decision.bindingRule)?.detail,
+        actorId: actor.id,
+        actorKind: actor.kind,
+        invokerId: onBehalfOfUserId,
+        tenantId: scope.tenantId,
+        organizationId: scope.organizationId,
+      })
+      return true
+    }
+
+    // 2. The half that needs no descriptor — see `invokerRefusalFor`. Without this
+    //    the invoker rule is blind for every feature no module has described, which
+    //    measured at 36 of the 157 enabled (`CC-132`).
+    const invokerRefusal = await this.authorityEnforcement.invokerRefusalFor(
+      userId,
+      required,
+      scope,
+      onBehalfOfUserId,
+    )
+    if (!invokerRefusal) return false
+
+    authorityLogger.warn('Refused by the invoker rule', {
+      capability: invokerRefusal.capabilityId,
+      bindingRule: invokerRefusal.bindingRule,
+      because: invokerRefusal.because,
+      actorId: actor.id,
+      actorKind: actor.kind,
+      invokerId: onBehalfOfUserId,
       tenantId: scope.tenantId,
       organizationId: scope.organizationId,
     })

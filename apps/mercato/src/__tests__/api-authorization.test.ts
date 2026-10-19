@@ -286,6 +286,80 @@ describe('API Route Authorization', () => {
           'user1',
           ['example.todos.view'],
           expect.objectContaining({ tenantId: 'tenant1' }),
+          { onBehalfOfUserId: null },
+        )
+      } finally {
+        mockedRouteModule.metadata = originalMetadata
+      }
+    })
+
+    it('carries the person a credential acts for', async () => {
+      const originalMetadata = mockedRouteModule.metadata
+      mockedRouteModule.metadata = {
+        requireAuth: true,
+        requireFeatures: ['example.todos.view'],
+      } as RouteMetadata & typeof mockedRouteModule.metadata
+
+      try {
+        mockResolveAuthFromRequestDetailed.mockResolvedValue({
+          auth: {
+            sub: 'api_key:key-1',
+            keyId: 'key-1',
+            isApiKey: true,
+            tenantId: 'tenant1',
+            orgId: 'org1',
+            userId: 'owner1',
+            roles: [],
+          },
+          status: 'authenticated' as const,
+        })
+
+        const request = new NextRequest('http://localhost:3001/api/example/test')
+        await GET(request, { params: Promise.resolve({ slug: ['example', 'test'] }) })
+
+        expect(mockRbac.userHasAllFeatures).toHaveBeenCalledWith(
+          'api_key:key-1',
+          ['example.todos.view'],
+          expect.objectContaining({ tenantId: 'tenant1' }),
+          { onBehalfOfUserId: 'owner1' },
+        )
+      } finally {
+        mockedRouteModule.metadata = originalMetadata
+      }
+    })
+
+    it('does not treat a person as acting for somebody else', async () => {
+      // A trusted envelope can carry a `userId` on a human context. The route must
+      // read the **principal**, which fills the field only for a credential;
+      // reading `auth.userId` would cap the person by an authority that is not
+      // theirs. This is the difference between the two sources, made executable.
+      const originalMetadata = mockedRouteModule.metadata
+      mockedRouteModule.metadata = {
+        requireAuth: true,
+        requireFeatures: ['example.todos.view'],
+      } as RouteMetadata & typeof mockedRouteModule.metadata
+
+      try {
+        mockResolveAuthFromRequestDetailed.mockResolvedValue({
+          auth: {
+            sub: 'user1',
+            tenantId: 'tenant1',
+            orgId: 'org1',
+            email: 'user@test.com',
+            roles: ['admin'],
+            userId: 'somebody-else',
+          },
+          status: 'authenticated' as const,
+        })
+
+        const request = new NextRequest('http://localhost:3001/api/example/test')
+        await GET(request, { params: Promise.resolve({ slug: ['example', 'test'] }) })
+
+        expect(mockRbac.userHasAllFeatures).toHaveBeenCalledWith(
+          'user1',
+          ['example.todos.view'],
+          expect.objectContaining({ tenantId: 'tenant1' }),
+          { onBehalfOfUserId: null },
         )
       } finally {
         mockedRouteModule.metadata = originalMetadata

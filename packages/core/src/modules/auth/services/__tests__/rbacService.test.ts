@@ -1117,7 +1117,13 @@ describe('RbacService', () => {
     const scope = { tenantId: 'tenant-1', organizationId: 'org-1' }
 
     function withEnforcement(refusal: unknown) {
-      const enforcement = { refusalFor: jest.fn(async () => refusal) }
+      const enforcement = {
+        refusalFor: jest.fn(async () => refusal),
+        // The second half of the invoker rule (`CC-123`) — a feature-id question
+        // that needs no capability descriptor. Stubbed to refuse nothing, because
+        // these tests are about the capability-aware half and the ordering.
+        invokerRefusalFor: jest.fn(async () => null),
+      }
       return {
         enforcement,
         service: new RbacService(em as any, cache, enforcement as any),

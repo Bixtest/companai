@@ -51,6 +51,22 @@ export type AuthorityRefusal = {
   decision: Decision
 }
 
+/**
+ * A refusal the resolver can make **without** a capability descriptor.
+ *
+ * `AuthorityRefusal` carries a full `Decision`, and a `Decision` needs a
+ * descriptor. But the *holding* half of the invoker rule — may the person this
+ * machine acts for hold this capability at all? — is a feature-id question and
+ * needs none. Keeping it a separate, smaller type is what lets the rule cover
+ * features no module has described yet, without inventing a `Decision` about a
+ * capability nobody has classified (`CC-123`, `CC-132`).
+ */
+export type InvokerRefusal = {
+  capabilityId: string
+  bindingRule: string
+  because: string
+}
+
 export type AuthorityScope = {
   tenantId: string | null
   organizationId: string | null
@@ -228,20 +244,108 @@ export class AuthorityEnforcementService {
     subject: string,
     required: string[],
     scope: AuthorityScope,
+    options: { onBehalfOfUserId?: string | null } = {},
   ): Promise<AuthorityRefusal | null> {
     if (!required.length) return null
     if ((await this.modeFor(scope.tenantId)) !== 'enforce') return null
 
+    // The person this actor acts for, carried into every decision. Without it the
+    // actor is judged alone, which is wider than its owner — the defect `CC-123`
+    // exists to close. A caller that has no invoker passes `null`, and nothing is
+    // invented here.
+    const onBehalfOfUserId = options.onBehalfOfUserId ?? null
+
     for (const feature of required) {
-      const decision = await this.decideFor(subject, feature, scope)
+      const decision = await this.decideFor(subject, feature, scope, { onBehalfOfUserId })
       // An undescribed capability is a coverage gap, not a refusal. Enforcing on
       // absence would make every wildcard grant and every un-described feature a
       // denial, which is a migration failure dressed up as a security control.
+      // The *holding* half is still checkable without a descriptor — see
+      // `invokerRefusalFor`, which runs after this and does not need one.
       if (!decision) continue
       if (!decision.allowed) return { capabilityId: feature, decision }
     }
 
     return null
+  }
+
+  /**
+   * The half of the invoker rule that needs no capability descriptor.
+   *
+   * `refusalFor` can only answer for features some module has described, because
+   * a `Decision` requires a descriptor. That left the rule blind for every
+   * undescribed feature — including, measured, all eight `ai_assistant.*`
+   * (`CC-132`). But the question *"may the person this actor acts for hold this
+   * capability at all?"* is answered by the existing RBAC check and needs no
+   * risk semantics, so it can be asked for **every** feature.
+   *
+   * **Runs only when there is an invoker.** That is not an optimisation — it is
+   * what stops a cycle. The reader below is implemented as
+   * `rbacService.userHasAllFeatures` (`auth/di.ts`), which re-enters
+   * `refusalFor`; a human has no invoker (`principal.ts` fills the field only for
+   * a credential), so the inner call returns here with `null` and terminates. If
+   * this method ran without that guard, the two would call each other forever.
+   *
+   * **Fails closed when the reader is missing, in `enforce` only.** An invoker we
+   * cannot read is not an unbounded invoker, and `checkToolAuthority` already
+   * takes this position on the same infrastructure gap (`tool-authority.ts`).
+   */
+  async invokerRefusalFor(
+    subject: string,
+    required: string[],
+    scope: AuthorityScope,
+    onBehalfOfUserId: string | null,
+  ): Promise<InvokerRefusal | null> {
+    if (!required.length) return null
+    const invoker = this.invokerFor(subject, onBehalfOfUserId)
+    if (!invoker) return null
+    if ((await this.modeFor(scope.tenantId)) !== 'enforce') return null
+
+    if (!this.invokerAuthority) {
+      logger.error('Cannot read the invoker’s authority; refusing rather than running ungoverned', {
+        invoker,
+        tenantId: scope.tenantId,
+      })
+      return {
+        capabilityId: required[0],
+        bindingRule: 'invoker-unreadable',
+        because:
+          'The person this actor acts for could not be read, so the act was refused rather than run on the actor’s authority alone.',
+      }
+    }
+
+    for (const feature of required) {
+      // Described capabilities were already settled by `refusalFor`, with the
+      // invoker supplied. Only the undescribed ones reach here.
+      if (getCapabilityDescriptor(feature)) continue
+      const holds = await this.invokerAuthority.holdsCapability(invoker, feature, scope)
+      if (!holds) {
+        return {
+          capabilityId: feature,
+          bindingRule: 'invoker-lacks-capability',
+          because:
+            'The person this actor acts for does not hold this capability, so the actor cannot hold it either.',
+        }
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Who this actor acts *for*, or `null` when it acts as itself.
+   *
+   * A person answers to themselves, so a human subject never carries an invoker
+   * even if a caller hands one over — `principal.ts` fills the field only for a
+   * credential, and trusting a stray value here would cap somebody by a decision
+   * that is not about them.
+   */
+  private invokerFor(subject: string, onBehalfOfUserId: string | null): string | null {
+    if (!onBehalfOfUserId) return null
+    const principal = parseSubject(subject)
+    if (principal.kind === 'human') return null
+    if (onBehalfOfUserId === principal.id) return null
+    return onBehalfOfUserId
   }
 
   /**
