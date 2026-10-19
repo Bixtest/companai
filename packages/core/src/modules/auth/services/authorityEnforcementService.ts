@@ -195,6 +195,33 @@ type InvokerAuthorityReader = {
  * disables the control precisely when something is wrong, and inventing a
  * refusal tells a user they lack a permission they hold.
  */
+/**
+ * `CC-128` — the tenant's capability ceiling, as this service needs it.
+ *
+ * A **reader**, not an `EntityManager`: this file's rule (`:103`) is that the service receives readers
+ * from the request container and never reaches for a database handle of its own. The ceiling is one
+ * more input, so it arrives the same way.
+ *
+ * **`null` means "no ceiling store is wired in this deployment"**, which is exactly the behaviour
+ * before `CC-128` and is what every existing test constructs. Production always wires it (`auth/di.ts`),
+ * so absence in production is a wiring bug, not a posture. That is stated here because "no reader means
+ * no limit" is the fail-open shape, and a fail-open default is only acceptable when it is named.
+ */
+export interface CapabilityCeilingReader {
+  /**
+   * Refusal messages for the capabilities that fall **outside** the tenant's ceiling, keyed by
+   * capability. Capabilities inside it are simply absent from the map.
+   *
+   * **Batch-shaped on purpose.** `refusalFor` asks the resolver once per required capability, so a
+   * per-capability reader would read the ceiling N times for one request. One call, one read, however
+   * many capabilities are asked about.
+   */
+  refusalsFor(
+    tenantId: string | null,
+    capabilities: readonly string[],
+  ): Promise<Map<string, string>>
+}
+
 export class AuthorityEnforcementService {
   constructor(
     private readonly graph: GraphCeilingReader | null,
@@ -204,6 +231,8 @@ export class AuthorityEnforcementService {
     private readonly delegations: DelegationReader | null = null,
     private readonly trust: TrustReader | null = null,
     private readonly projects: ProjectReader | null = null,
+    /** `CC-128` — `null` means no ceiling store is wired; see `CapabilityCeilingReader`. */
+    private readonly capabilityCeiling: CapabilityCeilingReader | null = null,
   ) {}
 
   /**
@@ -255,8 +284,17 @@ export class AuthorityEnforcementService {
     // invented here.
     const onBehalfOfUserId = options.onBehalfOfUserId ?? null
 
+    // `CC-128` — the ceiling, resolved ONCE for the whole list. Reading it inside `decideFor` would
+    // cost one query per required capability; the reader is batch-shaped so it costs one per request.
+    const ceilingRefusals = this.capabilityCeiling
+      ? await this.capabilityCeiling.refusalsFor(scope.tenantId, required)
+      : null
+
     for (const feature of required) {
-      const decision = await this.decideFor(subject, feature, scope, { onBehalfOfUserId })
+      const decision = await this.decideFor(subject, feature, scope, {
+        onBehalfOfUserId,
+        ...(ceilingRefusals ? { capabilityCeilingRefusal: ceilingRefusals.get(feature) ?? null } : {}),
+      })
       // An undescribed capability is a coverage gap, not a refusal. Enforcing on
       // absence would make every wildcard grant and every un-described feature a
       // denial, which is a migration failure dressed up as a security control.
@@ -364,12 +402,33 @@ export class AuthorityEnforcementService {
     subject: string,
     feature: string,
     scope: AuthorityScope,
-    options: { onBehalfOfUserId?: string | null; recordId?: string | null } = {},
+    options: {
+      onBehalfOfUserId?: string | null
+      recordId?: string | null
+      /**
+       * `CC-128` — the ceiling, when the caller already resolved it.
+       *
+       * `refusalFor` asks this method once per required capability, so resolving the ceiling inside
+       * would read it N times for one request. Passing it in makes the cost one read per request,
+       * which is the only reason this option exists.
+       */
+      capabilityCeilingRefusal?: string | null
+    } = {},
   ): Promise<Decision | null> {
     const capability = getCapabilityDescriptor(feature)
     if (!capability) return null
 
     const principal = parseSubject(subject)
+
+    // `CC-128` — MAY THIS BE HELD HERE AT ALL? Asked before any autonomy question, because a
+    // capability outside the tenant's ceiling is not "needs approval" — it is not available. It
+    // arrives as `holdsCapability: false`, the resolver's existing answer for exactly that, and the
+    // cause travels with it so the message names the ceiling rather than blaming the grant.
+    const ceilingRefusal = options.capabilityCeilingRefusal !== undefined
+      ? options.capabilityCeilingRefusal
+      : this.capabilityCeiling
+        ? (await this.capabilityCeiling.refusalsFor(scope.tenantId, [capability.id])).get(capability.id) ?? null
+        : null
     const graphCeiling = await this.graphCeilingFor(capability.id, scope)
     const invokerCeiling = await this.invokerCeilingFor(
       capability,
@@ -390,8 +449,11 @@ export class AuthorityEnforcementService {
         id: principal.id,
         // RBAC has already said yes; this service exists to narrow that, and
         // re-deciding the grant here would put two answers to one question in
-        // the codebase.
-        holdsCapability: true,
+        // the codebase. The ONE exception is `CC-128`: a capability outside the
+        // tenant's ceiling is not held, however the ACL answered, because the
+        // tenant may never hold it.
+        holdsCapability: ceilingRefusal === null,
+        ...(ceilingRefusal ? { holdsCapabilityRefusal: ceilingRefusal } : {}),
         ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
         ...(invokerCeiling ? { invokerCeiling } : {}),
         ...(delegation ? { delegationCeiling: delegation.ceiling } : {}),

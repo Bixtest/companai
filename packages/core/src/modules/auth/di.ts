@@ -10,6 +10,7 @@ import { DelegationService } from '@open-mercato/core/modules/auth/services/dele
 import { DenialService } from '@open-mercato/core/modules/auth/services/denialService'
 import { TrustService } from '@open-mercato/core/modules/auth/services/trustService'
 import { ProjectService } from '@open-mercato/core/modules/auth/services/projectService'
+import { capabilityCeilingRefusalFor } from '@open-mercato/core/modules/auth/lib/capabilityCeiling'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
@@ -111,6 +112,27 @@ export function register(container: AppContainer) {
             | null
           if (!projects) return null
           return projects.contextFor(recordId, principalId, scope) as never
+        },
+      },
+      {
+        // `CC-128` — the tenant's capability ceiling. Batch-shaped, because the
+        // resolver asks once per required capability and a per-capability reader
+        // would read the ceiling N times for one request.
+        //
+        // The ceiling is read here rather than through a registered service so
+        // the write path (`lib/capabilityCeiling.ts`) and this read share one
+        // implementation; the cache, when the deployment has one, is what makes
+        // the read cheap and what a write invalidates.
+        async refusalsFor(tenantId: string | null, capabilities: readonly string[]) {
+          const em = cradle.em as EntityManager | undefined
+          if (!em) return new Map<string, string>()
+          const cache = (cradle.cache as never) ?? null
+          const refusals = new Map<string, string>()
+          for (const capability of capabilities) {
+            const refusal = await capabilityCeilingRefusalFor(em, tenantId, capability, cache)
+            if (refusal) refusals.set(capability, refusal)
+          }
+          return refusals
         },
       },
     )).scoped().proxy(),

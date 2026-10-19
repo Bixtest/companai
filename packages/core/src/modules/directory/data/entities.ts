@@ -1,8 +1,19 @@
+import { OptionalProps } from '@mikro-orm/core'
 import { Collection } from '@mikro-orm/core'
 import { Entity, ManyToOne, OneToMany, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy'
 
 @Entity({ tableName: 'tenants' })
 export class Tenant {
+  /**
+   * `isFoundational` is optional at creation even though the column is `not null default false`.
+   *
+   * `default: false` alone does NOT make MikroORM treat it as optional — measured: `em.create` demanded
+   * it while `is_active` (`default: true`) did not, so a falsy `default` is not inferred. Declaring it
+   * here is the explicit statement the inference missed, and it keeps every existing
+   * `em.create(Tenant, {…})` call site compiling without inventing a value.
+   */
+  [OptionalProps]?: 'isFoundational'
+
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
 
@@ -20,6 +31,23 @@ export class Tenant {
 
   @Property({ name: 'deleted_at', type: Date, nullable: true })
   deletedAt?: Date | null
+
+  /**
+   * `CC-128` — **the foundational tenant**, and at most one row may say so.
+   *
+   * Option A (owner, 2026-10-19): the platform's admins live *inside* the foundational tenant, and
+   * other tenants inherit — or are limited to — what it allows. Before this column, "the platform's
+   * tenant" would have been "the oldest row" or "the one called `platform`", which is a guess.
+   *
+   * `CC-133` keeps Option B (a platform identity *above* every tenant) reachable, and the argument for
+   * choosing A was that **A is a strict subset of B's shape**. A boolean is additive; a self-referencing
+   * parent link would be B's shape half-built.
+   *
+   * Uniqueness is enforced by the database, not by a service remembering:
+   * `tenants_one_foundational_uq` is a partial unique index, so a second `true` is a `23505`.
+   */
+  @Property({ name: 'is_foundational', type: 'boolean', default: false })
+  isFoundational: boolean = false
 
   @OneToMany(() => Organization, (o) => o.tenant)
   organizations = new Collection<Organization>(this)

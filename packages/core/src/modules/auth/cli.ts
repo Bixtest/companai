@@ -22,6 +22,11 @@ import {
 } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { readFileSync } from 'node:fs'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
+import {
+  CapabilityCeilingError,
+  loadCapabilityCeiling,
+  replaceCapabilityCeiling,
+} from '@open-mercato/core/modules/auth/lib/capabilityCeiling'
 import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
 import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import { computeEmailHash, emailHashLookupValues } from './lib/emailHash'
@@ -1212,5 +1217,82 @@ const authorityDenials: ModuleCli = {
   },
 }
 
+/**
+ * `CC-128` — read or replace a capability ceiling.
+ *
+ * **This is the ceiling's only caller, and that is deliberate for now.** A ceiling with no surface is
+ * `CC-101`'s class — a control nothing calls — so the write path exists as soon as the table does. A
+ * route and a screen are separate work (`CC-128` §5: "it does not add a UI"), and this command is the
+ * honest minimum that makes `replaceCapabilityCeiling` reachable.
+ *
+ * The two refusals it surfaces are the ones that make the table trustworthy: an **empty** ceiling is
+ * rejected (it is indistinguishable from having none, and none means inherit — deactivate the tenant
+ * instead), and a tenant ceiling naming something the platform does not hold is rejected with the names
+ * of the offending capabilities rather than silently narrowed.
+ */
+const authorityCeiling: ModuleCli = {
+  command: 'ceiling',
+  async run(rest) {
+    const args: Record<string, string> = {}
+    for (let index = 0; index < rest.length; index += 1) {
+      const arg = rest[index]
+      if (!arg?.startsWith('--')) continue
+      const [key, inlineValue] = arg.replace(/^--/, '').split('=')
+      if (inlineValue !== undefined) { args[key] = inlineValue; continue }
+      const next = rest[index + 1]
+      if (next && !next.startsWith('--')) { args[key] = next; index += 1 }
+      else args[key] = 'true'
+    }
+
+    const container = await createRequestContainer()
+    const em = container.resolve('em') as EntityManager
+    // The cache, when the deployment has one. `null` is fine — the read falls through to the table.
+    const cache = (() => {
+      try { return container.resolve('cache') as never } catch { return null }
+    })()
+
+    const tenantId = args.tenant && args.tenant !== 'true' ? args.tenant : null
+    const scopeLabel = tenantId ?? 'the platform'
+
+    if (args.set === undefined || args.set === 'true') {
+      const ceiling = await loadCapabilityCeiling(em, tenantId, cache)
+      const source = ceiling.source === 'tenant' ? "this tenant's own" : "inherited from the platform's"
+      console.log('')
+      console.log(`  Ceiling for ${scopeLabel} — ${source}`)
+      console.log('')
+      if (ceiling.capabilities.size === 0) {
+        console.log('    (empty — nothing is enabled at this level)')
+      } else {
+        for (const capability of [...ceiling.capabilities].sort()) console.log(`    ${capability}`)
+      }
+      console.log('')
+      console.log('  Replace it with: mercato auth ceiling [--tenant <id>] --set a.b,c.d')
+      console.log('')
+      return
+    }
+
+    const wanted = parseCommaSeparatedList(args.set)
+    try {
+      const result = await replaceCapabilityCeiling(em, tenantId, wanted, { cache })
+      console.log('')
+      console.log(`  Ceiling for ${scopeLabel} replaced — ${wanted.length} capabilit${wanted.length === 1 ? 'y' : 'ies'}`)
+      if (result.added.length) console.log(`    added:   ${result.added.join(', ')}`)
+      if (result.removed.length) console.log(`    removed: ${result.removed.join(', ')} (retired, not deleted)`)
+      console.log('  The cached ceiling is invalidated, so this takes effect on the next request.')
+      console.log('')
+    } catch (error) {
+      if (error instanceof CapabilityCeilingError) {
+        console.error('')
+        console.error(`  Refused: ${error.message}`)
+        if (error.capabilities.length) console.error(`  Outside the platform ceiling: ${error.capabilities.join(', ')}`)
+        console.error('')
+        process.exitCode = 1
+        return
+      }
+      throw error
+    }
+  },
+}
+
 // Export the full CLI list
-export default [authorityExplain, authorityShadowReport, authorityMode, authorityDenials, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, authorityShadowReport, authorityMode, authorityDenials, authorityCeiling, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]

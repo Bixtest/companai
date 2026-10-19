@@ -1,3 +1,4 @@
+import { OptionalProps } from '@mikro-orm/core'
 import { Entity, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy'
 
 @Entity({ tableName: 'users' })
@@ -1029,4 +1030,71 @@ export class AuthorityDenial {
 
   @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date()
+}
+
+/**
+ * `CC-128` — **the capability ceiling**: the set of capabilities a tenant may ever hold.
+ *
+ * Two scopes in one table, told apart by a null:
+ *
+ * - `tenantId === null` — the **platform** ceiling. Authored by the foundational tenant's admins
+ *   (Option A, decided 2026-10-19) and applying to every tenant.
+ * - `tenantId !== null` — a **tenant's narrowing** of it. Every entry must be inside the platform
+ *   ceiling; the write path refuses a superset rather than silently narrowing (§3.1 of
+ *   `PLAN-CC-128-tenant-ceiling.md`).
+ *
+ * **One row per capability, not a JSON array.** The subset rule is then one `NOT EXISTS` — proved as
+ * a query in `migrations/__probes__/tenant-capability-ceiling.probe.sql` case E — instead of a parse,
+ * a set difference and a guess about what an empty array means. It is also diffable: a capability
+ * removed from a ceiling is a visible retired row, which is the record §4.6 of the one-agent plan asks
+ * for (*"a cross-tenant admin act that is recorded as such rather than inferred from a badge"*).
+ *
+ * **This is NOT the authority ceiling.** *Ceiling* already means two other things here — the autonomy
+ * gate A0–A5 from organization edges (`authorityEnforcementService.ts`), and the invoker ceiling
+ * `CC-123` added. This one bounds **which capabilities may be held at all**, and the name says
+ * *capability* so the three cannot be confused at a call site.
+ *
+ * **How it must be applied.** As a **third input to the resolver**, never as a filter over
+ * `acl.features`: `featureMatch.ts:25-43` is headed *"do not build a feature-list intersection on top
+ * of this"* and lists six ways a permission set is not a list. The ceiling is a ceiling among
+ * ceilings; the answer is the minimum of everything that applies.
+ */
+@Entity({ tableName: 'tenant_capability_ceilings' })
+@Index({
+  name: 'tenant_capability_ceilings_platform_uq',
+  expression:
+    'create unique index "tenant_capability_ceilings_platform_uq" on "tenant_capability_ceilings" ("capability") where "tenant_id" is null and "deleted_at" is null',
+})
+@Index({
+  name: 'tenant_capability_ceilings_tenant_uq',
+  expression:
+    'create unique index "tenant_capability_ceilings_tenant_uq" on "tenant_capability_ceilings" ("tenant_id", "capability") where "tenant_id" is not null and "deleted_at" is null',
+})
+@Index({
+  name: 'tenant_capability_ceilings_tenant_live_idx',
+  expression:
+    'create index "tenant_capability_ceilings_tenant_live_idx" on "tenant_capability_ceilings" ("tenant_id") where "deleted_at" is null',
+})
+export class TenantCapabilityCeiling {
+  [OptionalProps]?: 'createdAt' | 'updatedAt' | 'tenantId' | 'deletedAt'
+
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  /** `null` is the platform ceiling. No sentinel tenant id — `CC-126` and `CC-128` both refuse one. */
+  @Property({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string | null
+
+  /** A capability id, in the same dialect `acl.ts` declares (`ai_assistant.view`). */
+  @Property({ name: 'capability', type: 'text' })
+  capability!: string
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
 }

@@ -95,6 +95,20 @@ export type ResolveInput = {
     /** Whether the actor holds the capability at all, from the existing RBAC. */
     holdsCapability: boolean
     /**
+     * `CC-128` — why the actor does NOT hold it, when the cause is not the grant.
+     *
+     * The grant is one of two reasons a capability can be unheld: the ACL may say
+     * yes while the **tenant's capability ceiling** says the tenant may never hold
+     * it at all. Both arrive as `holdsCapability: false`, because both are the
+     * same answer to the same question — but they are not the same fact, and a
+     * message that blames the grant sends an operator to the wrong table. That is
+     * `CC-103`'s lesson (an error naming the wrong cause costs a day), so the
+     * cause travels with the answer instead of being guessed from it.
+     *
+     * Absent means "the grant is the reason" — the existing behaviour, unchanged.
+     */
+    holdsCapabilityRefusal?: string
+    /**
      * The most autonomy this actor has earned for acts of this kind.
      *
      * Absent until the trust model exists (planning 02 §5). Absent is not
@@ -270,7 +284,7 @@ export function resolveDecision(input: ResolveInput): Decision {
     const reason: DecisionReason = {
       rule: 'grant',
       ceiling: 'A0',
-      detail: `The actor does not hold ${capability.id}`,
+      detail: actor.holdsCapabilityRefusal ?? `The actor does not hold ${capability.id}`,
     }
     return {
       gate: 'A0',
