@@ -323,6 +323,24 @@ export class RbacService {
   }
 
   /**
+   * `CC-135` — **the public name for the question above.**
+   *
+   * Under `CC-128` option A, "platform administrator" and "administrator of the foundational tenant"
+   * are the same thing, so this is deliberately a *rename of access*, not a second implementation:
+   * a route that needs to know whether its caller acts above every tenant asks here, and the question
+   * keeps **one home**. The alternative — having the route look up `tenants.is_foundational` itself
+   * and then call `loadAcl` with that scope — would put "which tenant is the foundation" in two
+   * places, and the second one would not get `CC-134`'s fix when the definition next moves.
+   *
+   * **Why this is not a leak of a private.** `isGlobalSuperAdmin` was private because nothing outside
+   * this service needed to ask it; the ceiling route does. Making the answer reachable by its own
+   * name is the whole change — no behaviour moves.
+   */
+  async isPlatformAdmin(userId: string): Promise<boolean> {
+    return this.isGlobalSuperAdmin(userId)
+  }
+
+  /**
    * Loads the Access Control List (ACL) for a user within a given scope.
    * 
    * The ACL resolution follows this priority:

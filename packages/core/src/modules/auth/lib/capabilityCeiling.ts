@@ -232,7 +232,16 @@ export async function replaceCapabilityCeiling(
     // The record goes in BEFORE the flush that closes the transaction, so an act that cannot be
     // recorded does not happen. `ActionLogService.log` writes on the caller's `EntityManager`, so this
     // commits with the ceiling rows it describes.
-    const crossTenant = options.actor.tenantId !== null && options.actor.tenantId !== tenantId
+    // ★ **Cross-tenant means between two tenants** — `CC-135`, found when the route made the case
+    // reachable for the first time. This used to read `actor.tenantId !== null && actor.tenantId !==
+    // tenantId`, so a platform administrator acting from the foundational tenant on the **platform**
+    // ceiling was recorded as `crossTenant: true`. It is not: the platform ceiling belongs to no
+    // tenant, and the act is *the* platform act, not a crossing. Nothing caught it before because the
+    // CLI always acted from `null` — the route is what put a tenant on both sides of the comparison.
+    // `actedFromTenantId` and `ceilingScope` still say where the act came from and what it touched, so
+    // the record loses no information by being precise about the word.
+    const crossTenant =
+      tenantId !== null && options.actor.tenantId !== null && options.actor.tenantId !== tenantId
     await options.audit.log({
       // The TARGET tenant, not the actor's: the tenant whose ceiling moved must see it in its own
       // journal, and an admin must not be able to change a tenant invisibly. `null` for the platform

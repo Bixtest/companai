@@ -128,6 +128,32 @@ describe('mercato auth setup --include-demo-users', () => {
     consoleLogSpy.mockRestore()
   })
 
+  it('designates the tenant it creates as the foundational tenant (CC-135)', async () => {
+    // A fresh deployment is born with a platform administrator. Without this, `CC-134`'s
+    // "no foundation means no platform admin" branch would be the only branch that ever runs, and the
+    // platform capability ceiling would stay CLI-only forever.
+    process.env.NODE_ENV = 'production'
+    await setupCommand.run([...BASE_ARGS])
+    expect(process.exitCode).toBeUndefined()
+    const tenant = persistedEntities.find((entity) => entity && 'isFoundational' in entity)
+    expect(tenant?.isFoundational).toBe(true)
+  })
+
+  it('does not try to create a second foundation when one already exists (CC-135)', async () => {
+    // The one-row partial unique index would reject a second `true`, so the guard has to be a rule with
+    // a message rather than a constraint violation on a re-run.
+    process.env.NODE_ENV = 'production'
+    const roleLookup = findOne.getMockImplementation()
+    findOne.mockImplementation(async (Entity: any, where: any) => {
+      if (Entity?.name === 'Tenant' && where?.isFoundational === true) return { id: 'existing-foundation' }
+      return roleLookup ? roleLookup(Entity, where) : null
+    })
+    await setupCommand.run([...BASE_ARGS])
+    expect(process.exitCode).toBeUndefined()
+    const tenant = persistedEntities.find((entity) => entity && 'isFoundational' in entity)
+    expect(tenant?.isFoundational).toBe(false)
+  })
+
   it('does NOT seed admin@/employee@ accounts by default (no --include-demo-users)', async () => {
     process.env.NODE_ENV = 'production'
     await setupCommand.run([...BASE_ARGS])

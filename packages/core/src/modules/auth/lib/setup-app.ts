@@ -308,9 +308,23 @@ export async function setupInitialTenant(
     const passwordHash = await resolvePasswordHash(primaryUser)
 
     await em.transactional(async (tem) => {
+      // `CC-135` — **a fresh deployment is born with a platform administrator.**
+      //
+      // Under `CC-128` option A the platform's admins are the foundational tenant's admins, and
+      // `CC-134`'s cross-tenant read answers *false* when no tenant carries the flag. Measured
+      // 2026-10-19: nothing wrote it, so the role was declared and unfillable. `mercato auth
+      // set-foundation` is the operator's lever for a deployment that already exists; this is the
+      // fresh-install half, so a new install does not need a second command before its ceiling is
+      // manageable over HTTP.
+      //
+      // Guarded rather than unconditional: the one-row partial unique index on `is_foundational` would
+      // reject a second foundation, and a re-run of setup must fail on a rule with a message, not on a
+      // constraint violation.
+      const existingFoundation = await tem.findOne(Tenant, { isFoundational: true } as any)
       const tenant = tem.create(Tenant, {
         name: options.orgName,
         isActive: true,
+        isFoundational: !existingFoundation,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

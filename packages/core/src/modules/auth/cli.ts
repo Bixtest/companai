@@ -28,6 +28,11 @@ import {
   replaceCapabilityCeiling,
   type CeilingAuditWriter,
 } from '@open-mercato/core/modules/auth/lib/capabilityCeiling'
+import {
+  FoundationError,
+  designateFoundationalTenant,
+  type FoundationAuditWriter,
+} from '@open-mercato/core/modules/auth/lib/foundation'
 import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
 import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import { computeEmailHash, emailHashLookupValues } from './lib/emailHash'
@@ -1305,5 +1310,111 @@ const authorityCeiling: ModuleCli = {
   },
 }
 
+/**
+ * `CC-135` — designate **the tenant the platform's administrators live in**.
+ *
+ * Under `CC-128` option A there is no identity above the tenants: the platform's admins *are* the
+ * foundational tenant's admins. `CC-134` rewrote the cross-tenant read to ask exactly that question —
+ * *"is this person a superadmin in the foundational tenant?"* — and to answer **false** when no tenant
+ * carries `is_foundational`.
+ *
+ * **Measured 2026-10-19: nothing wrote that flag.** The column defaults to `false`, the migration adds
+ * the one-row partial unique index, and `rbacService` was the only reader. So the fail-closed branch
+ * was the only branch that could ever run, and the platform-administrator role — documented, tested,
+ * and depended on by the ceiling route — had no way to be filled. This command is its producer.
+ *
+ * **Two halves of one lever, and `CC-134` §6 named only one.** Moving the foundation does not
+ * invalidate `globalSuperAdminCache`; *setting* it does not either. Both are the same call, and this
+ * command makes it — `invalidateAllCache()` finally has a caller.
+ *
+ * **Why a command and not the route.** Designating the foundation is an act *above* every tenant, and
+ * the first one has to happen when no platform administrator exists yet — a chicken and egg that only
+ * an operator outside the HTTP surface can break. `mercato setup` designates the tenant it creates for
+ * a fresh deployment (`lib/setup-app.ts`); this command is for a deployment that already exists, and
+ * for changing its mind.
+ *
+ * `--clear` is the honest counterpart: it removes the platform administrator, which locks the platform
+ * ceiling back to this CLI. That is a legitimate emergency act, and refusing to offer it would mean the
+ * only way to undo a bad foundation is a database console.
+ */
+const setFoundation: ModuleCli = {
+  command: 'set-foundation',
+  async run(rest) {
+    const args = parseArgs(rest)
+    const container = await createRequestContainer()
+    const em = container.resolve('em') as EntityManager
+
+    const tenantArg = typeof args.tenant === 'string' ? args.tenant.trim() : ''
+    const clear = args.clear === true || args.clear === 'true'
+
+    if (!tenantArg && !clear) {
+      const current = await em.findOne(Tenant, { isFoundational: true } as any)
+      console.log('')
+      if (current) {
+        console.log(`  The foundational tenant is ${String((current as any).id)} — ${(current as any).name ?? 'unnamed'}`)
+        console.log('  Its administrators are the platform administrators: they act above every tenant.')
+      } else {
+        console.log('  No foundational tenant is designated, so there is NO platform administrator.')
+        console.log('  The platform capability ceiling is therefore reachable only from this CLI, and every')
+        console.log('  cross-tenant act is refused.')
+      }
+      console.log('')
+      console.log('  Designate one with: mercato auth set-foundation --tenant <id>')
+      console.log('  Remove it with:     mercato auth set-foundation --clear')
+      console.log('')
+      return
+    }
+
+    if (clear && tenantArg) {
+      process.stderr.write('Pass either --tenant <id> or --clear, not both.\n')
+      process.exitCode = 2
+      return
+    }
+
+    let targetId: string | null = null
+    if (tenantArg) {
+      const target = await em.findOne(Tenant, { id: tenantArg } as any)
+      if (!target) {
+        process.stderr.write(`No tenant with id ${tenantArg}. Run \`mercato auth list-tenants\` to see them.\n`)
+        process.exitCode = 1
+        return
+      }
+      targetId = String((target as any).id)
+    }
+
+    // The rule lives in `lib/foundation.ts`: clear, set, record, and then invalidate the ACL cache.
+    // Splitting those four across a CLI body is how `CC-134` §6's debt came to exist in the first place.
+    const rbac = container.resolve('rbacService') as { invalidateAllCache: () => Promise<void> }
+    let change
+    try {
+      change = await designateFoundationalTenant(em, {
+        tenantId: targetId,
+        audit: container.resolve('actionLogService') as FoundationAuditWriter,
+        invalidateAclCache: () => rbac.invalidateAllCache(),
+      })
+    } catch (error) {
+      if (error instanceof FoundationError) {
+        process.stderr.write(`${error.message}\n`)
+        process.exitCode = 1
+        return
+      }
+      throw error
+    }
+
+    console.log('')
+    if (change.foundationalTenantId) {
+      console.log(`  The foundational tenant is now ${change.foundationalTenantId}.`)
+      if (change.clearedTenantIds.length) {
+        console.log(`  No longer foundational: ${change.clearedTenantIds.join(', ')}`)
+      }
+      console.log('  Its administrators are the platform administrators from the next request onward.')
+    } else {
+      console.log('  No foundational tenant is designated. There is no platform administrator.')
+      console.log('  The platform capability ceiling is reachable only from this CLI.')
+    }
+    console.log('')
+  },
+}
+
 // Export the full CLI list
-export default [authorityExplain, authorityShadowReport, authorityMode, authorityDenials, authorityCeiling, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, authorityShadowReport, authorityMode, authorityDenials, authorityCeiling, setFoundation, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
