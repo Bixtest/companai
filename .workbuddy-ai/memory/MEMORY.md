@@ -47,7 +47,7 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 76 · 62 · 138.** Checkers PASS
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 77 · 61 · 138.** Checkers PASS
 (`check-master-checklist.mjs` + its 14/14-RED mutation suite).
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
@@ -84,15 +84,18 @@ ceiling"* — the ceiling is resolved **by tenant**, so it was a **floor** hole 
 parser-only fix would have left every consumer of `auth.principal` calling a platform act a person.
 **No data to migrate:** `action_logs.actor_user_id` is **`uuid`**, so `system:…` was never storable.
 L190: **two functions can produce one fact; teaching only the one a row names leaves the other
-reporting the old answer**).
+reporting the old answer**) · `CC-137` (**one capability means one door, 2026-10-19** — the users route
+was a fifth way onto the authority system: gated by `auth.users.create/edit`, `roles` array checked only
+by a **subset** rule whose first line is `if (actorAcl.isSuperAdmin) return`. **★ the finding: the floor
+ALREADY named `auth.roles.manage` and this route never asked it** (`CC-101`'s class one layer down) — so
+the fix is **two halves, not alternatives**: the route asks for the capability (**makes the existing
+answer reachable**) + the two user ids join `MACHINE_FLOOR` (**7 → 9**, refuses at the route's own gate).
+Empty `roles` needs no capability (narrowing is not widening). L191: **a check that exempts the most
+powerful actor protects everyone except the one who can do the most harm**).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-137`** — "granting roles" is reachable through `auth.users.edit`, which is **not on the floor**
-  (`roles` arrays are only subset-checked). **RULED 2026-10-19: (b) then (a)** — move role assignment
-  behind `auth.roles.manage`, then add `auth.users.create` + `auth.users.edit` to `MACHINE_FLOOR`
-  (**7 → 9**, so `lib/__tests__/machineFloor.test.ts`'s size guard moves too). **STARTABLE — next.**
 - **`CC-139`** — the ceiling has a route and **no screen**; `CC-135`'s other half, opened in the same
-  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE.**
+  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE — next.**
 - **`CC-138`** — no route declares human-only/machine-only; `CC-125`'s **surface** half, previously
   recorded only inside the closed row. Rides `W3`.
 - **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger; now also in

@@ -5227,3 +5227,45 @@ and therefore that both need a test.
 *Cross-ref: L189 (the fixture decides what a test can see — same family: the instrument, not the code),
 L23, the standing hazard **"a row's prescribed FIX can be wrong — re-measure it first"** (here the row's
 FIX was *a parser edit*, and it was half an edit), `PLAN-CC-136-system-subject.md` §2.2, M2 in its §8.*
+
+## L191
+
+**A check that exempts the most powerful actor protects everyone except the one who can do the most harm.**
+
+`CC-137`'s door was the users route: `POST`/`PUT /api/auth/users` accept a `roles` array, and the only
+check on it was `assertActorCanGrantRoles` — a **subset** check whose first line that matters is
+`if (actorAcl.isSuperAdmin) return` (`lib/grantChecks.ts:63`). So the actor holding `*`, the one who can
+hand out **any** role to anybody, was the one actor the check did not examine. Everybody else was
+carefully bounded.
+
+**It is not a typo, and that is what makes it worth a lesson.** For the rule that function implements —
+*you may pass on what you already hold* — the early return is **correct**: somebody holding everything
+holds everything, and comparing `*` against a role's feature list is busywork. The defect is that this
+was the **only** rule on that path. A narrowing rule was being used as if it were a granting rule, and
+the two differ exactly at the top of the privilege range.
+
+**And there was a second half, which is the part I did not expect.** The machine floor already listed
+`auth.roles.manage` — live since `CC-125`, with its reason written beside it — and this route **never
+asked a question the floor answers**, because it only ever asked *"do you hold `auth.users.edit`?"*. The
+control was correct, present and unreachable: `CC-101`'s class (*a checker is not a control until
+something calls it*), one layer down. The fix was therefore to **ask**, not to add another id.
+
+**The rules.**
+1. **Read the early returns before you trust a check.** An exemption is a statement about *which rule the
+   function implements*, not about who deserves less scrutiny. If the exempted actor is the one whose
+   abuse is unbounded, the check is measuring the wrong population.
+2. **A subset rule bounds narrowing, not granting.** *May you pass on something you hold* and *may you
+   hand out roles at all* are two questions, and the second one is not implied by the first. When a path
+   needs both, both have to be asked.
+3. **When a capability exists and a path does not consult it, add the question — not another
+   capability.** The instinct after finding an open door is to put a new id on the floor; here the id was
+   already there and the door was open because nobody asked. Ask first, then decide whether the gate
+   itself is too wide.
+4. **Say in the test which half it proves.** The route tests here assert the *capability id asked for* on
+   the mock's arguments, because a gate asking for a misspelt capability refuses everybody and looks
+   exactly like a gate that works.
+
+*Cross-ref: `CC-101` (a checker is not a control until something calls it) · L179 (a control that
+discards its answer) · L184 (*a fact is not corrected where it was discovered; it is corrected where it
+is believed* — the floor's entry was believed in one file and unasked in another) ·
+`PLAN-CC-137-role-assignment-door.md` §2, M2 and M3 in its §5.*

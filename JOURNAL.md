@@ -7,6 +7,57 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-137` closed: granting roles has one door, and the floor's answer is finally asked
+
+**What the row asked for.** Close the third door onto the authority system. The direct ACL writer is
+behind a floored capability; `POST`/`PUT /api/auth/users` is gated by two capabilities that were **not**
+on the floor, and its `roles` array was checked only as a **subset** of the actor's own ACL — with an
+early return for a superadmin. So a machine holding the users capability could pass on any role it
+already held, and one holding it *and* a wildcard role could hand out any role to anybody.
+
+**What measuring it found, and it is the reason the row was worth building.** The machine floor **already
+listed `auth.roles.manage`** — live since `CC-125`, with its reason written beside it — and this route
+**never asked a question the floor answers**, because it only ever asked *"do you hold the users
+capability?"*. The control was correct, present, and unreachable: the same shape as a checker nothing
+calls, one layer down. **So the fix is two halves and they are not alternatives.** The route now asks for
+the capability that means *may you assign roles* whenever a request carries roles — that is what makes the
+existing answer reachable — and the two user capabilities joined the floor — that is what refuses the
+machine at the route's own gate, before the handler is entered at all.
+
+**★ And the old check was worth nothing for the actor that mattered.** `assertActorCanGrantRoles` begins,
+in effect, with *if you are a superadmin, return* — so the one actor able to pass on **any** role was
+exempted by the check itself. That is not a typo: for the rule it implements (*you may pass on what you
+hold*) the early return is right, and comparing `*` against a feature list is busywork. The defect is that
+it was the **only** rule on that path — a **narrowing** rule doing duty as a **granting** rule, and the
+two differ exactly at the top of the privilege range. `LESSONS.md` **L191**.
+
+**What landed.** `assertCanAssignRoles` asks `userHasAllFeatures(actor, ['auth.roles.manage'], scope)` and
+**fails closed** (`?? false`) when the answer cannot be obtained; the subset check stays, because *may you
+assign roles* is not *may you assign a role wider than your own*. `MACHINE_FLOOR` grew **7 → 9**, and
+every place that states the size moved with it — the docblock arithmetic, the size guard, and the comment
+that had recorded this gap as open. **An empty `roles` array needs no capability:** it hands nobody a role,
+the grant check already returns early for it, and narrowing is not widening — the same rule that keeps
+`api_keys.delete` off the floor. `auth.users.list` and `auth.users.delete` stay off, asserted so a later
+tidy-up cannot widen the floor by accident.
+
+**The proof.** +5 route tests and +1 floor test. **5/5 mutations RED**, and two of them are the ones worth
+reading: flipping `?? false` to `?? true` turns **exactly one** test red — the fail-closed case — which is
+the whole justification for the `?.`; and removing the two ids from the floor turns three red across two
+suites, including the belt-and-braces assertion inside the machine test, which asks the **real** floor
+rather than a fixture told to say no. Every file restored **checksum-verified byte-identical**. Auth
+**105 suites / 937 tests**; core **659 suites / 5,806 tests, 0 failures**; `tsc` 0.
+
+**Why it matters beyond the row.** The authority system's four direct doors were shut by `CC-125`; this
+was the fifth, through a route that looked like user administration. With it closed, the last *measured*
+way a machine reaches the levers that define authority without touching a floored capability is gone —
+what remains on that path is the owner's long-standing decisions about what a machine may hold at all
+(`CC-120`) and whether the platform has an identity above its tenants (`CC-133`).
+
+**Records:** [`PLAN-CC-137-role-assignment-door.md`](library/development/PLAN-CC-137-role-assignment-door.md) ·
+`LESSONS.md` **L191** · `MASTER-CHECKLIST.md` §2 and §5.
+
+---
+
 ## 2026-10-19 — `CC-136` closed: when the platform acts on its own behalf, it stops being filed as a person
 
 **What the row asked for.** Teach the reader that `system:` marks the platform acting on its own behalf.
