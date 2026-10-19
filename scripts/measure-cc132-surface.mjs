@@ -168,4 +168,4 @@ for (const line of readFileSync(modulesTsPath, 'utf8').split('\n')) {
   if (m) allIds.add(m[1])
 }
 const enabledIds = new Set(entries.map((e) => e.id))
-for (const id of [...allIds].sort()) if (!enabledIds.has(id)) console.log('  ' + id)
+for (const id of [...allIds].sort((a, b) => a.localeCompare(b))) if (!enabledIds.has(id)) console.log('  ' + id)
