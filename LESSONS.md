@@ -5056,3 +5056,22 @@ discards its answer*) — a fact with no path to the place it is needed.
 **The general form:** *a fact is not corrected where it was discovered; it is corrected where it is
 believed.*
 
+
+## L185 — a default is not a default: `default: false` in an entity decorator does not make the property optional (2026-10-19, `CC-128`)
+
+I added a column to the tenant table — `is_foundational boolean not null default false` — and declared it the way the neighbouring column is declared:
+
+```ts
+@Property({ name: 'is_active', type: 'boolean', default: true })   isActive: boolean = true
+@Property({ name: 'is_foundational', type: 'boolean', default: false }) isFoundational: boolean = false
+```
+
+`tsc` then refused every existing `em.create(Tenant, { name, isActive, createdAt, updatedAt })` call with *"Property `isFoundational` is missing … but required"*. **The two declarations are identical in shape and opposite in effect**, because the falsy default is not inferred. `is_active` has been optional since the table was written; the new column was mandatory the moment it existed.
+
+**The rules.**
+1. **A decorator `default` is metadata for the database, not a statement about the TypeScript type.** Optionality is inferred from the presence of a default in some paths and not others — so when a property has a default, say so explicitly with `[OptionalProps]?: 'name'`. It costs one line and it cannot be inferred wrongly.
+2. **`default: false` and `default: 0` are the cases to test**, because they are the ones a truthiness check anywhere in the chain will quietly discard. A default of `true` proves nothing about a default of `false`.
+3. **When a shared entity gains a required property, the compiler is the census.** It found every call site in one pass — which is the argument for `tsc` being in the loop before a commit, not after.
+4. **The column and the type must be changed together.** A migration that adds a column with a default, plus an entity that declares it required, is a deploy that compiles in the migration and fails at every write.
+
+*Cross-ref: L37 (Awilix's silent `undefined` — the same family: a declaration that reads as one thing and behaves as another), `CC-128` §8 of `PLAN-CC-128-tenant-ceiling.md`; `packages/core/src/modules/directory/data/entities.ts`, `packages/core/src/modules/auth/data/entities.ts`.*

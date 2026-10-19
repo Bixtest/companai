@@ -286,6 +286,101 @@ and `CC-107`: the table, both partial uniques, the one-foundational index, `down
 | 3 | The naming collision found before it was written into a table (§1.4) | ✅ **DONE** |
 | 4 | The requirement (R1–R7) | ✅ **DONE** |
 | 5 | The design: table, foundational marker, enforcement point, cache (§3) | ✅ **DONE** |
-| 6 | The migration + a real-Postgres probe | ⬜ **NEXT** |
-| 7 | The resolver input and the cache | ⬜ |
-| 8 | The write path (subset check, refusal, invalidation) | ⬜ |
+| 6 | The migration + a real-Postgres probe | ✅ **DONE** — §8 |
+| 7 | The resolver input and the cache | ✅ **DONE** — §8 |
+| 8 | The write path (subset check, refusal, invalidation) | ✅ **DONE** — §8, as a CLI |
+
+---
+
+## 8. The build record
+
+Two migrations, both proven on a real PostgreSQL 16:
+
+- `directory/migrations/Migration20261019070000_directory.ts` — `tenants.is_foundational` (`boolean not
+  null default false`) plus `tenants_one_foundational_uq`, a **partial unique index over
+  `("is_foundational") where "is_foundational"`**, so a second `true` is a `23505` and not a service's
+  memory.
+- `auth/migrations/Migration20261019071000.ts` — `tenant_capability_ceilings` with two partial uniques
+  (platform scope `tenant_id is null`, tenant scope `tenant_id is not null`), both excluding retired
+  rows, and one read index.
+
+**The probe is committed beside them** (`auth/migrations/__probes__/tenant-capability-ceiling.probe.sql`)
+with its run command, and it extracts each migration's **own** SQL at runtime rather than a hand-copy.
+Cases A–F: the pre-migration shape; both `up()`s; at most one foundational tenant (and any number of
+`false` rows); the two ceiling uniques; a retired row freeing its slot; **the subset rule as one
+`NOT EXISTS`**; and `down()`/`up()` again. All green, container removed.
+
+### 8.1 The enforcement point, and why it is `holdsCapability`
+
+The ceiling is **not** an autonomy gate. The other ceilings answer *how careful must we be*; this one
+answers *may this be held at all* — and a capability outside it is not "needs approval", it is
+unavailable. `resolveDecision` already has exactly that answer: `holdsCapability: false` → `A0`,
+`bindingRule: 'grant'`. So `decideFor` now computes the ceiling refusal and passes
+`holdsCapability: ceilingRefusal === null`.
+
+**One addition to the shared type was needed.** Both causes — "the ACL does not grant it" and "the
+tenant may never hold it" — arrive as `holdsCapability: false`, so the stock message would have said
+*"The actor does not hold X"* and sent an operator to the grant. `ResolveInput.actor` gained an optional
+`holdsCapabilityRefusal`, and the grant rule prefers it. Additive: absent means the old behaviour, and
+no existing test pinned that string.
+
+**Batch-shaped, not per-capability.** `refusalFor` asks the resolver once per required capability, so a
+per-capability reader would read the ceiling N times per request. The reader interface is
+`refusalsFor(tenantId, capabilities) → Map`, and `refusalFor` loads once and passes the map down.
+
+**`null` reader = no ceiling store wired**, which is the pre-`CC-128` behaviour and what every existing
+test constructs. Production wires it in `auth/di.ts`. That default is the fail-open shape, so it is
+named in the interface's docblock rather than left to be discovered.
+
+### 8.2 The design decision the build forced: an empty ceiling is not expressible
+
+`loadCapabilityCeiling` inherits the platform ceiling when a tenant has **no rows**. But an empty set of
+rows and "no rows" are indistinguishable, so a tenant that deliberately allowed nothing would silently
+inherit everything.
+
+**Resolved by refusing the empty write**, in both scopes, with a message that points at
+`tenants.is_active` for a tenant and at the inheritance rule for the platform. The alternative — a
+marker row meaning "I really mean empty" — is a second encoding of one fact, which is the thing this
+codebase's own rules forbid. Recorded here because it is a real product decision, not an implementation
+detail.
+
+### 8.3 The write path is a CLI, and that is deliberate
+
+`mercato auth ceiling [--tenant <id>] [--set a.b,c.d]` — read, or replace. **It is the ceiling's only
+caller**, and without one the table would be `CC-101`'s class: a control nothing calls. A route and a
+screen are separate work (§5).
+
+### 8.4 Proof
+
+| Proof | Result |
+|---|---|
+| `capabilityCeiling.test.ts` | **15/15** |
+| `authorityEnforcement.capabilityCeiling.test.ts` | **7/7** |
+| the whole `auth` module | **100 suites / 881 tests**, no suite failed to load |
+| `tsc -p packages/core` | **0** |
+| **the probe**, real PostgreSQL 16 | A–F all green; container removed |
+| **five mutations**, each reverted and files restored byte-identical | **all 5 RED** |
+
+The five mutations, and the test each one kills:
+
+| # | Mutation | Killed by |
+|---|---|---|
+| M1 | `holdsCapability: true` — the ceiling ignored in the resolver | 3 tests, including *"refuses a capability the tenant may never hold"* |
+| M2 | the subset check removed | *"refuses a SUPERSET of the platform ceiling"* |
+| M3 | `deleted_at is null` dropped from the read | *"a retired row is not part of the ceiling"* |
+| M4 | **inheriting tenants unbounded** (only tenant ceilings enforced) | *"names the platform when the tenant inherited"* |
+| M5 | the empty-write guard removed | both empty-ceiling tests |
+
+**M4 is the important one.** It is the mutation that turns a ceiling into a decoration, and it is the one
+a future reader would be most tempted to introduce "for compatibility".
+
+### 8.5 What is still not done, and it is named
+
+- **No route and no screen.** A ceiling can be read and replaced from the CLI only.
+- **`isGlobalSuperAdmin` still has no tenant filter** (§5). R2 bounds its consequence; the read is wrong.
+- **The cache is only as good as the deployment.** `loadCapabilityCeiling` caches under
+  `auth:capability-ceiling` and a write invalidates by tag, but if no `CacheStrategy` is registered the
+  read falls through to the table every time — correct, just slower. Recorded so a performance
+  investigation starts here rather than at the resolver.
+- **No `CC-119`.** Both migrations join the set the database rebuild milestone carries, including
+  `ai_agent_types`, which is already queued there.
