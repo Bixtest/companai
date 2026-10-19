@@ -7,6 +7,59 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-135` closed: the ceiling has a door, and the platform has an administrator
+
+**What the row asked for.** A route, so that a ceiling change stops being recorded as `system`. The
+audit half was already built and correct — `CC-128` made the actor a **required** argument precisely so
+that the day a route supplied a real principal the record would be real for free. The only caller was
+`mercato auth ceiling`, and a CLI has no principal.
+
+**★ What measuring the row's own `FIX` line found, and it is why this was not a transport change.**
+
+*First: the platform administrator did not exist.* `CC-134` rewrote the cross-tenant read to ask *"is
+this person an administrator of the **foundational** tenant?"* and to answer **false** when no such
+tenant exists. Measured from source: `grep -rn isFoundational` over `packages` and `apps` returns **one
+reader and no writer**. The column defaults to `false` and nothing sets it. So the fail-closed branch
+was the only branch that could run, and a platform-scope route would have been a door nobody could open
+— the same shape as `CC-136`'s "a kind with no producer", one layer up.
+
+*Second: the capability is not the reach.* `directory.tenants.manage` says *may you manage tenants*. It
+does not say *whose ceiling may you move*. Under `CC-134` every tenant's administrator holds that
+capability legitimately, through the `*` that belongs to their position; and a tenant with no ceiling
+rows **inherits** the platform's. Gating on the capability alone would therefore have handed **every
+tenant administrator the platform ceiling** — the set that bounds every other tenant — which is
+strictly worse than having no HTTP door at all.
+
+**So the route asks two questions.** The capability, at the dispatcher's gate; and the **reach**: the
+platform scope needs a platform administrator, a tenant scope needs the caller's own tenant or a
+platform administrator, and narrowing your own tenant's ceiling is allowed — because `CC-128` already
+refuses a non-subset, so the most a tenant can do to itself is reduce.
+
+**And the flag gained its producer.** `mercato auth set-foundation --tenant <id> | --clear` — clear,
+set, record, and then **invalidate the ACL cache**, which is `CC-134`'s named debt and now has its only
+caller. `mercato setup` designates the tenant it creates, so a fresh install is born with a platform
+administrator instead of needing a second command.
+
+**★ The finding the route produced.** `crossTenant` was computed as *the actor stands in a tenant and
+that tenant is not the target*, which reads correctly until the target is the **platform** ceiling —
+`tenantId === null` — where it became `true`. So a platform administrator changing the platform ceiling
+would have been recorded as a **cross-tenant act**. It is not: the platform ceiling belongs to no
+tenant, and that act *is* the platform act. Nothing could have caught it before, because the only caller
+was a CLI that always acted from `null`; the route is what put a tenant on both sides of the comparison.
+
+**And one lesson about tests, from the test that passed.** The new suite imported `Tenant` from a module
+that does not export it, so the symbol was `undefined` at runtime and every tenant lookup answered "not
+found". Six tests failed — and the **404** test passed, because its entire content is *"the lookup finds
+nothing"*. A green refusal test is the weakest witness in the suite. `LESSONS.md` **L189**.
+
+**Proof.** 14 route tests driving the real handlers and the real library against a store that **applies
+the filters it is handed**; 5 foundation tests; +2 setup tests; **6/6 mutations RED**, every file
+restored checksum-verified byte-identical; auth **105 suites / 931 tests**; core **659 suites / 5,800
+tests, 0 failures**; `tsc` 0. The **screen** is `CC-139`, opened in the same change — a closed row is
+where a remaining half goes to be forgotten.
+
+---
+
 ## 2026-10-19 — `CC-134` closed: an administrator of one tenant is no longer an administrator of every tenant
 
 **The defect.** The read asked *"does this person hold a superadmin row anywhere?"* and the answer

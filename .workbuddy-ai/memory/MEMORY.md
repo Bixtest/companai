@@ -45,7 +45,7 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 74 · 63 · 137.** Checkers PASS.
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 75 · 63 · 138.** Checkers PASS.
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
 
@@ -60,11 +60,23 @@ directions; now `160/160 across 34 modules — 149 in this environment`, 39 desc
 (**the superadmin read** — now scoped to the **foundational** tenant in both halves, fail-closed with
 no foundation; **★ the blast radius's lesson: scoping the shortcut would have DEMOTED a tenant's own
 admin**, because `['*']` was arriving as a side effect of the bug — the wildcard belongs to the
-position, not the row. **7 new tests passed while that was broken; the OLD suite caught it.** L188).
+position, not the row. **7 new tests passed while that was broken; the OLD suite caught it.** L188) ·
+`CC-135` (**the ceiling's door, 2026-10-19** — `GET`/`PUT /api/auth/capability-ceiling[/tenant/:id]`
+behind `directory.tenants.manage`, recording `derivePrincipal(auth)`; **★ two defects the row's own FIX
+line did not name**: (1) **`is_foundational` had NO WRITER** — one reader, nothing set it, so
+`CC-134`'s fail-closed branch was the only branch and the platform scope would have been unreachable →
+`mercato auth set-foundation [--tenant|--clear]` + `setup` designates what it creates, and that command
+is **`invalidateAllCache()`'s only caller**; (2) **the capability is not the reach** — every tenant
+superadmin holds it through `*` and a tenant with no rows inherits the platform's, so one gate would have
+handed every tenant admin the **platform** ceiling → the route asks **two** questions, and
+self-narrowing is allowed because `CC-128` already refuses a non-subset. **★ `crossTenant` was wrong
+for the platform scope** (a platform act was recorded as cross-tenant) — unreachable before because the
+CLI always acted from `null`. L189: **an import from the wrong module is `undefined`, and the test that
+passes because of it is the NEGATIVE one**).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-135`** — the ceiling has no route/screen (CLI only, so its recorded actor is `system`).
-  **STARTABLE — next.**
+- **`CC-139`** — the ceiling has a route and **no screen**; `CC-135`'s other half, opened in the same
+  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE — next.**
 - **`CC-136`** — `system:` is a principal kind with **no producer**; `parseSubject` calls it `human`,
   so a platform act passes both floor and ceiling. **NEEDS THE OWNER** (rec: teach the parser).
 - **`CC-137`** — "granting roles" is reachable through `auth.users.edit`, which is **not on the floor**

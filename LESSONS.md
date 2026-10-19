@@ -5158,3 +5158,35 @@ regression in the opposite direction and would have been discovered by a custome
 *Cross-ref: L175 (a counter that reports the start state cannot report the left state — same family:
 the instrument measuring the wrong moment), `CC-134` §7 of `PLAN-CC-134-superadmin-tenant-scope.md`,
 `rbacService.ts`'s per-tenant read.*
+
+## L189
+
+**An import from the wrong module is `undefined` at runtime — and the test that passes because of it is
+the NEGATIVE one.**
+
+`CC-135`'s new route test imported `Tenant` from `auth/data/entities`, which does not export it. Nothing
+type-checked it (the suite runs with `isolatedModules`), so the symbol compiled to `undefined`, and the
+fake `findOne` compared `entity === Tenant` — i.e. `=== undefined` — against the real class the code
+under test passes. The comparison was never true, so **every tenant lookup answered "not found"**.
+
+The result is the part worth remembering: **six tests failed and one passed.** The one that passed was
+`answers 404 for a tenant id that does not exist` — a test whose whole content is *"the lookup finds
+nothing"*. It had been handed a store where the lookup could never find anything, and it reported the
+correct behaviour for a system with no tenants in it. Had the suite been written in the usual order
+(negative cases first, green quickly, move on) the failure would have been invisible until a customer
+asked why their ceiling route 404s.
+
+**The rules.**
+1. **Import the class from the module the code under test imports it from.** A re-export is a promise
+   nobody checks; if the module you reach for does not export it, you get `undefined`, not a compile
+   error, and `===` against `undefined` is silently false forever.
+2. **A green refusal test is the weakest witness in the suite.** It is satisfied by a fixture that can
+   only refuse. When the success cases go red and the refusal case stays green, suspect the fixture
+   before the code — a broken store looks exactly like a correct refusal.
+3. **Say in the test why the import is where it is.** The fix here is one line plus a comment; without
+   the comment the next editor "tidies" it back.
+
+*Cross-ref: L23 (a fake that ignores its arguments cannot prove a filter — the same family: the fixture,
+not the code, decides what the test can see), the standing hazard **"a row's prescribed FIX can be
+wrong — re-measure it first"** (here the row named **one** gate where the act needed **two**:
+`CC-135` §3.2), `api/__tests__/capability-ceiling.route.test.ts`.*
