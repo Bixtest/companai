@@ -1,7 +1,8 @@
 # Working rules — the owner's standing instructions, in one place
 
-> ## ★ NOTE — HOW TO ASK THE OWNER A QUESTION
-> *(owner, 2026-10-18. It is first because it was broken first.)*
+> ## ★ NOTE — HOW TO TALK TO THE OWNER: QUESTIONS **AND** REPORTS
+> *(owner, 2026-10-18. It is first because it was broken first. **Widened 2026-10-19, because it was
+> broken again — in a report, which this note did not cover.**)*
 >
 > **Before asking anything, rewrite the question as if explaining it to a 14-year-old.** One everyday
 > example. No project vocabulary. Say what each answer would change. **If the rewritten question still
@@ -19,6 +20,21 @@
 > **The test before sending:** *could a smart person who has never opened this codebase answer this in
 > one sentence?* If not, rewrite it. **If a sensible default exists, take it, do the work, and tell him
 > what changed** — §2.2, and it is the cheapest way to not spend his attention.
+>
+> **★ IT APPLIES TO REPORTS TOO (owner, 2026-10-19).** The note above was written after a **question**
+> failed, so it was scoped to questions — and on 2026-10-19 a **report** ended with *"the invoker half
+> splits into holding and gating"*, *"`di.ts:59` has a cycle"*, *"36 of the 157 have no descriptor"*.
+> The owner's reply: *"random cryptic words salad I have no clue what it means."* **A rule written from
+> one failure tends to cover only that failure's shape.**
+>
+> So: **apply the test to every sentence that reports a change.** The vocabulary to avoid is not just
+> project nouns — it is anything that names a mechanism: function names, file paths, gate labels
+> (`A0`–`A5`), and the words *descriptor*, *invoker*, *intersection*, *holding*, *gating*. **Say what
+> changed in the product's terms first, then the everyday example, then what it costs.** *"A stand-in
+> can't collect a parcel you couldn't collect yourself"* is the same fact as *"the invoker half splits
+> into holding and gating"* — and only the first can be checked by the person paying for the work.
+> **If it needs a diagram, it is unfinished thinking**, which is as true of an explanation as of a
+> question. `LESSONS.md` L183.
 
 **What this file is.** The owner's rules that apply to **every session, every task**, gathered in one
 page so they are not scattered across the prompt, the handover and the cookbook. It is a **list and a

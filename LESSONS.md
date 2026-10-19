@@ -4988,3 +4988,36 @@ number was wrong in a way no assertion covered. A total that adds up is not a to
 **The general form:** a status vocabulary is a control surface. If the checker cannot parse the
 word you wrote, you have not closed the row — you have written a sentence that looks like closure
 to a human and is invisible to the machine that counts.
+
+## L183 — The 14-year-old test governs every explanation, not only questions
+
+**What happened.** `CC-123`'s requirement was written and the report ended with *"Two things worth
+your attention"* — followed by *"the invoker half splits into holding and gating"*, *"`di.ts:59` has
+a cycle"*, *"36 of the 157 have no descriptor"*. Every one of those is a **true sentence about the
+code** and not one of them is a sentence about **what changed for the product**. The owner's reply:
+*"random cryptic words salad I have no clue what it means. check your working rules."*
+
+**Why it happened, and it is not carelessness.** `WORKING-RULES.md`'s top note says the test applies
+*"before asking anything"*. It was written after a **question** failed, so it was scoped to questions
+— and a report is not a question. So the test was not applied to the one thing that is sent far more
+often. **A rule written from one failure tends to cover only that failure's shape.**
+
+**What to do instead.**
+
+1. **Apply the test to every sentence that reports a change**, not only to sentences with a question
+   mark. The question is *"could somebody who has never opened this codebase say what changed?"*
+2. **The vocabulary list is not just project nouns — it is anything that names a mechanism.**
+   Function names, file paths, gate labels (`A0`–`A5`), the words *descriptor*, *invoker*,
+   *intersection*, *holding*, *gating*. If the sentence survives only because the reader knows the
+   code, it is a log entry, not a report.
+3. **Say what changed in the product's terms, then the example, then what it costs.** Not the
+   reverse. *"A stand-in can't collect a parcel you couldn't collect yourself"* is the same fact as
+   *"the invoker half splits into holding and gating"*, and only the first one can be checked by the
+   person paying for the work.
+4. **If it needs a diagram, it is unfinished thinking** — the note already says this about questions.
+   It is equally true of an explanation.
+
+**The general form:** a rule learned from a failed question will be written as a rule about
+questions. **Scope it to the class of failure, not the instance** — the owner reads reports every
+turn and questions rarely, so the narrow reading protects the wrong thing.
+
