@@ -8,6 +8,26 @@ export interface AiAgentBindingContext {
   userId?: string | null
 }
 
+/**
+ * A scope with no organization in it, on purpose.
+ *
+ * The per-agent and per-principal reads are organization-scoped because a
+ * manage surface acts inside one organization. A **departure** is not: a person
+ * leaves a tenant, and their bindings may sit in several organizations of it.
+ * Passing this type instead of `AiAgentBindingContext` makes the wider scope a
+ * decision the caller cannot make by forgetting a field (`CC-127`).
+ */
+export interface AiAgentTenantScope {
+  tenantId: string
+}
+
+/** One binding the departure cascade revoked, as the write reported it. */
+export interface AiAgentBindingRevoked {
+  principalId: string
+  agentId: string
+  organizationId: string | null
+}
+
 export interface AiAgentBindingInput {
   principalId: string
   agentId: string
@@ -102,6 +122,35 @@ export class AiAgentBindingRepository {
   }
 
   /**
+   * Lists the live bindings for several principals **across the whole tenant**
+   * (`CC-127`).
+   *
+   * Deliberately not `listForPrincipal` in a loop: that one narrows to
+   * `organizationId: ctx.organizationId ?? null`, so a departure preview built
+   * on it would silently omit every binding the person holds in another
+   * organization of the same tenant — and the admin would be shown a shorter
+   * list than the cascade later acts on.
+   */
+  async listForPrincipals(
+    principalIds: string[],
+    scope: AiAgentTenantScope,
+  ): Promise<AiAgentBinding[]> {
+    const ids = normalizeIdList(principalIds)
+    if (!ids.length || !scope?.tenantId) return []
+    return findWithDecryption<AiAgentBinding>(
+      this.em,
+      AiAgentBinding,
+      {
+        tenantId: scope.tenantId,
+        principalId: { $in: ids },
+        deletedAt: null,
+      } as any,
+      { orderBy: { agentId: 'ASC' } },
+      { tenantId: scope.tenantId, organizationId: null },
+    )
+  }
+
+  /**
    * Creates or replaces the live binding for `(principalId, agentId)`.
    *
    * A soft-deleted prior row is revived rather than duplicated, so the partial
@@ -178,6 +227,60 @@ export class AiAgentBindingRepository {
       return true
     })
   }
+
+  /**
+   * Soft-deletes every live binding held by these principals, tenant-wide
+   * (`CC-127`).
+   *
+   * The departure cascade's write. Two things differ from `revoke` above, both
+   * on purpose:
+   *
+   * - **no organization filter.** `revoke` narrows to
+   *   `organizationId: ctx.organizationId ?? null`, which is right for a
+   *   per-agent manage route acting inside one organization and wrong for a
+   *   person leaving a tenant: the bindings they hold in a second organization
+   *   would survive a call that reported success.
+   * - **it returns the rows it changed**, not a boolean. A receipt has to name
+   *   what was revoked; a count cannot, and a preview list is a read taken
+   *   before the write.
+   *
+   * Idempotent: already-revoked rows are not live, so they are not selected and
+   * not reported. The caller derives "already revoked" from what it listed
+   * minus what this returned.
+   */
+  async revokeForPrincipals(
+    principalIds: string[],
+    scope: AiAgentTenantScope,
+  ): Promise<AiAgentBindingRevoked[]> {
+    const ids = normalizeIdList(principalIds)
+    if (!ids.length || !scope?.tenantId) return []
+    return this.em.transactional(async (tx) => {
+      const rows = await tx.find(AiAgentBinding, {
+        tenantId: scope.tenantId,
+        principalId: { $in: ids },
+        deletedAt: null,
+      } as any)
+      if (!rows.length) return []
+      const now = new Date()
+      for (const row of rows) {
+        row.deletedAt = now
+        row.updatedAt = now
+      }
+      await tx.persist(rows).flush()
+      return rows.map((row) => ({
+        principalId: row.principalId,
+        agentId: row.agentId,
+        organizationId: row.organizationId ?? null,
+      }))
+    })
+  }
+}
+
+function normalizeIdList(values: string[] | null | undefined): string[] {
+  if (!Array.isArray(values)) return []
+  return Array.from(
+    new Set(values.filter((value) => typeof value === 'string' && value.trim().length > 0)),
+  )
 }
 
 function normalizeStringList(values: string[] | null | undefined): string[] | null {
