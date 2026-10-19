@@ -52,6 +52,8 @@ type Ceiling = {
   tenantId?: string
   source: 'platform' | 'tenant'
   capabilities: string[]
+  /** `CC-140` — the fingerprint of the set, and the token this save sends back. */
+  revision?: string
 }
 type TenantOption = { id: string; name: string }
 
@@ -98,7 +100,7 @@ export function CapabilityCeilingPage() {
   const [catalogue, setCatalogue] = React.useState<Catalogue | null>(null)
   const [tenants, setTenants] = React.useState<TenantOption[]>([])
   const [scope, setScope] = React.useState<string>(PLATFORM_SCOPE)
-  const [ceiling, setCeiling] = React.useState<Ceiling | null>(null)
+  const [ceiling, setCeiling] = React.useState<Ceiling & { revision?: string } | null>(null)
   const [selected, setSelected] = React.useState<string[]>([])
   const [loading, setLoading] = React.useState(true)
   const [saving, setSaving] = React.useState(false)
@@ -187,9 +189,21 @@ export function CapabilityCeilingPage() {
         method: 'PUT',
         credentials: 'include',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ capabilities: sortedSet(selected) }),
+        // `CC-140` — the revision travels with the save, so a write against a view that moved is refused
+        // instead of silently discarding the change somebody else made while this screen was open.
+        body: JSON.stringify({
+          capabilities: sortedSet(selected),
+          ...(ceiling?.revision ? { expectedRevision: ceiling.revision } : {}),
+        }),
       })
       const body = await response.json().catch(() => null)
+      if (response.status === 409) {
+        // Stale view, not a wrong request. **Reload first, then speak:** the reload resets the notice and
+        // the error, so a message set before it would be wiped out by the very fix it triggered.
+        await loadCeiling(scope)
+        setError(messageOf(body, response.status))
+        return
+      }
       if (!response.ok) {
         setError(messageOf(body, response.status))
         return

@@ -6,6 +6,7 @@ import { Tenant } from '@open-mercato/core/modules/directory/data/entities'
 import type { RbacService } from '../services/rbacService'
 import {
   CapabilityCeilingError,
+  ceilingRevision,
   loadCapabilityCeiling,
   replaceCapabilityCeiling,
   type CeilingActor,
@@ -57,6 +58,15 @@ export function tenantIdOf(scope: CeilingScope): string | null {
  */
 export const ceilingWriteSchema = z.object({
   capabilities: z.array(z.string().trim().min(1).max(200)).max(2000),
+  /**
+   * `CC-140` — optional, and a caller that does not send it behaves exactly as before.
+   *
+   * The revision of the ceiling the writer believed they were editing, as returned by the read. A write
+   * whose expected revision does not match what the table holds **now** is refused with a **409**, so a
+   * screen cannot silently discard another administrator's change. It is the fingerprint of the *set*
+   * (`ceilingRevision`), not a row version — a ceiling is N rows, so no row version exists.
+   */
+  expectedRevision: z.string().trim().max(64).optional(),
 })
 
 /** What the routes hand in. Structurally what `getAuthFromRequest` returns, plus its attached principal. */
@@ -169,12 +179,21 @@ async function targetRefusal(em: EntityManager, scope: CeilingScope): Promise<st
   return tenant ? null : `No tenant with id ${scope.tenantId}.`
 }
 
-function serialize(scope: CeilingScope, source: 'platform' | 'tenant', capabilities: Iterable<string>) {
+function serialize(
+  scope: CeilingScope,
+  source: 'platform' | 'tenant',
+  capabilities: Iterable<string>,
+) {
+  const sorted = [...capabilities].sort((a, b) => a.localeCompare(b))
   return {
     scope: scope.kind,
     ...(scope.kind === 'tenant' ? { tenantId: scope.tenantId } : {}),
     source,
-    capabilities: [...capabilities].sort((a, b) => a.localeCompare(b)),
+    capabilities: sorted,
+    // `CC-140` — the fingerprint of the set, so a writer can say which set they believed they were
+    // editing. Computed from the same sorted array that is being returned, so the state and its revision
+    // can never describe two different things.
+    revision: ceilingRevision(sorted),
   }
 }
 
@@ -224,6 +243,8 @@ export async function writeCeilingForCaller(input: {
   auth: CeilingCaller | null | undefined
   scope: CeilingScope
   capabilities: readonly string[]
+  /** `CC-140` — the revision the writer believed they were editing. Absent means "do not check". */
+  expectedRevision?: string | null
 }): Promise<CeilingResult> {
   const principal = principalOf(input.auth)
   if (!principal) return { status: 401, body: { error: 'Unauthorized' } }
@@ -235,6 +256,31 @@ export async function writeCeilingForCaller(input: {
   if (refusal) return { status: 403, body: { error: refusal } }
 
   const tenantId = tenantIdOf(input.scope)
+
+  // `CC-140` — the concurrency check, **before** anything is written.
+  //
+  // A 409 rather than a 400, because the request is not wrong: the **view** is stale. An operator who
+  // reads 400 will try again and lose the same change twice.
+  //
+  // **What this is and is not:** the window between this comparison and the write is milliseconds, not
+  // zero — this converts a silent overwrite into a refusal, it does not make the write atomic. A real
+  // lock would be `SELECT … FOR UPDATE` over the rows being replaced; see `ceilingRevision`'s docblock
+  // and `LESSONS.md` L192, because a control whose strength is overstated in its own comment is the
+  // defect, not the defence.
+  if (typeof input.expectedRevision === 'string' && input.expectedRevision.length > 0) {
+    const current = await loadCapabilityCeiling(input.em, tenantId, input.cache)
+    if (ceilingRevision(current.capabilities) !== input.expectedRevision) {
+      return {
+        status: 409,
+        body: {
+          error:
+            'The ceiling changed while you were looking at it, and saving now would discard that change. ' +
+            'Reload it and apply your edit again.',
+        },
+      }
+    }
+  }
+
   try {
     const result = await replaceCapabilityCeiling(input.em, tenantId, input.capabilities, {
       actor: actorOf(principal),

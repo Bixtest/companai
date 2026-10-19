@@ -94,6 +94,42 @@ export class CapabilityCeilingError extends Error {
 }
 
 /**
+ * `CC-140` — the **revision** of a ceiling: the fingerprint of its set.
+ *
+ * **Why a hash of the set and not a row's `updatedAt`.** A ceiling is not one row — `tenant_capability_
+ * ceilings` holds one row per capability, so `replaceCapabilityCeiling` rewrites N rows and there is no
+ * single version a header could name. That is exactly the reason `CC-139`'s screen had to answer a guard
+ * with an exemption rather than a header, and the reason is honest, specific — **and the reason itself was
+ * a defect**: two administrators who both loaded the same ceiling and both saved kept the last write, and
+ * the first one's change vanished with no message. The fingerprint of the set is the thing a stale writer
+ * is wrong about, so it is the thing the revision identifies.
+ *
+ * **Why FNV-1a and not `crypto`.** The value never protects anything: it is an *equality* token between a
+ * read and a write, not a secret, and its whole job is to make a stale save fail. A cryptographic hash
+ * would add an import and imply a strength property this does not claim.
+ *
+ * **What it is not.** Not a lock. A stale write is refused inside a window of milliseconds rather than
+ * minutes; two writers who both re-read between the comparison and the write still race. A real lock would
+ * be `SELECT … FOR UPDATE` over the rows being replaced — named here so nobody reads this as one
+ * (`LESSONS.md` L192: a control whose strength is overstated in its own comment is the `CC-19` family).
+ */
+export function ceilingRevision(capabilities: Iterable<string>): string {
+  const sorted = Array.from(new Set(capabilities)).sort((a, b) => a.localeCompare(b))
+  // FNV-1a over the sorted list, with a length-escaped join so `['a.b','c']` and `['a','b.c']` — the two
+  // sets whose ','-joined forms are identical — cannot collide.
+  const material = sorted.map((value) => `${value.length}:${value}`).join('|')
+  let hash = 0x811c9dc5
+  for (let index = 0; index < material.length; index += 1) {
+    hash ^= material.charCodeAt(index)
+    // 16777619 via shifts; `>>> 0` keeps it an unsigned 32-bit value so the hex has no sign surprises.
+    hash = Math.imul(hash, 0x01000193) >>> 0
+  }
+  // The count travels with the hash: two sets that somehow hash alike are almost certainly different
+  // sizes, and a caller that sees only the hash cannot tell.
+  return `${sorted.length}-${hash.toString(16).padStart(8, '0')}`
+}
+
+/**
  * Read the ceiling that applies to `tenantId`.
  *
  * **A tenant with no rows of its own inherits the platform ceiling** — R5 of the plan. "No rows" must

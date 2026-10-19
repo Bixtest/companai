@@ -43,6 +43,7 @@ const PLATFORM_CEILING = {
   scope: 'platform' as const,
   source: 'platform' as const,
   capabilities: ['auth.users.edit', 'auth.users.list', 'directory.tenants.manage'],
+  revision: 'cc140-test-revision',
 }
 
 const TENANT_INHERITS = {
@@ -104,7 +105,7 @@ describe('CC-139 — the ceiling screen', () => {
     expect(screen.getByTestId('ceiling-summary').textContent).toContain('3')
   })
 
-  it('★ writes through the route, with the capabilities it shows', async () => {
+  it('★ writes through the route, with the capabilities it shows, carrying the revision it was given', async () => {
     const { calls } = installFetch()
     renderWithProviders(<CapabilityCeilingPage />)
 
@@ -116,8 +117,46 @@ describe('CC-139 — the ceiling screen', () => {
     await waitFor(() => expect(putCalls(calls)).toHaveLength(1))
     const [put] = putCalls(calls)
     expect(put.url).toBe(PLATFORM_URL)
+    // `CC-140` — the token is the fingerprint of the set the screen was **given**, so a save against a
+    // view that has moved is refused rather than silently discarding the change somebody else made.
     expect(JSON.parse(String(put.init?.body))).toEqual({
       capabilities: ['auth.users.list', 'directory.tenants.manage'],
+      expectedRevision: 'cc140-test-revision',
+    })
+  })
+
+  it('★ a stale view (409) reloads the ceiling and says so — it does not ask for another click', async () => {
+    const { calls } = installFetch()
+    renderWithProviders(<CapabilityCeilingPage />)
+
+    const editUsers = (await screen.findByLabelText(/Edit users/)) as HTMLInputElement
+    await waitFor(() => expect(editUsers.checked).toBe(true))
+    fireEvent.click(editUsers)
+
+    // Route answers "the ceiling moved": the write helper returns 409 with a sentence, and the screen
+    // must reload rather than leave the person looking at a selection that no longer describes anything.
+    ;(global as any).fetch = jest.fn(async (url: string, init?: RequestInit) => {
+      calls.push({ url, init })
+      const respond = (status: number, body: unknown) =>
+        ({ ok: status < 400, status, json: async () => body }) as unknown as Response
+      if (init?.method === 'PUT') {
+        return respond(409, { error: 'The ceiling changed while you were looking at it. Reload it and apply your edit again.' })
+      }
+      if (url === '/api/auth/capability-ceiling/catalogue') return respond(200, CATALOGUE)
+      if (url.startsWith('/api/directory/tenants')) return respond(200, { items: [] })
+      if (url === PLATFORM_URL) return respond(200, PLATFORM_CEILING)
+      return respond(404, { error: `unexpected ${url}` })
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save ceiling' }))
+
+    const alert = await screen.findByRole('alert')
+    expect(alert.textContent).toContain('changed while you were looking at it')
+    // Reloaded: the second read is what the screen is now showing, so the ticked boxes match the table
+    // again rather than the edit that was just refused.
+    await waitFor(() => {
+      const boxes = screen.getAllByRole('checkbox') as HTMLInputElement[]
+      expect(boxes.every((box) => box.checked)).toBe(true)
     })
   })
 

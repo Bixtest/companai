@@ -371,3 +371,100 @@ describe('the door', () => {
     expect(optionalCache(mockContainer)).toBeNull()
   })
 })
+
+// ---------------------------------------------------------------------------
+// `CC-140` — the concurrency token, and the reason it is not a lock.
+//
+// `PLAN-CC-140-ceiling-revision.md`. The screen made this race reachable by hand: two administrators who
+// both loaded the same ceiling and both saved kept the last write, and the first one's change vanished
+// with no message. The refused case below is asserted the same way the rest of this file asserts every
+// refusal — **the store is unchanged and nothing was recorded** — because a 409 that fires after writing
+// is worse than no 409 at all.
+// ---------------------------------------------------------------------------
+
+describe('CC-140 — a write against a stale view is refused', () => {
+  it('the read returns the fingerprint of the set it returned', async () => {
+    signIn(ADMIN, FOUNDATION)
+    mockIsPlatformAdmin.mockResolvedValue(true)
+    rows.push(
+      { id: 'r1', tenantId: null, capability: 'b.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
+      { id: 'r2', tenantId: null, capability: 'a.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null },
+    )
+
+    const body = await json(await platformRoute.GET(request(PLATFORM_PATH, 'GET')))
+
+    expect(body.revision).toEqual(expect.any(String))
+    // A second read of the same set must agree, or the token is a random string doing nothing.
+    const again = await json(await platformRoute.GET(request(PLATFORM_PATH, 'GET')))
+    expect(again.revision).toBe(body.revision)
+    // The order of the rows is not the order of the request; the revision is of the set, not the list.
+    expect(body.capabilities).toEqual(['a.cap', 'b.cap'])
+  })
+
+  it('★ refuses with 409 when the table moved — and writes nothing', async () => {
+    signIn(ADMIN, FOUNDATION)
+    mockIsPlatformAdmin.mockResolvedValue(true)
+    rows.push({ id: 'r1', tenantId: null, capability: 'a.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null })
+    const read = await json(await platformRoute.GET(request(PLATFORM_PATH, 'GET')))
+
+    // Somebody else's write lands between the read and this one.
+    rows.push({ id: 'r2', tenantId: null, capability: 'z.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null })
+
+    const response = await platformRoute.PUT(
+      request(PLATFORM_PATH, 'PUT', { capabilities: ['only.this'], expectedRevision: read.revision }),
+    )
+    const body = await json(response)
+
+    expect(response.status).toBe(409)
+    // The sentence tells the person what to do — an operator who reads "409" tries again and loses twice.
+    expect(String(body.error)).toContain('Reload')
+    // And above all: nothing was written and nothing was recorded. A 409 that fires after the write is
+    // worse than no 409 at all.
+    expect(rows.map((row) => row.capability)).toEqual(['a.cap', 'z.cap'])
+    expect(mockLog).not.toHaveBeenCalled()
+  })
+
+  it('★ accepts the revision the read actually gave — obtained, not hard-coded', async () => {
+    signIn(ADMIN, FOUNDATION)
+    mockIsPlatformAdmin.mockResolvedValue(true)
+    rows.push({ id: 'r1', tenantId: null, capability: 'a.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null })
+    const read = await json(await platformRoute.GET(request(PLATFORM_PATH, 'GET')))
+
+    const response = await platformRoute.PUT(
+      request(PLATFORM_PATH, 'PUT', { capabilities: ['a.cap', 'b.cap'], expectedRevision: read.revision }),
+    )
+
+    expect(response.status).toBe(200)
+    // The write returns the revision of what is now stored, so the screen's token can be refreshed
+    // without a second read.
+    const body = await json(response)
+    expect(body.capabilities).toEqual(['a.cap', 'b.cap'])
+    // The revision of what is now stored is not the revision of what was read back: a token that stayed
+    // the same across a change would prove nothing about the change it just accepted.
+    expect(body.revision).not.toBe(read.revision)
+  })
+
+  it('a write with no expected token behaves exactly as before', async () => {
+    signIn(ADMIN, FOUNDATION)
+    mockIsPlatformAdmin.mockResolvedValue(true)
+    rows.push({ id: 'r1', tenantId: null, capability: 'a.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null })
+
+    const response = await platformRoute.PUT(request(PLATFORM_PATH, 'PUT', { capabilities: ['a.cap', 'b.cap'] }))
+
+    // The pre-existing callers — the CLI above all — must not wake up to a new refusal.
+    expect(response.status).toBe(200)
+  })
+
+  it('the tenant scope takes the token too', async () => {
+    signIn(TENANT_ADMIN, TENANT_A)
+    rows.push({ id: 'r1', tenantId: null, capability: 'a.cap', createdAt: new Date(), updatedAt: new Date(), deletedAt: null })
+    const read = await json(await tenantRoute.GET(request(tenantPath(TENANT_A), 'GET')))
+
+    const response = await tenantRoute.PUT(
+      request(tenantPath(TENANT_A), 'PUT', { capabilities: ['a.cap'], expectedRevision: 'stale-on-purpose' }),
+    )
+
+    expect(response.status).toBe(409)
+    expect(rows.filter((row) => row.tenantId === TENANT_A)).toHaveLength(0)
+  })
+})

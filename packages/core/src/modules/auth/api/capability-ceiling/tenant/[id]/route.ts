@@ -134,6 +134,8 @@ export async function PUT(req: Request) {
     auth,
     scope: { kind: 'tenant', tenantId },
     capabilities: parsed.data.capabilities,
+    // `CC-140` — see the platform route: the screen's concurrency token, absent means "do not check".
+    expectedRevision: parsed.data.expectedRevision,
   })
   if (result.status === 200) await guard.runAfterSuccess()
   return NextResponse.json(result.body, { status: result.status })

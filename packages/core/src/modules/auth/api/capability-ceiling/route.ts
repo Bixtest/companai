@@ -124,6 +124,9 @@ export async function PUT(req: Request) {
     auth,
     scope: { kind: 'platform' },
     capabilities: parsed.data.capabilities,
+    // `CC-140` — the concurrency token the screen sends. `undefined` when absent, which the lib reads as
+    // "do not check", so a caller that predates the token is unchanged.
+    expectedRevision: parsed.data.expectedRevision,
   })
   // `runAfterSuccess` only when something actually changed: a refused write is not a success, and a
   // guard hook that fires on a 400 would report an act that did not happen.
