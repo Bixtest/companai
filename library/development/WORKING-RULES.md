@@ -35,6 +35,17 @@
 > into holding and gating"* — and only the first can be checked by the person paying for the work.
 > **If it needs a diagram, it is unfinished thinking**, which is as true of an explanation as of a
 > question. `LESSONS.md` L183.
+>
+> **★ THE LOG — a rule with no history cannot be corrected (owner, 2026-10-19, accepted).**
+>
+> | Date | What failed | What changed | What would have caught it |
+> |---|---|---|---|
+> | 2026-10-18 | Four rulings asked in one message, in project vocabulary | One question; the 14-year-old test | A question template with a mandatory default (§2.2) |
+> | 2026-10-19 | A report in mechanism words | The test extended to reports | Slots 1–2 with the identifier ban (§2.0) |
+> | 2026-10-19 | "No jargon" named three words and missed five | A position rule instead of a blocklist | The diagnostic in slot 2 (§2.0) |
+>
+> **A clause amended a third time is not being disobeyed — it is wrong. Rewrite the clause; do not
+> restate it.** Three amendments to one note in two days is what this table exists to make visible.
 
 **What this file is.** The owner's rules that apply to **every session, every task**, gathered in one
 page so they are not scattered across the prompt, the handover and the cookbook. It is a **list and a
@@ -413,6 +424,27 @@ from the artefact, research-validate-write-then-build. Read them once, before to
 
 ## 2. How to work with the owner
 
+### 2.0 The shape of every message *(owner, 2026-10-19 — accepted from `ANALYSIS-2026-10-19-owner-communication.md`)*
+
+**Five slots, in this order. The order is the rule — a reader who stops after slot 2 still knows what
+changed and why it matters.**
+
+1. **What changed** — one sentence. **No identifiers**: no backticks, file paths, function names or
+   labels.
+2. **Why it matters** — one sentence naming the **consequence**, not the mechanism. **If this sentence
+   needs a mechanism word, stop: you have not finished thinking.** Say what it is, who needs it, what
+   breaks without it. An everyday example belongs here when the thing is new.
+3. **How I checked** — the measurement and its number. Identifiers belong here, and are welcome: this
+   is the proof, not the explanation.
+4. **Waiting on you** — `Nothing.` or **one** question, in the three-line form in §2.2.
+5. **Next** — one line.
+
+**Why a shape and not more advice.** Advice is forgotten and cannot be seen to be ignored; an empty
+slot can. **Zulip — the only one of the eleven studied platforms that wrote this down — checks a
+message's *shape* in CI (title length, capital letter, full stop) and never attempts to check tone.**
+That separation is the whole finding: check what is mechanical, write down what is not. The evidence
+is `ANALYSIS-2026-10-19-owner-communication.md` §3.
+
 ### 2.1 Report so nothing is left ambiguous
 
 - **Every claim carries an observation, not an argument.** Measure from the artefact; never from a
@@ -433,23 +465,26 @@ from the artefact, research-validate-write-then-build. Read them once, before to
   proceed without it. Do not hand him a menu of options to adjudicate, and do not batch several
   decisions into one turn. **If a sensible default exists, take it, do the work, and tell him what
   changed and how to undo it.**
+- **A question is three lines** *(owner, 2026-10-19)*: **the question** — one sentence, answerable by
+  somebody who has never seen the code · **the default** — what happens if he says nothing · **what
+  changes** if he chooses differently. **If the default is obvious and safe, do not ask at all: do it
+  and say so in slot 1.** The cost he named was *vagueness*, not the number of question marks — so a
+  second question is allowed **only if it also blocks the work**.
 - **Reserve his judgment for what is genuinely his** — a name, a domain, a cost, a preference. Not a
   technical choice that has an obvious safe default.
 
 ### 2.3 Speak plainly, and in English
 
-- **Always reply in English.** Plain, everyday words — he is not a developer. **No jargon** (words
-  like "upstream", "the resolver", "the barrel file" explain nothing). Name the thing: what it is,
-  who needs it, and what breaks without it.
-- **A QUESTION gets the 14-year-old test — see the NOTE at the top of this file.** Plain language is
-  not enough for a question: it must be answerable **in one sentence** by somebody who has never seen
-  the code. If it is not, it is not ready to be asked.
-- **★ AND SO DOES EVERY EXPLANATION** *(owner, 2026-10-19 — this bullet said "a QUESTION" while the
-  note at the top had already been widened, so the two disagreed).* A report is an explanation, and
-  reports are sent far more often than questions. **A mechanism word in the sentence that states the
-  consequence is a near miss**: it means the consequence has not been decided yet. The working shape,
-  the translation table and the amendment log are in
-  [`ANALYSIS-2026-10-19-owner-communication.md`](ANALYSIS-2026-10-19-owner-communication.md) §4.
+- **Always reply in English.** Plain, everyday words — he is not a developer. Name the thing: what it
+  is, who needs it, and what breaks without it.
+- **The 14-year-old test covers questions AND explanations** — see §2.0 slots 1–2 and the NOTE at the
+  top of this file. A question must be answerable **in one sentence** by somebody who has never seen
+  the code. A **mechanism word in the sentence that states the consequence is a near miss**: it means
+  the consequence has not been decided yet.
+- **Do not grow a blocklist.** "No jargon" failed because it named three words and missed five — a
+  list that grows one anecdote at a time is always one failure behind. **Use the position rule**
+  (no identifiers in slots 1–2) and the **translation table**, so the same word always becomes the
+  same plain phrase: `ANALYSIS-2026-10-19-owner-communication.md` §4.3.
 - **One line of plain reasoning beats a paragraph of framing.**
 
 ### 2.4 The front-end rule — build it reachable as soon as it works as a piece
@@ -498,7 +533,10 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-16 — **added rule 18** — on the owner's instruction, the `P2-9b` lesson made
+*Last updated: 2026-10-19 — **§2.0 added and §2.3 rewritten** on the owner's instruction, from
+`ANALYSIS-2026-10-19-owner-communication.md`: **every message has five slots**, identifiers are banned
+from the two slots he reads, a question carries its default, and the rule now keeps its own amendment
+log. Previously 2026-10-16 — **added rule 18** — on the owner's instruction, the `P2-9b` lesson made
 permanent: **a critical task gets a critical analysis first and expanded cloud research first**, to
 identify the best, most optimized, rich-featured, accurate and quality-boosted way to do it; what we
 already have and where the world is must be **measured, not assumed**; and a **compromise menu — or an

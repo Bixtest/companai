@@ -4,9 +4,9 @@
 perfect each issue or scenario."* Scope: `WORKING-RULES.md`'s top note and §2 (how to work with the
 owner). §2.4 (the front-end rule) is not a communication rule and is untouched.
 
-**Status: recommendation. One consistency fix applied (§2.3's scope); the rest waits for the owner.**
-The message shape in §4 is adopted immediately — it governs my own output, costs him nothing, and is
-reversible by deleting one paragraph.
+**Status: ACCEPTED and APPLIED 2026-10-19.** The owner took the recommendation, so the five-slot shape
+is now the required form in `WORKING-RULES.md` §2.0 — not a habit. §7 records exactly what changed in
+the rulebook; §5 and §6 remain proposals about *how to check* the rule rather than rules themselves.
 
 ---
 
@@ -277,24 +277,25 @@ second, and catches exactly the failure of 2026-10-19 without pretending to judg
 
 ---
 
-## 7. What is applied, and what waits for you
+## 7. What was applied — and the decision
 
-**Applied now, because it is my own output and costs you nothing:**
-the five-slot skeleton (§4.1), the question template (§4.2), and the translation table as a working
-habit (§4.3). Reversible by deleting this paragraph.
+**Answered 2026-10-19: yes.** The owner accepted the recommendation, so the shape is now the required
+form rather than a habit of mine.
 
-**Also applied, because it was a contradiction I created:**
-`WORKING-RULES.md` §2.3 still said *"a QUESTION gets the 14-year-old test"* while the note at the top
-had been widened to reports. §2.3 now says the test covers **every explanation**, with a pointer here.
+- **`WORKING-RULES.md` §2.0 is new** — the five slots, with the order as the rule and the identifier
+  ban on the two slots he reads.
+- **§2.2** carries the three-line question form, and the rule that a non-blocking decision is taken
+  and recorded rather than asked.
+- **§2.3 is rewritten** — the test covers questions *and* explanations, and the blocklist is replaced
+  by the position rule plus the translation table.
+- **The top note carries the amendment log**, with the standing instruction that a clause amended a
+  third time is wrong rather than disobeyed.
+- **§2.1 and §2.4 are unchanged** — the four per-point statuses still apply inside a report, and the
+  front-end rule is not a communication rule.
 
-**Waiting for you — one decision, and it is genuinely yours:**
-
-> **Should the five-slot shape become the required form in `WORKING-RULES.md`, with the amendment log
-> beside it?**
-> **Default if you say nothing:** yes — the rule file gets the shape and the log, and §2.1/§2.3 are
-> shortened to point at them.
-> **What changes if you say no:** I keep using the shape, but the rulebook keeps its prose and the
-> next agent starts from the version that failed.
+**What is still a proposal rather than a rule:** §5's *"do not lint tone"* and §6's near-miss count.
+Both are about how to **check** the rule; they are cheap to try and easy to drop, and neither belongs
+in the rulebook until it has shown it catches something.
 
 ---
 
