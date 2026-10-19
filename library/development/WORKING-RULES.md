@@ -444,6 +444,12 @@ from the artefact, research-validate-write-then-build. Read them once, before to
 - **A QUESTION gets the 14-year-old test — see the NOTE at the top of this file.** Plain language is
   not enough for a question: it must be answerable **in one sentence** by somebody who has never seen
   the code. If it is not, it is not ready to be asked.
+- **★ AND SO DOES EVERY EXPLANATION** *(owner, 2026-10-19 — this bullet said "a QUESTION" while the
+  note at the top had already been widened, so the two disagreed).* A report is an explanation, and
+  reports are sent far more often than questions. **A mechanism word in the sentence that states the
+  consequence is a near miss**: it means the consequence has not been decided yet. The working shape,
+  the translation table and the amendment log are in
+  [`ANALYSIS-2026-10-19-owner-communication.md`](ANALYSIS-2026-10-19-owner-communication.md) §4.
 - **One line of plain reasoning beats a paragraph of framing.**
 
 ### 2.4 The front-end rule — build it reachable as soon as it works as a piece
