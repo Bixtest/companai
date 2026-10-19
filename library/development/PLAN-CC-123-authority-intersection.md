@@ -1,7 +1,8 @@
 # PLAN-CC-123 — the authority intersection
 
-**Status:** REQUIREMENT ONLY, written 2026-10-19. **No code is written.** §3 is the requirement;
-§5 is the proof the build will have to pass. The row stays open until both are done.
+**Status:** **BUILT and CLOSED 2026-10-19.** Written as a requirement the same day, then built to it.
+§3 is the requirement, §5 is the proof, and **§9 is the build record** — including the two places the
+build corrected this document (Rule 13). The register row is closed.
 **Row:** `CC-123` in `library/development/MASTER-CHECKLIST.md` §5.
 **Answers:** nothing — **D2 is already settled by default** (*the human half is read live, never
 frozen*), and the code refuses to cache delegations for the same reason
@@ -279,3 +280,100 @@ handed*).
 
 Both are recorded here so that if either is wrong, it is wrong **by name** and can be reverted in one
 place.
+
+---
+
+## 8. What was built
+
+Six files touched, three of them new tests. The build is **one door plus the holding half**, which is
+what §1.2 and §1.4 said it would be once the row's stale claim was removed.
+
+| File | Change | Rule |
+|---|---|---|
+| `shared/src/lib/auth/featureMatch.ts` | R1's written rule, in `matchFeature`'s docblock: six numbered reasons a list intersection is unsound, ending *"The intersection must be of **answers**, not of lists"* | R1 |
+| `core/src/modules/auth/services/authorityEnforcementService.ts` | new `InvokerRefusal { capabilityId, bindingRule, because }`; `refusalFor` takes `{ onBehalfOfUserId }` and forwards it to `decideFor`; new `invokerRefusalFor`; new private `invokerFor` | R2–R7 |
+| `core/src/modules/auth/services/rbacService.ts` | `userHasAllFeatures` and `refusedByAuthority` take `{ onBehalfOfUserId }`; `refusedByAuthority` runs `refusalFor` with the invoker, then `invokerRefusalFor`, logging `invokerId` on both | R2, R3, R7 |
+| `apps/mercato/src/app/api/[...slug]/route.ts` | reads `derivePrincipal(auth)?.onBehalfOfUserId` and passes it — **the principal, never `auth.userId`** | R2 |
+| `core/.../__tests__/authorityEnforcement.invokerHolding.test.ts` | **11 tests** — R3–R7 | R3–R7 |
+| `core/.../__tests__/rbacService.invoker.test.ts` | **9 tests** — the plumbing: what reaches `refusalFor`, what reaches `invokerRefusalFor`, and that `null` is passed rather than invented | R2, R7 |
+| `apps/mercato/src/__tests__/api-authorization.test.ts` | 1 assertion updated, **2 tests added**: *"carries the person a credential acts for"* and *"does not treat a person as acting for somebody else"* | R2 |
+
+**The design insight, and it is why this was small.** The invoker check has two halves that were being
+treated as one. **Holding** — *may the person hold this capability at all?* — is a feature-id question
+and needs **no capability descriptor**. **Gating** — *what autonomy gate does their position produce?*
+— needs one. `invokerCeilingFor` returns early on `!capability` (`:495`), so *holding* was never asked
+for an undescribed feature. `invokerRefusalFor` therefore **skips described features** (`if
+(getCapabilityDescriptor(feature)) continue`) and covers all **157** enabled features without writing
+36 descriptors — which keeps the descriptor work as a separate product judgement (`CC-132`) instead of
+smuggling it into an authority fix.
+
+**A separate type, not a nullable field.** `refusalFor` returns `AuthorityRefusal { capabilityId,
+decision }` and existing tests pin `refusal.decision` non-null. The holding refusal has no `Decision`
+because it never consulted a descriptor, so it returns `InvokerRefusal { capabilityId, bindingRule,
+because }`. Making `decision` nullable would have weakened a type to avoid a second one.
+
+---
+
+## 9. The build record — two corrections, and the proof
+
+### 9.1 Rule 13: the M4 mutation cannot produce what §5 said it would
+
+§5's M4 said: *"Run R4's step unconditionally (no invoker gate) → a stack overflow, asserted as a
+timeout/throw."* **It cannot.** The recursion the guard protects against (`rbacService` →
+`refusedByAuthority` → `refusalFor` → `decideFor` → `invokerCeilingFor` → `holdsCapability` →
+`rbacService`) needs a live ACL layer; in a unit suite the ACL layer is stubbed, so the cycle is
+**unreachable** and no stack overflow occurs. The mutation was rewritten to remove the guard and the
+observable became *"asks nothing when no invoker is supplied"* — which is the behaviour R5 actually
+protects. **The requirement's own proof row was wrong; the rule it protects was right.**
+
+### 9.2 Rule 13: the shared suite's failure is not `CC-19`'s `EBUSY`
+
+`packages/shared` reported `Test Suites: 1 failed, 209 passed, 210 total` with `Tests: 2594 passed,
+2594 total` — **zero test failures**, one suite that failed to *run*. It is
+`src/lib/bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`, and the recorded cause in `CC-19`
+(`EBUSY` under the full suite) is **wrong**. The real error is the agent harness's bulk-delete guard:
+
+```
+[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] {"count":59,"threshold":50,"scope":"turn", ...}
+```
+
+The suite clears its dynamic-loader cache directory, which holds **59 files**, and the shim refuses any
+bulk delete above **50** inside one turn. Measured in four steps, not inferred: the suite passes
+**alone (8/8)**; it fails **under the full suite**; it fails **with the sandbox bypassed as well** — so
+neither concurrency nor the sandbox is the cause; and with the shim switched off
+(`CODEBUDDY_SAFE_DELETE_ENABLED=0`) the full suite runs **210 of 210 suites, 2,594 tests, all green**.
+That last run is the proof: the same code, the same suite count, the same machine — only the guard
+differs. `CC-19`'s *classification* survives (environmental, not a code defect, and the first CI run is
+still the right trigger); its *mechanism* does not, and is corrected in the row by name.
+
+**And the correct cause was already in the file.** §2's `CC-124` close records it exactly — *"one
+shared suite fails only in its `afterAll`, where this sandbox's delete guard blocks removal of the
+suite's own temp cache"*. So the register held the right answer and the wrong one in two places for a
+day, and the wrong one sat in the row a debugger opens first. **`LESSONS.md` L184**: *a fact is not
+corrected where it was discovered; it is corrected where it is believed.*
+
+### 9.3 The proof
+
+| Check | Result |
+|---|---|
+| resolver + plumbing suites matching `invoker` | **27 tests PASS** (11 new resolver · 9 new plumbing · 7 pre-existing) |
+| `apps/mercato` `api-authorization` | **30 tests PASS** (28 pre-existing · 2 new) |
+| `scripts/verify-cc123-mutations.mjs` | **6/6 PROVEN**, every file restored **byte-identical** |
+| `packages/core` | **652 suites / 5,705 tests, all green** |
+| `packages/shared` | **210/210 suites, 2,594 tests, all green** once the harness delete-guard is off; with it on, 209/210 suites and **0 test failures** (see §9.2) |
+| `tsc --noEmit` | **0** for `core` and `shared`; one **pre-existing, unrelated** error in the app's generated `modules.runtime.generated.ts:854` (wants `.extensions`, the module exports `entityExtensions`) |
+| line endings / encoding | **CR 0, BOM false** on all 9 touched files |
+
+**The six mutations:**
+
+1. the RBAC door drops the invoker instead of forwarding it
+2. `refusalFor` decides without the invoker it was given
+3. the descriptor-free holding refusal is removed
+4. the holding half runs even when there is no invoker
+5. a missing invoker reader stops refusing (fails open)
+6. the route reads the invoker from `auth.userId` instead of the principal
+
+Mutation 6 is the one that matters most, because it is the trap `CC-127` fell into: a fixture whose
+`userId` happens to equal its owner makes the mutation survive. The route test therefore gives a human
+context a `userId` that **differs** from its `sub`, so reading the wrong one is visible.
+

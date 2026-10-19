@@ -5021,3 +5021,38 @@ often. **A rule written from one failure tends to cover only that failure's shap
 questions. **Scope it to the class of failure, not the instance** — the owner reads reports every
 turn and questions rarely, so the narrow reading protects the wrong thing.
 
+## L184 — A correction that lands in a close note is not a correction until it reaches the ROW
+
+**What happened, closing `CC-123`.** `CC-19` has said for a day that
+`packages/shared`'s `dynamicLoader.tsconfig.test.ts` fails *"under the full suite (`EBUSY`)"* — a
+concurrency story, and a plausible one. It is false. The suite clears its own 59-file cache directory
+and this machine's delete-guard refuses any bulk delete above 50, so the suite fails to **run**.
+Measured in four steps: alone it passes **8/8**; in the full suite it fails; with the sandbox off it
+still fails; with the guard off the suite is **210/210, 2,594 tests green**.
+
+**The part worth keeping.** That cause was **already written down correctly** — in §2 of the same
+file, in `CC-124`'s close note: *"one shared suite fails only in its `afterAll`, where this sandbox's
+delete guard blocks removal of the suite's own temp cache."* So the register held **both** the right
+answer and the wrong one, in two places, for a day, and the wrong one sat in the row a debugger would
+open first.
+
+**Why it happens.** A close note is written to record **what I just did**; a row is read to find out
+**what is true**. They are different audiences, and nothing forces one to update the other. The same
+shape as `CC-101` (*a checker is not a control until something calls it*) and `L179` (*a control that
+discards its answer*) — a fact with no path to the place it is needed.
+
+**What to do instead.**
+
+1. **When a measurement contradicts an existing row, the fix is in the row, by name** — not in a
+   paragraph somewhere else in the same file. `Rule 13` already says the number gets committed; add
+   **where**.
+2. **Before closing anything, grep the register for the claim you just re-measured.** The old claim
+   will be sitting in a row, phrased more confidently than your new measurement, because it was
+   written when it was true.
+3. **A "classification survives, mechanism does not" correction is still a correction.** It is
+   tempting to leave it: the row still says *environmental, not a code defect*, which is right. But a
+   wrong mechanism sends the next reader to the wrong place, which costs more than a wrong label.
+
+**The general form:** *a fact is not corrected where it was discovered; it is corrected where it is
+believed.*
+
