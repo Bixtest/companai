@@ -374,13 +374,57 @@ The five mutations, and the test each one kills:
 **M4 is the important one.** It is the mutation that turns a ceiling into a decoration, and it is the one
 a future reader would be most tempted to introduce "for compatibility".
 
-### 8.5 What is still not done, and it is named
+### 8.5 The audit half — and the measurement corrected §6
 
-- **No route and no screen.** A ceiling can be read and replaced from the CLI only.
-- **`isGlobalSuperAdmin` still has no tenant filter** (§5). R2 bounds its consequence; the read is wrong.
+§6 said the recording "needs its own row **if** the existing ledger cannot express an act above a tenant".
+**It can**, so no row was needed:
+
+- `action_logs.tenant_id` is **nullable** (`audit_logs/data/entities.ts:26`).
+- `visibility_scope` already includes **`'platform'`** (`shared/modules/visibility.ts:17`), a vocabulary
+  built with a platform audience in mind.
+- `ActionLogService.log()` writes on the **caller's** `EntityManager`, so the record commits in the same
+  transaction as the ceiling rows it describes.
+
+**The actor and the record are now required arguments** of `replaceCapabilityCeiling`. A ceiling change
+with no record is not expressible — the same fail-closed posture `ActionLogService.assertScopeSurvived`
+takes (*"an action that happened without a record is worse than an action that did not happen"*).
+
+What the record says, and each line is a decision:
+
+| Field | Value | Why |
+|---|---|---|
+| `tenantId` | the **target** tenant (`null` for the platform) | the tenant whose ceiling moved must see it in its own journal; an admin must not change a tenant invisibly |
+| `context.actedFromTenantId` | the actor's tenant | the cross-tenant fact travels with the record |
+| `context.crossTenant` | `true`/`false`, **stated** | the row's own wording: *"recorded as such rather than inferred from a badge"* |
+| `context.added` / `removed` | what changed | not merely that something did |
+| `resourceId` | `tenantId`, or `'platform'` | readable without a join; **not** a sentinel tenant id — nothing reads it as a scope |
+
+The CLI passes `{ principalId: null, kind: 'system', tenantId: null }` because a CLI has no authenticated
+principal. It says so rather than inventing one; a route passes the real principal and the same code
+records it correctly (`CC-135`).
+
+**Two more mutations:** M6 (the act is not recorded) → **6 tests RED**; M7 (the cross-tenant fact dropped)
+→ **1 test RED**. Both restored byte-identical.
+
+**And two self-corrections in the test harness**, both the `L23` family: the fake `transactional` did not
+roll back, so the atomicity assertion could not mean anything (it now snapshots and restores on throw); and
+my own bare `.sort()` in the CLI broke `explicit-sort-comparators.test.ts` — the same test the previous
+session tripped on, caught by the full suite rather than by the suite I was looking at.
+
+### 8.6 What is still not done, and each is now a register row
+
+- **`CC-134` — `isGlobalSuperAdmin` still has no tenant filter.** `CC-128` bounds the consequence; the
+  cause is untouched. Opened as a row rather than left in this section.
+- **`CC-135` — no route and no screen.** A ceiling is read and replaced from the CLI only, so the actor it
+  records is `system`. The record shape is built and a route gets it for free.
 - **The cache is only as good as the deployment.** `loadCapabilityCeiling` caches under
   `auth:capability-ceiling` and a write invalidates by tag, but if no `CacheStrategy` is registered the
   read falls through to the table every time — correct, just slower. Recorded so a performance
   investigation starts here rather than at the resolver.
 - **No `CC-119`.** Both migrations join the set the database rebuild milestone carries, including
   `ai_agent_types`, which is already queued there.
+- **The platform ceiling's own change is not hash-chained.** `ActionLogService.appendToLedger` skips
+  tenant-less events by design (*"chains are partitioned per tenant, and a tenant-less event has no chain
+  to join"*), so the **most consequential** ceiling — the platform one — is journalled but not chained.
+  Named rather than papered over: chaining it would need either a chain that is not per-tenant or a
+  decision to attribute a platform act to the foundational tenant, and both are bigger than this row.
