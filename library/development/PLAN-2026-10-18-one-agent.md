@@ -47,7 +47,7 @@ them was a scoping error, not a judgement. They are now the primary donors for W
 | 1 | One agent core | **CONFIRMED** | Paperclip's four layers and Hermes's profile are the same conclusion from opposite directions. Four cores would be four permission dialects. |
 | 2 | Types are settings | **CONFIRMED AS A BUNDLE — and the owner's framing is better than mine** | A type **is** a role for agents: a named, data-defined bundle of capabilities, so "standardised agents" become cheap to create (§3.1). The only thing a type must not do is **select the permission rule** — that is a different kind of field that happens to share the name. |
 | 3 | Aissistant = intersection | **AMENDED, AND IT IS THE MOST IMPORTANT ONE** | Intersection of permission **lists** is unsound and can widen. It must be intersection of **decisions**, computed live, through one function (§3.3). |
-| 4 | Staiff behaves like a normal user | **CONFIRMED; the ceiling is configuration, not code** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). The owner's ruling: the platform admin sets the ceiling for machines and tenants inherit a subset (D1). One floor remains — capabilities that change the authority system itself. |
+| 4 | Staiff behaves like a normal user | **CONFIRMED; the ceiling is configuration, not code — and the floor is ANSWERED (2026-10-19)** | A machine *can* already resolve roles — from its key row (`rbacService.ts:320-355`). The owner's ruling: the platform admin sets the ceiling for machines and tenants inherit a subset (D1). **The floor is the five listed in §4.5, confirmed 2026-10-19** — capabilities that change the authority system itself, which no configuration may ever give a machine. |
 | 5 | Platform level or tenant level | **RESOLVED — and my question was a misreading** | It was said of **types**, not agents. Types have **two layers** (shipped by the platform, or created by a tenant); agents are **always** inside a tenant, which is why all twelve agent tables require one. What the misreading surfaced is real: the type catalogue has only a **code** layer, so a tenant cannot create one (`CC-126`). |
 | 6 | Same method for the four surfaces | **CONFIRMED, WITH AN ORDER** | The method is right; doing it concurrently is not. One spine, one proving surface, then attach (§6). |
 
@@ -260,15 +260,18 @@ permission set deliberately excludes `agents:create`, `users:manage_permissions`
 anything that can rewrite its own execution). **The floor is small, and it is the answer to D1's
 second half.**
 
-### D1 — ANSWERED IN PRINCIPLE; one narrow question left
+### D1 — ANSWERED (2026-10-19): the ceiling is configuration, and the floor is the five listed
 **Settled:** the ceiling is **configuration**, set by the platform admin, inherited by tenants, and a
 tenant may only narrow it. **No** hardcoded capability list.
-**Left:** *which* capabilities sit on the floor. My proposed floor, for a yes/no: **creating or
-widening credentials** (minting keys, changing a key's kind) · **granting roles or writing
-delegations** (the authority layer itself) · **editing the capability catalogue or the type bundles**
-(the thing that defines what it may do) · **writing or erasing the audit ledger** · **anything across
-tenants**. Everything else — every business capability — is a setting. See §4.5 for the question in
-plain words.
+**Settled 2026-10-19 — the floor is exactly this list and nothing else:** **creating or widening
+credentials** (minting keys, changing a key's kind) · **granting roles or writing delegations** (the
+authority layer itself) · **editing the capability catalogue or the type bundles** (the thing that
+defines what it may do) · **writing or erasing the audit ledger** · **anything across tenants**.
+Everything else — every business capability — is a setting.
+
+**The owner's answer was *"we follow your recommendations"*, so this is a ruling and not a default** —
+recorded as the decision, not as a proposal. `CC-125` is no longer waiting on a ruling; it is waiting on
+`CC-128`'s ceiling to inherit from, which is the only thing between the floor and the build.
 
 ### D2 — TAKEN AS A DEFAULT, not asked
 An Aissistant's authority is **re-checked against the human on every act** (live), never captured at
@@ -318,13 +321,15 @@ delete the owner; Buzz leaves the agent) stops being a decision to make and beco
 default. **`CC-127` stays, and its shape changes:** it is no longer "invent a policy", it is "make the
 departure flow exist, list the agents, and default to deactivate".
 
-### 4.5 What is actually left to ask
+### 4.5 What was left to ask — and the answer (2026-10-19)
 
-**One thing, and it is small:** the **floor** (`CC-125`). Everything else is settled — D2 by default, D3
-by correction, D4 by the owner.
+**Nothing is left.** The **floor** (`CC-125`) was the last open question and the owner answered it on
+2026-10-19: *"we follow your recommendations"* — so the five capabilities below are the floor, and
+everything else is a setting. D2 was settled by default, D3 by correction, D4 by the owner, D1's ceiling
+by the owner's own principle and D1's floor by this answer.
 
 The floor is the short list of capabilities that **no configuration may ever grant to a machine**, because
-they are the capabilities that change the authority system itself. My proposed list, for a yes/no:
+they are the capabilities that change the authority system itself:
 
 1. minting or widening credentials (creating keys, changing a key's kind)
 2. granting roles, or writing delegations
@@ -335,10 +340,13 @@ they are the capabilities that change the authority system itself. My proposed l
 **Why a floor at all, if the ceiling is configuration:** a machine that can grant itself authority makes
 every other control decoration — the locks would be held by the thing they are meant to lock out.
 **Everything else — every business capability — is a setting the platform admin controls and tenants
-inherit a subset of.** Say "no floor" and I will build it without one, but I would be recording a known
-hole rather than a decision.
+inherit a subset of.**
 
-### 4.6 NOTE — the platform has no ceiling over its tenants *(owner, 2026-10-18 — to revisit)*
+*This paragraph used to end "Say 'no floor' and I will build it without one." **Removed 2026-10-19** —
+the owner answered the question, so an open invitation here would contradict the section's own heading
+and invite a reader to reopen a settled ruling.*
+
+### 4.6 NOTE — the platform has no ceiling over its tenants *(owner, 2026-10-18 — **DECIDED 2026-10-19: option A; option B deferred as `CC-133`**)*
 
 > *"One architectural flaw this discussion exposed, the lack of control of platform superadmins on what
 > is allowed or not within each tenant. And the fact that we can't have agents that serve superadmins…
@@ -394,13 +402,48 @@ superadmins.
 platform itself is* — a tenant with extra rights, or something above every tenant. The gap and the
 agent's placement are the same gap.
 
-**Deliberately left open, to decide on the revisit — and it must be decided before `CC-125` is built,
-not during it:** whether the platform's own superadmins live **in** the foundational tenant (making the
-foundation a tenant with extra rights — two meanings of "tenant", the ambiguity this code already
-suffers) or **above** every tenant (which needs a row that is not tenant-scoped: the first genuinely
-platform-level table). **Register:** `CC-128`.
+**★ DECIDED 2026-10-19 — OPTION A: the platform's admins live INSIDE the foundational tenant.** The
+owner's answer: *"we follow your recommendations"*, on the recommendation that A is the smaller step, is
+his own sentence, and leaves B reachable. So the platform's superadmins are the superadmins of **instance
+1 / the foundational tenant**, which is where settings, templates, functionalities and types are authored
+and from which every other tenant inherits — **or is limited to what it allows**. Two consequences, and
+both are deliberate rather than accidental:
+
+- **Inheritance is a narrowing relation.** The foundation is the ceiling, never a peer. A tenant may
+  choose a subset; nothing may choose a superset.
+- **The walk-into-another-tenant behaviour stops being an accident.** Today it happens because
+  `isGlobalSuperAdmin` reads a tenant row with no tenant filter. Under A it becomes an **inheritance
+  rule with a name**: the foundational tenant's admins act above the tenants that inherit from it,
+  because that is what the foundation is *for* — not because a query forgot a `WHERE`.
+
+**The build that follows, and it is a build not a question:** a **per-tenant ceiling store** (the missing
+table — today `Tenant` holds `name`, `is_active` and timestamps and nothing else), the foundational-tenant
+relationship, and a cross-tenant admin act that is **recorded** as such rather than inferred from a badge.
+**Register:** `CC-128`, now startable.
+
+**★★ OPTION B IS DEFERRED, NOT DROPPED — and it carries a trigger, not a date.** The owner's instruction,
+2026-10-19: *"document option B to develop later after we finalize the pipeline and the platform is fully
+operational."* **Register: `CC-133`.** B is: the platform's admins are **above** every tenant, held in a
+row that belongs to no tenant — the first genuinely platform-level table. What B would change, and why it
+stays worth doing:
+
+| Under A (today's decision) | What B would fix |
+|---|---|
+| "platform admin" and "admin of the foundational tenant" are **the same thing** — the ambiguity this code already suffers | they become two different things, so neither word has to be read in context |
+| cross-tenant reach is a **rule** (the foundation's admins act above inheritors) | it is a **structure**: an admin of a tenant has no path to another tenant at all |
+| an agent serving the platform's superadmins has **no home** — it must sit inside the foundation, which is a tenant | it gets a home, because the platform itself has an identity |
+| the foundation is special **by convention** — the first row, the source of templates | it is special **by schema** — the only table that is not tenant-scoped |
+
+**Why deferring is safe rather than a compromise:** A is a strict subset of B's shape. Under A the ceiling
+store exists, the inheritance exists, and every tenant-scoped row already carries its tenant. B is then
+**adding a layer above**, not rewriting one below — which is the same reason A was recommended. **The
+trigger is the owner's own sentence:** *after the pipeline is finalised and the platform is fully
+operational.* Recorded so that "later" has a meaning, and so that B is not rediscovered as a surprise.
+
 **Refused now, by name:** a **sentinel tenant id** for "the platform" — the same refusal as `CC-126` and
-for the same reason: a value every query must remember to exclude is a latent cross-tenant read.
+for the same reason: a value every query must remember to exclude is a latent cross-tenant read. **This
+refusal survives A**, and it is what keeps B honest: A does *not* get to fake a platform layer with a
+reserved id, because that is the version that would make B unbuildable.
 
 ---
 

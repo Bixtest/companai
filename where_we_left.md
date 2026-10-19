@@ -38,10 +38,15 @@ In the **docs repo**, in this order:
 3. `library/development/MASTER-CHECKLIST.md` **§2** — the canonical "LAST DONE" and "NEXT" lines,
    and §5's register for every open item with its trigger.
 
-**As of 2026-10-17 (night), the position is:** `CC-102` closed (all five gaps of `SR-02` slice 2);
-register at **63 closed · 54 open · 117 total**; **NEXT is `SR-07` (`CC-107`, a bot is a
-participant), then `SR-12`** (per-tenant engine home). Treat that line as a signpost, not as the
-answer — re-read the files, because by the time you are reading it the NEXT pointer may have moved.
+**As of 2026-10-19, the position is:** register at **71 closed · 61 open · 132 total**; the frontier is
+the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-128`** (the per-tenant ceiling store),
+then `CC-125` (the floor — answered 2026-10-19), then `CC-121` behind `CC-119`. `SR-07`/`CC-107` (a bot
+is a participant) is **closed**.
+
+**Treat that paragraph as a signpost, not as the answer.** It was last right on the date it names, and
+it has been wrong before — on 2026-10-19 it still read `63 · 54 · 117` and named a closed item as next.
+Re-read the files; if this paragraph disagrees with `MASTER-CHECKLIST.md` §2, **§2 is right and this is
+stale** — and refreshing it is part of closing a batch, not a courtesy.
 
 ### Step 3 — VERIFY BEFORE YOU BELIEVE
 
