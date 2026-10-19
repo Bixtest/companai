@@ -211,3 +211,106 @@ describe('ensureOrganizationScope', () => {
     })
   })
 })
+
+/**
+ * `T-27` — the unscoped tenant path becomes observable, and closable by flag.
+ *
+ * **The finding, stated as a sentence the tests can hold.** `ensureTenantScope`'s deny branch was guarded
+ * by `ctx.auth &&`, so a caller with **no auth object at all** landed on a silent `return` while a caller
+ * with `auth: { tenantId: null }` was refused. Absence of context was trusted more than an empty one.
+ *
+ * **The allow is deliberate and unchanged** — the legacy test below stays exactly as it was; these tests
+ * add what was missing, they do not reverse a decision. The payment and scheduled-command flows use the
+ * scope-less path, so the deny direction is a flag (`OM_ENFORCE_TENANT_SCOPE_STRICT`), mirroring the
+ * organisation half from #2441.
+ */
+describe('T-27 — the unscoped tenant path is observable and closable', () => {
+  const originalStrict = process.env.OM_ENFORCE_TENANT_SCOPE_STRICT
+  const originalNodeEnv = process.env.NODE_ENV
+
+  beforeEach(() => {
+    // Same reason #2441's block flips it: the scope loggers suppress output under NODE_ENV==='test', so
+    // the observability signal is unassertable without this. Restored in afterEach.
+    process.env.NODE_ENV = 'development'
+    loggerWarn.mockClear()
+    delete process.env.OM_ENFORCE_TENANT_SCOPE_STRICT
+  })
+
+  afterEach(() => {
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = originalNodeEnv
+    if (originalStrict === undefined) delete process.env.OM_ENFORCE_TENANT_SCOPE_STRICT
+    else process.env.OM_ENFORCE_TENANT_SCOPE_STRICT = originalStrict
+  })
+
+  /** The logger is silenced outside `NODE_ENV === 'test'`, so the assertion is on the captured payload. */
+  function unscopedWarnings() {
+    return loggerWarn.mock.calls.filter((call) => String(call[0]).includes('Unscoped tenant command'))
+  }
+
+  it('★ still allows the legacy scope-less context — and says so out loud', () => {
+    const ctx = { ...buildCtx({}), auth: null }
+
+    expect(() => ensureTenantScope(ctx, 'tenant-2')).not.toThrow()
+
+    // The behaviour did not change; the silence did. A pass nobody can see is the part that cannot be
+    // acted on, and this is the whole of `T-27`.
+    const warnings = unscopedWarnings()
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0][1]).toMatchObject({ targetTenantId: 'tenant-2', strictEnforcement: false })
+  })
+
+  it('★ is refused when the operator hardens the deployment', () => {
+    process.env.OM_ENFORCE_TENANT_SCOPE_STRICT = 'true'
+    const ctx = { ...buildCtx({}), auth: null }
+
+    expect(() => ensureTenantScope(ctx, 'tenant-2')).toThrow(CrudHttpError)
+    expect(unscopedWarnings()).toHaveLength(1)
+  })
+
+  it('★ logs the strict state, so a reader can tell which deployment they are in', () => {
+    process.env.OM_ENFORCE_TENANT_SCOPE_STRICT = '1'
+    const ctx = { ...buildCtx({}), auth: null }
+    expect(() => ensureTenantScope(ctx, 'tenant-2')).toThrow(CrudHttpError)
+
+    // The payload names the deployment it ran in — a reader of the log can tell whether this pass was a
+    // warning or a refusal without knowing the operator's config.
+    expect(unscopedWarnings()[0][1]).toMatchObject({ strictEnforcement: true })
+  })
+
+  it('a present but tenant-less auth is still refused, exactly as #3910 left it', () => {
+    // Unchanged behaviour, asserted beside the new one: the new path is for the ABSENT object, not for a
+    // context that exists and is merely empty.
+    const ctx = buildCtx({ tenantId: null, isSuperAdmin: false })
+    expect(() => ensureTenantScope(ctx, 'tenant-2')).toThrow(CrudHttpError)
+    expect(unscopedWarnings()).toHaveLength(0)
+  })
+
+  it('says nothing at all when there is no target tenant to check', () => {
+    const ctx = { ...buildCtx({}), auth: null }
+    expect(() => ensureTenantScope(ctx, '')).not.toThrow()
+    expect(unscopedWarnings()).toHaveLength(0)
+  })
+
+  it('★ an ABSENT auth object cannot claim superadmin, and that is the finding in miniature', () => {
+    // The existing test allows a superadmin with no tenant — but it builds an auth object carrying
+    // `isSuperAdmin: true`. Strip the object and the privilege is unknowable, so the unscoped path logs.
+    // Every caller that forgot to wire auth is in exactly this position.
+    const ctx = { ...buildCtx({ tenantId: null, isSuperAdmin: true }), auth: null }
+    expect(() => ensureTenantScope(ctx, 'tenant-2')).not.toThrow()
+    expect(unscopedWarnings()).toHaveLength(1)
+  })
+
+  it('★ the organisation half gets the same treatment on its line-128 branch', () => {
+    const ctx = {
+      ...buildCtx({}),
+      auth: null,
+      // tenantId null is what makes this the line-128 branch; allowedIds null is what makes it an allow.
+      organizationScope: buildScope({ tenantId: null, allowedIds: null }),
+    }
+    expect(() => ensureOrganizationScope(ctx, 'org-b')).not.toThrow()
+    expect(
+      loggerWarn.mock.calls.filter((call) => String(call[0]).includes('Unscoped organization command')),
+    ).toHaveLength(1)
+  })
+})
