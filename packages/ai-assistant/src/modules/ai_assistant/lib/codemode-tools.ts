@@ -718,10 +718,7 @@ RULES: For FIND/LIST → GET only (1 call). For UPDATE → PUT to collection pat
           userId: ctx.userId,
         }
 
-        const sandbox = createSandbox(
-          { api: { request: apiRequestFn }, context },
-          { maxApiCalls }
-        )
+        const sandbox = createSandbox({ api: { request: apiRequestFn }, context })
 
         const result = await sandbox.execute(input.code)
 

@@ -678,3 +678,145 @@ describe('createSandbox', () => {
     })
   })
 })
+
+/**
+ * `T-35` — the caps the sandbox advertised and nothing read.
+ *
+ * `SandboxOptions` declared `maxOutputSize` and `maxApiCalls`; `createSandbox` destructured only `timeout`.
+ * A caller writing `{ maxApiCalls: 5 }` got no limit and no warning. The api-call cap is now enforced inside
+ * the sandbox, `apiCallCount` is written, and `maxOutputSize` is gone with its reason.
+ *
+ * **What is deliberately not tested here**: the caller's method-aware mutation cap
+ * (`CODE_MODE_MAX_MUTATION_CALLS`), which lives in `codemode-tools.ts` and is covered by its own suite. That
+ * is a different control on the same axis, and this file's cap is the backstop.
+ */
+describe('T-35 — the sandbox enforces the api-call cap it advertises', () => {
+  /** A stub api whose request records the arguments it was handed. */
+  function apiStub() {
+    const calls: Array<{ method: string; path: string }> = []
+    return {
+      calls,
+      request: async (args: { method: string; path: string }) => {
+        calls.push(args)
+        return { ok: true }
+      },
+    }
+  }
+
+  async function runWith(code: string, maxApiCalls?: number) {
+    const api = apiStub()
+    const sandbox = createSandbox({ api }, maxApiCalls === undefined ? {} : { maxApiCalls })
+    const result = await sandbox.execute(code)
+    return { result, api }
+  }
+
+  /** A run that calls api.request exactly `times` times. */
+  const codeCalling = (times: number) => `
+    async () => {
+      ${Array.from({ length: times }, (_, i) => `await api.request({ method: 'GET', path: '/x${i}' })`).join('\n      ')}
+      return 'done'
+    }
+  `
+
+  it('★ refuses one call past the cap, naming the cap in the message', async () => {
+    const { result, api } = await runWith(codeCalling(4), 3)
+
+    expect(api.calls).toHaveLength(3)
+    expect(result.error).toContain('API call limit exceeded (max 3)')
+    expect(result.result).toBeNull()
+  })
+
+  it('★ allows exactly the cap — the boundary is the cap, not the cap minus one', async () => {
+    // The mutation that breaks this is the off-by-one (`>=` instead of `>`): a cap of 3 refusing the third
+    // call would quietly deny every legitimate run.
+    const { result, api } = await runWith(codeCalling(3), 3)
+
+    expect(result.error).toBeUndefined()
+    expect(result.result).toBe('done')
+    expect(api.calls).toHaveLength(3)
+  })
+
+  it('★ reports what the sandbox counted, because the field was declared and never written', async () => {
+    const { result } = await runWith(codeCalling(2), 10)
+
+    expect(result.apiCallCount).toBe(2)
+  })
+
+  it('applies the documented default (50) when the caller does not opt in', async () => {
+    // The whole point: a caller that forgets still gets a bounded run.
+    const { result, api } = await runWith(codeCalling(51))
+
+    expect(result.error).toContain('max 50')
+    expect(api.calls).toHaveLength(50)
+  })
+
+  it('leaves a sandbox with no api injected alone — the search tool passes only a spec', async () => {
+    const sandbox = createSandbox({ spec: {} }, { maxApiCalls: 1 })
+    const result = await sandbox.execute(`async () => 'ok'`)
+
+    expect(result.error).toBeUndefined()
+    expect(result.result).toBe('ok')
+  })
+
+  it('passes an injected api with no request straight through', async () => {
+    const sandbox = createSandbox({ api: { version: 1 } }, { maxApiCalls: 1 })
+    const result = await sandbox.execute(`async () => 'ok'`)
+
+    expect(result.error).toBeUndefined()
+  })
+})
+
+describe('T-35 — the interface no longer advertises a cap nothing implements', () => {
+  /**
+   * The one mutation a runtime test cannot see. `maxOutputSize` was declared with a documented default and
+   * implemented nowhere; it was removed, with the reason written beside the removal. Re-advertising it is a
+   * silent regression, so the contract is asserted at the type level: this line must NOT type-check.
+   *
+   * `@ts-expect-error` fails the build when the expression stops being an error — i.e. when somebody
+   * re-adds the option. Verified by mutation M4.
+   */
+  it('★ refuses maxOutputSize as a sandbox option', () => {
+    // @ts-expect-error — maxOutputSize was removed in T-35; passing it must not compile.
+    const options: import('../sandbox').SandboxOptions = { maxOutputSize: 1024 }
+    // Unreachable if the line above compiles; kept so the object is not dead code to a reader.
+    expect(options).toBeDefined()
+  })
+})
+
+/**
+ * `T-35`, added after a mutation caught the gap. Dropping `apiCallCount` from the **success** return went
+ * red immediately; dropping it from the **error** return did not, because nothing asserted the count on a
+ * failed run. A failed run is exactly when the number matters most — it is the only place a caller can learn
+ * that the sandbox stopped the run rather than the code failing.
+ */
+describe('T-35 — the count is populated on a failed run too', () => {
+  it('★ reports the observed calls when the cap threw', async () => {
+    const calls: string[] = []
+    const sandbox = createSandbox(
+      { api: { request: async (args: { path: string }) => { calls.push(args.path); return { ok: true } } } },
+      { maxApiCalls: 2 },
+    )
+
+    const result = await sandbox.execute(
+      `async () => { await api.request({ path: '/a' }); await api.request({ path: '/b' }); await api.request({ path: '/c' }); return 'done' }`,
+    )
+
+    expect(result.error).toContain('API call limit exceeded (max 2)')
+    expect(result.apiCallCount).toBe(2)
+  })
+
+  it('★ reports the observed calls when the code itself throws', async () => {
+    const sandbox = createSandbox(
+      { api: { request: async () => ({ ok: true }) } },
+      { maxApiCalls: 10 },
+    )
+
+    const result = await sandbox.execute(
+      `async () => { await api.request({ path: '/a' }); throw new Error('boom') }`,
+    )
+
+    expect(result.error).toContain('boom')
+    // The run failed for an unrelated reason, and the count is still what the sandbox saw.
+    expect(result.apiCallCount).toBe(1)
+  })
+})

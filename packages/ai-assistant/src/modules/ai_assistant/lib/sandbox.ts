@@ -12,10 +12,20 @@ import ivm from 'isolated-vm'
 export interface SandboxOptions {
   /** Execution timeout in milliseconds (default: 30_000) */
   timeout?: number
-  /** Maximum output size in bytes (default: 1_048_576 / 1MB) */
-  maxOutputSize?: number
-  /** Maximum number of api.request() calls allowed (default: 50) */
+  /**
+   * Maximum number of api.request() calls allowed per execute() run (default: 50).
+   *
+   * `T-35` — **this option was decorative until 2026-10-19.** It was declared here and destructured
+   * nowhere, so a caller who wrote `{ maxApiCalls: 5 }` got no limit at all and no warning that they had.
+   * The sandbox now enforces it itself, wrapping any injected `api.request`.
+   */
   maxApiCalls?: number
+  // `T-35` — **`maxOutputSize` was removed deliberately.** It was advertised with a default of 1MB and
+  // implemented nowhere, which is worse than absent: a caller writing `{ maxOutputSize: 1024 }` believed a
+  // run was bounded when it was not. The isolate's own `memoryLimit` (MEMORY_LIMIT_MB, 32MB) bounds a
+  // runaway result, and the console proxy already caps entries and length. An option that promises a limit
+  // nothing implements is a lie in the API surface; the fix is to delete it, with this reason, not to
+  // keep it and hope.
 }
 
 export interface SandboxResult {
@@ -37,7 +47,8 @@ const MAX_LOG_ENTRY_LENGTH = 1000
  * @param options - Sandbox configuration
  */
 export function createSandbox(globals: Record<string, unknown>, options: SandboxOptions = {}) {
-  const { timeout = 30_000 } = options
+  const { timeout = 30_000, maxApiCalls = 50 } = options
+  let observedApiCalls = 0
 
   return {
     async execute(code: string): Promise<SandboxResult> {
@@ -53,7 +64,12 @@ export function createSandbox(globals: Record<string, unknown>, options: Sandbox
         await bootstrapConsole(ctx, logs)
 
         // Inject caller-provided globals (spec, api, context, etc.)
-        await injectGlobals(ctx, globals)
+        //
+        // `T-35` — the api-call cap is applied here rather than in the caller, because the caller's own
+        // cap (`codemode-tools.ts`) counts what it can see from outside the isolate. This one counts what
+        // the isolate actually did. Two controls, one axis, deliberately: a caller that forgets still gets
+        // the documented default, and the sandbox's number is the one that reflects the run.
+        await injectGlobals(ctx, applyApiCallCap(globals, maxApiCalls, () => { observedApiCalls += 1 }))
 
         // Shadow globalThis so user code cannot navigate to the isolate's global
         // object and inspect/escape via its properties
@@ -81,6 +97,9 @@ export function createSandbox(globals: Record<string, unknown>, options: Sandbox
           result,
           logs,
           durationMs: Date.now() - start,
+          // `T-35` — the third decorative member: declared since the file was written, never populated.
+          // A caller that logs the result now reports what the sandbox counted, not its private tally.
+          apiCallCount: observedApiCalls,
         }
       } catch (error) {
         const err = error as any
@@ -89,11 +108,55 @@ export function createSandbox(globals: Record<string, unknown>, options: Sandbox
           error: err?.message ?? String(err),
           logs,
           durationMs: Date.now() - start,
+          apiCallCount: observedApiCalls,
         }
       } finally {
         // Always release the V8 isolate to avoid memory leaks
         isolate.dispose()
       }
+    },
+  }
+}
+
+/**
+ * `T-35` — make the advertised api-call cap real.
+ *
+ * Returns `globals` unchanged unless it carries an `api` object with a callable `request`. When it does, the
+ * request is wrapped with a counter that throws past the cap — so the limit the interface has promised since
+ * the file was written is the limit that applies, and a caller that forgets to opt in gets the default
+ * instead of an unbounded run.
+ *
+ * **What this does not replace.** The caller's own cap in `codemode-tools.ts` counts against the
+ * **observed HTTP method**, which is how a dynamically-built method (`'PO' + 'ST'`) is caught. That is a
+ * different control on the same axis and it stays. This one is the backstop: it counts what the isolate
+ * actually did, from inside the isolate.
+ */
+function applyApiCallCap(
+  globals: Record<string, unknown>,
+  maxApiCalls: number,
+  onCall: () => void,
+): Record<string, unknown> {
+  const api = globals?.api
+  if (!api || typeof api !== 'object') return globals
+  const request = (api as { request?: unknown }).request
+  if (typeof request !== 'function') return globals
+
+  // Per-execute counter: each `execute()` builds its own wrapper, so a second run in the same sandbox starts
+  // from zero. `maxApiCalls` calls succeed; the next one throws.
+  let calls = 0
+
+  return {
+    ...globals,
+    api: {
+      ...(api as Record<string, unknown>),
+      request: (...args: unknown[]) => {
+        if (calls >= maxApiCalls) {
+          throw new Error(`API call limit exceeded (max ${maxApiCalls})`)
+        }
+        calls += 1
+        onCall()
+        return (request as (...a: unknown[]) => unknown)(...args)
+      },
     },
   }
 }
