@@ -5190,3 +5190,40 @@ asked why their ceiling route 404s.
 not the code, decides what the test can see), the standing hazard **"a row's prescribed FIX can be
 wrong — re-measure it first"** (here the row named **one** gate where the act needed **two**:
 `CC-135` §3.2), `api/__tests__/capability-ceiling.route.test.ts`.*
+
+## L190
+
+**Two functions can produce one fact, and teaching only the one a row names leaves the other reporting
+the old answer.**
+
+`CC-136`'s row said a platform act was being judged as a person because the *parser* did not recognise
+the `system:` word. True — and half. The other half is the step that turns a login into a principal: it
+does not call the parser and use its answer. It **re-derives** the kind from two yes/no facts
+(`isService`, `isAiWorker`) and its final `? :` chain ends in `'human'`. So a `system` subject fell
+through to *person* there too, in a function the row never mentioned.
+
+**Why that matters more than the missing branch:** the parser is read by the gates; the derivation is
+read by everything else — the journal, the preferences read, the helper that answers *whose personal
+settings are these*. Fixing only the parser would have turned the gates green while the rest of the
+platform still believed a platform act was a person, and the test that would have caught it is not the
+one the row asked for. The mutation that removes **only** the derivation arm turns exactly two tests red
+and leaves the parser tests green — which is the proof that the two halves are separately observable,
+and therefore that both need a test.
+
+**The rules.**
+1. **Before fixing "the reader", find every place that answers the same question.** A fact produced in
+   two functions is two defects with one symptom. The row names the one that was measured; the other is
+   found by asking *who else decides this?*
+2. **A re-derivation is not a call.** `x = f(y)` and `x = y === 'a' ? 'a' : y === 'b' ? 'b' : 'c'` look
+   equivalent until a fourth value exists — then the second silently answers `'c'`. Where a fall-through
+   default is *the dangerous value* (here: the one kind the floor does not bind), the default is a
+   defect waiting for its first new case.
+3. **A row that says "past both gates" must name what each gate reads.** This row said *past the floor
+   and the ceiling*; the ceiling is resolved **by tenant**, so it never looked at the kind at all, and
+   the defect was a floor hole and only a floor hole. The overstatement cost nothing here, but the next
+   reader would have gone looking for a ceiling bypass that does not exist. **Measure each half of a
+   claim separately** — the half that is wrong is usually the one nobody re-measured.
+
+*Cross-ref: L189 (the fixture decides what a test can see — same family: the instrument, not the code),
+L23, the standing hazard **"a row's prescribed FIX can be wrong — re-measure it first"** (here the row's
+FIX was *a parser edit*, and it was half an edit), `PLAN-CC-136-system-subject.md` §2.2, M2 in its §8.*

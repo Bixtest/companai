@@ -38,11 +38,14 @@ In the **docs repo**, in this order:
 3. `library/development/MASTER-CHECKLIST.md` **§2** — the canonical "LAST DONE" and "NEXT" lines,
    and §5's register for every open item with its trigger.
 
-**As of 2026-10-19 (later), the position is:** register at **75 closed · 63 open · 138 total**; the
-frontier is the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-139`** (the ceiling screen,
-over the route `CC-135` just built), then the two that need the owner (`CC-136`, `CC-137`), then
-`CC-121` behind `CC-119`. **`CC-125` (the floor), `CC-128` (the ceiling), `CC-134` (the superadmin read)
-and `CC-135` (the ceiling route + the foundation's producer) are closed.**
+**As of 2026-10-19 (later), the position is:** register at **76 closed · 62 open · 138 total**; the
+frontier is the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-137`** — the owner ruled it
+on 2026-10-19 (*move role assignment behind `auth.roles.manage`, then add the two user capabilities to
+the floor*), so it is startable work rather than a question — **then `CC-139`** (the ceiling screen, over
+the route `CC-135` built), then `CC-121` behind `CC-119`. **`CC-125` (the floor), `CC-128` (the ceiling),
+`CC-134` (the superadmin read), `CC-135` (the ceiling route + the foundation's producer) and `CC-136`
+(a platform act is no longer judged as a person) are closed.** **No row is waiting on the owner right
+now** except the long-standing ones in `MASTER-CHECKLIST.md` §4 (`4 need you`).
 **`CC-121` does not start until `CC-92` Slot 0 lands** — the 13 spine findings, because that migration
 re-keys every principal through the authority gate (`PREVIEW-AUDIT-TRIAGE.md` §6.2, `MASTER-CHECKLIST.md`
 §9.4).

@@ -80,9 +80,12 @@ const mutations = [
     expect: /§8 says 22 G-\* ids/,
   },
   {
-    name: 'M8 — change §8\'s measured "now" coverage headline (80 → 79)',
-    apply: (s) => s.replace('the unaddressed count is **80**', 'the unaddressed count is **79**'),
-    expect: /says 79 ids unaddressed; measured 80/,
+    name: 'M8 — change §8\'s measured "now" coverage headline (49 → 48)',
+    // Re-aimed 2026-10-19 (`CC-136`): the target read `**80**` and the document had moved to 49 at an
+    // earlier close, so this mutation could no longer fire — and a mutation that cannot fire is not a
+    // proof. Re-aimed at the text as it stands, which is the only thing it can honestly mutate.
+    apply: (s) => s.replace('the unaddressed count is **49**', 'the unaddressed count is **48**'),
+    expect: /says 48 ids unaddressed; measured 49/,
   },
   {
     name: 'M9 — change §8\'s benchmark "before" number (157 → 156)',

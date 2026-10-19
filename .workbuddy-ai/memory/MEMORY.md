@@ -34,6 +34,8 @@ live position only.
   `[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] count:59 threshold:50`. The harness, not the code
   and not `EBUSY` (that was `CC-19`'s wrong mechanism). Prove with `CODEBUDDY_SAFE_DELETE_ENABLED=0`.
 - **A row's prescribed FIX can be wrong — re-measure it first** (`CC-123`, `CC-129`, `CC-125`'s "nine").
+- **A mutation whose target text has moved reports GREEN — "DID NOT APPLY" is not a pass.** Re-aim it at
+  the text as it stands (`M8`, 2026-10-19: `**80**` had become `49`). Same family as `CC-101`.
 - **Jest reads a positional suite arg as a REGEX** — escape `\[key\]`; assert the denominator (L21).
 - **Python `open(p,'w')` converts the whole file to CRLF on Windows** (L22).
 - **A mock that ignores its `where` cannot prove a filter** (L23).
@@ -45,7 +47,8 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 75 · 63 · 138.** Checkers PASS.
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 76 · 62 · 138.** Checkers PASS
+(`check-master-checklist.mjs` + its 14/14-RED mutation suite).
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
 
@@ -72,15 +75,24 @@ handed every tenant admin the **platform** ceiling → the route asks **two** qu
 self-narrowing is allowed because `CC-128` already refuses a non-subset. **★ `crossTenant` was wrong
 for the platform scope** (a platform act was recorded as cross-tenant) — unreachable before because the
 CLI always acted from `null`. L189: **an import from the wrong module is `undefined`, and the test that
-passes because of it is the NEGATIVE one**).
+passes because of it is the NEGATIVE one**) · `CC-136` (**a platform act is a platform act, 2026-10-19** —
+`SYSTEM_SUBJECT_PREFIX` + `systemSubject()`, the `system:` branch **first** in `parseSubject`, the
+`isSystem` arm in `derivePrincipal`, the `system` arm in `normalizePrincipalSubject`, and the two template
+producers switched to the builder; **★ the row was wrong twice**: (1) *"past both the floor and the
+ceiling"* — the ceiling is resolved **by tenant**, so it was a **floor** hole only; (2) *"a parser edit"*
+— **`derivePrincipal` re-derives the kind from two booleans whose fall-through is `human`**, so a
+parser-only fix would have left every consumer of `auth.principal` calling a platform act a person.
+**No data to migrate:** `action_logs.actor_user_id` is **`uuid`**, so `system:…` was never storable.
+L190: **two functions can produce one fact; teaching only the one a row names leaves the other
+reporting the old answer**).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-139`** — the ceiling has a route and **no screen**; `CC-135`'s other half, opened in the same
-  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE — next.**
-- **`CC-136`** — `system:` is a principal kind with **no producer**; `parseSubject` calls it `human`,
-  so a platform act passes both floor and ceiling. **NEEDS THE OWNER** (rec: teach the parser).
 - **`CC-137`** — "granting roles" is reachable through `auth.users.edit`, which is **not on the floor**
-  (`roles` arrays are only subset-checked). **NEEDS THE OWNER** (rec: (b) then (a)).
+  (`roles` arrays are only subset-checked). **RULED 2026-10-19: (b) then (a)** — move role assignment
+  behind `auth.roles.manage`, then add `auth.users.create` + `auth.users.edit` to `MACHINE_FLOOR`
+  (**7 → 9**, so `lib/__tests__/machineFloor.test.ts`'s size guard moves too). **STARTABLE — next.**
+- **`CC-139`** — the ceiling has a route and **no screen**; `CC-135`'s other half, opened in the same
+  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE.**
 - **`CC-138`** — no route declares human-only/machine-only; `CC-125`'s **surface** half, previously
   recorded only inside the closed row. Rides `W3`.
 - **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger; now also in

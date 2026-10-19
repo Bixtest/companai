@@ -7,6 +7,66 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-136` closed: when the platform acts on its own behalf, it stops being filed as a person
+
+**What the row asked for.** Teach the reader that `system:` marks the platform acting on its own behalf.
+The owner ruled option (a) — teach the parser, and accept that the id columns then hold the bare id —
+and the recommendation was made in plain terms: *a platform act is currently filed as if a person did
+it; fix the reader.*
+
+**What measuring the row found: it was wrong in two places, and the second one is the whole story.**
+
+*The blast radius was overstated.* The row said a platform act was *"past both the floor and the
+ceiling"*. The ceiling is resolved **by tenant** — `capabilityCeiling.refusalsFor(scope.tenantId, …)` —
+so it applies identically to every principal and never looked at the kind at all. This was a **floor**
+hole and only a floor hole. The overstatement is cheap here and expensive later: a row that claims two
+gates sends the next reader to the file that was never involved.
+
+*The fix was twice the size the row said.* The row's `FIX` line was *a parser edit*. But the parser is
+not the only function that answers *what kind of actor is this*. The step that turns a login into a
+principal **re-derives** the kind from two booleans — `isService`, `isAiWorker` — and its final ternary
+ends in `'human'`. So a `system` subject fell through to *person* there as well. The parser is what the
+gates read; the derivation is what the journal, the preferences read and `effectiveUserId` read. **A
+parser-only change would have turned the gates green while the rest of the platform still believed a
+platform act was a person.** Two functions, one fact, and the row named one of them.
+
+**What landed.** One builder for the word that marks a platform act — the module's own docblock says
+*"nothing outside this module should build or parse this string"*, and two template files did — plus the
+reader taught to recognise it, the derivation taught to report it, and the write path taught that the
+mark belongs to the same three rules the other two kinds already follow: an agreeing mark is stripped, a
+disagreeing mark is refused with a message, a bare id is accepted with any declared kind. The machine
+floor's docblock stopped apologising: its `system` entry said *"currently unreachable"* and *"must not
+be read as coverage today"*, and both sentences are now false.
+
+**The data question turned out to have an empty answer.** The row worried that returning the bare id
+would change what stored `system:` rows contain. Measured: the column that would hold such an id —
+`action_logs.actor_user_id` — is a **`uuid`**, so Postgres never accepted one; and nothing writes a
+`system:` subject into a `text` principal column. **No migration.** The verification is a search.
+
+**What the proof looks like.** The platform's own act is now refused `auth.roles.manage` **and** still
+allowed an ordinary capability in the same test — a floor that refused a platform act everything would
+be the platform unable to run. **5/5 mutations RED**, and the one worth keeping is M2: remove *only* the
+derivation arm and exactly two tests go red while the parser tests stay green, which is the measurement
+that proves the second half was not a theory. Shared **210 suites / 2,601 tests**; core **659 suites /
+5,800 tests, 0 failures**; `tsc` 0 on both; every mutated file restored **checksum-verified
+byte-identical**.
+
+**★ And the run found an instrument that had quietly stopped working.** The checklist's own mutation
+suite reported `GREEN M8 — DID NOT APPLY`: its target text (`the unaddressed count is **80**`) had moved
+to `49` at an earlier close, so the mutation could no longer fire — and a mutation that cannot fire is
+not a proof, in the suite's own words. Re-aimed at the text as it stands; 14/14 RED again.
+
+**Why it matters beyond the row.** The platform now has four kinds of actor that can actually be
+produced, and the one it uses when it acts by itself is the one no configuration may grant the
+authority system's levers to. That closes the last measured fail-open in the identity layer that a
+platform act could walk through — the remaining door is `CC-137`, where a machine holding
+`auth.users.edit` can still hand out roles.
+
+**Records:** [`PLAN-CC-136-system-subject.md`](library/development/PLAN-CC-136-system-subject.md) ·
+`LESSONS.md` **L190** · `MASTER-CHECKLIST.md` §2 and §5.
+
+---
+
 ## 2026-10-19 — `CC-135` closed: the ceiling has a door, and the platform has an administrator
 
 **What the row asked for.** A route, so that a ceiling change stops being recorded as `system`. The
