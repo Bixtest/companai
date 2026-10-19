@@ -5269,3 +5269,37 @@ something calls it*), one layer down. The fix was therefore to **ask**, not to a
 discards its answer) · L184 (*a fact is not corrected where it was discovered; it is corrected where it
 is believed* — the floor's entry was believed in one file and unasked in another) ·
 `PLAN-CC-137-role-assignment-door.md` §2, M2 and M3 in its §5.*
+
+## L192
+
+**An exemption's reason is a defect, and a comment is where defects go to be forgotten.**
+
+`CC-139` shipped a screen with an inline `optimistic-lock-exempt` marker, because a guard scans backend
+screens for mutating calls that do not send the expected-version header and its allowlist is deliberately
+empty: *"wire it or exempt it inline."* Wiring was impossible — the ceiling is a **set of rows**, one per
+capability, so a version header has nothing to name. The reason in the comment was honest, specific, and
+one sentence long.
+
+**And it was still a defect, sitting in a comment.** Two administrators who load the same ceiling and both
+save keep the last write; the first one's change vanishes with no message and nothing records that
+anything was lost. Writing the exemption did not cause the race — the write has always been a
+compare-nothing replacement. **It made it reachable by hand**, and it forced me to write down exactly why
+the "obvious" safety was missing. That sentence is the whole defect, and the natural place to put a
+sentence is a comment.
+
+**The rules.**
+1. **Every `*-exempt` marker is a TODO with a receipt.** If you can write a reason you cannot wire
+   something, the reason names a property the system does not have. Read it back as a requirement and
+   register it — `CC-140` here came from my own comment, not from a review.
+2. **Distinguish "cannot lock" from "did not bother".** The first is a measurement (a set of rows has no
+   version), and it belongs in the marker. The second is a hole, and a marker would be laundering it.
+3. **A guard's empty allowlist is a promise, and an inline exemption is how you keep it.** The moment an
+   allowlist starts filling up, the guard stops being able to tell a documented gap from an accidental
+   one. Exempt inline, with the reason, or fix it.
+4. **Ask what the change makes reachable, not only what it fixes.** The screen fixed visibility. The same
+   change made a previously impractical race a button.
+
+*Cross-ref: `CC-101` (*a checker is not a control until something calls it* — this is the mirror image: a
+control that called, and could not be obeyed) · `CC-115` (*the declared-control census is a report by its
+own design*) · L191 (*the exemption was the attack surface*) ·
+`PLAN-CC-139-ceiling-screen.md` §5, the paragraph that found the guard.*

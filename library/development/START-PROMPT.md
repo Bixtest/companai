@@ -9,11 +9,19 @@
 > all point to the box. (Owner's instruction, 2026-10-06. If you are reading this months later, the
 > task will have changed many times — **go to the box**, do not trust this line.)
 
-> **★★ CURRENT STATE — 2026-10-16 (revision 34).** The project is at the end of a deliberate
-> **development pause**. The **platform-study + mapping stage is DONE**: nine platforms studied and
-> mapped into **53 architecture requirements** (`SR-*`) in `library/architecture/mapping/`. A new
-> platform, **activepieces**, was added (pending study, alongside **mattermost**). The **ONE NUMBER is
-> unchanged at 78 / 321 = 24%**. **★ START WITH THE MASTER CHECKLIST** —
+> **★★ CURRENT STATE — 2026-10-19 (revision 37).** The development pause is **over**. The **build
+> frontier is the authority family, and it is complete and closed**: `CC-125` (the machine floor) ·
+> `CC-128` (the tenant ceiling) · `CC-134` (the superadmin read, scoped to the foundational tenant) ·
+> `CC-135` (the ceiling's route) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability
+> means one door) · `CC-139` (the ceiling's screen — and `CC-140`, opened by its own exemption comment).
+> **Register: 78 closed · 61 open · 139 total**, counted from `MASTER-CHECKLIST.md` §5 by
+> `scripts/check-master-checklist.mjs`. **The live task is `CC-140`** — the ceiling write gets a
+> concurrency token — and it is named, with its steps and the queue behind it, in the **`★ ACTIVE TASK`
+> box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**, which is where you should look next.
+> *(The box had gone missing; it was restored on 2026-10-19. If it is missing again, restoring it is the
+> fix — this prompt is not allowed to state a task, and that rule is what made its absence a dead end for
+> two documents at once.)*
+> **★ START WITH THE MASTER CHECKLIST** —
 > [`library/development/MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md): the one plain-English index over the
 > whole lifecycle — every checklist row, every open item with its trigger, the platform study, and the
 > requirements, so you never hunt to learn what a code-name means or where it sits. **It is one file and
@@ -21,12 +29,9 @@
 > was retired on 2026-10-17, after its open-work view was measured 25 of 54 rows behind while its headline
 > counts stayed right (the headline was computed, the list was typed; two mirrors cannot hold one truth).
 > **Every count in it is measured, not typed:** `scripts/check-master-checklist.mjs` checks its tables
-> against its own numbers, and `scripts/derive-counts.mjs` re-derives 78/321 from the appendix boxes.
-> The **build frontier is paused, not
-> gone**: `P2-9b` (the Hermes switchover) is the next build when development resumes, gated by the
-> owner's stale-timeout decision (see `HANDOVER.md` revision-34 banner). **No code has been written
-> since 2026-10-14.** What is open for the owner: the `P2-9b` stale-timeout trade, and whether to start
-> the tooling set + `SR-08` while the two platform studies run in parallel.
+> against its own numbers (and has its own 14-mutation proof), and `scripts/derive-counts.mjs` re-derives
+> **78 / 321 = 24.3%** from the appendix boxes. **What is open for the owner:** the four long-standing
+> decisions in §4 — none of them on the authority path.
 
 **What this file is.** The ready-to-paste first message for the agent that inherits this project and
 continues the development. It is short on purpose: it tells the agent what to read, how to set up,

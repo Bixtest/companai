@@ -15,6 +15,29 @@ continue the development work.** Read it top to bottom once (about 20 minutes), 
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
 **Written 2026-10-05, revision 33 (2026-10-14). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**★★ CURRENT POSITION — 2026-10-19 (revision 36). Read this paragraph, then go to the box.**
+The development pause is **over** and the build frontier is the **authority family**, which is now
+**complete and closed**: `CC-125` (the machine floor — the capabilities no configuration may ever grant a
+machine) · `CC-128` (the tenant ceiling) · `CC-134` (the superadmin read, scoped to the foundational
+tenant) · `CC-135` (the ceiling's route + the flag's producer) · `CC-136` (a platform act is a platform
+act, in both places that decide it) · `CC-137` (one capability means one door) · `CC-139` (the ceiling's
+screen). **Register: 78 closed · 61 open · 139 total**, counted from `MASTER-CHECKLIST.md` §5 by
+`scripts/check-master-checklist.mjs`. **The live task is `CC-140`** — the ceiling write gets a concurrency
+token, the small row `CC-139`'s own exemption comment opened — and it is named, with its steps and the
+queue behind it, in **the `★ ACTIVE TASK` box at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md)**.
+**★ And one repair this revision made, because it would have stranded you:** the box was **missing**.
+Both this page and `START-PROMPT.md` pointed at it and neither was allowed to state a task itself, so the
+two documents a newcomer is told to read first both led nowhere. **The box is restored, and it is the only
+place a live task is written.** If you find it gone again, restoring it is the fix — not adding a task
+line here.
+**What has NOT moved:** the ONE NUMBER is **78 / 321 = 24.3%** — re-derived 2026-10-19 by
+`node scripts/derive-counts.mjs`, which prints `MATCHES the claimed 78/321`. *(Rule 13: this page's
+revision-33 text below says `75/321 = 23%`; that was true on 14 October and is superseded — the box
+below §2 and `platform_points.md`'s appendix are the authority.)* None of the six closed rows above
+moved a LIST row, because they are the authority spine, not a feature. The Hermes switchover
+(`P2-9b`) is still the next *product* build once the spine work is done, and its gate is **closed**
+(owner, 2026-10-16: Option 1 — keep the 2,400 s ceiling).
 **This revision adds the handoff snapshot — the ★ section between this intro and §0 (measured
 2026-10-14): the live frontier (Hermes Phase 2, `P2-1`–`P2-9a` discharged), the exact point the work
 was interrupted (`P2-9b`, queued and not started), and the one owner decision that gates it.**

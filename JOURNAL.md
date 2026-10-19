@@ -7,6 +7,97 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## ★ ACTIVE TASK — the one place that says what is being worked on now
+
+**Read this box first. Nothing else may state a live task** — `HANDOVER.md`, `START-PROMPT.md`,
+`BOOKMARKS.md`, `BACKLOG.md` and `README` all point here. If any of them seems to disagree with this
+box, **the box wins** (owner's instruction, 2026-10-06).
+
+> **★ THE BOX WENT MISSING AND IS RESTORED 2026-10-19.** It was the only pointer `HANDOVER.md` and
+> `START-PROMPT.md` gave a newcomer, and neither document was allowed to state a task itself — so for
+> however long it was absent, the two files a fresh agent is told to read first both sent it to a
+> section that did not exist. If you are reading this and the box is gone again, **that is the defect,
+> not a change of policy**: restore it here rather than adding a task line to one of the pointing files.
+
+**IN HAND — `CC-140`: the ceiling write gets a concurrency token.** `CC-139` gave the ceiling a screen,
+and the screen had to answer a guard that refuses mutating screens without an expected-version header. It
+answered honestly: the ceiling is a **set of rows**, one per capability, so there is no single version a
+header could name. **That answer is a Todo in disguise** — two administrators who load the same ceiling and
+both save keep the last write, and the first one's change vanishes with no message. The read returns a
+**fingerprint** (a hash of the sorted capability set) and the write requires it: a save against a stale
+view refuses with a sentence instead of overwriting. Work in `capabilityCeiling.ts` +
+`capabilityCeilingRoute.ts`, plus the screen's own reload-after-refusal.
+
+**THE QUEUE AFTER IT** — and the order is fixed, not a list:
+
+1. **`CC-92` Slot 0** — **13 spine findings before `CC-121` starts.** That migration re-keys every
+   principal, and the gate it re-keys through cannot see seven modules' commands (`T-07`) or refuse a
+   missing identity (`T-27`). **The spine is repaired before it is re-keyed.**
+2. **`W3`** — then `CC-138` (no route declares *human-only* / *machine-only*) rides it.
+3. **`CC-121`** — behind `CC-119` (the database rebuild milestone), then **`CC-122`**.
+4. **`CC-133`** — the platform above its tenants (option B). Deferred by the owner's trigger, not dropped.
+
+**THE POSITION, MEASURED — 2026-10-19:** register **78 closed · 61 open · 139 total**; §4's open rows
+**14 startable · 1 needs a live database · 4 need the owner · 42 blocked on a trigger**.
+`MASTER-CHECKLIST.md` §2 is the canonical last-done/next line and §5 is the register;
+`where_we_left.md` §0 is the six-step resume recipe. **The authority family is complete and closed:**
+`CC-125` (the floor) · `CC-128` (the ceiling) · `CC-134` (the superadmin read) · `CC-135` (the ceiling's
+door) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability means one door) ·
+`CC-139` (the ceiling's screen). **No row on the authority path is waiting on the owner.**
+
+---
+
+## 2026-10-19 — `CC-139` closed: the ceiling has a screen, and the wildcard is not assumed on the way in
+
+**What the row asked for.** A page over the route `CC-135` built — the one control that bounds every
+tenant in the deployment was still changed from a terminal or by hand-written request.
+
+**★ The question the row did not ask, and the measurement that answered it.** The feature tree comes from
+`/api/auth/features`, gated by the **role-editing** capability. The ceiling is gated by the
+**tenant-management** capability. The dispatcher's `requireFeatures` is **all-of** — measured, there is no
+any-of form anywhere in `packages/shared` or `packages/core` — so the screen could not borrow the role
+editor's endpoint. A platform administrator usually holds both, through `*`. **And that is exactly the
+sentence `CC-134` already punished:** the wildcard must not be relied on to arrive at all, because the guy
+`CC-135` chose to support — a tenant administrator narrowing **their own** ceiling — may hold the tenant
+capability and nothing else, and would have been handed an empty tree with no explanation.
+
+**So there is a read-only catalogue route in the same folder**, gated like the ceiling. Not a widening: a
+capability that lets you **set** a list is strictly more powerful than one that lets you **see** it, and a
+route that refuses the list to somebody who may rewrite it is a door with the handle on the wrong side. It
+is a separate route — not a relaxed gate on `/api/auth/features` — because that endpoint also appends
+**tenant-scoped synthesized entity features**, which must never enter a ceiling that sits above every
+tenant. The row also said to reuse `AclEditor.tsx`; measured, the row is right about the **tree** and wrong
+about the **component**: that is a role editor that also fetches roles, organisations and a target ACL.
+What is reusable is the data shape and the grouping.
+
+**★ And the build met a guard in the tree.** Two suites scan every backend screen for a mutating call
+without the expected-version header, with a deliberately **empty** allowlist — *"wire it or exempt it
+inline."* Both went red (2 of 5,818). The honest answer is not a header: the ceiling is a **set of rows**,
+one per capability, so no version header means anything. The page carries an inline exemption — **and the
+hole that exemption exposed is `CC-140`**, opened in the same change rather than left in a comment. Two
+administrators who load the same ceiling and both save keep the last write; a screen makes that race
+reachable by hand. `LESSONS.md` **L192**.
+
+**What landed.** `backend/settings/capability-ceiling/` — a page and its metadata — plus
+`api/capability-ceiling/catalogue/route.ts`. Scope selector, searchable module-grouped tree, save
+disabled until something changed, every refusal shown as the route's **sentence**.
+
+**The proof.** 3 suites / 26 tests, the page rendered under jsdom with a stubbed fetch that asserts on
+**URLs and bodies** rather than call counts. **5/5 mutations RED**, files restored checksum-verified:
+drop the page's capability · save to the platform URL for every scope · render the status instead of the
+message · re-gate the catalogue route · call an inherited ceiling *this tenant's own*. `tsc` 0; full core
+**661 suites / 5,818 tests**.
+
+**One thing this costs, stated plainly:** the page is registered by a **generated** manifest
+(`apps/mercato/.mercato/generated/backend-routes.generated.ts`, not in git), so it appears the next time
+`mercato generate` runs — `yarn dev` runs it automatically. Nobody has to remember to do anything, but a
+reader who greps for the file and does not find it in the manifest has not found a defect.
+
+**Records:** [`PLAN-CC-139-ceiling-screen.md`](library/development/PLAN-CC-139-ceiling-screen.md) ·
+`LESSONS.md` **L192** · `MASTER-CHECKLIST.md` §2, §4, §5 · **`CC-140` opened**.
+
+---
+
 ## 2026-10-19 — `CC-137` closed: granting roles has one door, and the floor's answer is finally asked
 
 **What the row asked for.** Close the third door onto the authority system. The direct ACL writer is

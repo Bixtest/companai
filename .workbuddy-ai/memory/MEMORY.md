@@ -47,7 +47,7 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 77 · 61 · 138.** Checkers PASS
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 78 · 61 · 139.** Checkers PASS
 (`check-master-checklist.mjs` + its 14/14-RED mutation suite).
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
@@ -91,15 +91,27 @@ ALREADY named `auth.roles.manage` and this route never asked it** (`CC-101`'s cl
 the fix is **two halves, not alternatives**: the route asks for the capability (**makes the existing
 answer reachable**) + the two user ids join `MACHINE_FLOOR` (**7 → 9**, refuses at the route's own gate).
 Empty `roles` needs no capability (narrowing is not widening). L191: **a check that exempts the most
-powerful actor protects everyone except the one who can do the most harm**).
+powerful actor protects everyone except the one who can do the most harm**) · `CC-139` (**the ceiling's
+screen, 2026-10-19** — `backend/settings/capability-ceiling/` + a read-only
+`api/capability-ceiling/catalogue/route.ts`. **★ the row did not ask which door reads the tree**: the
+tree's endpoint is gated by `auth.acl.manage`, the ceiling by `directory.tenants.manage`, the dispatcher
+is all-of and there is **no any-of form anywhere** — and the wildcard must not be relied on to arrive
+(`CC-134`), so a **separate catalogue route gated like the ceiling** (setting > seeing, and
+`/api/auth/features` appends tenant-scoped entity features a platform ceiling must not contain).
+**★ a guard met the build**: two suites scan backend screens for mutating calls without an
+expected-version header, allowlist deliberately empty; the ceiling is a **set of rows** so no header means
+anything → inline exemption → **the exemption's reason became `CC-140`** (no concurrency token).
+L192: **an exemption's reason is a defect, and a comment is where defects go to be forgotten**).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-139`** — the ceiling has a route and **no screen**; `CC-135`'s other half, opened in the same
-  change. Reuses `AclEditor.tsx`'s feature tree. **STARTABLE — next.**
-- **`CC-138`** — no route declares human-only/machine-only; `CC-125`'s **surface** half, previously
-  recorded only inside the closed row. Rides `W3`.
-- **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger; now also in
-  `BACKLOG.md`'s deferred table.
+- **`CC-140`** — the ceiling write has **no concurrency token**; two admins who load the same ceiling and
+  both save keep the last write. Started by `CC-139`'s own exemption comment. Fix: the read returns a
+  **fingerprint** (hash of the sorted set), the write requires it. Work in `capabilityCeiling.ts` +
+  `capabilityCeilingRoute.ts`. **STARTABLE — next.**
+- **`CC-92` Slot 0** — **13 spine findings before `CC-121`** (the gate cannot see 7 modules' commands,
+  `T-07`, or refuse a missing identity, `T-27`). Startable.
+- **`CC-138`** — no route declares human-only/machine-only; rides `W3`.
+- **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger.
 
 **★ `CC-92` IS SCHEDULED (2026-10-19) — the preview backlog now has gates, not a queue.**
 `PREVIEW-AUDIT-TRIAGE.md` §6 = `MASTER-CHECKLIST.md` §9.4. All **45** `T-*` findings placed: 8 closed ·
