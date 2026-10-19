@@ -98,7 +98,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-24** | 08 §11 F9 | `KernelObjectContract.source` is unpopulated for most entities | 🔬 CONFIRMED | small | postponed | DOCUMENT |
 | **T-25** | 08 §11 F10 | Two sort comparators, one locale-dependent; it reaches `entity.version` | 🔬 CONFIRMED (shape) | medium | scheduled | EXECUTE |
 | **T-26** | 08 §11 F12 | `importModel` validates ids but not structure | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
-| **T-27** | 08 §12 S-2/S-6 | `ensureTenantScope` fails open when `ctx.auth` is absent | 🔬 CONFIRMED | high | scheduled | EXECUTE |
+| **T-27** | 08 §12 S-2/S-6 | `ensureTenantScope` fails open when `ctx.auth` is absent | 🔬 CONFIRMED | high | **done** | ✅ **BUILT 2026-10-19** — `PLAN-T27-tenant-scope-observability.md`. The allow is unchanged (load-bearing, pinned by a test); the **silence** is not. See §1.5 `C-08`/`C-09` for the audit sentence being half wrong. |
 | **T-28** | 08 §12 S-4 | The PUT command path skips the guard set when the candidate id is not on the parsed input | 🔬 CONFIRMED (shape) | medium | scheduled | EXECUTE |
 | **T-29** | 08 §12 C-1 | The C6 command contract is dead at runtime — zero declarations | 🔬 CONFIRMED (shape) | medium | scheduled | EXECUTE |
 | **T-30** | 08 §12 L-1 | Optimistic locking is client-opt-in **and the reader fails open** (five early `ok: true` returns) | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
@@ -135,6 +135,9 @@ Rule 13 — a committed number can be wrong; re-measure, and commit the fix by n
 |---|---|---|---|
 | **C-01** | RTL: **1,129** physical vs **16** logical (70:1) | **878** vs **58** (15.1:1) | 📐 Token-level count of string literals only, over `packages/ui/src`, `packages/core/src`, `apps/mercato/src`, `packages/enterprise/src` — 4,320 files, 472,110 class-like tokens. The audit's was a word-boundary count. **The finding and its severity are unchanged; the ratio is 15:1, not 70:1.** |
 | **C-02** | §6: `communication_channels` declares no command capability | **Correct** — and my own first census was wrong | My first census grepped for the bare word `capability`, which matched the prose "adapter capability" in a comment. Re-measured with `^\s*capability\s*:` : **15 core modules with `commands/`, 8 declaring a capability.** The audit's numbers were right; the measurement method was mine to get wrong. |
+| **C-08** | "`ensureOrganizationScope` and `ensureTenantScope` fail open — log-only, default off" | **Half wrong, and the wrong half is the finding.** `ensureOrganizationScope` is already observable and closable (log + `OM_ENFORCE_ORG_SCOPE_STRICT`, #2441). `ensureTenantScope` has **neither** — it returns in silence. Stated the other way round, the finding is: *one of the pair is observable and configurable, the other is silent and fixed open* — and the fix is to bring the sibling to parity, not to deny something 415 call sites rely on. |
+| **C-09** | "the `systemActor` flag exists and is never checked here" | **False.** `systemActor` does not appear in `ensureTenantScope` at all, and the test that looks like it checks this (`denies authenticated tenant-less systemActor contexts… #3910`) builds a context where **`auth` exists with `tenantId: null`** — so the refusal fires on `ctx.auth` being truthy, not on the flag. The flag is orthogonal; nothing is missing from this function. The real defect is the `&& ctx.auth` **asymmetry**: an *absent* auth object is exempt, a *present but tenant-less* one is refused. |
+
 | **C-03** | §12 S-2/S-6 cited `commands/scope.ts:95-126` | The file is **`packages/core/src/modules/wms/commands/shared.ts:12-17`** | `ensureTenantScope` lives in the wms module's shared helpers, not a top-level `commands/scope.ts` |
 | **C-04** | §15 QT-01 cited `authority/__tests__/decision.test.ts:296-303` | **`packages/shared/src/lib/authority/__tests__/decision.test.ts`**, same shape | The test moved into `shared` |
 | **C-05** | §11 §10: 9 arbitrary media queries | **6** in source | Excluding tests and built output; and they are `window.matchMedia` JS calls rather than CSS media queries |
@@ -406,8 +409,10 @@ reach. **The spine is repaired before it is re-keyed.**
 `scripts/check-declared-controls.mjs` → **6 controls: 1 covered, 4 uncovered, 1 dead-input** (so
 `T-08`, `T-22`, `T-29`, `T-34`, `T-43` all still stand, and `T-01`'s `delegable` is now covered by the
 built fix); the command-capability census → **15 core modules with `commands/`, 8 declaring a
-capability, 7 not** (`T-07`, and it is 7 rather than the audit's 9, per `C-02`); `T-27`'s helper still
-reads `ctx.auth?.tenantId ?? null` and skips the refusal when it is absent; `T-36` is **fixed** by
+capability, 7 not** (`T-07`, and it is 7 rather than the audit's 9, per `C-02`);
+`T-27` was **built 2026-10-19** — the helper no longer refuses-and-says-nothing; the unscoped pass is
+logged and closable by `OM_ENFORCE_TENANT_SCOPE_STRICT`, which leaves **12** in this slot;
+`T-36` is **fixed** by
 `CC-132` (`moduleRootFor` + `enabledModules`, measured in the guard).
 
 ### 6.1 Already closed — do not re-fix (8)
@@ -430,7 +435,7 @@ The spine's own guarantees. Each is a central promise the pipeline will otherwis
 | **T-15** | medium | The confirm path drops the binding's narrowing — an approval silently widens what was approved | Slot 0 |
 | **T-16** | medium | Two gates fail in opposite directions on a missing dependency — one denies, one allows; the pipeline adds a third | Slot 0 |
 | **T-17** | medium | The model allowlist fails open on the provider axis | Slot 0 |
-| **T-27** | high | `ensureTenantScope` fails open when `ctx.auth` is absent (re-confirmed today) — a foreign tenant is accepted by a helper named for the opposite | Slot 0 |
+| **T-27** | high | ✅ **BUILT 2026-10-19** — was: `ensureTenantScope` fails open when `ctx.auth` is absent. Now logged, and closable by `OM_ENFORCE_TENANT_SCOPE_STRICT`. `PLAN-T27-tenant-scope-observability.md`. | — |
 | **T-28** | medium | The PUT command path skips the guard set when the candidate id is not on the parsed input | Slot 0 |
 | **T-30** | medium | Optimistic locking is client-opt-in **and the reader fails open** (five early `ok: true` returns) | Slot 0 |
 | **T-33** | medium | `resourceKind`/`resourceId` are unhashed in the ledger — the record cannot name what was touched and stay tamper-evident | Slot 0 |

@@ -19,19 +19,23 @@ box, **the box wins** (owner's instruction, 2026-10-06).
 > section that did not exist. If you are reading this and the box is gone again, **that is the defect,
 > not a change of policy**: restore it here rather than adding a task line to one of the pointing files.
 
-**IN HAND — `CC-92` Slot 0: the 13 spine findings, before `CC-121` starts.** The ceiling work is finished
-as a unit — screen, token, refusal — so the frontier moves to the spine. `CC-121` re-keys every
-`principal_id` through the authority gate, and that gate cannot yet see **seven modules' commands**
-(`T-07`) or refuse a missing identity (`T-27`). **The spine is repaired before it is re-keyed:** a
-migration through a gate with holes produces a clean answer about a partial system. The 13 findings and
-their slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4.
+**IN HAND — `CC-92` Slot 0: 12 spine findings left, before `CC-121` starts.** The ceiling work is finished
+as a unit — screen, token, refusal — and the first Slot 0 finding is closed: **`T-27`**, the tenant-scope
+helper that accepted a foreign tenant whenever the auth object was absent, silently. **12 remain:**
+`T-04`, `T-05`, `T-06`, `T-07`, `T-08`, `T-15`, `T-16`, `T-17`, `T-28`, `T-30`, `T-33`, `T-35`.
+`CC-121` re-keys every `principal_id` through the authority gate, and that gate cannot yet see **seven
+modules' commands** (`T-07`) or refuse a missing identity. **The spine is repaired before it is re-keyed:** a
+migration through a gate with holes produces a clean answer about a partial system. The findings and their
+slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4.
 
 **The steps, in order:**
 
-1. Read §9.4 — the 13 Slot 0 findings are numbered there, with what each measured and which gate it rides.
-   They are the queue; nothing else about `CC-121` is startable until they are closed.
-2. Each is a normal row: measure it, write the requirement, build, prove with a mutation, close.
-3. `CC-121` after Slot 0, behind `CC-119` (the database rebuild milestone). `CC-138` rides `W3`.
+1. Read §9.4 / `PREVIEW-AUDIT-TRIAGE.md` §6 — each Slot 0 finding is numbered there, with what it measured
+   and which gate it rides. They are the queue.
+2. Each is a normal row: **measure it from source first** — the audit's wording is a claim, and two of
+   `T-27`'s own sentences were wrong (`C-08`, `C-09`) — then write the requirement, build, prove with a
+   mutation, close.
+3. `CC-121` after the slot, behind `CC-119` (the database rebuild milestone). `CC-138` rides `W3`.
 
 **THE QUEUE AFTER IT** — and the order is fixed, not a list:
 
@@ -47,6 +51,93 @@ their slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4
 door) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability means one door) ·
 `CC-139` (the ceiling's screen) · `CC-140` (its write refuses a stale view). **No row on the authority
 path is waiting on the owner.**
+
+---
+
+## 2026-10-19 — `T-27` built: the tenant-scope helper stops passing in silence
+
+**Slot 0, finding 1 of 12 remaining.**
+
+**What the audit claimed, and what is actually true.** The line said *"`ensureOrganizationScope` and
+`ensureTenantScope` fail open — log-only, default off … the `systemActor` flag exists and is never checked
+here."* Measured, that sentence is half right and the wrong half is the interesting part.
+
+**Right:** the deny branch is guarded by `ctx.auth &&`, so a caller with **no auth object at all** lands on
+a silent `return`, and there is **no logging on that path** — the pass is invisible.
+
+**Wrong, twice.** *"log-only, default off"* is the description of the **organisation** helper, which #2441
+already hardened: it logs and can be turned into a deny with `OM_ENFORCE_ORG_SCOPE_STRICT`. The tenant helper
+got none of that, so the finding reads the right way round as *"one of the pair is observable and
+configurable, the other is silent and fixed open."* And *"`systemActor` is never checked here"* is simply
+false — the flag does not appear in the function, and the test that looks like it checks this builds a context
+where **`auth` exists with `tenantId: null`**, so the refusal fires on `ctx.auth` being truthy, not on the
+flag. Both corrections are in `PREVIEW-AUDIT-TRIAGE.md` §1.5 as `C-08` and `C-09`.
+
+**★ The defect, in one sentence:** the exemption is keyed on the **absence of the auth object**, so *no
+context at all* was trusted more than a context with nothing in it — and the pass was silent, which is what
+made it hard to act on.
+
+**★ And what is deliberately NOT changed: the allow.** The HTTP path cannot reach this — the dispatcher
+refuses a request with no session before any handler runs, the same argument `T-45` recorded — and the
+scope-less branch is **load-bearing**: payment, scheduled-command and 415 call sites across 71 files ride on
+it, and a test pins it by name (*"preserves legacy system contexts without an authenticated actor"*). Making
+absent auth a 403 here would break those flows and turn a finding into a manufactured emergency. So the fix
+is parity with the sibling, not a reversal: **observable now, closable by flag** (`OM_ENFORCE_TENANT_SCOPE_STRICT`,
+default `false`). The organisation helper's line-128 branch had the identical asymmetry and is silent, so it
+gets the same treatment.
+
+**Proof.** The scope suite is **26 tests** (20 pre-existing, all still passing, + 6 new) · **4/4 mutations
+RED**, files restored checksum-verified: drop the strict throw (2 failed) · default the flag to `true`
+(3 failed — which is the proof the default is the load-bearing half) · drop the tenant log (4) · drop the org
+log (1) · `tsc --noEmit` on `packages/shared` exit **0** · full shared **210 suites / 2,608 tests, 0
+failures**.
+
+**★ One flake, measured rather than assumed.** The first full run reported 209/210; the second reported no
+failure at all. Running the suspect suite alone gives **13/13 green** and the full run with the sandbox's
+delete guard switched off gives **210/210, 2,608 green** — which is `CC-19`'s recorded mechanism exactly
+(that suite clears a 59-file temp cache, and this harness refuses any bulk delete above 50 in one turn).
+Nothing about this change touches it, but *"a suite flaked"* is not a proof, so it was measured.
+
+**★ And the test caught a fact worth keeping:** an auth object stripped of `isSuperAdmin` cannot claim
+superadmin, so `auth: null` + a target tenant now logs even when the "real" caller was privileged. That is not
+a regression — it is the finding in miniature. Every caller that forgot to wire auth is in exactly that
+position, and it is now visible.
+
+**Records:** [`PLAN-T27-tenant-scope-observability.md`](library/development/PLAN-T27-tenant-scope-observability.md) ·
+`PREVIEW-AUDIT-TRIAGE.md` §1.3, §1.5 (`C-08`, `C-09`), §6, §6.2 · `MASTER-CHECKLIST.md` §9.4 (Slot 0 is
+now **12**).
+
+---
+
+## 2026-10-19 — `CC-140` closed: the ceiling write refuses a stale view instead of silently discarding it
+
+**The row came from `CC-139`'s own exemption comment** (`LESSONS.md` L192: the exemption's reason is a defect,
+and a comment is where defects go to be forgotten).
+
+**Built:** `ceilingRevision(capabilities)` — the fingerprint of the **set** (FNV-1a over the sorted,
+length-escaped list, count alongside; not crypto, because the token protects nothing and its job is equality).
+The read returns it beside `capabilities`; the write takes an optional `expectedRevision` and, when it
+differs from what the table holds **now**, answers **409** before anything is written — asserted the way every
+refusal in that file is asserted: the store is unchanged and nothing was recorded. A 409 rather than a 400,
+because the request was right and the **view** was wrong; an operator who reads 400 tries again and loses
+twice.
+
+**★ And what it is NOT, written in the code, the plan and the register row:** the window between the
+comparison and the write is **milliseconds, not zero**. This converts a silent overwrite into a refusal; it
+does not make the write atomic, and a real lock would be a `SELECT … FOR UPDATE` over the rows being replaced.
+A security control whose strength is overstated in its own comment is the defect, not the defence.
+
+**★ L193 — the new test caught a defect in the new code.** The 409 branch set its message and then reloaded,
+and the reload clears the notices and the error — so the screen would have reloaded **in silence**, which is
+precisely the wrong `CC-139` shipped to repair. Repair first, then report; that order is now a test.
+
+**Proof.** +5 route tests, +2 page tests; 3 ceiling suites / 32 tests; **4/4 mutations RED** (drop the
+revision from the read → 3 · ignore the token → 2 · 400 instead of 409 → 2 · compare against the request's
+set instead of the stored one → 1), files restored checksum-verified; `tsc` 0; full core **661 suites /
+5,824 tests, 0 failures**.
+
+**Register 79 closed · 60 open · 139 total.** The authority family is complete — `CC-125`, `CC-128`,
+`CC-134`, `CC-135`, `CC-136`, `CC-137`, `CC-139`, `CC-140`.
 
 ---
 

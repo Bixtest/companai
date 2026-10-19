@@ -183,7 +183,7 @@ checksum-verified; auth **103 suites / 910 tests**; core **657 suites / 5,779 te
 **PREVIOUSLY — 2026-10-19: `CC-92` is SCHEDULED — the preview audit's 45 findings now have gates
 instead of a queue.** The row had said *"the rest are queued"* since 16 October, which named no slot,
 so nothing in §4 could start any of them. The schedule is `PREVIEW-AUDIT-TRIAGE.md` **§6**, carried here
-as **§9.4**, and it is **by gate, not date**: 8 closed · **Slot 0 = 13 findings before `CC-121` starts** ·
+as **§9.4**, and it is **by gate, not date**: 8 closed · **Slot 0 = 12 findings before `CC-121` starts** — `T-27` was built and left the row on 2026-10-19 ·
 Slot 1 = 10 with `W3` · Slot 2 = 1 with `W5` · Slot 3 = 4 with `W7` · Slot 4 = 3 with `W8` · Slot 5 = 2
 with `P2-9b` · 4 deferred by name. **★ The revisit point is Slot 0, and the reason is specific:** `CC-121`
 re-keys every `principal_id`, and the gate it re-keys through cannot see **seven modules' commands**
