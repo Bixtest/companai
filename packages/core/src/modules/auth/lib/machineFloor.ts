@@ -1,0 +1,140 @@
+/**
+ * `CC-125` — **the floor**: the capabilities no configuration may ever grant to a machine.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHY A FLOOR AT ALL, IF THE CEILING IS CONFIGURATION
+ * ─────────────────────────────────────────────────────────────────────────────
+ * `CC-128` made the ceiling **configuration**: the platform admin sets it, tenants inherit a subset, and a
+ * tenant may only narrow. That is the right shape for every business capability — a customer's appetite for
+ * what its agents may do is the customer's business.
+ *
+ * It is the wrong shape for the five things below, because **a machine that can grant itself authority
+ * makes every other control decoration.** The locks would be held by the thing they are meant to lock out.
+ * So these five are a **constant in code**, and the owner's answer on 2026-10-19 was *"we follow your
+ * recommendations"* — recorded as a ruling, not a default (`PLAN-2026-10-18-one-agent.md` §4.5).
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * IT APPLIES TO MACHINES ONLY, AND THAT IS THE WHOLE DISTINCTION
+ * ─────────────────────────────────────────────────────────────────────────────
+ * A **human** holding any of these is the point of the system: somebody has to mint the keys, grant the
+ * roles and edit the types. The floor is not "nobody may do this" — it is *"nobody may CONFIGURE a machine
+ * to do this"*. A person is bounded by their own grant and by `CC-128`'s ceiling; a machine is additionally
+ * bounded here.
+ *
+ * `system` is included with `service` and `ai_worker`: the platform acting on its own behalf is still not a
+ * person, and a floor that exempted it would be a floor with a door in it.
+ *
+ * **★ BUT `system` IS CURRENTLY UNREACHABLE, AND THAT IS A SEPARATE DEFECT.** `PrincipalKind` declares
+ * `'system'` (`shared/lib/auth/principal.ts:28`) and `parseSubject` can never produce it — it recognises
+ * `ai_worker:` and `api_key:` and calls **everything else** `human` (`:88-97`). `decideFor` takes a
+ * *subject string* and parses it, so a platform act arrives as a **human**: the widest kind, past both the
+ * floor and the ceiling. The entry stays here because it costs nothing and is correct the day the parser
+ * learns `system:`, but it must not be read as coverage today. **Register: `CC-136`.**
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHAT THE FIVE CATEGORIES ACTUALLY ARE, MEASURED — AND TWO OF THEM ARE NOT WHAT THEY SOUND LIKE
+ * ─────────────────────────────────────────────────────────────────────────────
+ * The owner's wording is five categories. Mapping them to real capability ids found **two that have no
+ * capability expressing them**, and saying so is part of the work — a floor that silently covers four of
+ * five looks complete.
+ *
+ * | The category | The capability | What the measurement found |
+ * |---|---|---|
+ * | minting or widening credentials | `api_keys.create` | `api_keys.delete` is **excluded**: deleting a key narrows. Named here so the omission is a decision, not an oversight. |
+ * | granting roles or writing delegations | `auth.roles.manage`, `auth.delegations.manage`, `auth.acl.manage`, `auth.denials.manage` | `auth.denials.manage` is included because **lifting** a denial widens — the capability is symmetric and a machine must not hold either end. |
+ * | editing the catalogue or the type bundles | `ai_assistant.settings.manage` | There is **no** `ai_assistant.agent_types.*` capability. This one guards the type routes, the binding routes **and the mutation-policy / loop-override / prompt-override routes** — so a machine holding it could raise its own gate. That is the category in spirit and then some. |
+ * | writing to, or erasing, the audit ledger | **none exists** | Measured: the audit capabilities are `view_*`, `undo_*`, `redo_*`. **Nothing can erase the ledger**, which is the correct end state — recorded as a finding rather than left as an empty row. |
+ * | anything that reaches across tenants | `directory.tenants.manage` | The only capability whose effect is not confined to one tenant. |
+ *
+ * **Two consequences worth stating plainly.** The floor is **seven** ids, not five — the granting
+ * category expands to four (roles · delegations · ACL · denials), so the arithmetic is 1 + 4 + 1 + 1 and
+ * `MACHINE_FLOOR.size` is asserted as 7 in `lib/__tests__/machineFloor.test.ts`. And one category is
+ * **empty because the capability it would name does not exist**, which is a stronger result than a
+ * refusal: the ledger cannot be erased by anyone, machine or human.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHAT THE FLOOR DOES NOT COVER, MEASURED AND NAMED — `CC-137`
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Category 2 ("granting roles") is fully covered for the four *direct* writers, but "grant a role" is
+ * ALSO reachable through `auth.users.create` / `auth.users.edit` — neither is on the floor — whose
+ * `roles` arrays are checked only against the actor's own ACL (`assertActorCanGrantRoles`,
+ * `lib/grantChecks.ts:58-90`, subset check, early return for a superadmin). So a machine configured
+ * with `auth.users.edit` can pass on the roles it already holds. **The ruling was five categories
+ * and nothing else, so this floor was not extended past it — the gap is registered as `CC-137` and
+ * the fix is the owner's to choose.** If you are extending this file, read that row first: adding
+ * those two ids, or moving role assignment behind `auth.roles.manage`, closes the gap.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHY THIS IS CODE AND NOT A ROW IN THE CEILING TABLE
+ * ─────────────────────────────────────────────────────────────────────────────
+ * The ceiling is data because a customer may narrow it. The floor is **code** because it must not be
+ * raisable by the thing it constrains — and a row is reachable by whoever can write the table. The only way
+ * to raise the floor is to change this file and redeploy, which is exactly the cost it should have.
+ */
+
+/**
+ * The actor kinds the floor binds.
+ *
+ * `human` is deliberately absent: the floor constrains what a **machine** may be configured to do, and a
+ * person is bounded by their grant and the tenant ceiling instead.
+ */
+export const FLOOR_BOUND_KINDS = ['ai_worker', 'service', 'system'] as const
+
+/**
+ * The floor. **Seven ids behind five categories** — the arithmetic is 1 (`api_keys.create`) + 4 (granting
+ * is expressed four ways) + 1 (`ai_assistant.settings.manage`) + 1 (`directory.tenants.manage`) — and
+ * every entry carries its reason.
+ *
+ * Adding to this list costs a machine some autonomy. Removing from it lets a destructive act run
+ * unattended — which is why the tie-break, when a case is genuinely arguable, is the one `CC-132` wrote
+ * down: **when in doubt, classify higher.**
+ */
+export const MACHINE_FLOOR: ReadonlyMap<string, string> = new Map([
+  ['api_keys.create', 'minting a credential is minting authority'],
+  [
+    'auth.roles.manage',
+    'a role is a grant; a machine that can write one can grant itself anything',
+  ],
+  [
+    'auth.delegations.manage',
+    'a delegation is a grant with an expiry; same door, different handle',
+  ],
+  ['auth.acl.manage', 'the ACL is the grant list itself'],
+  [
+    'auth.denials.manage',
+    'lifting a denial WIDENS — the capability is symmetric and both ends are the same door',
+  ],
+  [
+    'ai_assistant.settings.manage',
+    'it guards the mutation-policy and loop-override routes, so a machine holding it could raise its own gate',
+  ],
+  [
+    'directory.tenants.manage',
+    'the tenant is the outermost boundary every other scope is defined by',
+  ],
+])
+
+/** True when this principal kind is bound by the floor. */
+export function isFloorBoundKind(kind: string | null | undefined): boolean {
+  return typeof kind === 'string' && (FLOOR_BOUND_KINDS as readonly string[]).includes(kind)
+}
+
+/**
+ * The refusal message when a machine asks for a floor capability, else `null`.
+ *
+ * Returns a **message** for the same reason `CC-128`'s ceiling does: the caller puts it in a `Decision`
+ * reason, and an operator who reads "the actor does not hold it" will go and grant it — which is the one
+ * thing that will not help.
+ */
+export function floorRefusalFor(
+  kind: string | null | undefined,
+  capability: string,
+): string | null {
+  if (!isFloorBoundKind(kind)) return null
+  const reason = MACHINE_FLOOR.get(capability)
+  if (!reason) return null
+  return (
+    `${capability} is on the machine floor and no configuration may grant it to a ${kind}: ${reason}. ` +
+    'A person may hold it; a machine may not be configured to.'
+  )
+}

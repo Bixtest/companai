@@ -1,5 +1,6 @@
 import { resolveDecision, type Decision } from '@open-mercato/shared/lib/authority/decision'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
+import { floorRefusalFor } from '@open-mercato/core/modules/auth/lib/machineFloor'
 import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
@@ -429,6 +430,15 @@ export class AuthorityEnforcementService {
       : this.capabilityCeiling
         ? (await this.capabilityCeiling.refusalsFor(scope.tenantId, [capability.id])).get(capability.id) ?? null
         : null
+
+    // `CC-125` — THE FLOOR. Checked before the ceiling and independent of it, because they answer different
+    // questions: the ceiling is *what this tenant allows* (data, raisable by a platform admin), the floor is
+    // *what no configuration may ever allow a machine* (code, raisable only by a redeploy). A machine that
+    // could reach the ceiling table could raise its own ceiling; it cannot reach this.
+    //
+    // A human is not bound by it: somebody has to mint the keys and grant the roles, and that is the system
+    // working. `null` for a human, so the existing behaviour is untouched.
+    const floorRefusal = floorRefusalFor(principal.kind, capability.id)
     const graphCeiling = await this.graphCeilingFor(capability.id, scope)
     const invokerCeiling = await this.invokerCeilingFor(
       capability,
@@ -452,8 +462,10 @@ export class AuthorityEnforcementService {
         // the codebase. The ONE exception is `CC-128`: a capability outside the
         // tenant's ceiling is not held, however the ACL answered, because the
         // tenant may never hold it.
-        holdsCapability: ceilingRefusal === null,
-        ...(ceilingRefusal ? { holdsCapabilityRefusal: ceilingRefusal } : {}),
+        holdsCapability: ceilingRefusal === null && floorRefusal === null,
+        // The floor's reason wins when both apply: it is the one no configuration can lift, so naming it
+        // sends an operator to the only place that can actually help — a person doing the act instead.
+        ...(floorRefusal ?? ceilingRefusal ? { holdsCapabilityRefusal: floorRefusal ?? ceilingRefusal! } : {}),
         ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
         ...(invokerCeiling ? { invokerCeiling } : {}),
         ...(delegation ? { delegationCeiling: delegation.ceiling } : {}),
