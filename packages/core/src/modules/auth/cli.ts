@@ -26,6 +26,7 @@ import {
   CapabilityCeilingError,
   loadCapabilityCeiling,
   replaceCapabilityCeiling,
+  type CeilingAuditWriter,
 } from '@open-mercato/core/modules/auth/lib/capabilityCeiling'
 import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
 import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
@@ -1263,7 +1264,9 @@ const authorityCeiling: ModuleCli = {
       if (ceiling.capabilities.size === 0) {
         console.log('    (empty — nothing is enabled at this level)')
       } else {
-        for (const capability of [...ceiling.capabilities].sort()) console.log(`    ${capability}`)
+        for (const capability of [...ceiling.capabilities].sort((a, b) => a.localeCompare(b))) {
+          console.log(`    ${capability}`)
+        }
       }
       console.log('')
       console.log('  Replace it with: mercato auth ceiling [--tenant <id>] --set a.b,c.d')
@@ -1273,7 +1276,15 @@ const authorityCeiling: ModuleCli = {
 
     const wanted = parseCommaSeparatedList(args.set)
     try {
-      const result = await replaceCapabilityCeiling(em, tenantId, wanted, { cache })
+      // `CC-128` — a ceiling change is RECORDED, and the actor is required. A CLI has no authenticated
+      // principal, so the record says `system` with no user and no acting tenant, rather than inventing
+      // one. When a route lands it passes the real principal and the same code records it correctly.
+      const audit = container.resolve('actionLogService') as CeilingAuditWriter
+      const result = await replaceCapabilityCeiling(em, tenantId, wanted, {
+        cache,
+        actor: { principalId: null, kind: 'system', tenantId: null },
+        audit,
+      })
       console.log('')
       console.log(`  Ceiling for ${scopeLabel} replaced — ${wanted.length} capabilit${wanted.length === 1 ? 'y' : 'ies'}`)
       if (result.added.length) console.log(`    added:   ${result.added.join(', ')}`)

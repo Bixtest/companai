@@ -35,6 +35,52 @@ export interface CapabilityCeiling {
   capabilities: ReadonlySet<string>
 }
 
+/**
+ * `CC-128` — the actor a ceiling change is attributed to.
+ *
+ * **Required, and that is the point.** The row's third named part is *"a cross-tenant admin act that is
+ * recorded as such rather than inferred from a badge"*, so a write with no actor cannot be recorded and
+ * must not happen. `principalId` is null for a caller that has no principal — a CLI — and the record
+ * says so rather than inventing one.
+ */
+export interface CeilingActor {
+  /** The acting principal's uuid, or `null` when the caller has no principal (a CLI). */
+  principalId: string | null
+  /** `human` · `ai_worker` · `service` · `system`. */
+  kind: string
+  /**
+   * The tenant the actor is acting **from**. When it differs from the ceiling being changed, the act is
+   * cross-tenant and the record says so. `null` for a CLI, which acts from nowhere.
+   */
+  tenantId: string | null
+}
+
+/**
+ * The audit writer, as this module needs it.
+ *
+ * A **port**, not the `ActionLogService` class: the ceiling is in `auth` and the journal is in
+ * `audit_logs`, and a lib importing a service would invert that. `ActionLogService` satisfies this
+ * structurally, so `auth/di.ts` and the CLI pass it without an adapter.
+ *
+ * `log()` runs on the caller's `EntityManager`, so the record commits **in the same transaction** as the
+ * ceiling rows it describes — an act recorded but not applied, or applied but not recorded, are both
+ * wrong, and `ActionLogService`'s own docblock makes the same argument for the hash chain.
+ */
+export interface CeilingAuditWriter {
+  log(input: {
+    tenantId: string | null
+    actorUserId: string | null
+    commandId: string
+    actionLabel?: string
+    resourceKind?: string
+    resourceId?: string
+    context?: Record<string, unknown>
+  }): Promise<unknown>
+}
+
+/** The `commandId` every ceiling change is recorded under. One string, so the journal is greppable. */
+export const CEILING_CHANGE_COMMAND_ID = 'auth.capability_ceiling.replace'
+
 /** A ceiling operation that the caller should report rather than swallow. */
 export class CapabilityCeilingError extends Error {
   override readonly name = 'CapabilityCeilingError'
@@ -127,7 +173,13 @@ export async function replaceCapabilityCeiling(
   em: EntityManager,
   tenantId: string | null,
   capabilities: readonly string[],
-  options: { cache?: CacheStrategy | null; now?: Date } = {},
+  options: {
+    /** Required: a ceiling change with no record must not happen (see `CeilingActor`). */
+    actor: CeilingActor
+    audit: CeilingAuditWriter
+    cache?: CacheStrategy | null
+    now?: Date
+  },
 ): Promise<{ added: string[]; removed: string[] }> {
   const now = options.now ?? new Date()
   const wanted = new Set(capabilities.map((c) => c.trim()).filter((c) => c.length > 0))
@@ -177,6 +229,37 @@ export async function replaceCapabilityCeiling(
       )
       added.push(capability)
     }
+    // The record goes in BEFORE the flush that closes the transaction, so an act that cannot be
+    // recorded does not happen. `ActionLogService.log` writes on the caller's `EntityManager`, so this
+    // commits with the ceiling rows it describes.
+    const crossTenant = options.actor.tenantId !== null && options.actor.tenantId !== tenantId
+    await options.audit.log({
+      // The TARGET tenant, not the actor's: the tenant whose ceiling moved must see it in its own
+      // journal, and an admin must not be able to change a tenant invisibly. `null` for the platform
+      // ceiling, which belongs to no tenant.
+      tenantId,
+      actorUserId: options.actor.principalId,
+      commandId: CEILING_CHANGE_COMMAND_ID,
+      actionLabel: crossTenant
+        ? `Capability ceiling changed from another tenant`
+        : `Capability ceiling replaced`,
+      resourceKind: 'auth.tenant_capability_ceiling',
+      // `null` is the platform scope, and it is written as the literal string so the journal row is
+      // readable without a join. It is NOT a sentinel tenant id — nothing reads it as a scope.
+      resourceId: tenantId ?? 'platform',
+      context: {
+        ceilingScope: tenantId === null ? 'platform' : 'tenant',
+        // THE CROSS-TENANT FACT, recorded as such rather than inferred from a badge: the acting tenant
+        // travels with the record, and `crossTenant` is stated rather than left to a reader to derive.
+        actedFromTenantId: options.actor.tenantId,
+        actorKind: options.actor.kind,
+        crossTenant,
+        added,
+        removed,
+        capabilityCount: wanted.size,
+      },
+    })
+
     await tx.flush()
 
     // The invalidation is the point of the cache, not an afterthought: without it the ceiling this
