@@ -4935,3 +4935,56 @@ check that goes through a shell string is not a line-ending check.**
 the same failure class as a test runner that selects nothing (L21) — the operation
 succeeded, the artifact changed in a way nobody asked for, and the tool reported
 success. Surgical edits need surgical writers.
+
+## L23 — A mock that ignores its arguments cannot prove the filter it was handed
+
+**What happened.** `CC-127`'s mutation proof broke the preview on purpose — dropping the
+`session_user_id` clause so the query would see only keys minted by the departing person — and
+the suite stayed green. Same for the delegation `$or`, and same for the repository's
+organization filter. Three mutations the tests should have caught, all survived.
+
+**The tests were the defect, not the code.** The unit suite's fake `EntityManager` returned
+**every row it was constructed with**, regardless of the `where` it was passed. So a query could
+lose a clause and still receive the right rows: the *behaviour* under test was the mock's
+constant, not the module's query. And one fixture hid it twice over — the "session" key was also
+`createdBy` the same person, so even an honest filter would have kept it after the clause was
+dropped.
+
+**What to do instead.**
+
+1. **A fake that takes a filter must apply it.** Even a ten-line matcher (`tenantId`,
+   `deletedAt`, `$or`) is enough; what matters is that removing a clause removes rows.
+2. **Fixtures must make each clause load-bearing.** If a row satisfies two conditions, neither
+   condition is under test. The session key had to be minted by *somebody else*.
+3. **Read a `PARTIAL` result as a test bug first.** "The suite failed, but not the case it should"
+   means something else noticed — usually an assertion on the query's *shape*, which is a weaker
+   proof than the behaviour the mutation aimed at.
+
+**The general form:** a test double is part of the proof. One that answers without reading the
+question turns every mutation of the question into a pass, and the mutation harness is the only
+thing that will tell you.
+
+## L24 — A status the checker cannot read is a row the register does not count
+
+**What happened.** `CC-126` was closed a day before `CC-127`, and its §5 status cell read
+`☑ done` — the glyph the **open-work** section uses. The register checker's state rule reads the
+word after `✅`/`☐`, so the row counted as *neither* closed nor open: the totals read `67 closed ·
+62 open · 130 total` while 68 rows were actually closed, and every subsequent tally inherited the
+error.
+
+**Why it stayed invisible.** The two mistakes cancelled. A closed row that is not counted as closed
+also does not trip the "§4 still lists closed rows" check — so the checker stayed green, and the
+number was wrong in a way no assertion covered. A total that adds up is not a total that is right.
+
+**What to do instead.**
+
+1. **One glyph per state, and the checker's glyph.** A closed register row is `✅ closed`; `☑` is
+   the open-work section's marker for "this row is finished but still being described here".
+2. **A closed row leaves §4.** §4 is the open-work list; keeping a finished row there is what
+   forced the wrong glyph in the first place. Its record belongs in §5 and LAST DONE.
+3. **When a count changes, re-derive it — do not adjust it.** The register's own history says it
+   plainly: *a typed count drifts, a counted one cannot.*
+
+**The general form:** a status vocabulary is a control surface. If the checker cannot parse the
+word you wrote, you have not closed the row — you have written a sentence that looks like closure
+to a human and is invisible to the machine that counts.

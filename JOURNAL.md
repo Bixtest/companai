@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-127`'s build: the departure flow asks the question and records the answer
+
+**The requirement became code, and the code settled four things the document could not.** The
+preview (`GET /api/ai/departures/[userId]`) lists every live binding held by one of the person's
+keys through **both** links — `session_user_id` *and* `created_by`, where the `api_keys` cascade
+sees only the second — plus every delegation in **both** directions. The departure (`POST`) runs
+`auth.users.delete` through the command bus and then applies the decision: **`deactivate`** revokes
+bindings **tenant-wide** through a new `revokeForPrincipals` (the existing `revoke` narrows to one
+organization, and a person leaves a *tenant*) and revokes delegations with `revoked_by_user_id`
+naming the admin; **`leave`** writes nothing and says, per agent, that the row is preserved **and
+inert** — because a binding's principal is an `api_keys` id and the key dies with its owner.
+
+**★ The four corrections (Rule 13).**
+
+1. **`CommandLogMetadata` has no free-form field.** The plan wrote `metadata: { departure: … }`,
+   which does not type-check and would have meant editing the bus's vocabulary for one caller. The
+   honest home is `metadata.context` — `mergeMetadata` keeps it because `auth.users.delete`'s own
+   `buildLog` supplies no context — so `auth` records a decision about agents with **no type change
+   and no schema change**. That is the whole point of putting the decision in the audit entry
+   rather than in a new table: the module boundary is crossed in the audit record, not in the code.
+2. **The partial-failure flag must live outside the `try`.** The first draft marked the thrown error
+   with a symbol; a frozen error would have dropped the mark and a failed cascade would have read as
+   "nothing happened". It is a `deleteCommitted` flag now, and the `catch` checks it **first** —
+   because once the delete has committed, *every* later failure is `departure_partial`, whatever its
+   class. A typed error answering with its own status would describe the second half of a two-step
+   act as though the first never ran.
+3. **The guard runs only for `deactivate` with at least one agent.** `leave` touches no binding, so
+   guarding it would be theatre; an empty departure has nothing to guard.
+4. **An empty POST body is the default; a malformed one is a 400.** Omitting the decision is not the
+   same as mistyping it, and only the second is a client error.
+
+**★ And the mutation proof caught the tests, not the code.** Its first run was one **PARTIAL** and
+two **NOT PROVEN** — and in all three the defect was the suite: the fake `EntityManager` returned
+every row it was constructed with, regardless of the `where` it was handed, so a dropped `$or`
+changed nothing; and the "both key links" fixture used a session key **also minted by the same
+person**, so the `created` clause still matched it after the `session` clause was removed. Fixed by
+making the mock apply the filters it is given and minting that key from somebody else — and recorded
+as `LESSONS.md` **L23**. The re-run is **19/19 PROVEN**.
+
+**★ Closing the row also corrected the register itself (`L24`).** `CC-126` had been closed the day
+before with `☑ done` in §5 — the *open-work* glyph — and the checker reads the word after `✅`/`☐`,
+so that row had been counted as neither closed nor open ever since. The two mistakes cancelled
+(a closed row the checker cannot see also does not trip the "§4 lists closed rows" check), which is
+why it stayed green. Both closed rows now read `✅ closed` and have left §4: **69 closed · 61 open ·
+130 total**, and the §4 tally is 61 rows.
+
+**Proof:** 43 tests in 3 new suites (15 module · 18 route · 10 repository), 19/19 mutations, the
+ai-assistant package green at **143 suites / 2,128 tests** (the `CC-126` close stood at 140 / 2,085),
+and `tsc --noEmit` 0. **Next: `CC-123`** — both of its preconditions are now discharged.
+
+---
+
 ## 2026-10-19 — `CC-127`'s requirement: the departure flow, and a row whose danger had already been disarmed
 
 **D4 is answerable now.** The owner's ruling — *"the admin doing the deactivation decides, at that

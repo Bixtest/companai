@@ -1,7 +1,7 @@
 # PLAN-CC-127 — the departure flow
 
-**Status:** requirement, measured 2026-10-19. No code was written for this phase, per
-the owner's rule.
+**Status:** BUILT and CLOSED 2026-10-19. This document is the requirement; §9 records where the
+build diverged from it (Rule 13) and what proves it.
 **Row:** `CC-127` in `library/development/MASTER-CHECKLIST.md` §5.
 **Answers:** **D4** — *"the admin doing the deactivation decides, at that moment, what
 happens to the related agents"*.
@@ -239,3 +239,48 @@ binding is still live. That is why the receipt is built from the **write results
   survive.
 - **A hostile critic** reads the finished slice against this document before
   anything is committed — the same pass `CC-126` took.
+
+---
+
+## 9. The build — what it settled that this document could not
+
+Built 2026-10-19. Files: `lib/departure.ts` (the preview and the apply), `api/ai/departures/[userId]/route.ts`
+(the two verbs), and two new repository verbs — `listForPrincipals` / `revokeForPrincipals` — on
+`data/repositories/AiAgentBindingRepository.ts`, scoped by a new `AiAgentTenantScope` that has no
+`organizationId` field to forget.
+
+**Four corrections (Rule 13), each one a place this document was wrong or silent:**
+
+1. **§4.1's `metadata: { departure: … }` does not type-check.** `CommandLogMetadata` is a closed type
+   with no free-form field. The decision travels in `metadata.context` instead, which `mergeMetadata`
+   keeps because `auth.users.delete`'s own `buildLog` supplies no context. **The claim it was there to
+   support still holds** — `auth` records a decision about agents without knowing what an agent is —
+   but the mechanism is `context`, not a new field on the bus's vocabulary.
+2. **The partial state needs a flag the `catch` can read.** §4.2 said the response is
+   `departure_partial`; it did not say how the route knows. Marking the thrown error is not reliable (a
+   frozen error drops the mark), so `deleteCommitted` is set after the command resolves and read
+   **first** in the `catch` — before the `CrudHttpError` and interceptor branches, because once the
+   delete has committed every later failure is partial, whatever its class.
+3. **The guard's scope was unstated.** It runs only for `deactivate` with at least one agent: `leave`
+   writes no binding, and an empty departure has nothing to guard. `resourceKind` is
+   `ai_assistant.agent_binding`, `resourceId` is `departure:<userId>`.
+4. **An empty POST body is the default, a malformed one is a 400.** §4.1 said `decision` defaults; it
+   did not say what an absent body means. Omitting the decision is not mistyping it, so the route reads
+   the body as text and treats an empty one as `{}`.
+
+**Two things the tests owed and did not, found by the mutation harness.** The first run was one PARTIAL
+and two NOT PROVEN, and all three were test defects: the fake `EntityManager` ignored the `where` it was
+given, and the "both key links" fixture used a session key **also minted by the person**, so the
+`created` clause still matched it after the `session` clause was dropped. `LESSONS.md` L23.
+
+**Proof.** 43 tests in three new suites — `lib/__tests__/departure.test.ts` (15),
+`api/ai/departures/[userId]/__tests__/route.test.ts` (18),
+`data/repositories/__tests__/AiAgentBindingRepository.test.ts` (10). **19/19 mutations PROVEN**
+(`scripts/verify-cc127-mutations.mjs`, denominator asserted per L21): the default, the unknown-decision
+400, the audit context, the two features, the guard (all three branches), both failure directions, both
+key links, both delegation directions, the tenant filter on the user read, the tenant-wide cascade, the
+receipt-from-the-write rule, `leave`'s no-writes rule, the organization filters on both repository verbs,
+and the de-duplication. Package: **143 suites / 2,128 tests** green; `tsc --noEmit` 0.
+
+**Not built, and why** — §7 stands unchanged: the orphan sweep, the `api_keys` blind spot in the other
+direction, and re-homing a binding all wait on `CC-121`/`CC-122`. `block` still waits on `CC-128`.
