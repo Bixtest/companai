@@ -21,9 +21,9 @@ The development pause is **over** and the build frontier is the **authority fami
 machine) · `CC-128` (the tenant ceiling) · `CC-134` (the superadmin read, scoped to the foundational
 tenant) · `CC-135` (the ceiling's route + the flag's producer) · `CC-136` (a platform act is a platform
 act, in both places that decide it) · `CC-137` (one capability means one door) · `CC-139` (the ceiling's
-screen). **Register: 78 closed · 61 open · 139 total**, counted from `MASTER-CHECKLIST.md` §5 by
-`scripts/check-master-checklist.mjs`. **The live task is `CC-140`** — the ceiling write gets a concurrency
-token, the small row `CC-139`'s own exemption comment opened — and it is named, with its steps and the
+screen). **Register: 79 closed · 60 open · 139 total**, counted from `MASTER-CHECKLIST.md` §5 by
+`scripts/check-master-checklist.mjs`. **The live task is `CC-92` Slot 0** — the 13 spine findings that gate
+`CC-121` — and it is named, with its steps and the
 queue behind it, in **the `★ ACTIVE TASK` box at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md)**.
 **★ And one repair this revision made, because it would have stranded you:** the box was **missing**.

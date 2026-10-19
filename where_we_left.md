@@ -38,13 +38,13 @@ In the **docs repo**, in this order:
 3. `library/development/MASTER-CHECKLIST.md` **§2** — the canonical "LAST DONE" and "NEXT" lines,
    and §5's register for every open item with its trigger.
 
-**As of 2026-10-19 (night), the position is:** register at **78 closed · 61 open · 139 total**; the
-frontier is the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-140`** — the ceiling write
-gets a concurrency token, the small row `CC-139`'s own exemption comment opened — then **`CC-92` Slot 0**
-(the 13 spine findings that gate `CC-121`). **The authority family is complete and closed:** `CC-125`
-(the floor), `CC-128` (the ceiling), `CC-134` (the superadmin read), `CC-135` (the ceiling's door),
-`CC-136` (a platform act is a platform act), `CC-137` (one capability means one door), `CC-139` (the
-ceiling's screen). **No row on the authority path is waiting on the owner.**
+**As of 2026-10-19 (night), the position is:** register at **79 closed · 60 open · 139 total**; the
+frontier is the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-92` Slot 0** — the 13 spine
+findings that gate `CC-121`, because that migration re-keys every principal through an authority gate that
+cannot yet see seven modules' commands. **The authority family is complete and closed:** `CC-125` (the
+floor), `CC-128` (the ceiling), `CC-134` (the superadmin read), `CC-135` (the ceiling's door), `CC-136` (a
+platform act is a platform act), `CC-137` (one capability means one door), `CC-139` (the ceiling's screen),
+`CC-140` (its write refuses a stale view). **No row on the authority path is waiting on the owner.**
 **`CC-121` does not start until `CC-92` Slot 0 lands** — the 13 spine findings, because that migration
 re-keys every principal through the authority gate (`PREVIEW-AUDIT-TRIAGE.md` §6.2, `MASTER-CHECKLIST.md`
 §9.4).

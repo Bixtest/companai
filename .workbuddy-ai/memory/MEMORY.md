@@ -47,7 +47,7 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 78 · 61 · 139.** Checkers PASS
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 79 · 60 · 139.** Checkers PASS
 (`check-master-checklist.mjs` + its 14/14-RED mutation suite).
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
@@ -101,15 +101,18 @@ is all-of and there is **no any-of form anywhere** — and the wildcard must not
 **★ a guard met the build**: two suites scan backend screens for mutating calls without an
 expected-version header, allowlist deliberately empty; the ceiling is a **set of rows** so no header means
 anything → inline exemption → **the exemption's reason became `CC-140`** (no concurrency token).
-L192: **an exemption's reason is a defect, and a comment is where defects go to be forgotten**).
+L192: **an exemption's reason is a defect, and a comment is where defects go to be forgotten**) ·
+`CC-140` (**the ceiling write refuses a stale view, 2026-10-19** — `ceilingRevision()` = the fingerprint of
+the **set** (FNV-1a over the sorted, length-escaped list, count alongside); the read returns it, the write
+takes an optional `expectedRevision` and answers **409** (not 400: the request was right, the *view* was
+wrong) when it differs from what the table holds **now**. **★ it is NOT a lock** — the compare→write window
+is milliseconds, a real one is `SELECT … FOR UPDATE`; that is written in code, plan and row. The screen
+sends the token and a 409 **reloads first, then speaks** (the reload clears the messages). L193: **a fix
+that reloads wipes its own message** — the new test caught it in the new code).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-140`** — the ceiling write has **no concurrency token**; two admins who load the same ceiling and
-  both save keep the last write. Started by `CC-139`'s own exemption comment. Fix: the read returns a
-  **fingerprint** (hash of the sorted set), the write requires it. Work in `capabilityCeiling.ts` +
-  `capabilityCeilingRoute.ts`. **STARTABLE — next.**
 - **`CC-92` Slot 0** — **13 spine findings before `CC-121`** (the gate cannot see 7 modules' commands,
-  `T-07`, or refuse a missing identity, `T-27`). Startable.
+  `T-07`, or refuse a missing identity, `T-27`). Startable. `PREVIEW-AUDIT-TRIAGE.md` §6 = checklist §9.4.
 - **`CC-138`** — no route declares human-only/machine-only; rides `W3`.
 - **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger.
 

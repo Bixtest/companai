@@ -41,7 +41,30 @@ reproduces exactly, so the headline above stands.)*
 records named in §5 and §7. This section stays short because a section that
 grows every session stops being read.
 
-**LAST DONE — 2026-10-19: `CC-139` is BUILT and CLOSED — the ceiling has a screen, and the wildcard is
+**LAST DONE — 2026-10-19: `CC-140` is BUILT and CLOSED — the ceiling write refuses a stale view instead of
+discarding it.** `CC-139` had to answer a guard that refuses mutating screens without an expected-version
+header, and it answered honestly: a ceiling is a **set of rows**, so no version header means anything. The
+reason it gave was true, specific — **and a defect in a comment**: two administrators who both loaded the
+same ceiling and both saved kept the last write, and the first one's change vanished with no message. The
+sentence is now a row, and the row is now code. **The read returns the fingerprint of the set it returned**
+(a stable hash over the sorted capabilities, length-escaped so `['a.b','c']` and `['a','b.c']` cannot
+collide); **the write accepts it and refuses a stale one with a 409** — not a 400, because the request was
+right and the *view* was wrong, and an operator who reads 400 tries again and loses twice. The screen sends
+the token, and a 409 reloads and says so. **★ What this is and is not:** the window between the comparison
+and the write is **milliseconds, not zero** — this turns a silent overwrite into a refusal, it does not make
+the write atomic, and a real lock would be a `SELECT … FOR UPDATE` over the rows being replaced. Written down
+in three places because a security control whose strength is overstated in its own comment is the `CC-19`
+family, and the wrong mechanism sends the next reader looking in the wrong place. **★ And the new test
+caught a defect in the new code:** the 409 branch set its message and then reloaded, and the reload clears
+the messages — so the screen would have reloaded in silence, which is the very wrong `CC-139` existed to
+repair. **Proof:** +5 route tests and +2 page tests, the refused case asserted the way every refusal in that
+file is asserted — **the store is unchanged and nothing was recorded**; **4/4 mutations RED** (drop the
+revision from the read → 3 · ignore the token → 2 · a 400 instead of a 409 → 2 · compare against the
+request's set instead of the stored one → 1), every file restored checksum-verified; `tsc` 0; full core
+**661 suites / 5,824 tests, 0 failures**.
+**79 closed · 60 open · 139 total.**
+
+**PREVIOUSLY — 2026-10-19: `CC-139` is BUILT and CLOSED — the ceiling has a screen, and the wildcard is
 not assumed on the way in.** The one control that bounds every tenant in the deployment was the one
 control nobody could see: `CC-128` made it real, `CC-135` gave it a route, and both stops short of a
 page — so a ceiling change still meant a terminal or a hand-written request. The page now exists, with a
@@ -65,7 +88,7 @@ a comment: `CC-140` — two administrators who load the same ceiling and both sa
 **Proof:** 3 suites / 26 tests (14 route + 6 catalogue + 6 page, the page rendered under jsdom with a
 stubbed fetch, asserting on **URLs and bodies**, not call counts); **5/5 mutations RED**, every file
 restored checksum-verified; `tsc` 0; full core **661 suites / 5,818 tests**.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19: `CC-137` is BUILT and CLOSED — granting roles has one door, and the floor's
 answer is finally asked.** The row said a machine holding the users capability could hand out roles. It
@@ -87,7 +110,7 @@ tests and +1 floor test; **5/5 mutations RED** (drop the check → 4 failed · a
 3 · flip the fail-closed default → **exactly 1** · remove the two ids from the floor → 3 across 2 suites ·
 drop the empty-array early return → 1), every file restored **checksum-verified byte-identical**; auth
 **105 suites / 937 tests**; core **659 suites / 5,806 tests, 0 failures**; `tsc` 0.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19: `CC-136` is BUILT and CLOSED — when the platform acts on its own behalf, the
 platform is no longer filed as a person.** The row said the hole was *"past the floor and the ceiling"*
@@ -112,7 +135,7 @@ refused a platform act everything would be the platform unable to run; **5/5 mut
 the one that removes only the login-step half (2 failures), which is precisely what the row did not
 name; every file restored **checksum-verified byte-identical**; shared **210 suites / 2,601 tests**;
 core **659 suites / 5,800 tests, 0 failures**; `tsc` 0 on both.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19: `CC-135` is BUILT and CLOSED — the capability ceiling has a door, and the
 platform has an administrator for the first time.** The row asked for a route so the recorded actor
@@ -139,7 +162,7 @@ against a store that applies the filters it is handed, 5 foundation tests, +2 se
 mutations RED**, every file restored checksum-verified; auth **105 suites / 931 tests**; core **659
 suites / 5,800 tests, 0 failures**; `tsc` 0. **The screen is `CC-139`** — opened in the same change, so
 the half is scheduled rather than remembered.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19: `CC-134` is BUILT and CLOSED — an administrator of one tenant is no longer
 an administrator of every tenant.** The read asked *does this person hold a superadmin row anywhere?*
@@ -172,7 +195,7 @@ closed by `CC-132`, and `T-07` is **seven** modules, not nine (15 carry `command
 capability). **★ And a defect the audit found in the records, now closed:** `CC-125`'s row was closed
 with its **surface half** recorded only inside the closed row — that half is now **`CC-138`**, so a
 closed row is no longer where a remaining half goes to be forgotten.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19: `CC-125` is BUILT and CLOSED — the capabilities that change the authority
 system itself are a floor no configuration may raise for a machine.** The owner's ruling (2026-10-19,
@@ -211,7 +234,7 @@ ACL (`assertActorCanGrantRoles`, `grantChecks.ts:58-90`). The floor stays at the
 and the gap is registered as **`CC-137`** with the two options and a recommendation — extending the
 floor past the ruling is the owner's call, not a silent one. The record:
 `PLAN-CC-125-machine-floor.md`.
-**78 closed · 61 open · 139 total.**
+**79 closed · 60 open · 139 total.**
 
 **PREVIOUSLY — 2026-10-19 (earlier the same day): `CC-128` is BUILT and CLOSED — one tenant's superadmin is no longer every
 tenant's.** The row said *"the platform has no ceiling over its tenants"*. Measuring it found the defect is
@@ -263,15 +286,14 @@ packages green, `tsc` 0 for core and all nine. **One process miss, mine:** the c
 with the requirement broke `explicit-sort-comparators.test.ts` because only the guard's own suite was run
 before that commit. **72 closed · 62 open · 134 total.**
 
-**▶ NEXT — `CC-140` (the ceiling write gets a concurrency token), then `CC-92` Slot 0. `CC-140` is
-small, adjacent to what just shipped, and it is the hole `CC-139`'s own exemption comment named: a read
-that returns a fingerprint and a write that requires it, so a save against a stale view refuses instead
-of silently discarding another administrator's change. **Then `CC-92` Slot 0 — the 13 spine findings
-before `CC-121` starts.** `CC-121` re-keys every principal through the authority gate, and that gate
-cannot yet see seven modules' commands (`T-07`) or refuse a missing identity (`T-27`), so the spine is
-repaired before it is re-keyed. Behind it `CC-121` (behind `CC-119`, the database rebuild milestone),
-then `CC-122`; `CC-138` rides `W3`; **`CC-133`** stays deferred by the owner's trigger. **No row on the
-authority path is waiting on you:** the four in §4 that still need a decision are the long-standing ones.
+**▶ NEXT — `CC-92` Slot 0: the 13 spine findings, before `CC-121` starts.** That migration re-keys every
+`principal_id`, and the gate it re-keys through cannot see **seven modules' commands** (`T-07`) or refuse
+a missing identity (`T-27`) — **so the spine is repaired before it is re-keyed**; a migration through a
+gate with holes produces a clean answer about a partial system. The 13 findings and their slots are
+`PREVIEW-AUDIT-TRIAGE.md` §6, carried here as §9.4. Behind Slot 0: `CC-121` (behind `CC-119`, the database
+rebuild milestone), then `CC-122`; `CC-138` rides `W3`; **`CC-133`** stays deferred by the owner's trigger.
+**No row on the authority path is waiting on you:** the four in §4 that still need a decision are the
+long-standing ones.
 
 **PREVIOUSLY — 2026-10-19 (earlier the same day): `CC-123` is BUILT and CLOSED — an assistant can no
 longer do more than the person it stands for.** The rule was already true at two of the three doors; the **web** door resolved
@@ -464,7 +486,7 @@ not ban** (`CC-124` — **built and closed the same day**, see LAST DONE above);
 and the **type catalogue has only a code layer**, so a tenant can override a type and cannot create one
 (`CC-126` — *corrected 2026-10-18: this read "platform level has no schema home", which was my misreading
 of **types** as **agents**; agents are correctly tenant-scoped, 12 of 12 tables*); and owner
-departure is unmodelled — **the flow now exists, built 2026-10-19** (`CC-127`). Register: **78 closed · 61 open · 139 total**, counted from §5.
+departure is unmodelled — **the flow now exists, built 2026-10-19** (`CC-127`). Register: **79 closed · 60 open · 139 total**, counted from §5.
 **★ AND THE OWNER FOUND THE GAP ABOVE ALL OF THEM (2026-10-18, documented as asked — `CC-128`, plan §4.6):
 the platform has no ceiling over its tenants.** Measured, four reads: `Tenant` holds `name`/`is_active`
 and nothing else, and **no plan, feature, limit or settings table exists** — so D1's answer (*"the platform
@@ -608,8 +630,8 @@ rather than silently copied.)*
 ## 4. Open work — every unfinished item, with its trigger
 
 **The trigger is the observable event that makes an item startable.** *"When a command is next
-touched"* is a trigger; *"later"* is not. This is the complete list — all **61** open
-register rows, counted from §5, never typed. **14** can start right now,
+touched"* is a trigger; *"later"* is not. This is the complete list — all **60** open
+register rows, counted from §5, never typed. **13** can start right now,
 **1** needs only a database, **4** need a
 decision from you, and the rest wait on the trigger named in their row.
 *(Rule 13, corrected 2026-10-19 (`CC-137` closed): **14 · 1 · 4 · 42 = 61** — the row was built, so it
@@ -689,14 +711,13 @@ paragraph was not, and that is why it drifted.)*
 | `CC-122` | — | **There is no agent instance — nothing is ever hired.** `AiAgentDefinition` is a code object; the twelve DB entities are overrides, bindings, runtimes and conversations. "One user, many Aissistants" has no row. | **`CC-121`** — never hire onto a credential id. | **blocked on its trigger** |
 | `CC-130` | — | **A third table carries the same free-form principal string, with no caller yet.** `authority_project_memberships.principal_id` is `text` with `principal_kind` beside it (`auth/data/entities.ts:926-936`), written by `projectService.addMember(principalId, principalKind)` and read by `contextFor(recordId, principalId)` — where the enforcement reader passes the bare id (`authorityEnforcementService.ts:281` → `:361`). **Measured: `addMember` has no production caller** — only the DI wiring (`auth/di.ts:107-114`) and tests. So it is not a live fail-open; it is a bug that arrives with its first caller. | **When `projectService.addMember` gets its first production caller.** `CC-124`'s migration already rewrites the column, which buys that caller a correctly-shaped table. | **blocked on its trigger** |
 | `CC-133` | — | **The platform has no identity above its tenants — Option B, deferred by the owner, not dropped.** `CC-128` was decided as Option A (the platform's admins live inside the foundational tenant, and other tenants inherit, or are limited to, what it allows). Under A, *"platform admin"* and *"admin of the foundational tenant"* are the same thing; cross-tenant reach is a **rule** rather than a structure; an agent serving the platform's superadmins has no home outside the foundation; and the foundation is special **by convention** rather than by schema. B puts the platform's admins **above** every tenant, in a row that belongs to no tenant — the first genuinely platform-level table. | **After the pipeline is finalised and the platform is fully operational** — the owner's trigger, 2026-10-19. `CC-128` (Option A) lands first: A is a strict subset of B's shape, so B adds a layer above rather than rewriting one below. | **blocked on its trigger** |
-| `CC-140` | — | **Two administrators who load the same ceiling and both save keep the last write, and the first one's change vanishes with no message.** Opened by `CC-139`, which built the screen that makes the race reachable by hand instead of by a terminal race nobody was having. **THE MEASUREMENT:** `tenant_capability_ceilings` is a **set of rows**, one per capability (`auth/data/entities.ts:1078-1099`), so `replaceCapabilityCeiling` rewrites N rows and there is no single `updatedAt` an expected-version header could name — which is exactly why the screen's `PUT` carries an inline `optimistic-lock-exempt` instead of a header. Measured further: the write is **not** a compare-and-swap on anything, the read returns only `capabilities`, and the diff the write returns (`added` / `removed`) describes the result, never the writer's starting point. | **Startable now** — the read returns a **fingerprint** (a hash of the sorted capability set) and the write requires it, so a save against a stale fingerprint refuses with a sentence instead of overwriting. Cheap, and it belongs with the library that owns the write rather than with the screen. | **startable now** |
 | `CC-138` | — | **No route declares human-only or machine-only** — `CC-125`'s authority half is built and closed, and its **surface** half was left inside the closed row with no row of its own. The consequence is unchanged: any API key holding `ai_assistant.view` reaches the assistant surface, because the gate above it does not distinguish the caller's kind. | **With the `W3` gate** — every route declares one of the three, the default is neither, and a route with no declaration fails the build (`CC-92` Slot 1). | **blocked on its trigger** |
-*Grouped by state:* **14 startable now** · **1 needs a database** ·
+*Grouped by state:* **13 startable now** · **1 needs a database** ·
 **4 need you** · **42 blocked** on a named trigger.
-*(Rule 13, corrected 2026-10-19 (`CC-139` closed, `CC-140` opened): one row left the table and one
-arrived, so the tally is unchanged at **14 · 1 · 4 · 42 = 61** — counted from the table, not typed. The
-swap is the point worth saying out loud: a screen that makes a **race** reachable by hand is a new defect
-with a build date, even though nothing about the write changed.)*
+*(Rule 13, corrected 2026-10-19 (`CC-140` closed): **13 · 1 · 4 · 42 = 60** — the row was built, so it
+left the table and the startable count follows it out. The ceiling pair finished as a unit: the screen
+shipped with a token it could not send, and the row that made sending it possible was opened by the same
+build.)*
 *(Rule 13, corrected 2026-10-19 (later): `CC-125` was built and left the table, and `CC-136` opened in
 its place as *needs you* — the tally is unchanged at 15 + 1 + 5 + 41 = 62, counted from the table, not
 typed.)*
@@ -736,7 +757,7 @@ that *does* still matter is **code that nothing calls** — a checker on disk wi
 referencing it is an unfinished row, because the wiring itself is missing code (`CC-101` fixed seven
 of eight; `CC-117` closed the eighth, as a report step). Do not confuse the two: **no remote is a
 deployment state; no caller is a defect.**
-**CC-75 was never assigned** — the numbering skips it. **78 closed · 61 open · 139 total.**
+**CC-75 was never assigned** — the numbering skips it. **79 closed · 60 open · 139 total.**
 *(Rule 13, corrected 2026-10-17. The committed header read **52 closed · 44 open · 96 total**, and that
 figure corresponded to **no state the table ever held**: measured at `HEAD`, the table below already
 carried **97 rows — 55 closed, 42 open** — because rows were appended to the table without the header
@@ -905,7 +926,7 @@ be the thing that drifts.)*
 
 | CC-138 | **NO ROUTE DECLARES HUMAN-ONLY OR MACHINE-ONLY — `CC-125` CLOSED ITS AUTHORITY HALF AND LEFT THIS HALF UNROWNED** — 2026-10-19, opened while auditing the `CC-125` close, and it exists because **a closed row is where a remaining half goes to be forgotten**. **THE MEASUREMENT:** `CC-125`'s original framing had two halves. (1) *The authority floor* — what no configuration may grant a machine — **built and closed 2026-10-19** (`PLAN-CC-125-machine-floor.md`). (2) *Per-route declaration* — every route says `human-only`, `machine-only` or `both`, the default is **neither**, and a route with no declaration **fails a build-time check** — **not built**, and the only record of it was a sentence inside the closed row plus a line in §3. **So the consequence the row was opened for is unchanged:** any API key holding `ai_assistant.view` still reaches the assistant surface, because the gate above it does not distinguish the caller's kind. The floor bounds *what a machine may hold*; it does not say *where a machine may go*. **WHY IT IS NOT `CC-125` REOPENED:** the owner's D1 ruling answered the authority question, and this is a **surface** question with its own vocabulary and its own build-time check — `PLAN-2026-10-18-one-agent.md` W3's *"Lands"* line already names it as the actor-class gate, so it was always a separate deliverable. **FIX:** every route file declares one of the three; the default is neither; the declaration is read by the same chokepoint `CC-123` routes through; a route with no declaration fails the build. **Precedent:** `SR-04`'s two-surface rule (policy set by code, never config). **SCHEDULED 2026-10-19 — `CC-92` Slot 1**, riding the `W3` gate (`PREVIEW-AUDIT-TRIAGE.md` §6.3). | ☐ open |
 | CC-139 | **THE CAPABILITY CEILING HAS A ROUTE AND NO SCREEN — `CC-135`'s other half, opened in the same change rather than left inside the closed row** — 2026-10-19. **WHY IT WAS NOT BUILT WITH THE ROUTE:** the row that named it said *"then a screen"*, and a capability picker is a **product decision** — 157 enabled features across 34 modules is a tree, not a form — which a transport row is not allowed to invent silently. The row exists so that the half is scheduled rather than remembered. **THE MEASUREMENT THAT MAKES IT SMALL:** `auth/components/AclEditor.tsx` **already renders the enabled features grouped by module** with per-feature selection, so the screen is that tree with a different action and a different gate — not a new component. **FIX:** a `pageContext: 'settings'` page beside `settings/structural-permissions`, `requireFeatures: ['directory.tenants.manage']`, reading and writing `GET`/`PUT /api/auth/capability-ceiling[/tenant/:id]` (built in `CC-135`), showing `source` so an operator can tell *"this tenant narrowed itself"* from *"the deployment bounds it"*. **Gate:** the page declares the capability in `page.meta.ts` — an undeclared page is ungated, which is `CC-138`'s class one surface over. **Depends on:** `CC-135` (closed). **★ BUILT AND CLOSED 2026-10-19** (`PLAN-CC-139-ceiling-screen.md`). **WHAT LANDED:** a settings page with a scope selector (*Platform* plus one entry per tenant), a searchable module-grouped tree, a save that is disabled until something changes, and every refusal shown as the route's **sentence** rather than a status code. **★ THE QUESTION THE ROW DID NOT ASK, answered by measurement:** the tree's endpoint (`/api/auth/features`) is gated by the role-editing capability while the ceiling is gated by the tenant capability — the dispatcher is **all-of** with **no any-of form anywhere** in `packages/shared`/`packages/core` — so a tenant administrator narrowing **their own** ceiling (`CC-135` §3.2's actor, who may hold the tenant capability alone) would have got an empty tree. **So there is a read-only catalogue route in the same folder, gated like the ceiling:** a capability that lets you **set** a list is strictly more powerful than one that lets you **see** it; and `/api/auth/features` also appends tenant-scoped synthesized entity features, which must never enter a ceiling above every tenant. **★ A guard met the build and exposed a hole:** two suites scan backend screens for mutating calls without the expected-version header, with a deliberately empty allowlist (*"wire it or exempt it inline"*). The ceiling is a **set of rows**, not one versioned row, so no header is meaningful — the page carries an inline exemption and the race it exposes is **`CC-140`**, opened in the same change rather than left in a comment. **PROOF:** 3 suites / 26 tests (the page rendered under jsdom, asserting on URLs and bodies) · **5/5 mutations RED** (the page's capability · the tenant save URL · the sentence-instead-of-status · the catalogue's gate · *inherits* vs *own*) · every file restored **checksum-verified byte-identical** · `tsc` 0 · full core **661 suites / 5,818 tests**. | ✅ closed |
-| CC-140 | **THE CEILING WRITE HAS NO CONCURRENCY TOKEN — TWO ADMINISTRATORS WHO LOAD THE SAME CEILING AND BOTH SAVE KEEP THE LAST WRITE** — 2026-10-19, opened by `CC-139`'s own exemption comment, which had to answer a guard that refuses mutating screens without an expected-version header. **THE MEASUREMENT, three parts:** (1) the shape — `tenant_capability_ceilings` is a **set of rows**, one per capability (`auth/data/entities.ts:1078-1099`), so `replaceCapabilityCeiling` rewrites N rows and there is **no single `updatedAt` a version could name** — which is why no header is being sent, rather than a header being forgotten; (2) the write — measured, `replaceCapabilityCeiling` is **not** a compare-and-swap on anything: it takes a tenant, a list and an actor, and writes; (3) the read — the route returns `capabilities` only, and the `added` / `removed` diff in its response describes the **result**, never the writer's starting point. **★ WHY IT IS A DEFECT AND NOT A NOTE:** the screen makes the race reachable by hand. In a terminal it took two people racing at a prompt; in a settings page it takes two administrators who both pressed save on views opened minutes apart, and the first one's change vanishes with no message and no record that anything was lost. **★ WHY IT IS CHEAP AND STILL A ROW:** the read returns a **fingerprint** (a hash of the sorted capability set) and the write requires it, so a save against a stale fingerprint refuses with a sentence instead of overwriting. It belongs with the library that owns the write, not with the screen. **Startable now** — `capabilityCeiling.ts` + the read/write helpers in `capabilityCeilingRoute.ts`, plus the screen's own reload-after-refusal. | ☐ open |
+| CC-140 | **THE CEILING WRITE HAS NO CONCURRENCY TOKEN — TWO ADMINISTRATORS WHO LOAD THE SAME CEILING AND BOTH SAVE KEEP THE LAST WRITE** — 2026-10-19, opened by `CC-139`'s own exemption comment, which had to answer a guard that refuses mutating screens without an expected-version header. **THE MEASUREMENT, three parts:** (1) the shape — `tenant_capability_ceilings` is a **set of rows**, one per capability (`auth/data/entities.ts:1078-1099`), so `replaceCapabilityCeiling` rewrites N rows and there is **no single `updatedAt` a version could name** — which is why no header is being sent, rather than a header being forgotten; (2) the write — measured, `replaceCapabilityCeiling` is **not** a compare-and-swap on anything: it takes a tenant, a list and an actor, and writes; (3) the read — the route returns `capabilities` only, and the `added` / `removed` diff in its response describes the **result**, never the writer's starting point. **★ WHY IT IS A DEFECT AND NOT A NOTE:** the screen makes the race reachable by hand. In a terminal it took two people racing at a prompt; in a settings page it takes two administrators who both pressed save on views opened minutes apart, and the first one's change vanishes with no message and no record that anything was lost. **★ WHY IT IS CHEAP AND STILL A ROW:** the read returns a **fingerprint** (a hash of the sorted capability set) and the write requires it, so a save against a stale fingerprint refuses with a sentence instead of overwriting. It belongs with the library that owns the write, not with the screen. **Startable now** — `capabilityCeiling.ts` + the read/write helpers in `capabilityCeilingRoute.ts`, plus the screen's own reload-after-refusal.  **★ BUILT AND CLOSED 2026-10-19** (`PLAN-CC-140-ceiling-revision.md`) — and **the reason this row had a build date at all** is that its own text was written inside an exemption comment on a screen that made the race reachable by hand. **WHAT LANDED:** `ceilingRevision(capabilities)` — the **fingerprint of the set** (FNV-1a over the sorted, length-escaped list, with the count travelling alongside), returned by the read beside `capabilities`; an optional `expectedRevision` on the write that, when it differs from what the table holds **now**, refuses with **409** — not 400, because the request was right and the *view* was wrong, and an operator who reads 400 tries again and loses twice; and the screen now sends the token and, on a 409, **reloads and says so**. **★ WHAT THIS IS AND IS NOT, stated in the code, the plan and this row:** the window between the comparison and the write is **milliseconds, not zero** — this converts a silent overwrite into a refusal, it does **not** make the write atomic, and a real lock would be a `SELECT … FOR UPDATE` over the rows being replaced. **★ AND THE NEW TEST CAUGHT A DEFECT IN THE NEW CODE:** the 409 branch set its message and then reloaded, and `loadCeiling` clears both notices and errors — so the screen would have reloaded **in silence**, which is precisely the wrong `CC-139` existed to repair. **PROOF:** +5 route tests and +2 page tests, the refused case asserted the way every refusal in that file is asserted — **the store is unchanged and nothing was recorded**; **4/4 mutations RED** — drop the revision from the read (3) · ignore the token (2) · a 400 instead of a 409 (2) · compare against the **request's** set instead of the stored one (1) — every file restored **checksum-verified byte-identical**; `tsc` 0; full core **661 suites / 5,824 tests, 0 failures**. | ✅ closed |
 
 ---
 ## 6. Platform study — 11 platforms, every one with its address

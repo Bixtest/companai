@@ -5303,3 +5303,29 @@ sentence is a comment.
 control that called, and could not be obeyed) · `CC-115` (*the declared-control census is a report by its
 own design*) · L191 (*the exemption was the attack surface*) ·
 `PLAN-CC-139-ceiling-screen.md` §5, the paragraph that found the guard.*
+
+## L193
+
+**A fix that reloads wipes its own message — and the test that caught it was written for the fix, not for
+the message.**
+
+`CC-140`'s 409 branch said: show the sentence, then reload the ceiling. It failed its own test a minute
+after it passed the one for the refusal. `loadCeiling` begins by clearing both the notice and the error —
+so the very call that made the screen correct erased the only thing that explained why. The end state was
+a screen that silently swapped its contents, which is the defect `CC-139` existed to repair.
+
+**Why it took a test and not a review.** Each half was right on its own: setting an error, and reloading a
+stale view. The order is what was wrong, and **order is invisible in a diff and obvious in an assertion** —
+the test asked for an alert that had already been created and destroyed within the same handler.
+
+**The rules.**
+1. **When a handler both reports and repairs, repair first.** The report outlives the repair or nothing
+   survives; a message cleared by recovery is a bug whose only symptom is that the person learns nothing.
+2. **Assert the message *after* the whole handler has run**, not after the branch that produced it. An
+   assertion in the middle checks a state nobody sees.
+3. **"Reload and say so" is one action with two steps**, and the second is the one that gets forgotten.
+   Write the pair down as a pair.
+
+*Cross-ref: L184 (*a fact is not corrected where it was discovered; it is corrected where it is believed*
+— here the correction was made in the wrong place in the *sequence* rather than the wrong file) ·
+`PLAN-CC-140-ceiling-revision.md` §4, the paragraph under the mutation table.*

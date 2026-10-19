@@ -19,31 +19,34 @@ box, **the box wins** (owner's instruction, 2026-10-06).
 > section that did not exist. If you are reading this and the box is gone again, **that is the defect,
 > not a change of policy**: restore it here rather than adding a task line to one of the pointing files.
 
-**IN HAND — `CC-140`: the ceiling write gets a concurrency token.** `CC-139` gave the ceiling a screen,
-and the screen had to answer a guard that refuses mutating screens without an expected-version header. It
-answered honestly: the ceiling is a **set of rows**, one per capability, so there is no single version a
-header could name. **That answer is a Todo in disguise** — two administrators who load the same ceiling and
-both save keep the last write, and the first one's change vanishes with no message. The read returns a
-**fingerprint** (a hash of the sorted capability set) and the write requires it: a save against a stale
-view refuses with a sentence instead of overwriting. Work in `capabilityCeiling.ts` +
-`capabilityCeilingRoute.ts`, plus the screen's own reload-after-refusal.
+**IN HAND — `CC-92` Slot 0: the 13 spine findings, before `CC-121` starts.** The ceiling work is finished
+as a unit — screen, token, refusal — so the frontier moves to the spine. `CC-121` re-keys every
+`principal_id` through the authority gate, and that gate cannot yet see **seven modules' commands**
+(`T-07`) or refuse a missing identity (`T-27`). **The spine is repaired before it is re-keyed:** a
+migration through a gate with holes produces a clean answer about a partial system. The 13 findings and
+their slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4.
+
+**The steps, in order:**
+
+1. Read §9.4 — the 13 Slot 0 findings are numbered there, with what each measured and which gate it rides.
+   They are the queue; nothing else about `CC-121` is startable until they are closed.
+2. Each is a normal row: measure it, write the requirement, build, prove with a mutation, close.
+3. `CC-121` after Slot 0, behind `CC-119` (the database rebuild milestone). `CC-138` rides `W3`.
 
 **THE QUEUE AFTER IT** — and the order is fixed, not a list:
 
-1. **`CC-92` Slot 0** — **13 spine findings before `CC-121` starts.** That migration re-keys every
-   principal, and the gate it re-keys through cannot see seven modules' commands (`T-07`) or refuse a
-   missing identity (`T-27`). **The spine is repaired before it is re-keyed.**
-2. **`W3`** — then `CC-138` (no route declares *human-only* / *machine-only*) rides it.
-3. **`CC-121`** — behind `CC-119` (the database rebuild milestone), then **`CC-122`**.
-4. **`CC-133`** — the platform above its tenants (option B). Deferred by the owner's trigger, not dropped.
+1. **`W3`** — then `CC-138` (no route declares *human-only* / *machine-only*) rides it.
+2. **`CC-121`** — behind `CC-119` (the database rebuild milestone), then **`CC-122`**.
+3. **`CC-133`** — the platform above its tenants (option B). Deferred by the owner's trigger, not dropped.
 
-**THE POSITION, MEASURED — 2026-10-19:** register **78 closed · 61 open · 139 total**; §4's open rows
-**14 startable · 1 needs a live database · 4 need the owner · 42 blocked on a trigger**.
+**THE POSITION, MEASURED — 2026-10-19:** register **79 closed · 60 open · 139 total**; §4's open rows
+**13 startable · 1 needs a live database · 4 need the owner · 42 blocked on a trigger**.
 `MASTER-CHECKLIST.md` §2 is the canonical last-done/next line and §5 is the register;
 `where_we_left.md` §0 is the six-step resume recipe. **The authority family is complete and closed:**
 `CC-125` (the floor) · `CC-128` (the ceiling) · `CC-134` (the superadmin read) · `CC-135` (the ceiling's
 door) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability means one door) ·
-`CC-139` (the ceiling's screen). **No row on the authority path is waiting on the owner.**
+`CC-139` (the ceiling's screen) · `CC-140` (its write refuses a stale view). **No row on the authority
+path is waiting on the owner.**
 
 ---
 
