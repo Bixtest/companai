@@ -3,9 +3,18 @@
 import { DELETE, GET, POST, PUT } from '@open-mercato/core/modules/auth/api/users/route'
 import { Role, RoleAcl, User, UserAcl } from '@open-mercato/core/modules/auth/data/entities'
 import { Organization } from '@open-mercato/core/modules/directory/data/entities'
+// `CC-137` — the machine test asks the real floor rather than a fixture that was told to say no.
+import { floorRefusalFor } from '@open-mercato/core/modules/auth/lib/machineFloor'
 
 const mockGetAuthFromRequest = jest.fn()
 const mockLoadAcl = jest.fn()
+/**
+ * `CC-137`. Defaults to **true** so the pre-existing tests keep asserting what they were written to
+ * assert (the subset check); the tests that are *about* this gate set it explicitly, and the capability
+ * id is asserted on the call rather than inferred from a status code — a gate asking for a misspelt
+ * capability refuses everybody and looks correct.
+ */
+const mockUserHasAllFeatures = jest.fn(async () => true)
 const mockFindWithDecryption = jest.fn()
 const mockFindOneWithDecryption = jest.fn()
 const mockLoadCustomFieldValues = jest.fn()
@@ -40,7 +49,9 @@ const mockEm = {
 const mockContainer = {
   resolve: jest.fn((token: string) => {
     if (token === 'em') return mockEm
-    if (token === 'rbacService') return { loadAcl: mockLoadAcl }
+    // `CC-137` — the route asks whether the actor holds `auth.roles.manage` before it touches a `roles`
+    // array. The mock has to answer that question, or the "allowed" tests would be proving a refusal.
+    if (token === 'rbacService') return { loadAcl: mockLoadAcl, userHasAllFeatures: mockUserHasAllFeatures }
     return null
   }),
 }
@@ -126,6 +137,8 @@ describe('GET /api/auth/users', () => {
   beforeEach(() => {
     mockGetAuthFromRequest.mockReset()
     mockLoadAcl.mockReset()
+    mockUserHasAllFeatures.mockReset()
+    mockUserHasAllFeatures.mockResolvedValue(true)
     mockEm.find.mockReset()
     mockEm.findOne.mockReset()
     mockEm.findAndCount.mockReset()
@@ -1075,5 +1088,113 @@ describe('GET /api/auth/users', () => {
     }))
 
     expect(response.status).toBe(200)
+  })
+
+  /**
+   * `CC-137` — one capability means one door.
+   *
+   * The users route is a third way onto the authority system: its `roles` array was checked **only** as a
+   * subset of the actor's own ACL, with an early return for a superadmin (`grantChecks.ts:63`). So a machine
+   * holding `auth.users.edit` could pass on any role it already held, and one holding it *and* a wildcard
+   * role could grant any role to anybody.
+   *
+   * **The floor already named `auth.roles.manage`** (live since `CC-125`) and this route never asked a
+   * question the floor answers — `CC-101`'s class, one layer down. These tests are about the asking, and
+   * the last one is about the belt-and-braces half: the two user capabilities are now on the floor, so the
+   * machine is refused at the route's own gate before the handler runs.
+   */
+  describe('CC-137 — assigning roles requires auth.roles.manage', () => {
+    const machineKeyId = '623e4567-e89b-12d3-a456-426614174001'
+    const roleToGrant = '323e4567-e89b-12d3-a456-426614174779'
+
+    function createWithRoles(roles: string[]) {
+      return POST(new Request('http://localhost/api/auth/users', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          email: 'grant-attempt@example.com',
+          password: 'StrongSecret123!',
+          organizationId,
+          roles,
+        }),
+      }))
+    }
+
+    test('★ refuses without the capability — and refuses BEFORE the role is looked up', async () => {
+      mockUserHasAllFeatures.mockResolvedValueOnce(false)
+
+      const response = await createWithRoles([roleToGrant])
+      const body = await response.json()
+
+      expect(response.status).toBe(403)
+      // The capability is named, so an operator reads *what to grant* rather than guessing.
+      expect(body.error).toContain('auth.roles.manage')
+      expect(body.requiredFeatures).toEqual(['auth.roles.manage'])
+
+      // And the refusal happened before the grant check: a refusal that has already resolved the role is a
+      // refusal in the wrong place, and it would still be doing work on behalf of an actor who may not ask.
+      const roleLookups = mockFindOneWithDecryption.mock.calls.filter((call) => call[1] === Role)
+      expect(roleLookups).toHaveLength(0)
+    })
+
+    test('asks for the capability the floor names, not a near-miss', async () => {
+      await createWithRoles([roleToGrant])
+
+      // Asserted on the arguments rather than inferred from a status: a gate asking for a misspelt
+      // capability refuses everybody and looks exactly like a gate that works.
+      expect(mockUserHasAllFeatures).toHaveBeenCalledWith(
+        'user-1',
+        ['auth.roles.manage'],
+        { tenantId, organizationId },
+      )
+    })
+
+    test('★ a machine holding auth.users.edit cannot assign a role', async () => {
+      // The answer comes from the REAL floor, not from a fixture that was told to say no: `auth.roles.manage`
+      // is on it, and `floorRefusalFor` is what `userHasAllFeatures` ends up consulting.
+      mockGetAuthFromRequest.mockResolvedValueOnce({
+        sub: `api_key:${machineKeyId}`,
+        tenantId,
+        orgId: organizationId,
+        isSuperAdmin: false,
+        roles: ['admin'],
+      })
+      mockUserHasAllFeatures.mockImplementationOnce(async (_actor, required: string[]) =>
+        required.every((capability) => floorRefusalFor('service', capability) === null))
+
+      const response = await createWithRoles([roleToGrant])
+      const body = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(body.requiredFeatures).toEqual(['auth.roles.manage'])
+      // The belt-and-braces half, asserted in the same test because the two halves are one defect:
+      // the route's own gate is floored too, so this request never reaches the handler at all.
+      expect(floorRefusalFor('service', 'auth.users.create')).toMatch(/machine floor/)
+    })
+
+    test('fails CLOSED when the capability cannot be answered', async () => {
+      // A service object with no `userHasAllFeatures` — an older wiring, a partial container, a mock. The
+      // one outcome that must be impossible is a missing check reading as permission.
+      mockContainer.resolve
+        .mockImplementationOnce(() => mockEm)
+        .mockImplementationOnce(() => ({ loadAcl: mockLoadAcl }))
+
+      const response = await createWithRoles([roleToGrant])
+
+      expect(response.status).toBe(403)
+    })
+
+    test('an empty roles array is not an assignment — no capability needed', async () => {
+    // Not `mockResolvedValueOnce`: if the route DID ask, this answer must be the one it gets, so the 201
+    // below cannot be produced by a stale queue entry.
+    mockUserHasAllFeatures.mockResolvedValue(false)
+
+    const response = await createWithRoles([])
+
+      // Nothing is handed to anybody, and the grant check already returns early for it. Requiring the
+      // capability here would refuse a request that grants nothing — narrowing is not widening.
+      expect(response.status).toBe(201)
+      expect(mockUserHasAllFeatures).not.toHaveBeenCalled()
+    })
   })
 })

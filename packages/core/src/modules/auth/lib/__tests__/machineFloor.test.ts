@@ -63,11 +63,26 @@ describe('CC-125 — the floor binds machines, and only machines', () => {
   })
 
   it('covers all five of the owner\'s categories, and the two that expand or are empty are named', () => {
-    // seven ids behind five categories: 1 + 4 + 1 + 1 — "granting" is expressed four ways
-    expect(MACHINE_FLOOR.size).toBe(7)
+    // nine ids behind five categories: 1 + 4 + 1 + 1 + 2 — "granting" is expressed four ways, and
+    // `CC-137` added the two user capabilities because a `roles` array rides on them
+    expect(MACHINE_FLOOR.size).toBe(9)
     // and "erasing the audit ledger" has NO capability — nothing can erase it, machine or human.
     // Asserted as an absence so the finding cannot be quietly forgotten.
     expect([...MACHINE_FLOOR.keys()].some((id) => /ledger/i.test(id))).toBe(false)
+  })
+
+  it('★ `CC-137`: the users route is a grant door, and its two write capabilities are on the floor', () => {
+    // Measured before the fix: the route was gated by these two, neither was here, and the `roles` array
+    // was only subset-checked against the actor's own ACL — with an early return for a superadmin.
+    expect(MACHINE_FLOOR.get('auth.users.create')).toMatch(/grant/)
+    expect(MACHINE_FLOOR.get('auth.users.edit')).toMatch(/grant/)
+    expect(floorRefusalFor('service', 'auth.users.create')).toMatch(/machine floor/)
+    expect(floorRefusalFor('ai_worker', 'auth.users.edit')).toMatch(/machine floor/)
+    // The pair that must NOT be here, asserted so a later "tidy-up" cannot widen the floor by accident:
+    // reading is not granting, and deleting narrows.
+    expect(MACHINE_FLOOR.has('auth.users.list')).toBe(false)
+    expect(MACHINE_FLOOR.has('auth.users.delete')).toBe(false)
+    expect(floorRefusalFor('service', 'auth.users.delete')).toBeNull()
   })
 })
 

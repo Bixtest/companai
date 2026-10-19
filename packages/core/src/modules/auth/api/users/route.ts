@@ -573,16 +573,54 @@ function readId(record: Record<string, unknown> | null | undefined): string | nu
   return typeof value === 'string' && value.length > 0 ? value : null
 }
 
+/**
+ * The capability that means *may you assign roles*.
+ *
+ * `CC-137`. This route is a third door onto the authority system, and it was the open one: it is gated by
+ * `auth.users.create` / `auth.users.edit`, and the only check on the `roles` array was a **subset** check
+ * (`assertActorCanGrantRoles`) that **returns early for a superadmin** (`grantChecks.ts:63`). So a machine
+ * holding `auth.users.edit` could pass on any role it already held, and one holding it *and* a wildcard
+ * role could hand out any role to anybody.
+ *
+ * **The floor already names this capability** (`machineFloor.ts`, live since `CC-125`) — and this route
+ * never asked a question the floor answers, because it only ever asked *"do you hold `auth.users.edit`?"*.
+ * That is `CC-101`'s class: a control that is correct and that no caller calls. Asking here is what makes
+ * the existing answer reachable; the floor entry for the two user capabilities (same change) then refuses
+ * the machine at the route's own gate, so the handler is never entered at all.
+ */
+const ROLE_ASSIGNMENT_CAPABILITY = 'auth.roles.manage'
+
 async function assertCanAssignRoles(req: Request, roles: unknown, payload: Record<string, unknown>) {
-  if (!Array.isArray(roles)) return
+  // An **empty** array hands nobody a role, and the grant check below returns early for it
+  // (`grantChecks.ts:50`). Requiring the capability for it would refuse a request that grants nothing —
+  // and narrowing is not widening, which is why `api_keys.delete` is deliberately off the floor too.
+  if (!Array.isArray(roles) || roles.length === 0) return
   const auth = await getAuthFromRequest(req)
   if (!auth?.sub) throw new CrudHttpError(401, { error: 'Unauthorized' })
   const container = await createRequestContainer()
   const em = container.resolve('em') as EntityManager
+  const rbacService = container.resolve('rbacService') as RbacService
+
+  // `?? false` is the whole point of the `?.`: a service object without the method, or an answer that
+  // cannot be obtained, must refuse. A missing check reading as permission is the defect this row is.
+  const mayAssignRoles = await rbacService.userHasAllFeatures?.(
+    auth.sub,
+    [ROLE_ASSIGNMENT_CAPABILITY],
+    { tenantId: auth.tenantId ?? null, organizationId: auth.orgId ?? null },
+  ) ?? false
+  if (!mayAssignRoles) {
+    throw new CrudHttpError(403, {
+      error: `Assigning roles requires ${ROLE_ASSIGNMENT_CAPABILITY}.`,
+      requiredFeatures: [ROLE_ASSIGNMENT_CAPABILITY],
+    })
+  }
+
   const tenantId = await resolveTargetTenantIdForRoleGrant(em, payload, auth.tenantId ?? null)
+  // Holding the capability says *may you assign roles*. It does not say *may you assign a role wider than
+  // your own* — that is the second question, and it is still asked.
   await assertActorCanGrantRoleTokens({
     em,
-    rbacService: container.resolve('rbacService') as RbacService,
+    rbacService,
     actorUserId: auth.sub,
     tenantId,
     organizationId: auth.orgId ?? null,

@@ -50,23 +50,33 @@
  * | writing to, or erasing, the audit ledger | **none exists** | Measured: the audit capabilities are `view_*`, `undo_*`, `redo_*`. **Nothing can erase the ledger**, which is the correct end state — recorded as a finding rather than left as an empty row. |
  * | anything that reaches across tenants | `directory.tenants.manage` | The only capability whose effect is not confined to one tenant. |
  *
- * **Two consequences worth stating plainly.** The floor is **seven** ids, not five — the granting
- * category expands to four (roles · delegations · ACL · denials), so the arithmetic is 1 + 4 + 1 + 1 and
- * `MACHINE_FLOOR.size` is asserted as 7 in `lib/__tests__/machineFloor.test.ts`. And one category is
- * **empty because the capability it would name does not exist**, which is a stronger result than a
- * refusal: the ledger cannot be erased by anyone, machine or human.
+ * **Three consequences worth stating plainly.** The floor is **nine** ids, not five — the granting
+ * category expands to four (roles · delegations · ACL · denials) and, since `CC-137`, the two user
+ * capabilities join it, so the arithmetic is 1 + 4 + 1 + 1 + 2 and `MACHINE_FLOOR.size` is asserted as 9
+ * in `lib/__tests__/machineFloor.test.ts`. One category is **empty because the capability it would name
+ * does not exist**, which is a stronger result than a refusal: the ledger cannot be erased by anyone,
+ * machine or human. And the count is the one number in this file that a reader will trust without
+ * re-counting, so it is pinned by a test rather than by this sentence.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * WHAT THE FLOOR DOES NOT COVER, MEASURED AND NAMED — `CC-137`
+ * WHAT USED TO BE A GAP HERE, AND WHY IT WAS TWO DEFECTS — `CC-137`, CLOSED 2026-10-19
  * ─────────────────────────────────────────────────────────────────────────────
- * Category 2 ("granting roles") is fully covered for the four *direct* writers, but "grant a role" is
- * ALSO reachable through `auth.users.create` / `auth.users.edit` — neither is on the floor — whose
- * `roles` arrays are checked only against the actor's own ACL (`assertActorCanGrantRoles`,
- * `lib/grantChecks.ts:58-90`, subset check, early return for a superadmin). So a machine configured
- * with `auth.users.edit` can pass on the roles it already holds. **The ruling was five categories
- * and nothing else, so this floor was not extended past it — the gap is registered as `CC-137` and
- * the fix is the owner's to choose.** If you are extending this file, read that row first: adding
- * those two ids, or moving role assignment behind `auth.roles.manage`, closes the gap.
+ * Category 2 ("granting roles") was fully covered for the four *direct* writers, and "grant a role" was
+ * ALSO reachable through `auth.users.create` / `auth.users.edit`, neither on the floor, whose `roles`
+ * arrays were checked only against the actor's own ACL (`assertActorCanGrantRoles`,
+ * `lib/grantChecks.ts:58-90`, subset check, early return for a superadmin).
+ *
+ * **The measurement that made the row worth more than its own description:** the floor's
+ * `auth.roles.manage` entry has been live since `CC-125`, and the users route **never asked a question
+ * this floor answers** — it only ever asked *"do you hold `auth.users.edit`?"*. A control that is correct
+ * and that no caller calls is `CC-101`'s class, and it was here, one layer down. So the fix had two
+ * halves: the route now asks for `auth.roles.manage` when a request carries roles (**that is what makes
+ * the existing answer reachable**), and the two user capabilities join the list below (**that is what
+ * refuses the machine at the route's own gate**). Either half alone leaves a door: without the first, a
+ * machine with `auth.users.edit` still reaches the handler; without the second, the handler's capability
+ * check is the only thing standing there.
+ *
+ * `auth.users.list` and `auth.users.delete` stay off: reading is not granting, and deleting narrows.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * WHY THIS IS CODE AND NOT A ROW IN THE CEILING TABLE
@@ -85,9 +95,9 @@
 export const FLOOR_BOUND_KINDS = ['ai_worker', 'service', 'system'] as const
 
 /**
- * The floor. **Seven ids behind five categories** — the arithmetic is 1 (`api_keys.create`) + 4 (granting
- * is expressed four ways) + 1 (`ai_assistant.settings.manage`) + 1 (`directory.tenants.manage`) — and
- * every entry carries its reason.
+ * The floor. **Nine ids behind five categories** — the arithmetic is 1 (`api_keys.create`) + 4 (granting
+ * is expressed four ways) + 1 (`ai_assistant.settings.manage`) + 1 (`directory.tenants.manage`) + 2 (the
+ * user capabilities, `CC-137`) — and every entry carries its reason.
  *
  * Adding to this list costs a machine some autonomy. Removing from it lets a destructive act run
  * unattended — which is why the tie-break, when a case is genuinely arguable, is the one `CC-132` wrote
@@ -115,6 +125,18 @@ export const MACHINE_FLOOR: ReadonlyMap<string, string> = new Map([
   [
     'directory.tenants.manage',
     'the tenant is the outermost boundary every other scope is defined by',
+  ],
+  // `CC-137`. These two are how a person is created and how their access is written, so a machine holding
+  // either is granting by another name — and the route's own `roles` array was the open door. They are
+  // separate entries rather than one, because they are separate capabilities and a reader must be able to
+  // see that `auth.users.list` and `auth.users.delete` are deliberately NOT here.
+  [
+    'auth.users.create',
+    'creating a person is the first half of granting; the same request carries their roles',
+  ],
+  [
+    'auth.users.edit',
+    'editing a person is how their roles are rewritten — a subset check is not a grant check',
   ],
 ])
 
