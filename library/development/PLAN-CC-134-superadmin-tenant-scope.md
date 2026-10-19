@@ -113,3 +113,46 @@ changed, the cached answers are stale. `invalidateAllCache()` exists; nothing ca
 
 - 2026-10-19 — requirement written; the measurement (§1–§2) re-confirmed the row and found that the
   per-tenant path already works, which is what makes the fix small and the regression test obvious.
+
+## 8. The build record — 2026-10-19
+
+**What changed.** `rbacService.isGlobalSuperAdmin` now asks **one** question — *is this person an
+administrator of the foundational tenant?* — and asks it in both halves. The `UserAcl` read gained
+`tenantId: <foundational>`; the role half, which used to look for **tenant-less** links and then read
+`RoleAcl` with no tenant filter at all, now points at the same tenant in both places; and a deployment
+with no foundational tenant answers **false**.
+
+**★ The finding the blast radius produced, and it is the important part.** Scoping the shortcut made the
+**existing** `rbacService.test.ts` go red — and the red was right. A tenant superadmin had been
+receiving `['*']` as a **side effect** of the bug: the shortcut was not only answering the cross-tenant
+question, it was also supplying the wildcard that spells "everything". Scoping the question therefore
+**quietly reduced a tenant's own superadmin to whatever their row listed** — a regression in the
+opposite direction, invisible to the seven new tests, and it would have been found by a customer.
+**Fix:** the per-tenant read now returns `['*']` whenever `isSuperAdmin` is true, because the wildcard
+belongs to the **position**, not to the row's stored contents. `LESSONS.md` **L188**.
+
+**A second, smaller correction in the same test file.** `expect(em.find).toHaveBeenCalledTimes(1)` was a
+proxy for *"the per-user row won, so no role aggregation happened"* — and it also counted a lookup the
+fix made conditional on a foundational tenant existing. The property survived; the proxy did not. It now
+asserts the property directly: **no `RoleAcl` read at all**. (L188, rule 4.)
+
+**Proof.**
+- New suite `rbacService.globalSuperAdmin.test.ts`: **7/7**, with a fake that **applies the filters it
+  is handed** — so removing a tenant filter changes an answer instead of changing nothing (L23).
+- **Four mutations, all RED**, every file restored and **checksum-verified byte-identical** (backup by
+  copy, never `git checkout` — L187):
+
+  | # | Mutation | Result |
+  |---|---|---|
+  | M1 | drop the tenant filter from the `UserAcl` read | **2 failed** (the cross-tenant case and the scope-leak case) |
+  | M2 | look up a non-foundational tenant instead | **6 failed** |
+  | M3 | return true when no foundational tenant exists | **1 failed** (fail-closed) |
+  | M4 | make the role half tenant-less again | **1 failed** (a superadmin role in another tenant) |
+
+- The whole `auth` module: **103 suites / 910 tests green** (`CC-125`'s close stood at 102 / 903 — the
+  delta is exactly this work).
+- The whole `core` package: **657 suites / 5,779 tests, 0 failures** (was 656 / 5,772).
+- `tsc --noEmit -p packages/core/tsconfig.json`: **exit 0**.
+
+**Still open, named rather than implied:** moving the foundation does not invalidate
+`globalSuperAdminCache` (§6), and `CC-136` is adjacent but **not** fixed by this.

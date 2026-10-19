@@ -5129,3 +5129,32 @@ for minutes the safest copy of that work was my own scrollback.
 
 *Cross-ref: L23 family (a fake that behaves like the real thing until it doesn't), CC-125 §8 of
 `PLAN-CC-125-machine-floor.md` (the near-loss and its recovery, recorded).*
+
+## L188
+
+**Narrowing a shortcut can silently REDUCE a legitimate answer — check what the shortcut was also supplying.**
+
+`CC-134` scoped a cross-tenant permission check so that a superadmin of one customer was no longer a
+superadmin of every customer. The fix was correct and the new tests were green. Then the **existing**
+suite went red, and the red was right: a superadmin of a single tenant had been receiving *everything*
+as a **side effect** of the bug. The shortcut did not only answer "is this person global" — it also
+supplied the wildcard that spells "everything" in this codebase. Scoping the question therefore
+**quietly demoted a tenant's own superadmin to whatever their row happened to list**, which is a
+regression in the opposite direction and would have been discovered by a customer, not by a test.
+
+**The rules.**
+1. **Before narrowing a shortcut, list everything it returns**, not only the thing it decides. A buggy
+   path that returns a *correct* value for the wrong reason is still the only source of that value.
+2. **A privilege that is "everything" must be produced where the privilege is established**, not by the
+   path that happens to run first. Here the wildcard belongs to the *position* (superadmin), not to the
+   row's stored list — so it moved into the per-tenant read, where the position is read.
+3. **A pre-existing test going red is evidence, not friction.** This one was the only thing that said
+   the fix had reduced something; the seven new tests all passed.
+4. **And a count is not a property.** A second failing assertion was `expect(em.find).toHaveBeenCalledTimes(1)`,
+   a proxy for *"the per-user row won, so no role aggregation happened"*. The proxy also counted a
+   lookup the fix made conditional. The property survived; the proxy did not. **Assert the thing the
+   test means** — here, that no role ACL was ever read.
+
+*Cross-ref: L175 (a counter that reports the start state cannot report the left state — same family:
+the instrument measuring the wrong moment), `CC-134` §7 of `PLAN-CC-134-superadmin-tenant-scope.md`,
+`rbacService.ts`'s per-tenant read.*

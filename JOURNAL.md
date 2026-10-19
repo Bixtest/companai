@@ -7,6 +7,55 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-134` closed: an administrator of one tenant is no longer an administrator of every tenant
+
+**The defect.** The read asked *"does this person hold a superadmin row anywhere?"* and the answer
+promoted them above **every** tenant — and `loadAcl` acted on it before the requested scope was
+consulted at all. `UserAcl.tenant_id` is `NOT NULL` with a comment saying tenant scope is mandatory
+for ACL evaluation; the query had no tenant filter. `CC-128` bounded what the resulting `*` could
+reach. This is the read itself.
+
+**The measurement that made the fix small.** `loadAcl`'s **per-tenant** read already filters by
+`tenantId` — so a superadmin of tenant B already gets `['*']` **inside B**, without this function's
+help. That means the function is *only* the cross-tenant shortcut: its name was right and its question
+was wrong. Under `CC-128` option A the right question is **"is this person an administrator of the
+foundational tenant?"**, and `tenants.is_foundational` already exists.
+
+**The fix asks it in both halves.** The per-user read gained `tenantId: <foundational>`; the role half,
+which used to look for **tenant-less** links and then read `RoleAcl` with no tenant filter at all, now
+points at the same tenant in both places — otherwise the function returns the union of two different
+questions. No foundational tenant answers **false**: a deployment that has not designated a foundation
+must not silently promote every tenant's superadmin.
+
+**★ The finding the blast radius produced — and it is the part worth keeping.** Scoping the shortcut
+turned the **existing** suite red, and the red was right. A tenant superadmin had been receiving `['*']`
+as a **side effect** of the bug: the shortcut was not only answering the cross-tenant question, it was
+also supplying the wildcard that spells "everything" in this codebase. So the fix, as first written,
+**quietly demoted a tenant's own administrator to whatever their row happened to list** — a regression
+in the opposite direction, invisible to the seven new tests, and one a customer would have found first.
+**The wildcard belongs to the position, not to the row's stored contents**, so the per-tenant read now
+produces it. `LESSONS.md` **L188**: *narrowing a shortcut can silently reduce a legitimate answer —
+list everything it returns, not only what it decides.*
+
+**A second, smaller correction in the same test file.** `expect(em.find).toHaveBeenCalledTimes(1)` was a
+proxy for *"the per-user row won, so no role aggregation happened"* — and it also counted a lookup the
+fix made conditional. The property survived; the proxy did not. It now asserts the property directly:
+**no `RoleAcl` read at all**.
+
+**Proof.** New suite **7/7** with a fake that **applies the filters it is handed** (a fake that ignores
+its `where` cannot prove a filter — L23). **Four mutations, all RED**: drop the tenant filter from the
+`UserAcl` read → 2 failed; look up a non-foundational tenant → 6; return true with no foundation → 1;
+make the role half tenant-less again → 1. Every file restored and **checksum-verified byte-identical**
+(backup by copy, never `git checkout` — L187). The whole `auth` module **103 suites / 910 tests** (was
+102 / 903); the whole `core` package **657 suites / 5,779 tests, 0 failures** (was 656 / 5,772);
+`tsc --noEmit` **0**. Register **74 closed · 63 open · 137 total**.
+
+**Named, not implied:** moving the foundation does not invalidate `globalSuperAdminCache` (the fix is one
+call in the tenant-update path, and `CC-135` is the nearest surface); and `CC-136` is adjacent but **not**
+fixed here — a `system:` subject is still parsed as `human`.
+
+---
+
 ## 2026-10-19 — `CC-92` scheduled: the preview audit's 45 findings get gates, and `CC-125`'s missing half gets a row
 
 **The row had said "the rest are queued" since 16 October.** That is not a schedule — it named no slot,

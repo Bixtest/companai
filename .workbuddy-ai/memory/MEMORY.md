@@ -45,7 +45,7 @@ live position only.
   must say so (L185).
 
 ## FRONTIER (2026-10-19)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 73 · 64 · 137.** Checkers PASS.
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 74 · 63 · 137.** Checkers PASS.
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
 type → instance → binding, each a subset above; an agent is always inside a tenant.
 
@@ -56,12 +56,15 @@ table could raise its own; binds `ai_worker`/`service`/`system`, never `human`) 
 catalogue) · `CC-127` (departure flow) · `CC-128` (**the ceiling** — `tenants.is_foundational` +
 `tenant_capability_ceilings`, enforced as a **third input to the resolver**, never a filter;
 `featureMatch.ts:25-43` forbids list intersection) · `CC-132` (the coverage guard was wrong in **both**
-directions; now `160/160 across 34 modules — 149 in this environment`, 39 descriptors).
+directions; now `160/160 across 34 modules — 149 in this environment`, 39 descriptors) · `CC-134`
+(**the superadmin read** — now scoped to the **foundational** tenant in both halves, fail-closed with
+no foundation; **★ the blast radius's lesson: scoping the shortcut would have DEMOTED a tenant's own
+admin**, because `['*']` was arriving as a side effect of the bug — the wildcard belongs to the
+position, not the row. **7 new tests passed while that was broken; the OLD suite caught it.** L188).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-134`** — `isGlobalSuperAdmin` reads `UserAcl` with **no tenant filter**, so one tenant's
-  superadmin is every tenant's. `CC-128` bounded the consequence, not the cause. **STARTABLE — next.**
 - **`CC-135`** — the ceiling has no route/screen (CLI only, so its recorded actor is `system`).
+  **STARTABLE — next.**
 - **`CC-136`** — `system:` is a principal kind with **no producer**; `parseSubject` calls it `human`,
   so a platform act passes both floor and ceiling. **NEEDS THE OWNER** (rec: teach the parser).
 - **`CC-137`** — "granting roles" is reachable through `auth.users.edit`, which is **not on the floor**
