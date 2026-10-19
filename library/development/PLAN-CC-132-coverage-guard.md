@@ -1,7 +1,8 @@
 # PLAN-CC-132 — the coverage guard measures the enabled surface
 
-**Status:** REQUIREMENT ONLY, written 2026-10-19. **No code is written.** §3 is the requirement;
-§5 is the proof the build will have to pass. The row stays open until both are done.
+**Status:** **BUILT and CLOSED 2026-10-19.** Written as a requirement and built to it the same day.
+§3 is the requirement, §5 is the proof, **§8 is what was built and §9 is the build record** — including
+the five corrections, three of them to this document (Rule 13). The register row is closed.
 **Row:** `CC-132` in `library/development/MASTER-CHECKLIST.md` §5.
 **Found while** writing `CC-123`'s requirement (`PLAN-CC-123-authority-intersection.md` §1.4), and
 recorded separately rather than folded in, because it is a **checker defect** with its own fix.
@@ -181,6 +182,21 @@ Recorded so that if any is wrong, it is wrong **by name** and reversible in one 
 | `scheduler.jobs.trigger` | **E3**, compensatable | the effect is whatever the job does, and the job may reach outside — classified by the worst case |
 | `search.embeddings.manage` | **E2**, reversible | bulk and expensive, but rebuildable |
 
+**★ Rule 13 — three of these changed when they were actually written down, and the change is recorded
+here rather than quietly applied.** The table above was the *plan*; the shipped classification is:
+
+| Feature | Planned | Shipped | Why the plan was wrong |
+|---|---|---|---|
+| `ai_assistant.conversations.share` | E3, compensatable | **E5**, compensatable | E3 means *leaves the company boundary*, and a shared conversation stays inside the tenant. What changes is **who may read a record** — which is E5's own definition. Using E3 would have been the right instinct with the wrong reason, and the next reader would have trusted the class over the note |
+| `webhooks.test` | E3, compensatable | **E3, irreversible** | a compensatable act must **name the capability that compensates it**, and there is none: nothing recalls a request that has reached a customer's endpoint. Naming `webhooks.manage` would have been a promise nobody can keep — which the validator exists to prevent |
+| `scheduler.jobs.trigger` | E3, compensatable | **E3, irreversible** | same reason: no capability undoes a job that has already run |
+
+The pattern in all three: **the plan reached for `compensatable` because the outcome felt recoverable,
+and the validator asked the harder question — *which capability compensates it?*** For two of them the
+answer was "none", so the honest class was `irreversible`. That is the validator doing its job on its
+first real input, and it is why descriptors are declared next to the act rather than in a table
+somewhere else.
+
 ---
 
 ## 5. The proof
@@ -211,6 +227,8 @@ count, and `tsc --noEmit` at 0.
 | A tool requires `customers.people.view`, and `customers` is **parked** — so the requirement names a feature the enabled product does not have | It is a question about which tools ship, not about coverage | A new row when the tool surface is next touched; recorded here so it is not rediscovered |
 | The guard's `readFeatureIds` splits on `id: '` and cannot tell a feature id from a nested object's id | No module nests `id:` today (measured across all 50 `acl.ts` files); fixing it needs a real parser and buys nothing yet | Stated here; it becomes a row the first time a module nests one |
 | `officialModuleEntries` is empty, so the generated-registry path is **unexercised** | The guard must still handle it (R2), but there is nothing to test it against | Test with an injected fixture, not with the real file |
+| **`tsc` never type-checks a test file** — every package's tsconfig excludes `**/__tests__/**`, so `tsc --noEmit` at 0 says nothing about the 84 tests this row added | Platform-wide, and fixing it changes every package's build time | A candidate row: *"the type-checker cannot see the tests"* — the same class as `CC-101` |
+| **`packages/core/jest.config.cjs` parses `modules.ts` with the same naive scan** that `CC-132` fixed in the guard — every `id:` literal, including the reference list | It only decides which core module tests to skip, and no core module is in the reference list, so it is inert today | Stated here; it becomes a row the first time a core module is parked *and* listed elsewhere |
 
 ---
 
@@ -223,3 +241,108 @@ the tie is broken by the same principle the whole authority family is built on.
 
 The eight calls in §4.3 are listed rather than asked because each is reversible in one line, and
 because a question whose answer I would take anyway is a question that costs the owner a turn.
+
+---
+
+## 8. What was built
+
+Eleven files changed: the guard, nine `acl.ts` files plus one in the app, and a mutation script.
+
+| File | Change | Rule |
+|---|---|---|
+| `packages/core/src/__tests__/capability-coverage.test.ts` | the surface now comes from `enabledModules` resolved by each entry's `from`; the parse fails on an enablement path it does not know; modules that declare nothing are named; the floors are re-derived with a non-core floor added; the printed line states its scope | R1–R6, R8 |
+| `packages/ai-assistant/…/acl.ts` | **8 descriptors** — the whole agent surface | R7 |
+| `packages/search/…/acl.ts` | 6 | R7 |
+| `packages/webhooks/…/acl.ts` | 4 | R7 |
+| `packages/scheduler/…/acl.ts` | 3 | R7 |
+| `packages/onboarding/…/acl.ts` | 3 | R7 |
+| `packages/channel-gmail/…/acl.ts`, `packages/channel-imap/…/acl.ts` | 2 each | R7 |
+| `apps/mercato/src/modules/example/acl.ts` | 8 | R7 |
+| `apps/mercato/src/modules/example_customers_sync/acl.ts` | 2 | R7 |
+| `packages/storage-s3/…/acl.ts` | 1 | R7 |
+| `scripts/verify-cc132-mutations.mjs` | the proof | §5 |
+
+**The guard's shape, and the three functions that carry the fix.** `moduleRootFor(from)` is the whole
+of R1: it maps a package name to the directory that ships its modules, so **nothing is found by
+walking** — which is what keeps the create-app template copy of `example` out of the count.
+`pushSites(source)` is the whole of R2: it returns each `enabledModules.push(` with **the text that
+decides it**, and a site whose text matches none of the documented enablement paths fails the guard.
+`environmentEntries()` is R3: it evaluates the documented flags, so the printed line can say how much
+of the surface this environment actually has.
+
+**39 descriptors, and the validator earned its keep on its first real input.** Three classifications
+changed when written down (§4.3) — two of them because `compensatable` demands a capability that
+compensates, and for `webhooks.test` and `scheduler.jobs.trigger` there is none.
+
+---
+
+## 9. The build record — five corrections, three of them to this document
+
+### 9.1 Rule 13: four of §5's seven mutations could not be proved as written
+
+The table in §5 was written before the guard existed. Building it showed four rows were wrong:
+
+| Row | As written | What it actually is |
+|---|---|---|
+| M3 | "treat an unknown `from` as a skip" | **There is no unknown `from` today**, so the mutation changes nothing and survives. Replaced with *"a known root is treated as unknown"* (`@app` → `null`), which the resolution test catches by name |
+| M4 | "remove the non-core floor" | **Removing an assertion cannot fail anything.** A floor is only load-bearing against the regression it guards, so M4 now removes *both* — the pushed entries are dropped from the surface **and** the floor goes — and the mutation proves the floor is what catches a silently-shrinking denominator |
+| M7 | "count the reference modules as always enabled" | Once those modules are described, counting them changes **no** coverage assertion. The observable had to be created: a new test asserts that a module the file says is off is **not in the environment set**, and M7 now goes red against that |
+| M1, M2, M5, M6 | — | survived as written |
+
+**This is the `CC-127` lesson applied to the requirement instead of the tests:** a proof row that
+cannot go red is a defect in the row.
+
+### 9.2 The mutation run found a defect in the GUARD, not in the test
+
+M6 — *"a new way to enable a module the guard does not know"* — **survived the first run**. The
+attribution looked **400 characters back** from each push site, and the new push inherited the marker
+of the push above it (`entry.id === 'example'`), so an unknown enablement path was silently attributed
+to a known one.
+
+Fixed by attributing each push to **the span between the previous push and this one**, so a marker
+belongs to exactly one site. After that M6 goes red on its own.
+
+**Worth stating plainly, because it is the opposite of the usual direction:** in `CC-127` the mutation
+run exposed defective *tests*; here it exposed a defective *guard*. The instrument is doing the same
+job either way — it asks whether the rule can fail, and it does not care which half is wrong.
+
+### 9.3 A process miss: my own census script broke a repo-wide test
+
+`scripts/measure-cc132-surface.mjs` — committed with the requirement — contained `[...allIds].sort()`
+with no comparator, and `packages/core/src/__tests__/explicit-sort-comparators.test.ts` scans
+`scripts/` for exactly that. **The full core suite went red on the next run.**
+
+The miss was mine and it was avoidable: when the script was committed, **only the guard's own suite was
+run**, not the suite that governs the directory the file was added to. Fixed with an explicit
+comparator; recorded because the same shape will recur — a new file in a scanned directory is a change
+to that directory's checks.
+
+### 9.4 `tsc` does not cover the guard file, and the plan implied it did
+
+§5 lists `tsc --noEmit` at 0 as a denominator. Measured: `packages/core/tsconfig.json` **excludes
+`**/__tests__/**`**, so `tsc` never type-checks the file this whole row is about. The claim is true and
+weaker than it reads. The guard's correctness is carried by **84 passing tests and 7/7 mutations**, not
+by the type-checker — and this is the same class as `CC-101` (*a control that cannot see what it
+guards*), one level down. Recorded in §6 as a candidate row rather than fixed here.
+
+### 9.5 The proof
+
+| Check | Result |
+|---|---|
+| the guard | **84 tests PASS** |
+| `scripts/verify-cc132-mutations.mjs` | **7/7 PROVEN**, every file restored **byte-identical** |
+| printed line | `[capabilities] 160/160 features described (100%) across 34 modules reachable from enabledModules — every documented enablement path, 149 features in this environment` |
+| `packages/core` | **652 suites / 5,728 tests, all green** (was 5,705 — the guard gained 23) |
+| `packages/ai-assistant` | **143 suites / 2,128 tests green** |
+| the seven other described packages | channel-gmail 6/78 · channel-imap 8/109 · onboarding 15/93 · scheduler 18/353 · search 27/281 · webhooks 15/127 · storage-s3 8/90 — all green |
+| `tsc --noEmit` | **0** for `core` and all nine packages; the app has **one pre-existing, unrelated** error (`modules.runtime.generated.ts:854`, `.extensions` vs `entityExtensions`) |
+
+**The seven mutations, as proved:**
+
+1. the numerator reads one package again (the original defect)
+2. one package resolves to the wrong tree
+3. a known root is treated as unknown and skipped
+4. a module enabled by a flag is dropped from the surface, and the floor that catches it
+5. one descriptor is deleted from the agent surface
+6. a new way to enable a module the guard does not know
+7. the denominator is parsed from the whole file, counting modules that are off
