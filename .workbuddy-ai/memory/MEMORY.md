@@ -111,7 +111,7 @@ sends the token and a 409 **reloads first, then speaks** (the reload clears the 
 that reloads wipes its own message** — the new test caught it in the new code).
 
 **★ OPEN, and the order is now fixed:**
-- **`CC-92` Slot 0** — **12 spine findings left** (`T-27` built 2026-10-19): `T-04`, `T-05`, `T-06`, `T-07`,
+- **`CC-92` Slot 0** — **11 spine findings left** (`T-27` and `T-35` built 2026-10-19): `T-04`, `T-05`, `T-06`, `T-07`,
   `T-08`, `T-15`, `T-16`, `T-17`, `T-28`, `T-30`, `T-33`, `T-35`. Startable.
   `PREVIEW-AUDIT-TRIAGE.md` §6 = checklist §9.4. **The audit's wording is a claim, not a measurement** —
   `T-27`'s own sentence was half wrong (`C-08`/`C-09`); measure each row from source before building it.

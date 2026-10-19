@@ -19,22 +19,23 @@ box, **the box wins** (owner's instruction, 2026-10-06).
 > section that did not exist. If you are reading this and the box is gone again, **that is the defect,
 > not a change of policy**: restore it here rather than adding a task line to one of the pointing files.
 
-**IN HAND — `CC-92` Slot 0: 12 spine findings left, before `CC-121` starts.** The ceiling work is finished
-as a unit — screen, token, refusal — and the first Slot 0 finding is closed: **`T-27`**, the tenant-scope
-helper that accepted a foreign tenant whenever the auth object was absent, silently. **12 remain:**
-`T-04`, `T-05`, `T-06`, `T-07`, `T-08`, `T-15`, `T-16`, `T-17`, `T-28`, `T-30`, `T-33`, `T-35`.
-`CC-121` re-keys every `principal_id` through the authority gate, and that gate cannot yet see **seven
-modules' commands** (`T-07`) or refuse a missing identity. **The spine is repaired before it is re-keyed:** a
-migration through a gate with holes produces a clean answer about a partial system. The findings and their
-slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4.
+**IN HAND — `CC-92` Slot 0: 11 spine findings left, before `CC-121` starts.** The ceiling work is finished
+as a unit — screen, token, refusal — and two Slot 0 findings are closed: **`T-27`** (the tenant-scope helper
+that accepted a foreign tenant whenever the auth object was absent, silently) and **`T-35`** (the sandbox
+that advertised an api-call cap it did not enforce). **11 remain:** `T-04`, `T-05`, `T-06`, `T-07`, `T-08`,
+`T-15`, `T-16`, `T-17`, `T-28`, `T-30`, `T-33`. `CC-121` re-keys every `principal_id` through the authority
+gate, and that gate cannot yet see **seven modules' commands** (`T-07`) or refuse a missing identity. **The
+spine is repaired before it is re-keyed:** a migration through a gate with holes produces a clean answer
+about a partial system. The findings and their slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the
+checklist as §9.4.
 
 **The steps, in order:**
 
 1. Read §9.4 / `PREVIEW-AUDIT-TRIAGE.md` §6 — each Slot 0 finding is numbered there, with what it measured
    and which gate it rides. They are the queue.
-2. Each is a normal row: **measure it from source first** — the audit's wording is a claim, and two of
-   `T-27`'s own sentences were wrong (`C-08`, `C-09`) — then write the requirement, build, prove with a
-   mutation, close.
+2. Each is a normal row: **measure it from source first** — the audit's wording is a claim, and both
+   `T-27` and `T-35` needed corrections (`C-08`, `C-09`; and `T-35`'s own sentence understated where the
+   protection actually was) — then write the requirement, build, prove with a mutation, close.
 3. `CC-121` after the slot, behind `CC-119` (the database rebuild milestone). `CC-138` rides `W3`.
 
 **THE QUEUE AFTER IT** — and the order is fixed, not a list:
@@ -51,6 +52,60 @@ slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried in the checklist as §9.4.
 door) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability means one door) ·
 `CC-139` (the ceiling's screen) · `CC-140` (its write refuses a stale view). **No row on the authority
 path is waiting on the owner.**
+
+---
+
+## 2026-10-19 — `T-35` built: the sandbox enforces the cap it advertises
+
+**Slot 0, finding 2 of 12 → 11 left.**
+
+**What the audit said, and the correction.** *"The sandbox's `maxOutputSize` and `maxApiCalls` are declared
+and dropped — two of three documented safety options are decorative."* Measured, that understates it in an
+important way:
+
+- **`maxApiCalls` was already enforced — in the caller, not the sandbox.** `codemode-tools.ts` counts inside
+  its `apiRequestFn` callback, against the **observed HTTP method** (so a dynamically-built method cannot
+  escape). So the sandbox — the component whose interface promises the limit — was the one component that
+  could not enforce it. The defect is not "the cap is missing"; it is **"the sandbox's option is decorative
+  and the safety depends on the caller remembering."**
+- **`maxOutputSize` was implemented nowhere, and nothing wanted it.** The isolate's own memory limit already
+  bounds a runaway result, and the console proxy caps entries and length. A second byte counter would be
+  theatre.
+- **`SandboxResult.apiCallCount` was a third decorative member the audit never named.** Declared since the
+  file was written, never populated.
+
+**What shipped.** The sandbox now wraps any injected `api.request` with its own counter and throws past the
+cap, so the option is real and a caller that forgets gets the documented default of 50 instead of unlimited.
+The result carries what the sandbox counted. `maxOutputSize` is **removed**, with the reason written at the
+removal site, because an option that promises a limit nothing implements is worse than an absent one — the
+next caller writes `{ maxOutputSize: 1024 }` and believes the run is bounded. And the caller stops passing a
+value that was ignored.
+
+**★ Two things the mutations caught, both in my own work, and both are why mutations exist:**
+
+1. **My first M3 did not go red.** I aimed at the first matching `apiCallCount:` line — which was the
+   **catch** block — and nothing asserted the count on a failed run. That is not a pass; it is an untested
+   branch, and a failed run is exactly when the number matters, because it is the only place a caller learns
+   the sandbox stopped the run rather than the code failing. Two new tests now hold that branch, and M5 is
+   the mutation that proves it.
+2. **M4 needed a type-level proof.** Re-adding an interface field is invisible to a runtime test, so the
+   contract is pinned with `@ts-expect-error` — which fails the build when the expression stops being an
+   error. Confirmed: re-adding the option yields `TS2578: Unused '@ts-expect-error' directive`.
+
+**★ And one failure that is not mine, measured rather than assumed.** This package's full run shows
+**27 failures in 5 suites** (`agent-runtime*`, `max-steps-budget.integration`, `ws-c-policy-and-tools`),
+every one `AiModelFactoryError: … provider "openai" … is not configured`. Proven by stashing my change and
+re-running: **the pristine tree fails the same 27 tests in the same 5 suites.** A missing provider key in
+this environment. Left visible here because the next person to see a red `agent-runtime` suite would
+otherwise start digging in the wrong place.
+
+**Proof.** The sandbox suite is **74 tests** (66 pre-existing + 8 new) · **5/5 mutations RED**, files
+restored checksum-verified: drop the throw (2) · off-by-one at `cap - 1` (3, which is the proof the boundary
+is the cap itself) · the success-path count (1) · re-advertise `maxOutputSize` (`tsc`) · the error-path count
+(2) · `tsc --noEmit` on `packages/ai-assistant` exit **0**.
+
+**Records:** [`PLAN-T35-sandbox-caps-real.md`](library/development/PLAN-T35-sandbox-caps-real.md) ·
+`PREVIEW-AUDIT-TRIAGE.md` §1.3, §6.2 · `MASTER-CHECKLIST.md` §9.4 (**Slot 0 = 11**).
 
 ---
 

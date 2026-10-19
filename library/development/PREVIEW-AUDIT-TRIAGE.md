@@ -106,7 +106,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-32** | 08 §13 A1-09 | `UUID_PATTERN` rejects UUIDv7, so locked records are writable | 🔬 CONFIRMED | small | urgent | ✅ **BUILT** `13c6206f` — see §2.4 |
 | **T-33** | 08 §13 A1-11 | `resourceKind`/`resourceId` are unhashed in the ledger | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-34** | 08 §13 A1-14 | `authorityPolicyProblems` has zero production callers | 🔬 CONFIRMED | small | scheduled | EXECUTE |
-| **T-35** | 08 §13 A2-06 | The sandbox's `maxOutputSize` and `maxApiCalls` are declared and dropped | 🔬 CONFIRMED | small | scheduled | EXECUTE |
+| **T-35** | 08 §13 A2-06 | The sandbox's `maxOutputSize` and `maxApiCalls` are declared and dropped | 🔬 CONFIRMED | small | **done** | ✅ **BUILT 2026-10-19** — `PLAN-T35-sandbox-caps-real.md`. The audit's sentence understated it: one cap was already enforced **in the caller**, not the sandbox, so the sandbox was the component that could not enforce what it advertised; the other was implemented nowhere and nothing wanted it. |
 | **T-36** | 08 §13 A2-07 | The capability-coverage test's denominator excludes the AI package | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-37** | 08 §15 QT-01 | The only assertion is wrapped in an `if` that never runs | 🔬 CONFIRMED | small | scheduled | EXECUTE |
 | **T-38** | 08 §15 QT-04 | `describedModules().length >= 24` is a floor, so 24 modules could drop out and it still passes | 🔬 CONFIRMED | small | scheduled | EXECUTE |
@@ -439,7 +439,7 @@ The spine's own guarantees. Each is a central promise the pipeline will otherwis
 | **T-28** | medium | The PUT command path skips the guard set when the candidate id is not on the parsed input | Slot 0 |
 | **T-30** | medium | Optimistic locking is client-opt-in **and the reader fails open** (five early `ok: true` returns) | Slot 0 |
 | **T-33** | medium | `resourceKind`/`resourceId` are unhashed in the ledger — the record cannot name what was touched and stay tamper-evident | Slot 0 |
-| **T-35** | small | The sandbox's `maxOutputSize` and `maxApiCalls` are declared and dropped — a limit nothing reads is `CC-101`'s class | Slot 0 |
+| **T-35** | small | ✅ **BUILT 2026-10-19** — the sandbox enforces the api-call cap it advertises, and the count is reported. `PLAN-T35-sandbox-caps-real.md`. | — |
 
 ### 6.3 Slot 1 — with `W3`, the chokepoint and actor-class gate (10)
 
