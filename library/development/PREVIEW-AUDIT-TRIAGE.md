@@ -377,11 +377,140 @@ is the one substantive recommendation this document adds.
 
 ## 5. What this document does not do
 
-- It does not schedule anything. **BUILD-ORDER.md and the SRS own the sequence.** Every "scheduled" row above
-  names a plan item only where the plan already names it.
+- It does not **re-rank** anything. **BUILD-ORDER.md and the SRS own the sequence**; §6 below places each
+  finding into that sequence, it does not replace it.
 - It does not resolve an owner decision. The seven `DP-*` and `CC-*` questions in `06 §1` remain the owner's,
   and are recorded here as untouched.
 - It does not re-run the suites. **U-02** is open, and the audit's green-suite claims are second-hand.
+
+---
+
+## 6. The schedule — every pending finding, its slot, and the gate that owns it
+
+**Why this section exists.** §5 used to say *"it does not schedule anything"*, and that was honest but
+incomplete: a finding with a rank and no slot is a finding nobody owns. `CC-92` was the collective
+address and said *"the rest are queued"* — which named no row, so nothing in the register could start
+any of them. **Written 2026-10-19; this is the schedule `CC-92` was waiting for.**
+
+**A slot is a gate, not a date.** This project sequences by gate (`PLAN-2026-10-18-one-agent.md` §6), so
+each slot below is named by the gate that must be green before the work after it starts.
+
+**★ The first gate is before `W1` (`CC-121`), not before the first surface.** W1 re-keys every
+`principal_id` in the system. If the gate still cannot see seven modules' commands (`T-07`, re-measured
+today), and one scope helper accepts a missing identity (`T-27`, re-measured today), then the migration
+re-keys authority through a gate with holes — and W1's own gate (*"rotate a key: bindings, roles,
+delegations, denials and audit rows all survive"*) cannot be proven for the modules the gate does not
+reach. **The spine is repaired before it is re-keyed.**
+
+**The measurement this schedule rests on, re-run today (2026-10-19), not inherited:**
+`scripts/check-declared-controls.mjs` → **6 controls: 1 covered, 4 uncovered, 1 dead-input** (so
+`T-08`, `T-22`, `T-29`, `T-34`, `T-43` all still stand, and `T-01`'s `delegable` is now covered by the
+built fix); the command-capability census → **15 core modules with `commands/`, 8 declaring a
+capability, 7 not** (`T-07`, and it is 7 rather than the audit's 9, per `C-02`); `T-27`'s helper still
+reads `ctx.auth?.tenantId ?? null` and skips the refusal when it is absent; `T-36` is **fixed** by
+`CC-132` (`moduleRootFor` + `enabledModules`, measured in the guard).
+
+### 6.1 Already closed — do not re-fix (8)
+
+`T-01` `fa974bb1` · `T-02` `60a6714f` · `T-03` → `SR-47`/`CC-93` · `T-13`/`T-14` `CC-98` · `T-32` `13c6206f` ·
+`T-45` `CC-97` · **`T-36` — closed by `CC-132`** (the coverage guard's denominator no longer excludes
+anything shipped outside `packages/core`; the row's own defect, fixed under a different row).
+
+### 6.2 Slot 0 — before `W1` / `CC-121` starts (13)
+
+The spine's own guarantees. Each is a central promise the pipeline will otherwise build on top of.
+
+| # | Rank | Why it cannot wait for its own workstream | The gate |
+|---|---|---|---|
+| **T-04** | high | A Function that asks for a count returns rows, and the gap verifies as `passed` — a green test over a wrong answer, which is the one failure this project's whole method is aimed at | Slot 0 |
+| **T-05** | high | The approvals queue can approve the same act twice (read-then-act, no compare-and-set) — every approval built later inherits the race | Slot 0 |
+| **T-06** | high | `undo` writes the one record the tamper-evident chain does not cover — a ledger with a known gap stops being evidence | Slot 0 |
+| **T-07** | high | **7 core modules' commands are invisible to the authority gate** (re-measured today: `catalog`, `communication_channels`, `customers`, `resources`, `sales`, `staff`, `wms`). W1 re-keys principals across this gate | Slot 0 |
+| **T-08** | high | Trust demotion is never triggered — 4 callers, all its own test (`SR-47` re-confirmed today). Graduated trust that never demotes is a one-way ratchet | Slot 0 |
+| **T-15** | medium | The confirm path drops the binding's narrowing — an approval silently widens what was approved | Slot 0 |
+| **T-16** | medium | Two gates fail in opposite directions on a missing dependency — one denies, one allows; the pipeline adds a third | Slot 0 |
+| **T-17** | medium | The model allowlist fails open on the provider axis | Slot 0 |
+| **T-27** | high | `ensureTenantScope` fails open when `ctx.auth` is absent (re-confirmed today) — a foreign tenant is accepted by a helper named for the opposite | Slot 0 |
+| **T-28** | medium | The PUT command path skips the guard set when the candidate id is not on the parsed input | Slot 0 |
+| **T-30** | medium | Optimistic locking is client-opt-in **and the reader fails open** (five early `ok: true` returns) | Slot 0 |
+| **T-33** | medium | `resourceKind`/`resourceId` are unhashed in the ledger — the record cannot name what was touched and stay tamper-evident | Slot 0 |
+| **T-35** | small | The sandbox's `maxOutputSize` and `maxApiCalls` are declared and dropped — a limit nothing reads is `CC-101`'s class | Slot 0 |
+
+### 6.3 Slot 1 — with `W3`, the chokepoint and actor-class gate (10)
+
+These *are* the chokepoint's contracts and the Business IR it carries, so they land where that code is
+already open.
+
+| # | Rank | Why here |
+|---|---|---|
+| **T-29** | medium | The C6 command contract is dead at runtime (`SR-47`: reader wired, 0 producers). W3 is where a contract gets a producer |
+| **T-34** | small | `authorityPolicyProblems` has no production caller — W3 reads policies, so the validator belongs on that path |
+| **T-18** | small | `SURFACE_ID_PATTERN` carries a stray `/i` — the surface vocabulary is W3's subject |
+| **T-19** | medium | `importFunction` rejects a §50-legal IR the compiler normalises and accepts |
+| **T-20** | medium | `references` is sorted for export but not for the fingerprint |
+| **T-21** | medium | `notChecked: []` forges "every §46 check ran" |
+| **T-22** | small | `findFrontendVocabulary` has no production caller (`SR-47` re-confirmed) — the leak it detects reaches the client |
+| **T-23** | medium | The `decided` branch returns the header's records unvalidated |
+| **T-25** | medium | Two sort comparators, one locale-dependent; it reaches `entity.version` |
+| **T-26** | medium | `importModel` validates ids but not structure |
+
+### 6.4 Slot 2 — with `W5`, durable runs (1)
+
+| # | Rank | Why here |
+|---|---|---|
+| **T-43** | small | `detectRepeatedRequest` has no caller (`SR-47` re-confirmed). W5 introduces idempotency keys, which is exactly where a repeat detector gets a consumer |
+
+### 6.5 Slot 3 — with `W7`, the first surface proves the spine (4)
+
+Frontend findings only become real when a surface is built — and W7's gate says a surface may not start
+without its own written requirement, so this is the cheapest moment to repair what it will inherit.
+
+| # | Rank | Why here |
+|---|---|---|
+| **T-09** | high | The design-system lint is broken (`@typescript-eslint` mixed versions) and all six rules are `warn` — 30 rule categories unlocked by one repair |
+| **T-12** | high | `/backend` crashes if the `dashboards` module is switched off — a documented crash trap in the surface path |
+| **T-40** | medium | Six DS rule categories of ~30; lint scope excludes user modules; 27 of 73 primitives untested; 10 widgets with no layout contract; three modules with data, API and no screen |
+| **T-10** | high | Accessibility linting is installed and never switched on — cheap while the surface is new, expensive after |
+
+### 6.6 Slot 4 — with `W8`, the ratchets (3)
+
+All three are tests that **cannot fail**. W8 is the workstream whose subject is exactly that.
+
+| # | Rank | Why here |
+|---|---|---|
+| **T-37** | small | The only assertion is wrapped in an `if` that never runs |
+| **T-38** | small | `describedModules().length >= 24` is a floor, so 24 modules could drop out and it still passes |
+| **T-39** | small | The decoupling test asserts against a hand-built fixture, not the real interface |
+
+### 6.7 Slot 5 — with `P2-9b`, the Hermes switchover (2)
+
+Both are compose-file facts, and both matter most the day Hermes becomes the default lane.
+
+| # | Rank | Why here |
+|---|---|---|
+| **T-41** | medium | The Hermes service has **no healthcheck** — a wedged runtime is invisible. A default lane must be observable |
+| **T-42** | medium | No `llamacpp` preset — the open-source lane squats on `OPENAI_*` |
+
+### 6.8 Deferred by name — a decision, not a queue (4)
+
+| # | Rank | Why deferred, and what would reopen it |
+|---|---|---|
+| **T-11** | high | The RTL campaign: **878 physical vs 58 logical** sites (15.1:1, `C-01`). A campaign, not a flag. Reopens when a tenant requires RTL — and it starts in `packages/ui/src`, the primitives every consumer inherits |
+| **T-24** | small | `KernelObjectContract.source` is unpopulated for most entities — a completeness gap with no consumer yet |
+| **T-31** | small | The autonomy matrix exempts humans entirely — **deliberate**; recorded so it is not "fixed" into a bug |
+| **T-44** | critical | `G-04`, the data axis, does not exist and the compiler says so on every compile. It has its own SRS sequencing and four register rows wait on it — scheduling it here would fork that sequence |
+
+### 6.9 The two checkpoints
+
+**Checkpoint A — the `W1` gate (the one that matters).** `CC-121` does not start until Slot 0 is
+closed. It is the only slot whose absence would make later work *wrong* rather than merely incomplete.
+
+**Checkpoint B — the `W8` gate.** The three ratchet findings are closed when `CC-101`'s rule is
+satisfied: **a checker that nothing calls is not a control.** `SR-47`'s registry is already the
+instrument; W8 is where it becomes CI.
+
+**Everything else rides a named workstream.** Nothing in this register is left without a gate, which is
+the property §5 previously disclaimed and `CC-92` was opened to obtain.
 
 ---
 

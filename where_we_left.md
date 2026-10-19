@@ -38,10 +38,12 @@ In the **docs repo**, in this order:
 3. `library/development/MASTER-CHECKLIST.md` **§2** — the canonical "LAST DONE" and "NEXT" lines,
    and §5's register for every open item with its trigger.
 
-**As of 2026-10-19, the position is:** register at **71 closed · 61 open · 132 total**; the frontier is
-the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-128`** (the per-tenant ceiling store),
-then `CC-125` (the floor — answered 2026-10-19), then `CC-121` behind `CC-119`. `SR-07`/`CC-107` (a bot
-is a participant) is **closed**.
+**As of 2026-10-19 (evening), the position is:** register at **73 closed · 63 open · 136 total**; the
+frontier is the agent spine (`PLAN-2026-10-18-one-agent.md`); **NEXT is `CC-134`** (the superadmin read
+still has no tenant filter), then `CC-135`, then `CC-121` behind `CC-119`. **`CC-125` (the floor) and
+`CC-128` (the ceiling) are both closed.** **`CC-121` does not start until `CC-92` Slot 0 lands** — the 13
+spine findings, because that migration re-keys every principal through the authority gate
+(`PREVIEW-AUDIT-TRIAGE.md` §6.2, `MASTER-CHECKLIST.md` §9.4). **`CC-136` and `CC-137` are yours.**
 
 **Treat that paragraph as a signpost, not as the answer.** It was last right on the date it names, and
 it has been wrong before — on 2026-10-19 it still read `63 · 54 · 117` and named a closed item as next.

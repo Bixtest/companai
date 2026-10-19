@@ -463,6 +463,10 @@ the identity row. We put the identity *on* the key, which is the one arrangement
 `principal_id`; a documented rule that no authority structure may key on a credential id.
 **Gate.** Rotate a key in a test: bindings, roles, delegations, denials and audit rows all survive,
 and the audit trail stays one actor.
+**Precondition — `CC-92` Slot 0.** The 13 spine findings must be closed first
+(`PREVIEW-AUDIT-TRIAGE.md` §6.2): this migration re-keys every `principal_id`, and the gate it re-keys
+through cannot see seven modules' commands (`T-07`) or refuse a missing identity (`T-27`). A migration
+through a gate with holes produces a clean answer about a partial system.
 
 ### W2 — Hire: the instance · `CC-122`
 **Question.** What is the smallest row set that makes "hired" a fact — kind, owner axis, lifecycle
@@ -564,20 +568,41 @@ is not a control until something calls it.*
 ```
 D1..D4 rulings  ──────────────────────────────►  (no code before these)
         │
+CC-92 Slot 0   ──────────────────────────────►  (the spine set: 13 findings, §6.2 of the triage)
+        │                                        W1 does NOT start until these are closed
+        │
 W1 actor ≠ credential  (CC-121)
         │
         ├── W3 chokepoint + actor-class gate  (CC-123/124/125)   ← X2 fix lands here, first
+        │        └── CC-92 Slot 1 (10 findings) rides this gate
         │
         └── W2 hire: the instance  (CC-122)
                 │
                 ├── W4 settings that only narrow
                 ├── W6 placement (CC-126/127)
                 └── W5 durable runs
+                        │        └── CC-92 Slot 2 (T-43) rides this gate
                         │
                         └── W7 chat proves it → workspaces → automation → widgets
+                                │        └── CC-92 Slot 3 (4 findings) rides this gate
                                 │
                                 └── W8 ratchets, wired to CI
+                                         └── CC-92 Slot 4 (3 findings) rides this gate
 ```
+
+**Why `CC-92` Slot 0 comes before `W1`.** `CC-121` re-keys every `principal_id` in the system. The gate
+it re-keys through cannot see seven modules' commands (`T-07`: 15 core modules carry `commands/`, 8
+declare a capability — re-measured 2026-10-19), and one scope helper accepts a missing identity (`T-27`,
+re-confirmed the same day). So W1's own gate — *"rotate a key: bindings, roles, delegations, denials and
+audit rows all survive"* — **cannot be proven for the modules the gate does not reach.** A migration
+through a gate with holes produces a clean answer about a partial system. **The spine is repaired
+before it is re-keyed.** The 13 findings and the reasoning: `PREVIEW-AUDIT-TRIAGE.md` §6.2, carried as
+`MASTER-CHECKLIST.md` §9.4.
+
+**Why the rest ride their workstreams rather than a separate campaign.** Each slot's findings are the
+contracts of code that workstream already has open — the chokepoint's own validators (`W3`), the repeat
+detector that wants idempotency keys (`W5`), the design system the first surface inherits (`W7`), and
+the tests that cannot fail (`W8`). Repairing them where the code is open costs one review, not two.
 
 **Why W1 before W2.** Hiring onto a credential id means every hire is un-hired by the next rotation.
 **Why W3 before W2.** An instance that can be created but whose authority cannot be decided is a row

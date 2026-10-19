@@ -1,37 +1,85 @@
 # Project memory — Companai / open-mercato
 
+**Rewritten 2026-10-19 (evening), deliberately shorter.** It had grown to 15.7 KB, and the
+session-start injection truncates it — cutting off the *tail*, which is the part that says where we
+are. History lives in `JOURNAL.md` and the `PLAN-*` files; this file keeps rules, hazards and the
+live position only.
+
 ## RULES (owner)
 - **Rule 1: docs are claims, code is the authority. Rule 13: a re-measured number that changed gets its fix committed *by name*.**
 - **No code before a written requirement.** Hermes is never forked.
-- **DONOR RE-READ on every `SR-*`** — full text `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1.
+- **DONOR RE-READ on every `SR-*`** — `library/architecture/mapping/00-PIN-AND-METHOD.md` §4.1.
 - **CHAIN RULE** — same file §4.2: who CREATES · CHECKS · CONSUMES · DELETES.
 - **GLYPHS**: ✅ code fully done; 🟡 partly. **No remote = deployment state. No caller = defect.**
-- **STANDING FORMAT**: (1) done, (2) its `CC-nn`, (3) next; update §2, run the checker.
+- **STANDING FORMAT**: (1) what is exactly done, (2) its address in the checklist, (3) what is next —
+  and update the **top section** to match. **The HTML twin was retired (`3970769`); the address is
+  `MASTER-CHECKLIST.md` §2 (frontier) and §5 (the row).**
+- **THE FIVE-SLOT SHAPE** (`WORKING-RULES.md` §2.0, owner 2026-10-19): what changed · why it matters ·
+  how I checked · waiting on you · next. **No identifiers in slots 1–2.** If slot 2 needs a mechanism
+  word, the consequence has not been decided yet.
 - **QUESTIONS: the 14-year-old test** — one example, no jargon, ONE per turn; if a default exists, take it.
+- **Commits are mine to manage** (owner, 2026-10-19). Commit when it is the right time — both repos,
+  explicit paths.
 
 ## HAZARDS
-- Pure LF, no BOM. **Never `git add -A`** — explicit paths.
+- Pure LF, no BOM. **Never `git add -A`** — explicit paths, in both repos.
 - **A checker is not a control until something calls it** (`CC-101`).
 - **A newline OR an unescaped `|` inside a register row splits the table.** The checker catches both.
-- Suites run on **node24** (`.toolchain/node24/node.exe`), not node22 (core 652/5,705 · shared 210/2,594 · auth 96/840).
-- **A suite that deletes >50 files in one turn fails to RUN under this harness** — `[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] count:59 threshold:50`, thrown from `node-safe-delete-shim.cjs`. It is the agent harness, **not the code and not `EBUSY`** (that is what `CC-19` said, wrongly). Prove it with `CODEBUDDY_SAFE_DELETE_ENABLED=0` → shared goes **210/210, 2,594 green**. **`CC-19`'s classification was right, its mechanism was wrong.** `LESSONS.md` L184.
-- **A row's prescribed FIX can be wrong — re-measure it first.** Twice in one session: `CC-123`'s trigger had fired; `CC-129`'s reader half was a no-op.
-- **Jest reads a positional suite arg as a REGEX** — `[key]` matches nothing, runs 0 tests, exits 0. Escape it (`\[key\]`); assert the denominator (`Test Suites: … N total`, the **last** number — the green-only format does not match a failing run). `LESSONS.md` L21.
-- **Python `open(p,'w')` converts the WHOLE file to CRLF on Windows** — patch with `newline=''` or binary; verify with `b.count(b'\r')`, never `grep $'\r'`. `LESSONS.md` L22.
-- **A mock that ignores its `where` cannot prove a filter** — `CC-127`'s mutation run survived three mutations because the fake `em` returned every row, and one fixture satisfied two clauses at once. Mocks apply the filters they are handed; fixtures make each clause load-bearing. `LESSONS.md` L23.
-- **A register status the checker cannot read is a row it does not count** — a closed §5 row is `✅ closed` and **leaves §4**; `☑ done` there is invisible to the checker (it had undercounted `CC-126` for a day, with two errors cancelling). `LESSONS.md` L24.
+- **§4's state cell reads exactly four strings** — `startable now` · `startable, needs a live DB` ·
+  `needs you` · `blocked on its trigger`. **Anything else is a row it does not count** (L24 — and it
+  recurred on 2026-10-19 with `scheduled — Slot 0 startable now`; the checker caught it).
+- Suites run on **node24** (`workspace/.toolchain/node24/node.exe`). Jest needs the **package** dir and
+  its `jest.config.cjs`, not the repo root.
+- **A suite that deletes >50 files in one turn fails to RUN under this harness** —
+  `[safe-delete][SAFE_DELETE_BULK_CONFIRM_REQUIRED] count:59 threshold:50`. The harness, not the code
+  and not `EBUSY` (that was `CC-19`'s wrong mechanism). Prove with `CODEBUDDY_SAFE_DELETE_ENABLED=0`.
+- **A row's prescribed FIX can be wrong — re-measure it first** (`CC-123`, `CC-129`, `CC-125`'s "nine").
+- **Jest reads a positional suite arg as a REGEX** — escape `\[key\]`; assert the denominator (L21).
+- **Python `open(p,'w')` converts the whole file to CRLF on Windows** (L22).
+- **A mock that ignores its `where` cannot prove a filter** (L23).
+- **`git checkout --` is not a restore while work is uncommitted** — capture a checksum and restore by
+  copy (L187).
+- **A test that spells its own input tests a string, not the code** — build subjects through the real
+  encoders (L186).
+- **`default: false` in an entity decorator does not make the property optional** — `[OptionalProps]`
+  must say so (L185).
 
-## FRONTIER (2026-10-18)
-**The agent spine:** `PLAN-2026-10-18-one-agent.md`, `CC-121`…`CC-128`. **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL** — no business examples.
-**★ A TYPE IS A ROLE FOR AGENTS**: a data-defined capability bundle; chain ceiling → type → instance → binding, each a **subset** above; an instance **pins its type version**. **Two layers** (platform, tenant); **an agent is always inside a tenant**.
-**★ NO PLATFORM CEILING OVER TENANTS (`CC-128`, plan §4.6, owner-found):** no plan/feature/limit table exists, so D1's ceiling has no column; `isGlobalSuperAdmin` filters no tenant and `loadAcl` returns `['*']` before scope → **one tenant's superadmin is every tenant's** (cookie entry, mintable from inside). Owner: **instance 1 / foundational tenant**; "change platform architecture" is **platform level**. Decide before `CC-125`.
-**★ THE BARE-ID CONVENTION (`CC-124`/`CC-129`, closed):** a principal is a **bare id, kind in a sibling column**. Two directions: `CC-124` wrote a **prefixed** denial the bare read never applied (**fail-open**); `CC-129` could not read a machine's evidence (**fail-closed**, unreported). **`normalizePrincipalSubject`**: agreeing prefix → bare · **disagreeing prefix + kind → THROW** · bare + any kind → accepted.
-**RULINGS:** D2 live · D4 departure **flow** · D1 ceiling = **configuration** (only the **floor** left, `CC-125`) · D3 VOID.
-**★ THE TENANT TYPE CATALOGUE (`CC-126`, BUILD DONE, `e5cd823f`/`18e7712`):** `ai_agent_types` (`tenant_id NOT NULL` always — no platform row, the code registry *is* the platform layer), one plain unique over `(tenant, key)` covering **every** status (a retired key is never reusable), key in the `ai_agent_bindings.agent_id` dialect as a CHECK shipped **with** the table. **`lib/agent-type-catalog.ts` is the one home** for "the catalogue in tenant T": `resolveAgentCatalogEntry` returns `{definition, layer}` and **code-first precedence lives only there**. **The gate is HANDED its subject** (`checkAgentPolicy({agentId, agent})`); a handed subject whose id ≠ the asked id is refused. **A shadowed tenant row: the catalogue lists it flagged, a PICKER DROPS IT** (both key by agent id → duplicate). **Provenance is NOT derivable from a definition** — a tenant type carries `AGENT_TYPE_MODULE_ID='ai_assistant'`, also a real module id.
-**★ DEPARTURE (`CC-127`, BUILD DONE, `242ae4c0`/`9b916a1`):** the row's danger was **already disarmed** — demotion invalidates the ACL cache in the same request (`commands/users.ts:650`), departure kills the credential twice (`user-deleted-revoke-keys.ts:70` + `shared/lib/auth/server.ts:284`), delegations are bounded by the grantor's own gate (`authorityEnforcementService.ts:443-465`, `:511`), and a binding's principal is an `api_keys` id. **The defect was that nobody was asked and nothing was recorded.** Built: `GET /api/ai/departures/[userId]` (both key links `session_user_id` **and** `created_by`; delegations both ways, kind checked beside the id) → `POST { decision }` default **deactivate** → `auth.users.delete` through the bus with the decision in **`metadata.context`** (no free-form field exists) → `revokeForPrincipals` **tenant-wide** + delegations both ways. **`leave` writes nothing and says the row is preserved AND inert.** `departure_partial` is the post-delete failure; its flag lives **outside** the try and is read **first** in the catch. 43 tests / 3 suites, 19/19 mutations, package 143/2,128, `tsc` 0.
-**★ THE AUTHORITY INTERSECTION (`CC-123`, **BUILT AND CLOSED 2026-10-19**, `0fe928fc`/`2671f73`; plan §8–§9):** the row's *"`invokerCeilingFor` is unwired"* was **STALE** — it was already wired at **two of three** doors (command gate `interceptors.ts:210-212`→`:222-227`; tool door `tool-authority.ts:178-183`); **only the HTTP route gate lacked it**. Built: the route reads `derivePrincipal(auth)?.onBehalfOfUserId` (**the principal, never `auth.userId`**, which is inconsistent across sites by design — `tool-authority.ts:40-48`) and carries it through `userHasAllFeatures`→`refusedByAuthority`→`refusalFor`→`decideFor`. **★ THE DESIGN INSIGHT:** the invoker check is **holding** (*may the person hold this at all?* — a feature id, **no descriptor needed**) vs **gating** (*what gate does their position produce?* — needs one); `invokerCeilingFor` returns early on `!capability` (`:495`), so `invokerRefusalFor` **skips described features** and covers all **157** enabled features without writing the 36 missing descriptors — that work stays in `CC-132`. **A separate `InvokerRefusal { capabilityId, bindingRule, because }`**, not a nullable `AuthorityRefusal.decision` (existing tests pin `decision` non-null). **R1 is now a written rule** in `matchFeature`'s docblock (six reasons; *the intersection must be of answers, not of lists*). **★ The recursion is real but unreachable in a unit suite** — `di.ts:59` implements `holdsCapability` as `rbac.userHasAllFeatures(...)`, re-entering `refusalFor`; it terminates only because `refusalFor` passes no options, so R4 is gated on *an invoker being present* (a human has none, `principal.ts:216`). **★ §5's M4 was wrong:** it promised a stack overflow; it cannot produce one (the ACL layer is stubbed), so the mutation's observable is *"asks nothing when there is no invoker"*. Proof: 27 resolver/plumbing + 30 route tests, **6/6 mutations PROVEN**, core **652/5,705**, shared **210/2,594**, `tsc` 0.
-**★ THE COVERAGE GUARD WAS WRONG IN BOTH DIRECTIONS AND IS NOW CLOSED (`CC-132`, **BUILT AND CLOSED 2026-10-19**, `b248c893`/`a7f9a19`; plan §8–§9):** three defects in twelve lines. **(1)** `modulesRoot` was `packages/core/src/modules`, so anything shipped elsewhere was absent from **both halves** of the fraction — the printed `121/121 (100%)` was two errors cancelling. **(2)** the denominator was parsed from `apps/mercato/src/modules.ts` by taking **every** `id:` literal, and that file holds **two** lists — so it counted `example`, which the file says is *deliberately off*. **(3)** the enabled set is **not static**: `example`+`example_customers_sync` under `OM_ENABLE_EXAMPLES`, `storage_s3` under `OM_ENABLE_STORAGE_S3`, plus `officialModuleEntries`. **Built:** `moduleRootFor(from)` resolves each entry by its own `from` (`@open-mercato/core` · `@open-mercato/<pkg>` · `@app`) — **never a directory walk**, because `example` exists **twice** (create-app template) and a walk double-counts it; `pushSites()` attributes each `enabledModules.push(` to **the span between it and the previous push**, and a site matching no documented enablement path **FAILS the guard**; `environmentEntries()` evaluates the flags. **Printed line: `160/160 features described (100%) across 34 modules reachable from enabledModules — 149 features in this environment`.** **39 descriptors** across 10 modules. **★ THE VALIDATOR CAUGHT TWO PLANNED CALLS:** `compensatable` demands a capability that compensates, and for `webhooks.test` (a request that reached a customer) and `scheduler.jobs.trigger` (a job that already ran) **there is none** → both honestly `irreversible`. `conversations.share` is **E5 not E3** (a shared conversation stays inside the tenant; what changes is who may read it). **★ THE MUTATION RUN FOUND A DEFECT IN THE GUARD, NOT IN THE TESTS** — the unknown-enablement-path mutation **survived** because attribution looked a fixed 400 chars back and inherited the previous push's marker; fixed by span attribution. In `CC-127` the mutations exposed bad *tests*; here a bad *guard*. **★ FOUR OF THE PLAN'S SEVEN MUTATIONS COULD NOT BE PROVED AS WRITTEN** (no input; deleting an assertion cannot fail; counting an off module changes nothing once described) — rebuilt, which is `CC-127`'s lesson applied to the *requirement*. **★ TWO HONESTY NOTES:** my census script had a bare `.sort()` and broke `explicit-sort-comparators.test.ts` (it scans `scripts/`) because only the guard's suite was run before that commit; and **`tsc` never type-checks a test file** (every package's tsconfig excludes `**/__tests__/**`), so `tsc 0` says nothing about the 84 tests — `CC-101`'s class one level down. Proof: guard **84 tests**, **7/7 mutations PROVEN** byte-identical restore, core **652/5,728**, ai-assistant **143/2,128**, seven more packages green, `tsc` 0 for core + nine.
-**★ `CC-128`'s REQUIREMENT IS WRITTEN (2026-10-19) — `PLAN-CC-128-tenant-ceiling.md`; the migration is next.** Measuring corrected the row twice: **(1)** *"no settings table exists"* is TOO STRONG — `module_configs` is a **three-level** store (platform → tenant → organization) with a nullable `tenant_id` and two partial uniques, so the platform/tenant split is already here; what is missing is a **ceiling model**. **(2)** The defect is sharper: `UserAcl.tenant_id` is `uuid NOT NULL` (*"Tenant scope is mandatory for ACL evaluation"*) while `isGlobalSuperAdmin` (`rbacService.ts:247-275`) reads it with **no tenant filter** — **the data model is tenant-scoped and the read is not.** **★ The design was settled by a rule already in the codebase:** `featureMatch.ts:25-43` (*"do not build a feature-list intersection on top of this"*, six reasons, *"the intersection must be of answers, not of lists"*) — so the capability ceiling is a **third input to the resolver**, never a filter over `acl.features`. **★ And "ceiling" already means TWO other things** (the autonomy gate A0–A5, and `CC-123`'s invoker), so the table is `tenant_capability_ceilings` and the name must say *capability*. Shape: one row per capability; `tenants.is_foundational` as a boolean with a one-row partial unique index (A must stay a strict subset of B's shape). **Debt named:** `isGlobalSuperAdmin`'s missing filter is bounded by R2, not fixed.
-**★ `CC-128` BUILT (2026-10-19, code `43ac0519`) — the capability ceiling. ROW STAYS OPEN for its audit half.** `tenants.is_foundational` + a one-row partial unique index; `tenant_capability_ceilings` (one row per capability, platform scope = `tenant_id null`, two partial uniques excluding retired rows); both proven on a real PostgreSQL 16 by a committed probe running each migration's OWN SQL. **Enforcement is in the resolver, NOT a filter:** `featureMatch.ts:25-43` forbids list intersection in six ways, so `decideFor` passes `holdsCapability: ceilingRefusal === null` — the only place that can narrow a superadmin's `*`. The refusal carries its cause via a new optional `holdsCapabilityRefusal` on `ResolveInput.actor`. **Empty ceilings are refused by design** (indistinguishable from none, and none = inherit; point at `tenants.is_active`). Write path is `mercato auth ceiling` (CLI) so the table is not a control nothing calls. Proof: 22 tests, auth 100/881, core 654/5,750, shared 210/2,594, `tsc` 0, **5 mutations RED** (M4 = inheriting tenants unbounded). **L185: `default: false` in an entity decorator does NOT make the property optional** — `[OptionalProps]` must say so. **Remaining: a cross-tenant admin act RECORDED as such** (needs its own row if the ledger cannot express an act above a tenant — not yet measured); `isGlobalSuperAdmin`'s missing tenant filter is bounded by R2, not fixed; no route, no screen.
-**★ `CC-128` CLOSED 2026-10-19 (code `99e870fc`) — the audit half, and the ledger COULD express it.** `action_logs.tenant_id` is nullable and `visibility_scope` already includes `'platform'`; `ActionLogService.log()` writes on the caller's em, so the record commits in the same transaction. **Actor + record are now REQUIRED arguments** of `replaceCapabilityCeiling`; the record names the TARGET tenant, states `actedFromTenantId` and `crossTenant` (not derived from a badge), and carries `added`/`removed`. Two more mutations RED (M6 not recorded → 6 tests, M7 cross-tenant dropped → 1). Core **654 suites / 5,756**, `tsc` 0. **★ TWO DEBTS OPENED AS ROWS, not prose (rule 7): `CC-134`** — `isGlobalSuperAdmin` still reads `UserAcl` with no tenant filter (CC-128 bounded the consequence, not the cause); **`CC-135`** — no route/screen, ceiling is CLI-only so the recorded actor is `system`. **Also named:** the platform ceiling's own change is NOT hash-chained (`appendToLedger` skips tenant-less events by design). **Register 72 · 62 · 134**, 15 startable. **NEXT: `CC-125`** (the floor — it now inherits from a ceiling that exists).
-**THEN:** `CC-121` (the actor/credential split — behind `CC-119`, the schema milestone). `CC-125`'s floor still needs the owner; `CC-128`'s ceiling comes before `CC-125`. Debts: per-agent manage routes code-only + `version` with no pinner (both `CC-122`), `ai_agent_types` migration joins `CC-119`, `hasRequiredFeatures` has no invoker, orphan sweep in the departure plan §7, and **a tool requiring `customers.people.view` from a parked module** (stale requirement, `CC-132` plan §6). Register **71 · 60 · 131** (13 startable).
+## FRONTIER (2026-10-19)
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 73 · 64 · 137.** Checkers PASS.
+**★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** **A type is a role for agents**; chain ceiling →
+type → instance → binding, each a subset above; an agent is always inside a tenant.
+
+**CLOSED, in order:** `CC-123` (the authority intersection — the web door now carries the person a
+credential acts for; *holding* needs no descriptor, *gating* does) · `CC-125` (**the floor** — 7 ids
+behind the owner's 5 categories, **code not config** because a machine that could reach the ceiling
+table could raise its own; binds `ai_worker`/`service`/`system`, never `human`) · `CC-126` (tenant type
+catalogue) · `CC-127` (departure flow) · `CC-128` (**the ceiling** — `tenants.is_foundational` +
+`tenant_capability_ceilings`, enforced as a **third input to the resolver**, never a filter;
+`featureMatch.ts:25-43` forbids list intersection) · `CC-132` (the coverage guard was wrong in **both**
+directions; now `160/160 across 34 modules — 149 in this environment`, 39 descriptors).
+
+**★ OPEN, and the order is now fixed:**
+- **`CC-134`** — `isGlobalSuperAdmin` reads `UserAcl` with **no tenant filter**, so one tenant's
+  superadmin is every tenant's. `CC-128` bounded the consequence, not the cause. **STARTABLE — next.**
+- **`CC-135`** — the ceiling has no route/screen (CLI only, so its recorded actor is `system`).
+- **`CC-136`** — `system:` is a principal kind with **no producer**; `parseSubject` calls it `human`,
+  so a platform act passes both floor and ceiling. **NEEDS THE OWNER** (rec: teach the parser).
+- **`CC-137`** — "granting roles" is reachable through `auth.users.edit`, which is **not on the floor**
+  (`roles` arrays are only subset-checked). **NEEDS THE OWNER** (rec: (b) then (a)).
+- **`CC-138`** — no route declares human-only/machine-only; `CC-125`'s **surface** half, previously
+  recorded only inside the closed row. Rides `W3`.
+- **`CC-133`** — option B (platform above tenants). Deferred by the owner's trigger; now also in
+  `BACKLOG.md`'s deferred table.
+
+**★ `CC-92` IS SCHEDULED (2026-10-19) — the preview backlog now has gates, not a queue.**
+`PREVIEW-AUDIT-TRIAGE.md` §6 = `MASTER-CHECKLIST.md` §9.4. All **45** `T-*` findings placed: 8 closed ·
+**Slot 0 = 13 before `CC-121` starts** · Slot 1 = 10 with `W3` · Slot 2 = 1 with `W5` · Slot 3 = 4 with
+`W7` · Slot 4 = 3 with `W8` · Slot 5 = 2 with `P2-9b` · 4 deferred by name. **★ WHY SLOT 0 BEFORE W1:**
+`CC-121` re-keys every `principal_id` through a gate that cannot see **7 modules' commands** (`T-07`,
+re-measured: 15 have `commands/`, 8 declare a capability) and a scope helper that accepts a missing
+identity (`T-27`). **The spine is repaired before it is re-keyed.** Two re-measurements: `T-36` is
+closed by `CC-132`; `T-07` is 7, not 9.
+
+**★ DEBTS NAMED, not prose:** `ai_agent_types` migration joins `CC-119`; per-agent manage routes
+code-only + `version` with no pinner (`CC-122`); a tool requiring `customers.people.view` from a parked
+module (`CC-132` plan §6); platform-ceiling changes are not hash-chained (tenant-less events are skipped).

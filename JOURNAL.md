@@ -7,6 +7,112 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-19 — `CC-92` scheduled: the preview audit's 45 findings get gates, and `CC-125`'s missing half gets a row
+
+**The row had said "the rest are queued" since 16 October.** That is not a schedule — it named no slot,
+so nothing in §4 could start any of the 37 pending findings. The owner asked for the revisit point to
+be named and the findings spread into the pipeline and the register, so nothing is left as a hole.
+
+**The schedule is by gate, not date** (`PREVIEW-AUDIT-TRIAGE.md` §6 = `MASTER-CHECKLIST.md` §9.4):
+8 closed · **Slot 0 = 13 before `CC-121`** · Slot 1 = 10 with `W3` · Slot 2 = 1 with `W5` · Slot 3 = 4
+with `W7` · Slot 4 = 3 with `W8` · Slot 5 = 2 with `P2-9b` · 4 deferred by name.
+
+**★ Why Slot 0 sits before `W1` and not before the first surface.** `CC-121` re-keys every
+`principal_id`. The gate it re-keys through cannot see **seven modules' commands** (`T-07`:
+`catalog`, `communication_channels`, `customers`, `resources`, `sales`, `staff`, `wms`) and one scope
+helper accepts a missing identity (`T-27`: `ctx.auth?.tenantId ?? null` then skips the refusal). So
+W1's own gate — *rotate a key and every binding, role, delegation, denial and audit row survives* —
+**cannot be proven for the modules the gate does not reach.** A migration through a gate with holes
+produces a clean answer about a partial system. **The spine is repaired before it is re-keyed.**
+
+**The gate is now in the pipeline, not only in the checklist** — `PLAN-2026-10-18-one-agent.md` §6 draws
+`CC-92 Slot 0` before W1 and marks which slot rides which workstream, and W1's gate carries it as a
+precondition. A schedule that lives in one document is a schedule the next reader of the other document
+does not have.
+
+**Two numbers re-measured, not inherited (Rule 13).** `T-36` is **closed by `CC-132`** — the coverage
+guard's denominator now resolves through `enabledModules`, so it no longer excludes anything shipped
+outside `packages/core`. And `T-07` is **seven** modules, not the audit's nine (the triage's own `C-02`
+had already corrected it; today's census confirms: 15 core modules carry `commands/`, 8 declare a
+capability). `scripts/check-declared-controls.mjs` re-run today: **6 controls — 1 covered, 4 uncovered,
+1 dead-input**, which is the evidence that `T-08`, `T-22`, `T-29`, `T-34` and `T-43` still stand.
+
+**★ A defect in the records, closed the same way.** `CC-125` was closed with its **surface half** — no
+route declares human-only or machine-only — recorded only as prose *inside the closed row*. A closed row
+is exactly where a remaining half goes to be forgotten, so that half is now **`CC-138`**, scheduled with
+`W3` where the pipeline's own "Lands" line already named it. Register **73 · 64 · 137**.
+
+**★ And the checker caught me repeating L24.** `CC-92`'s new state cell read *"scheduled — Slot 0
+startable now"*, which is not one of §4's four strings — so the row counted as none of them and the
+tally went wrong by one. Same class as the `☑ done` that hid `CC-126` for a day: **a status the checker
+cannot read is a row it does not count.** The lesson was six hours old when it recurred; the fix is the
+vocabulary, and the schedule detail moved to the trigger column.
+
+**Also in this pass, five record defects found by auditing the uncommitted batch:** the `CC-127`
+journal heading had been consumed by the new entry above it (its body was dangling under a separator);
+`where_we_left.md` still read `71 · 61 · 132` and named `CC-128` as next; `MEMORY.md`'s frontier was a
+day stale **and the file was long enough that the session-start injection truncated its tail — the part
+that says where we are**, which is why this session opened believing it was 16 October (rewritten
+shorter); `CC-133` was missing from `BACKLOG.md`'s deferred-by-decision table, which is the owner's
+callback register for "not now, when the time is right"; and the route-classification half above.
+**Checkers: PASS at 457 table rows · derive-counts MATCHES 78/321 (24.3 %).**
+
+---
+
+## 2026-10-19 — `CC-125` closed: the floor — seven capabilities no configuration may grant a machine
+
+**The ruling became code, and the measurement found the floor is not five things.** The owner's answer
+(*"we follow your recommendations"*, `PLAN-2026-10-18-one-agent.md` §4.5) made the five categories
+the floor and nothing else. Mapping them onto real capability ids then measured **two of the five
+wrong**: *granting* is expressed **four ways** (roles · delegations · ACL · **denials — lifting a
+denial widens**, so the capability is symmetric and a machine must not hold either end), and *erasing
+the audit ledger* has **no capability at all** — the audit capabilities are `view_*`, `undo_*`,
+`redo_*`, so nothing can erase the ledger, which is the correct end state and is recorded as a finding
+rather than left as an empty row. So the floor is **seven ids behind five categories** (1 + 4 + 1 + 1).
+
+**Why code and not a row in the ceiling table.** `CC-128` made the ceiling configuration because that
+is the right shape for business capabilities. It is the wrong shape here: a machine that could reach
+the ceiling table could raise its own ceiling. The floor is a constant in `machineFloor.ts`, bound to
+`ai_worker`, `service`, `system` — and **not `human`**, because somebody has to mint the keys and
+grant the roles. In `decideFor` it is a third narrow input beside the ceiling, and when both refuse
+the reason names the **floor**, because that is the one no configuration can lift — naming the ceiling
+would send an operator to raise a ceiling that would not help.
+
+**★ Two defects in the work itself, both caught at the close, both fixed.** (1) **A test wrote a
+subject the platform cannot produce**: `decideFor('service:x')` is judged **human**, because
+`service:` is not a prefix — a service principal is an `api_key:` subject and the parser decides the
+kind — so the test claiming *"nothing can turn the floor off"* was red for the wrong reason. It now
+builds its subjects through the platform's own encoders. (2) **The prose said six and the table held
+seven** — typed-count drift, in the file being closed. The size guard is the pin.
+
+**★ And the build documented a hole instead of hiding one: `system` is a principal kind with no
+producer** (`CC-136`). `parseSubject` recognises `ai_worker:` and `api_key:` and calls everything else
+`human`, so a platform act — and `example_customers_sync` builds the `system:` subject form today —
+arrives as the **widest** kind, past both floor and ceiling. Asserted at the parser *and* the resolver
+so it is red-green visible. It is not a one-line fix: `normalizePrincipalSubject` documents the
+storage convention as *"no prefix is defined"* for `system`, so teaching the parser the prefix changes
+what the id columns hold — a decision recorded as the owner's, with my recommendation attached.
+
+**★ And the hostile pass over the closed floor found the one gap the ruling did not contemplate.**
+*"Granting roles"* — the owner's second category — is covered for the four direct writers, but the
+route that writes `isSuperAdmin` and the feature list (`PUT /api/auth/users/acl`) is behind
+`auth.acl.manage`, which **is** on the floor, while `POST`/`PUT /api/auth/users` is behind
+`auth.users.create` / `auth.users.edit` — **off the floor** — and its `roles` arrays are checked only
+against the actor's own ACL (a subset check, `grantChecks.ts:58-90`). So a machine configured with
+`auth.users.edit` can pass on the roles it already holds. The floor stays at the five categories the
+owner ruled and the gap is **`CC-137`**, with (b) move role assignment behind `auth.roles.manage`
+recommended over (a) add the two ids to the floor.
+
+**Proof:** 16/16 in the two new suites; the full `auth` module **102 suites / 903 tests**; the full
+`core` package **656 suites / 5,772 tests, 0 failures** (CC-128's close stood at 654 / 5,756 — the
+delta is exactly this work); `tsc --noEmit` on `core` exit 0; **four mutations all RED** — floor
+severed (3), `service` unbound (2), `human` bound (2), one id dropped (the size guard) — every file
+restored and checksum-verified byte-identical. Register: 73 closed · 63 open · 136 total, checker
+PASS, 14/14 checker mutations RED, `derive-counts` MATCHES. The record:
+`library/development/PLAN-CC-125-machine-floor.md`.
+
+---
+
 ## 2026-10-19 — `CC-127`'s build: the departure flow asks the question and records the answer
 
 **The requirement became code, and the code settled four things the document could not.** The

@@ -5075,3 +5075,57 @@ I added a column to the tenant table — `is_foundational boolean not null defau
 4. **The column and the type must be changed together.** A migration that adds a column with a default, plus an entity that declares it required, is a deploy that compiles in the migration and fails at every write.
 
 *Cross-ref: L37 (Awilix's silent `undefined` — the same family: a declaration that reads as one thing and behaves as another), `CC-128` §8 of `PLAN-CC-128-tenant-ceiling.md`; `packages/core/src/modules/directory/data/entities.ts`, `packages/core/src/modules/auth/data/entities.ts`.*
+
+## L186
+
+**A test that spells its own input tests a string, not the code that reads it.**
+
+While closing `CC-125`, the test claiming to prove *"nothing in the service can turn the floor off"*
+built its subjects by string concatenation — `` `${kind}:x` `` for `ai_worker` and `service`. The
+`ai_worker` case worked. The `service` case went **red**, and the red was correct: `decideFor`
+answered `allowed: true`, because **`service:` is not a subject prefix**. The platform's service
+principal authenticates as `api_key:<id>`, and `parseSubject` — the *only* reader of the encoding —
+decides the kind from the prefix. `'service:x'` has no known prefix, so the parser called it
+**`human`**: the widest kind, past both the floor and the ceiling. The test was measuring a subject
+the platform cannot produce.
+
+**The rules.**
+1. **Build test inputs through the same encoders production uses** — here `aiWorkerSubject(id)` /
+   `apiKeySubject(id)` from `shared/lib/auth/principal.ts`. Then the input cannot drift from the
+   encoding, and the test fails the day the encoding changes instead of silently testing a fiction.
+2. **When a test goes red on a hand-built input, re-derive the input from the parser before touching
+   the code under test.** The instinct was "the floor missed a case"; the truth was "the case does
+   not exist". Fixing the code to match would have taught the platform a subject it does not have.
+3. **The same lesson, from the green side:** the `system:` hole in the same file (`CC-136`) is a
+   subject the platform *does* build in the wild and the parser answers as `human` — an input that
+   exists with no handler, the mirror image of this one. Both directions come from assuming the
+   spelling of a kind is the kind.
+
+*Cross-ref: `CC-124` / `CC-129` (the encoding family — bare id in the column, kind in a sibling),
+`CC-125`'s close record; `packages/shared/src/lib/auth/principal.ts:88-96`,
+`packages/core/src/modules/auth/services/__tests__/authorityEnforcement.machineFloor.test.ts`.*
+
+## L187
+
+**`git checkout --` is not a restore while work is uncommitted — it is `git checkout --` of HEAD.**
+
+While running the CC-125 mutation proofs, an intermediate restore used `git checkout --` on the one
+**tracked** file that carried the change — `authorityEnforcementService.ts`, whose CC-125 wiring was
+13 uncommitted lines. The command answered "what HEAD holds", wiped the wiring, and looked like
+success; the damage surfaced only because a `sha256sum -c` against the pre-mutation checksum said
+**FAILED**. The file was rebuilt from the captured diff and proven byte-identical by checksum, but
+for minutes the safest copy of that work was my own scrollback.
+
+**The rules.**
+1. **Before any mutation, `sha256sum` every file it touches and keep the original beside it** — a
+   `/tmp` copy, not a git command. Restore by copy, then verify with the checksum. That sequence is
+   the only one that cannot answer the wrong question.
+2. **Never `git checkout --`, `git restore`, or `git reset --hard` as a mutation restore while the
+   change is uncommitted.** They restore HEAD, not the working tree's pre-mutation state; they are
+   silent, and they are the one step in a proof that must never be irreversible.
+3. **Commit the change under proof before mutating it** — then HEAD is the pre-mutation state and the
+   restore is honest. That is also the cheapest fix: `CC-125` was uncommitted only because the proof
+   was still running.
+
+*Cross-ref: L23 family (a fake that behaves like the real thing until it doesn't), CC-125 §8 of
+`PLAN-CC-125-machine-floor.md` (the near-loss and its recovery, recorded).*
