@@ -77,7 +77,10 @@ describe('RbacService', () => {
       expect(acl.isSuperAdmin).toBe(false)
       expect(acl.features.sort()).toEqual(['entities.records.view', 'example.*'])
       expect(acl.organizations).toEqual(['org-1', 'org-2'])
-      expect(em.find).toHaveBeenCalledTimes(1)
+      // The per-user row wins, so no role aggregation happens. Asserting the TOTAL `em.find` count was
+      // a proxy for this that also counted the global superadmin lookup — which `CC-134` made
+      // conditional on a foundational tenant existing. The proxy broke; the property did not.
+      expect((em.find as jest.Mock).mock.calls.filter(([entity]) => entity === RoleAcl)).toHaveLength(0)
     })
 
     it('aggregates role ACLs when user ACL missing and tenant provided', async () => {

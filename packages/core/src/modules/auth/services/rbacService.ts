@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { CacheStrategy } from '@open-mercato/cache'
 import { getCurrentCacheTenant, runWithCacheTenant } from '@open-mercato/cache'
 import { UserAcl, RoleAcl, User, UserRole } from '@open-mercato/core/modules/auth/data/entities'
+import { Tenant } from '@open-mercato/core/modules/directory/data/entities'
 import { ApiKey } from '@open-mercato/core/modules/api_keys/data/entities'
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { buildOrgScopeUserCacheTag, buildOrgScopeTenantCacheTag } from '@open-mercato/core/modules/directory/utils/organizationScope'
@@ -244,20 +245,59 @@ export class RbacService {
     }
   }
 
+  /**
+   * Is this person an administrator of the **foundational** tenant — i.e. does their authority reach
+   * above every tenant?
+   *
+   * `CC-134`. This is **not** "does the user hold a superadmin row anywhere". The per-tenant answer is
+   * produced by `loadAcl`'s own scoped read below (`:383`), so a superadmin of tenant B is already a
+   * superadmin **inside B** without this function's help. The only question left here is the
+   * cross-tenant one, and under `CC-128` option A the answer is: **the platform's admins are the
+   * foundational tenant's admins.**
+   *
+   * The `UserAcl` read used to carry **no tenant filter**, on a column whose own comment says tenant
+   * scope is mandatory for ACL evaluation — so a superadmin of any tenant was treated as a superadmin
+   * of every tenant, and `loadAcl` acted on that before the requested scope was consulted at all.
+   * `CC-128` bounded what the resulting `*` could reach; this is the read itself.
+   *
+   * **No foundational tenant means no global superadmin** (fail closed). A deployment that has not
+   * designated a foundation must not silently promote every tenant's superadmin.
+   *
+   * The answer is a property of the **user**, not of the requested scope — which is why the per-user
+   * cache above is correct rather than accidentally correct. `tenants.is_foundational` moving is the
+   * one event that invalidates it, and `invalidateAllCache()` is the lever.
+   */
   private async isGlobalSuperAdmin(userId: string): Promise<boolean> {
     if (this.globalSuperAdminCache.has(userId)) return this.globalSuperAdminCache.get(userId)!
     const em = this.em.fork()
-    const userSuper = await em.findOne(UserAcl, { user: userId as any, isSuperAdmin: true })
+
+    const foundational = await em.findOne(Tenant, { isFoundational: true } as any)
+    const foundationalTenantId = foundational ? String((foundational as any).id) : null
+    if (!foundationalTenantId) {
+      this.globalSuperAdminCache.set(userId, false)
+      return false
+    }
+
+    const userSuper = await em.findOne(UserAcl, {
+      user: userId as any,
+      isSuperAdmin: true,
+      tenantId: foundationalTenantId,
+    })
     if (userSuper && (userSuper as any).isSuperAdmin) {
       this.globalSuperAdminCache.set(userId, true)
       return true
     }
+
+    // The role half must ask the SAME question, or this function returns the union of two different
+    // ones. A global role lives **in the foundational tenant** — not in "no tenant", which is what
+    // this lookup used to look for (and `UserAcl.tenant_id` is `NOT NULL`, so the two halves could
+    // never have agreed).
     const links = await findWithDecryption(
       em,
       UserRole,
-      { user: userId as any },
+      { user: userId as any, role: { tenantId: foundationalTenantId } } as any,
       { populate: ['role'] },
-      { tenantId: null, organizationId: null },
+      { tenantId: foundationalTenantId, organizationId: null },
     )
     const linkList = Array.isArray(links) ? links : []
     if (!linkList.length) {
@@ -272,7 +312,11 @@ export class RbacService {
       this.globalSuperAdminCache.set(userId, false)
       return false
     }
-    const roleSuper = await em.findOne(RoleAcl, { isSuperAdmin: true, role: { $in: roleIds as any } } as any)
+    const roleSuper = await em.findOne(RoleAcl, {
+      isSuperAdmin: true,
+      tenantId: foundationalTenantId,
+      role: { $in: roleIds as any },
+    } as any)
     const result = !!(roleSuper && (roleSuper as any).isSuperAdmin)
     this.globalSuperAdminCache.set(userId, result)
     return result
@@ -384,7 +428,13 @@ export class RbacService {
     if (uacl) {
       const result = {
         isSuperAdmin: !!uacl.isSuperAdmin,
-        features: Array.isArray(uacl.featuresJson) ? (uacl.featuresJson as string[]) : [],
+        // A superadmin holds everything, and `*` is how this codebase spells "everything". The global
+        // shortcut used to supply it for any superadmin row anywhere — so scoping that shortcut
+        // (`CC-134`) would otherwise have SILENTLY REDUCED a tenant superadmin's features to whatever
+        // their row happens to list. The wildcard belongs to the position, not to the row's contents.
+        features: uacl.isSuperAdmin
+          ? ['*']
+          : (Array.isArray(uacl.featuresJson) ? (uacl.featuresJson as string[]) : []),
         organizations: Array.isArray(uacl.organizationsJson) ? (uacl.organizationsJson as string[]) : null,
       }
       await this.setCache(cacheKey, result, userId, scope)
