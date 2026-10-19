@@ -24,12 +24,16 @@
  * `system` is included with `service` and `ai_worker`: the platform acting on its own behalf is still not a
  * person, and a floor that exempted it would be a floor with a door in it.
  *
- * **★ BUT `system` IS CURRENTLY UNREACHABLE, AND THAT IS A SEPARATE DEFECT.** `PrincipalKind` declares
- * `'system'` (`shared/lib/auth/principal.ts:28`) and `parseSubject` can never produce it — it recognises
- * `ai_worker:` and `api_key:` and calls **everything else** `human` (`:88-97`). `decideFor` takes a
- * *subject string* and parses it, so a platform act arrives as a **human**: the widest kind, past both the
- * floor and the ceiling. The entry stays here because it costs nothing and is correct the day the parser
- * learns `system:`, but it must not be read as coverage today. **Register: `CC-136`.**
+ * **★ AND THAT ENTRY WAS INERT UNTIL `CC-136`, WHICH IS WHY IT IS WORTH READING.** `PrincipalKind`
+ * declared `'system'` from the start and `parseSubject` could never produce it — it recognised
+ * `ai_worker:` and `api_key:` and called **everything else** `human`. `decideFor` takes a *subject
+ * string* and parses it, so a platform act arrived as a **human**, and `human` is the one kind this
+ * floor does not bind. The entry was correct and unreachable: a control with no producer, which is
+ * `CC-101`'s class in the identity layer. **`CC-136` taught the parser and the derivation, and the
+ * entry is live from that change onward** — a `system:` subject is now refused the seven ids below.
+ * The row's own claim that the hole was "past the floor **and** the ceiling" was corrected in
+ * `PLAN-CC-136-system-subject.md` §2.1: `CC-128`'s ceiling is resolved by tenant, not by kind, so
+ * this was a floor hole and only a floor hole.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * WHAT THE FIVE CATEGORIES ACTUALLY ARE, MEASURED — AND TWO OF THEM ARE NOT WHAT THEY SOUND LIKE

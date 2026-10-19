@@ -9,7 +9,7 @@
  */
 import { AuthorityEnforcementService } from '../authorityEnforcementService'
 import { clearCapabilityRegistry, registerCapabilityDescriptors } from '@open-mercato/shared/lib/capabilities/registry'
-import { aiWorkerSubject, apiKeySubject, parseSubject } from '@open-mercato/shared/lib/auth/principal'
+import { aiWorkerSubject, apiKeySubject, parseSubject, systemSubject } from '@open-mercato/shared/lib/auth/principal'
 
 const FLOORED = 'auth.roles.manage'
 const ORDINARY = 'ai_assistant.view'
@@ -87,22 +87,29 @@ describe('CC-125 — the floor in decideFor', () => {
     }
   })
 
-  it('★ a `system` principal CANNOT REACH this path at all — it arrives as a human', async () => {
-    // Measured from two directions, and recorded rather than papered over:
+  it('★ a `system` principal IS a machine now — `CC-136` taught the parser, and the floor binds it', async () => {
+    // The hole this replaces was measured from two directions and pinned so it stayed visible:
     //
-    // (1) THE PARSER. `PrincipalKind` declares 'system' and `parseSubject` can never produce it — it
-    //     knows `ai_worker:` and `api_key:` and calls everything else `human`. So the kind exists in the
-    //     type system and has no producer, exactly the *"kind with no inhabitants"* shape `CC-107` fixed
-    //     for `ai_worker`.
+    // (1) THE PARSER. `PrincipalKind` declared 'system' and `parseSubject` could never produce it — it
+    //     knew `ai_worker:` and `api_key:` and called everything else `human`. A kind with no
+    //     inhabitants, the same shape `CC-107` fixed for `ai_worker`.
     // (2) THE RESOLVER. `decideFor` takes a subject string and parses it, so a platform act — and the
-    //     `system:` subject form is not hypothetical: `packages/create-app/template/src/modules/
-    //     example_customers_sync/lib/` builds it today — arrives as the WIDEST kind, past both the floor
-    //     and the ceiling.
-    // Both assertions exist so the hole is visible in a red-green run rather than only in prose;
-    // `CC-136` is the fix and it is an identity-model decision, not a one-line parser change.
-    expect(parseSubject('system:x')).toEqual({ kind: 'human', id: 'system:x' })
-    const decision = await makeService().decideFor('system:x', FLOORED, SCOPE)
-    expect(decision!.allowed).toBe(true)
-    expect(decision!.reasons.some((r) => /machine floor/.test(r.detail))).toBe(false)
+    //     `system:` form is not hypothetical: `packages/create-app/template/src/modules/
+    //     example_customers_sync/lib/` builds it — arrived as the WIDEST kind, and `human` is the one
+    //     kind the floor does not bind.
+    //
+    // Both halves are fixed, and **fixing only the parser would not have been enough**:
+    // `derivePrincipal` re-derives the kind from two booleans whose fall-through is `human`, so it
+    // needed the arm too. That second half is asserted in `principal.test.ts`.
+    expect(parseSubject(systemSubject('x'))).toEqual({ kind: 'system', id: 'x' })
+
+    const decision = await makeService().decideFor(systemSubject('x'), FLOORED, SCOPE)
+    expect(decision!.allowed).toBe(false)
+    expect(decision!.reasons[0]?.detail).toMatch(/machine floor/)
+
+    // And it is a LIST of seven ids, not a blanket refusal: the same subject still gets an ordinary
+    // capability. A floor that refused a platform act everything would be the platform unable to run.
+    const ordinary = await makeService().decideFor(systemSubject('x'), ORDINARY, SCOPE)
+    expect(ordinary!.allowed).toBe(true)
   })
 })

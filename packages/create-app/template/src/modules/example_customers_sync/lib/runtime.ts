@@ -1,6 +1,9 @@
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { DefaultDataEngine, type DataEngine } from '@open-mercato/shared/lib/data/engine'
 import type { CommandRuntimeContext } from '@open-mercato/shared/lib/commands'
+// `CC-136` — the prefix has one builder, in `principal.ts`. Hand-rolling `system:${origin}` was how a
+// platform act came to be parsed as a person: the string existed and nothing read it.
+import { systemSubject } from '@open-mercato/shared/lib/auth/principal'
 
 export type ExampleCustomersSyncScope = {
   tenantId: string
@@ -43,10 +46,13 @@ export function buildExampleCustomersSyncCommandContext(
   return {
     container: container as CommandRuntimeContext['container'],
     auth: {
-      sub: `system:${syncOrigin}`,
+      sub: systemSubject(syncOrigin),
       tenantId: scope.tenantId,
       orgId: scope.organizationId,
-      userId: `system:${syncOrigin}`,
+      // Kept for callers that read `auth.userId` directly; it is **not** a user id, which is why
+      // `derivePrincipal` ignores it for a `system` subject and reports `onBehalfOfUserId: null`.
+      // Same string as `sub`, built by the same function so the prefix has one spelling.
+      userId: systemSubject(syncOrigin),
     },
     organizationScope: null,
     selectedOrganizationId: scope.organizationId,

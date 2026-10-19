@@ -19,11 +19,13 @@
 /**
  * The kinds of actor the platform can represent.
  *
- * All four are produced. `ai_worker` was the last to gain a producer: a
- * credential marked as belonging to an AI worker issues an `ai_worker:` subject,
- * so the resolver, the journal and the ledger all see a machine where they
- * previously saw a service. Until that existed the kind was a type with no
- * inhabitants, and nothing could bound a machine differently from a person.
+ * **All four are produced, and the last one to get there took two edits.** `ai_worker` gained its
+ * producer first: a credential marked as belonging to an AI worker issues an `ai_worker:` subject, so
+ * the resolver, the journal and the ledger all see a machine where they previously saw a service.
+ * `system` was declared from the start and had **nothing that could produce it** until `CC-136`: the
+ * parser called every unrecognised subject `human`, and `human` is the one kind the machine floor does
+ * not bind — so the platform acting on its own behalf was judged as a person. See
+ * `SYSTEM_SUBJECT_PREFIX`.
  */
 export type PrincipalKind = 'human' | 'ai_worker' | 'service' | 'system'
 
@@ -69,6 +71,25 @@ const API_KEY_SUBJECT_PREFIX = 'api_key:'
  */
 const AI_WORKER_SUBJECT_PREFIX = 'ai_worker:'
 
+/**
+ * The prefix that makes an actor the **platform acting on its own behalf** rather than a person.
+ *
+ * `CC-136`. `system` was a principal kind with **no producer** — `parseSubject` recognised
+ * `ai_worker:` and `api_key:` and called everything else `human`. That was not cosmetic: `decideFor`
+ * takes a *subject string* and parses it, and `human` is the one kind the machine floor does not bind
+ * (`machineFloor.ts`), so a platform act arrived as the widest kind and the seven capabilities no
+ * configuration may grant a machine were grantable to it. The subject form was already in the wild —
+ * `packages/create-app/template/src/modules/example_customers_sync/lib/` builds `system:…` today — so
+ * the shape existed with nothing parsing it.
+ *
+ * **The owner's ruling (2026-10-19) was to teach the parser, accepting that `principalIdOf` then
+ * returns the bare id for these subjects.** That is the platform's storage convention anyway: the id
+ * is the id and the kind lives in its own column (`subject_kind`, `actor_kind`, …). Measured, the
+ * change has no data to migrate — `action_logs.actor_user_id` is a **`uuid`** column, so a `system:…`
+ * subject was never storable there, and nothing writes one into a `text` principal column either.
+ */
+const SYSTEM_SUBJECT_PREFIX = 'system:'
+
 /** Builds the legacy `sub` for an API key principal. */
 export function apiKeySubject(apiKeyId: string): string {
   return `${API_KEY_SUBJECT_PREFIX}${apiKeyId}`
@@ -80,12 +101,33 @@ export function aiWorkerSubject(apiKeyId: string): string {
 }
 
 /**
+ * Builds the `sub` for **the platform acting on its own behalf** — a scheduled job, a CLI, an
+ * outbound sync — as opposed to a person or a credential.
+ *
+ * `CC-136`. The module's own docblock says *"Nothing outside this module should build or parse this
+ * string"*, and two files did: `example_customers_sync`'s `sync.ts` and `runtime.ts` both hand-rolled
+ * `` `system:${origin}` ``. A hand-rolled prefix is a typo waiting to become a silently-human act, so
+ * the builder exists and those two call it.
+ */
+export function systemSubject(origin: string): string {
+  return `${SYSTEM_SUBJECT_PREFIX}${origin}`
+}
+
+/**
  * Splits a legacy `sub` into a kind and a bare id.
  *
- * Accepts a plain uuid (a human) or the prefixed API-key form. This is the only
- * reader of the encoding; call sites should prefer `auth.principal`.
+ * Accepts a plain uuid (a human) or one of the three prefixed forms. This is the only reader of the
+ * encoding; call sites should prefer `auth.principal`.
+ *
+ * **`system:` is tested first, and the order is load-bearing.** The prefixes share no leading
+ * character, so order is not a correctness issue today — but the shortest one is the one a later edit
+ * is most likely to append after a longer check, and a branch that can never fire looks exactly like
+ * a branch that works. First is where it cannot be shadowed by accident.
  */
 export function parseSubject(subject: string): { kind: PrincipalKind; id: string } {
+  if (subject.startsWith(SYSTEM_SUBJECT_PREFIX)) {
+    return { kind: 'system', id: subject.slice(SYSTEM_SUBJECT_PREFIX.length) }
+  }
   if (subject.startsWith(AI_WORKER_SUBJECT_PREFIX)) {
     return { kind: 'ai_worker', id: subject.slice(AI_WORKER_SUBJECT_PREFIX.length) }
   }
@@ -138,8 +180,11 @@ export function principalIdOf(subject: string): string | null {
  *  - a bare subject with a machine kind is **accepted** — the bare id is the
  *    convention, and the kind is what the sibling column is for.
  *
- * `human` and `system` take the bare id and no prefix is defined for either, so
- * a `system`-kind subject is returned exactly as given.
+ * `human` takes the bare id and **no prefix is defined for it**. `system` used to be described here as
+ * sharing that property; `CC-136` gave it one, because a platform act with no prefix was parsed as a
+ * person. So a `system:` subject is now stripped on write like the other two, and a **bare** subject
+ * with kind `system` is still accepted — the bare id is the convention, and the kind is what the
+ * sibling column is for.
  */
 export function normalizePrincipalSubject(
   subject: string,
@@ -151,11 +196,13 @@ export function normalizePrincipalSubject(
   // Which prefix, if any, the subject carries. `null` means the subject is bare —
   // the convention, and the form a machine's row has taken since the tables were
   // created — so a bare subject is compatible with **any** declared kind.
-  const prefixKind = trimmed.startsWith(AI_WORKER_SUBJECT_PREFIX)
-    ? 'ai_worker'
-    : trimmed.startsWith(API_KEY_SUBJECT_PREFIX)
-      ? 'service'
-      : null
+  const prefixKind = trimmed.startsWith(SYSTEM_SUBJECT_PREFIX)
+    ? 'system'
+    : trimmed.startsWith(AI_WORKER_SUBJECT_PREFIX)
+      ? 'ai_worker'
+      : trimmed.startsWith(API_KEY_SUBJECT_PREFIX)
+        ? 'service'
+        : null
 
   const id = principalIdOf(trimmed)
   if (!id) throw new Error('a principal subject must name somebody')
@@ -204,15 +251,28 @@ export function derivePrincipal(auth: PrincipalSource | null | undefined): Princ
   // so a context built by an older path still resolves correctly.
   const isService = parsed.kind === 'service' || auth.isApiKey === true
   const isAiWorker = parsed.kind === 'ai_worker'
+  // **`system` is a kind of its own and must be named here explicitly.** This function does not pass
+  // `parseSubject`'s kind through — it re-derives it from two booleans, and the final ternary's
+  // fall-through is `human`. So teaching the parser the prefix, and stopping there, would have left
+  // every consumer of `auth.principal` still calling a platform act a person. `CC-136` measured that
+  // and fixed both halves; the parser and the derivation are two producers of one fact.
+  const isSystem = parsed.kind === 'system'
   // Both are credentials rather than people, so both resolve their identity from
   // the key and carry the user they were issued on behalf of. Only the *kind*
   // differs — and that difference is the one the whole governance layer turns on.
+  //
+  // `system` is a machine too, but it is **not credential-backed** (`isApiKeyBackedKind` returns
+  // false for it), so it must not take the key branch: there is no key row to look up, and the bare
+  // subject id is the identity.
   const isMachine = isService || isAiWorker
   const id = isMachine ? auth.keyId ?? parsed.id : parsed.id
 
   return {
     id,
-    kind: isAiWorker ? 'ai_worker' : isService ? 'service' : 'human',
+    kind: isAiWorker ? 'ai_worker' : isService ? 'service' : isSystem ? 'system' : 'human',
+    // The platform acts for nobody. `auth.userId` is deliberately not consulted for `system`: a
+    // `system:` producer that also sets `userId` is setting the *user* field to a non-user string, and
+    // inheriting that here would put a machine's origin into an id column expecting a person.
     onBehalfOfUserId: isMachine ? auth.userId ?? null : null,
     displayName: (isMachine ? auth.keyName : auth.email) ?? null,
     tenantId: auth.tenantId ?? null,

@@ -4,6 +4,7 @@ import { type Kysely } from 'kysely'
 import type { CommandBus } from '@open-mercato/shared/lib/commands'
 import { loadCustomFieldSnapshot } from '@open-mercato/shared/lib/commands/customFieldSnapshots'
 import { CrudHttpError } from '@open-mercato/shared/lib/crud/errors'
+import { systemSubject } from '@open-mercato/shared/lib/auth/principal'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import {
   CustomerInteraction,
@@ -293,7 +294,7 @@ async function loadCanonicalInteractionRecord(
     auth: {
       tenantId: scope.tenantId,
       orgId: scope.organizationId,
-      sub: `system:${EXAMPLE_CUSTOMERS_SYNC_OUTBOUND_ORIGIN}`,
+      sub: systemSubject(EXAMPLE_CUSTOMERS_SYNC_OUTBOUND_ORIGIN),
     },
     selectedOrganizationId: scope.organizationId,
     interactions: [interaction],

@@ -1,10 +1,14 @@
 import {
+  aiWorkerSubject,
   apiKeySubject,
   derivePrincipal,
   effectiveUserId,
   isHumanPrincipal,
   isMachinePrincipal,
+  normalizePrincipalSubject,
   parseSubject,
+  principalIdOf,
+  systemSubject,
 } from '../principal'
 
 const USER_ID = '11111111-1111-4111-8111-111111111111'
@@ -140,5 +144,88 @@ describe('kind predicates', () => {
   it('derives when the context carries no principal', () => {
     expect(isHumanPrincipal({ sub: USER_ID })).toBe(true)
     expect(isMachinePrincipal({ sub: apiKeySubject(KEY_ID) })).toBe(true)
+  })
+})
+
+/**
+ * `CC-136` — a platform act is a platform act.
+ *
+ * The kind `system` was declared from the start and **nothing could produce it**: `parseSubject` knew
+ * `ai_worker:` and `api_key:` and called everything else `human`, and `human` is the one kind the
+ * machine floor does not bind. So the platform acting on its own behalf was judged as a person, and
+ * the seven capabilities no configuration may grant a machine were grantable to it.
+ *
+ * **Two halves had to be fixed, and this block pins both.** The parser is one; `derivePrincipal` is
+ * the other, because it does not pass the parser's kind through — it re-derives it from two booleans
+ * whose fall-through is `human`. A fix that taught only the parser would have left every consumer of
+ * `auth.principal` still calling a platform act a person.
+ */
+describe('the system subject (CC-136)', () => {
+  const ORIGIN = 'example_customers_sync:outbound'
+
+  it('builds, parses and reduces to a bare id', () => {
+    expect(systemSubject(ORIGIN)).toBe(`system:${ORIGIN}`)
+    expect(parseSubject(systemSubject(ORIGIN))).toEqual({ kind: 'system', id: ORIGIN })
+    // The bare id is the platform's storage convention — the id is the id, and the kind lives in its
+    // own column. Before this change `principalIdOf` returned the subject with its prefix attached.
+    expect(principalIdOf(systemSubject(ORIGIN))).toBe(ORIGIN)
+  })
+
+  it('derives a system principal — and not by falling through to human', () => {
+    const principal = derivePrincipal({ sub: systemSubject(ORIGIN), tenantId: 't1', orgId: 'o1' })
+    expect(principal).toEqual({
+      id: ORIGIN,
+      kind: 'system',
+      // The platform acts for nobody. A `system:` producer that also sets `userId` is setting the
+      // *user* field to a non-user string; inheriting it here would put a machine's origin into an id
+      // column expecting a person.
+      onBehalfOfUserId: null,
+      displayName: null,
+      tenantId: 't1',
+      organizationId: 'o1',
+    })
+  })
+
+  it('does not take the credential branch — a system principal has no key row', () => {
+    // `isApiKeyBackedKind('system')` is false, so the key id must not be preferred over the subject's
+    // own id. Looking one up in `api_keys` finds nothing.
+    const principal = derivePrincipal({ sub: systemSubject(ORIGIN), keyId: KEY_ID, keyName: 'a key' })
+    expect(principal!.id).toBe(ORIGIN)
+    expect(principal!.displayName).toBeNull()
+  })
+
+  it('is a machine to the predicates, and has no personal state', () => {
+    const context = { sub: systemSubject(ORIGIN) }
+    expect(isMachinePrincipal(context)).toBe(true)
+    expect(isHumanPrincipal(context)).toBe(false)
+    // No person behind it, so no preferences, no sidebar, no attribution to a human.
+    expect(effectiveUserId(context)).toBeNull()
+  })
+
+  it('is stored bare by the write path, under the same three rules as every other prefix', () => {
+    // An agreeing prefix is stripped — the admin followed the documentation and the row stays in the
+    // convention.
+    expect(normalizePrincipalSubject(systemSubject(ORIGIN), 'system')).toBe(ORIGIN)
+    // A bare subject with a machine kind is accepted: the bare id is the convention.
+    expect(normalizePrincipalSubject(ORIGIN, 'system')).toBe(ORIGIN)
+    // A prefix that DISAGREES with the declared kind throws. A permission taken from the platform and
+    // landing on a person is worse than the defect being fixed, so this is never a guess.
+    expect(() => normalizePrincipalSubject(systemSubject(ORIGIN), 'human')).toThrow(/names a system/)
+    expect(() => normalizePrincipalSubject(systemSubject(ORIGIN), 'service')).toThrow(/names a system/)
+  })
+
+  it('refuses a prefix with nothing behind it', () => {
+    // A control asked "may this act" by an empty id must not get an answer derived from ''.
+    expect(principalIdOf('system:')).toBeNull()
+    expect(() => normalizePrincipalSubject('system:', 'system')).toThrow(/must name somebody/)
+  })
+
+  it('leaves the other three kinds exactly where they were', () => {
+    // The regression that would be worst: a human must stay unbound by the machine floor, and the two
+    // credential prefixes must keep their ids.
+    expect(parseSubject(USER_ID)).toEqual({ kind: 'human', id: USER_ID })
+    expect(parseSubject(apiKeySubject(KEY_ID))).toEqual({ kind: 'service', id: KEY_ID })
+    expect(parseSubject(aiWorkerSubject(KEY_ID))).toEqual({ kind: 'ai_worker', id: KEY_ID })
+    expect(principalIdOf(USER_ID)).toBe(USER_ID)
   })
 })
