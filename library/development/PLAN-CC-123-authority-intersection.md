@@ -241,7 +241,7 @@ three of its first six mutations were failing because the *tests* were the defec
 | M1 | Drop `options` from `userHasAllFeatures` → `refusedByAuthority` → `refusalFor` | R2/R3 |
 | M2 | `refusalFor` passes no options to `decideFor` (revert to `:236`) | R3 |
 | M3 | Remove the `invoker-lacks-capability` branch | R4 |
-| M4 | Run R4's step unconditionally (no invoker gate) | R5 — a stack overflow, asserted as a timeout/throw |
+| M4 | Run R4's step unconditionally (no invoker gate) | R5 — **but NOT as written here: the mutation removes the guard and the observable is *"asks nothing when no invoker is supplied"*. It cannot blow the stack — see §9.1** |
 | M5 | Restore `return null` on a missing reader | R6 |
 | M6 | Read the invoker from `auth.userId` instead of the principal | R2 — and only fails if the fixture's `userId` differs from its owner, which is the trap `CC-127` hit |
 
