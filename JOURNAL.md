@@ -56,6 +56,35 @@ path is waiting on the owner.**
 
 ---
 
+## 2026-10-20 — the repositories are on a remote: `main` is the docs, `code` is the codebase
+
+The owner created `https://github.com/FOOTBALLMOOD/companai` and asked whether one repository was
+enough for both halves. It is — as **two branches**, because the two local repositories have
+**unrelated histories** and cannot share one:
+
+| Branch | What it carries | Head |
+|---|---|---|
+| `main` (default) | the documentation repository | `821938b` |
+| `code` | the codebase (`workspace/starting-kit`) | `a807fda3` |
+
+Each branch carries its own workflow, and each workflow names the branch it runs on — `docs.yml` on
+`main`, `ci.yml` on `main`/`code`/`develop`/`feat/wms`. **That last clause was a defect waiting to
+happen:** `ci.yml` listed only `main`/`develop`/`feat/wms`, so pushing the code to `code` would have
+carried a workflow that nothing calls — `CC-101`'s defect, committed by the change meant to fix it.
+It now names `code`.
+
+**★ The push failed first, and the reason is worth keeping.** `RPC failed; curl 55 Send failure:
+Connection was reset` — the docs `.git` was **313 MB of 18,016 loose objects**, never packed. One
+`git gc --prune=now` took it to **10.8 MiB**, and the same push succeeded. A repository that has never
+been packed is a repository whose first push is a coin toss.
+
+**What this changes.** `CC-113` and `CC-116` were closed on the owner's ruling that *"no remote is a
+deployment state, not a defect"*. The deployment state has now moved: the checkers this project has
+been verifying **by hand** can be called by a runner. **What it does not yet prove is a green run** —
+that is the next observation, and it is the one that turns `✅ built` into `✅ enforced`.
+
+---
+
 ## 2026-10-20 — `T-04` built: a question about a number is no longer answered with rows
 
 **Slot 0, finding 3 of 13 → 10 left.** Code `6d7ef0ce`. Plan `PLAN-T04-count-returns-rows.md`.

@@ -20,6 +20,7 @@ rules, hazards and where we are.
 ## HAZARDS
 - Pure LF, no BOM. **Never `git add -A`.**
 - **A checker is not a control until something calls it** (`CC-101`). Same for a workflow with no remote (`CC-116`).
+- **A repo that has never been packed makes its first push a coin toss** — `git gc --prune=now` first (docs: 313 MB loose → 10.8 MiB).
 - **A newline OR an unescaped `|` inside a register row splits the table.** The checker catches both.
 - **§4's state cell reads exactly four strings** — `startable now` · `startable, needs a live DB` · `needs you` · `blocked on its trigger`.
 - Suites run on **node24** (`workspace/.toolchain/node24/node.exe`). Jest needs the **package** dir and its `jest.config.cjs`.
@@ -56,8 +57,10 @@ all needed the audit's sentence corrected. Schedule: `PREVIEW-AUDIT-TRIAGE.md` �
 modules' commands and once accepted a missing identity. **The spine is repaired before it is re-keyed.**
 
 **AFTER IT:** `CC-121` (behind `CC-119`, the DB rebuild) → `CC-122` · `CC-138` rides `W3` · `CC-133`
-deferred by the owner's trigger. **`CC-113`/`CC-116`: both repos have NO REMOTE**, so no workflow has ever
-run — built and proven, not enforced; needs the owner's decision on where the repos live.
+deferred by the owner's trigger. **REMOTE (2026-10-20): `https://github.com/FOOTBALLMOOD/companai`** —
+`main` = the docs repo (`821938b`), `code` = the codebase (`a807fda3`); one repo, two unrelated branches,
+each with its own workflow naming its branch. The checkers can now be called by a runner; **what is not
+yet observed is a green run.**
 
 **DEBTS NAMED:** `ai_agent_types` migration → `CC-119` · per-agent manage routes have no version pinner
 (`CC-122`) · a tool requiring `customers.people.view` from a parked module (`CC-132` plan §6) ·

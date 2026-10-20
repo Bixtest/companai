@@ -18,14 +18,32 @@ knowledge, and a new agent that has not been bitten by them will be.
 
 | | |
 |---|---|
-| Docs repo | `C:/Users/Ramzi/Downloads/companai` — branch **`master`**, author `scout` |
-| Code repo | `C:/Users/Ramzi/Downloads/companai/workspace/starting-kit` — branch **`main`** |
+| Docs repo | `C:/Users/Ramzi/Downloads/companai` — branch **`master`** → remote **`main`**, author `scout` |
+| Code repo | `C:/Users/Ramzi/Downloads/companai/workspace/starting-kit` — branch **`main`** → remote **`code`** |
+| Remote | `https://github.com/FOOTBALLMOOD/companai` — **one repository, two unrelated branches** (2026-10-20) |
 | Node | `C:/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24/node.exe` — **v24.19.0, mandatory** |
 
 **The code repo is a subdirectory of the docs repo but is its own git repository** (the docs
 `.gitignore` line 15 excludes `workspace/starting-kit/`). Every command has to be run from the right
 one, and a commit belongs in **both**. `git add -A` is banned in both repos — stage explicit paths.
 One wildcard add once swept 10,448 of the owner's unrelated files into a commit.
+
+**The remote layout, and why it is two branches.** The two local repositories have unrelated
+histories, so they cannot share one branch. `main` carries the documentation repository (it is the
+GitHub default, because that is the project's front door) and `code` carries the codebase. Both were
+pushed on 2026-10-20; each branch carries its own workflow, and each workflow names the branch it
+runs on — `docs.yml` on `main`, `ci.yml` on `code`. A push from either local repository is one
+command:
+
+```bash
+cd C:/Users/Ramzi/Downloads/companai                    && git push    # master -> origin/main
+cd C:/Users/Ramzi/Downloads/companai/workspace/starting-kit && git push    # main   -> origin/code
+```
+
+**If a push ever dies mid-transfer** (`RPC failed; curl 55 Send failure: Connection was reset`), the
+cause here was **18,016 loose objects** — 313 MB on disk, **10.8 MiB** once `git gc` packed them.
+Run `git gc --prune=now` first; the settings `http.postBuffer=524288000` and `http.version=HTTP/1.1`
+are already set in the docs repository and were part of the fix.
 
 ### Step 2 — read the live position
 
