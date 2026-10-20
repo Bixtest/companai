@@ -15,7 +15,8 @@ rules, hazards and where we are.
 - **THE FIVE-SLOT SHAPE** (`WORKING-RULES.md` §2.0): what changed · why it matters · how I checked ·
   waiting on you · next. **No identifiers in slots 1–2.**
 - **QUESTIONS: the 14-year-old test** — one example, no jargon, ONE per turn; if a default exists, take it.
-- **Commits are mine to manage** — both repos, explicit paths.
+- **Commits are mine to manage** — both repos, explicit paths, **and push after each slice** (remote
+  since 2026-10-20: `main` = docs, `code` = codebase).
 
 ## HAZARDS
 - Pure LF, no BOM. **Never `git add -A`.**
