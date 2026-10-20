@@ -94,4 +94,9 @@ export const entityExtensions: EntityExtension[] = [
   },
 ]
 
+// The generator emits `X.default ?? X.extensions` for every module that has a data/extensions.ts,
+// and the bundler resolves BOTH names statically — so a module with only a default export fails
+// `yarn build:app` under Turbopack even though `??` would never read the missing one at runtime.
+// This was the one module of seven without it; CI run 39357327101 caught it (2026-10-20).
+export const extensions = entityExtensions
 export default entityExtensions
