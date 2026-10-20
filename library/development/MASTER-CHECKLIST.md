@@ -41,7 +41,24 @@ reproduces exactly, so the headline above stands.)*
 records named in §5 and §7. This section stays short because a section that
 grows every session stops being read.
 
-**LAST DONE — 2026-10-19: `CC-140` is BUILT and CLOSED — the ceiling write refuses a stale view instead of
+**LAST DONE — 2026-10-20 (03:40): `T-04` is BUILT and CLOSED — a Function that asks for a number is refused
+instead of answered with rows.** The compiler said *"no physical execution is possible"* — as a **gap** —
+and `verifyFunction` filters diagnostics to `severity === 'error'`, so a gap is excluded **by
+construction**: the report printed *"resolved without error"* beside the compiler's own refusal. Literally
+true, materially false. The Function then saved, published, became runnable, and returned **a list of
+rows** to somebody who asked for a count — a green suite behind a materially wrong answer, which is the one
+failure this method is aimed at. **Three refusals now, at three layers:** the compiler emits an **error**
+(so the report fails), the passing message **names the gaps that remain** instead of asserting there are
+none, and the **runner asks the IR's operation at its own gate** — because a Function verified and saved
+before this change carries its old green report with it, and the compiler's answer changing underneath it
+must not turn *refused with a sentence* into *silently wrong rows*. **★ The existing test pinned the
+defect:** *"an aggregate IR compiles logically and reports the row-oriented gap"* asserted exactly the
+behaviour this row removes, and used `mustCompile`, which throws on a refusal. **Proof:** 5/5 mutations
+RED — two of them exist for the boundary (a gate that refuses **every** IR; a gate that reads
+`operationType` again) — every file restored byte-identical; `tsc` 0; shared **211 suites / 2,613 tests,
+0 failures**. **Slot 0: 10 left of 13.** **79 closed · 60 open · 139 total.**
+
+**PREVIOUSLY — 2026-10-19: `CC-140` is BUILT and CLOSED — the ceiling write refuses a stale view instead of
 discarding it.** `CC-139` had to answer a guard that refuses mutating screens without an expected-version
 header, and it answered honestly: a ceiling is a **set of rows**, so no version header means anything. The
 reason it gave was true, specific — **and a defect in a comment**: two administrators who both loaded the
@@ -183,7 +200,7 @@ checksum-verified; auth **103 suites / 910 tests**; core **657 suites / 5,779 te
 **PREVIOUSLY — 2026-10-19: `CC-92` is SCHEDULED — the preview audit's 45 findings now have gates
 instead of a queue.** The row had said *"the rest are queued"* since 16 October, which named no slot,
 so nothing in §4 could start any of them. The schedule is `PREVIEW-AUDIT-TRIAGE.md` **§6**, carried here
-as **§9.4**, and it is **by gate, not date**: 8 closed · **Slot 0 = 11 findings before `CC-121` starts** — `T-27` and `T-35` were built and left the row on 2026-10-19 ·
+as **§9.4**, and it is **by gate, not date**: 11 closed · **Slot 0 = 10 findings before `CC-121` starts** — `T-27` and `T-35` were built and left the row on 2026-10-19, and `T-04` on 2026-10-20 ·
 Slot 1 = 10 with `W3` · Slot 2 = 1 with `W5` · Slot 3 = 4 with `W7` · Slot 4 = 3 with `W8` · Slot 5 = 2
 with `P2-9b` · 4 deferred by name. **★ The revisit point is Slot 0, and the reason is specific:** `CC-121`
 re-keys every `principal_id`, and the gate it re-keys through cannot see **seven modules' commands**
@@ -286,12 +303,14 @@ packages green, `tsc` 0 for core and all nine. **One process miss, mine:** the c
 with the requirement broke `explicit-sort-comparators.test.ts` because only the guard's own suite was run
 before that commit. **72 closed · 62 open · 134 total.**
 
-**▶ NEXT — `CC-92` Slot 0: the 13 spine findings, before `CC-121` starts.** That migration re-keys every
-`principal_id`, and the gate it re-keys through cannot see **seven modules' commands** (`T-07`) or refuse
-a missing identity (`T-27`) — **so the spine is repaired before it is re-keyed**; a migration through a
-gate with holes produces a clean answer about a partial system. The 13 findings and their slots are
-`PREVIEW-AUDIT-TRIAGE.md` §6, carried here as §9.4. Behind Slot 0: `CC-121` (behind `CC-119`, the database
-rebuild milestone), then `CC-122`; `CC-138` rides `W3`; **`CC-133`** stays deferred by the owner's trigger.
+**▶ NEXT — `CC-92` Slot 0: 10 spine findings left, before `CC-121` starts.** `T-05` is the next one by
+rank: the approvals queue can approve the same act twice, a read-then-act with no compare-and-set, and
+every approval built later inherits the race. Then `T-06` (the one record the tamper-evident chain does
+not cover), `T-07` (seven modules' commands invisible to the gate), `T-08`, `T-15`, `T-16`, `T-17`, `T-28`,
+`T-30`, `T-33`. **Measure each from source before building it** — `T-27`, `T-35` and `T-04` all needed the
+audit's own sentence corrected. The findings and their slots are `PREVIEW-AUDIT-TRIAGE.md` §6, carried
+here as §9.4. Behind Slot 0: `CC-121` (behind `CC-119`, the database rebuild milestone), then `CC-122`;
+`CC-138` rides `W3`; **`CC-133`** stays deferred by the owner's trigger.
 **No row on the authority path is waiting on you:** the four in §4 that still need a decision are the
 long-standing ones.
 
@@ -1201,8 +1220,8 @@ repaired before it is re-keyed.**
 
 | Slot | Gate | Findings | Count |
 |---|---|---|---|
-| **closed** | — | `T-01` `T-02` `T-03` `T-13` `T-14` `T-32` `T-36` `T-45` | 8 |
-| **Slot 0** | before `CC-121` starts | `T-04` `T-05` `T-06` `T-07` `T-08` `T-15` `T-16` `T-17` `T-27` `T-28` `T-30` `T-33` `T-35` | 13 |
+| **closed** | — | `T-01` `T-02` `T-03` `T-13` `T-14` `T-32` `T-36` `T-45` · **built from the schedule:** `T-27` `T-35` (2026-10-19), `T-04` (2026-10-20) | 11 |
+| **Slot 0** | before `CC-121` starts | `T-05` `T-06` `T-07` `T-08` `T-15` `T-16` `T-17` `T-28` `T-30` `T-33` | 10 |
 | **Slot 1** | with `W3` (chokepoint + actor-class gate) | `T-18` `T-19` `T-20` `T-21` `T-22` `T-23` `T-25` `T-26` `T-29` `T-34` | 10 |
 | **Slot 2** | with `W5` (durable runs) | `T-43` | 1 |
 | **Slot 3** | with `W7` (first surface) | `T-09` `T-10` `T-12` `T-40` | 4 |

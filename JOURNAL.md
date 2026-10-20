@@ -19,10 +19,11 @@ box, **the box wins** (owner's instruction, 2026-10-06).
 > section that did not exist. If you are reading this and the box is gone again, **that is the defect,
 > not a change of policy**: restore it here rather than adding a task line to one of the pointing files.
 
-**IN HAND — `CC-92` Slot 0: 11 spine findings left, before `CC-121` starts.** The ceiling work is finished
-as a unit — screen, token, refusal — and two Slot 0 findings are closed: **`T-27`** (the tenant-scope helper
-that accepted a foreign tenant whenever the auth object was absent, silently) and **`T-35`** (the sandbox
-that advertised an api-call cap it did not enforce). **11 remain:** `T-04`, `T-05`, `T-06`, `T-07`, `T-08`,
+**IN HAND — `CC-92` Slot 0: 10 spine findings left, before `CC-121` starts.** The ceiling work is finished
+as a unit — screen, token, refusal — and three Slot 0 findings are closed: **`T-27`** (the tenant-scope
+helper that accepted a foreign tenant whenever the auth object was absent, silently), **`T-35`** (the
+sandbox that advertised an api-call cap it did not enforce) and **`T-04`** (a Function that asked for a
+count and was answered with rows, verified green). **10 remain:** `T-05`, `T-06`, `T-07`, `T-08`,
 `T-15`, `T-16`, `T-17`, `T-28`, `T-30`, `T-33`. `CC-121` re-keys every `principal_id` through the authority
 gate, and that gate cannot yet see **seven modules' commands** (`T-07`) or refuse a missing identity. **The
 spine is repaired before it is re-keyed:** a migration through a gate with holes produces a clean answer
@@ -52,6 +53,52 @@ checklist as §9.4.
 door) · `CC-136` (a platform act is a platform act) · `CC-137` (one capability means one door) ·
 `CC-139` (the ceiling's screen) · `CC-140` (its write refuses a stale view). **No row on the authority
 path is waiting on the owner.**
+
+---
+
+## 2026-10-20 — `T-04` built: a question about a number is no longer answered with rows
+
+**Slot 0, finding 3 of 13 → 10 left.** Code `6d7ef0ce`. Plan `PLAN-T04-count-returns-rows.md`.
+
+**The defect, and why the gap was the whole of it.** The compiler emitted
+`ROW_ORIENTED_TARGET` as a **gap** for any operation that was not `list`. `verifyFunction` filters
+diagnostics to `severity === 'error'`, so a gap is excluded **by construction** — the check recorded
+`passed` with *"The compiler resolved this against the model without error"*, a sentence that is
+literally true and materially false, because the stage that emitted it had just said no physical
+execution was possible. The Function saved, published, became runnable, and returned **a list of rows**
+to somebody who asked for **a number**. Nothing downstream told the reader the count they inferred was
+a fabrication.
+
+**Three refusals, at three layers, because one is not enough.** The compiler's diagnostic is an
+**error** now, so `compiled.ok` is false and the check records `failed` with the compiler's own sentence
+— rewritten to say what the caller would have received (*"the run would return rows rather than the
+requested count"*) rather than only what the compiler could not do. The passing message **names the gaps
+that remain** (`OFFSET_NOT_SUPPORTED` is still a real gap: a list without an offset is still a real
+list). And the runner asks the **IR's** operation at its own gate — gate 3 only ever asked the
+Function's `operationType`, so a Function verified and saved *before* this change would have carried its
+old green report straight past the compiler fix. The belt exists because the braces can be undone by
+history.
+
+**★ The existing test pinned the defect.** `compile.test.ts`'s *"an aggregate IR compiles logically and
+reports the row-oriented gap"* asserted the exact behaviour this row removes, through `mustCompile`,
+which throws on a refusal. A test that encodes a defect is not a test that needs updating in passing; it
+is the defect, written down.
+
+**Proof.** New suite `t04-count-returns-rows.test.ts` (5 tests: the compiler refuses · the report fails ·
+the runner refuses and **never calls the engine** · a list IR still runs with the exact same
+`QueryOptions` · the passing message names its gap). `scripts/verify-t04-mutations.mjs`: **5/5 RED**,
+files restored byte-identical — severity back to a gap · the runner gate deleted · the old message
+restored · **the gate refuses every IR including list** · **the gate reads `operationType` again**. The
+last two exist because a gate that refuses everything passes all three refusals and destroys the only
+query this module runs. `tsc` 0; `packages/shared` **211 suites / 2,613 tests, 0 failures**.
+
+**Two traps, both worth keeping.** `VerificationCheck` carries `outcome`, not `status` — the scenario
+test was written against an imagined signature. And a `$param` placeholder is refused at **stage 2**,
+before the operation is ever looked at, so the compiler has to be asked through `bindParameters` — the
+same step the runner uses — or the test proves a string instead of the path (L186). The first full run
+also reported a suite that *"failed to run"*: the harness's bulk-delete guard (59 files > 50), not the
+code — 8/8 with `CODEBUDDY_SAFE_DELETE_ENABLED=0`, and the whole package green under the same override.
+A suite that fails to load reports no failing tests, which reads as a pass to anyone scanning totals.
 
 ---
 

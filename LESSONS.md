@@ -5329,3 +5329,70 @@ the test asked for an alert that had already been created and destroyed within t
 *Cross-ref: L184 (*a fact is not corrected where it was discovered; it is corrected where it is believed*
 — here the correction was made in the wrong place in the *sequence* rather than the wrong file) ·
 `PLAN-CC-140-ceiling-revision.md` §4, the paragraph under the mutation table.*
+
+## L194
+
+**A status line written before the evidence is a claim, and the next reader will take it as a fact.**
+
+`PLAN-T04-count-returns-rows.md` was created at 21:35 with **"Status: BUILT AND CLOSED"** in its header.
+The code was written at 21:36–21:38; the test was never run; the build was cut off at 21:41; nothing was
+committed. The header sat false for six hours, and the first thing anyone resuming would read is the one
+line that says there is nothing to resume.
+
+**Why it happens.** A plan is opened by copying the last plan's shape, and the status line is part of the
+shape. Copying a *format* copies a *claim*.
+
+**The rules.**
+1. **A status line is written last**, from the measurement, and it names the commit. If the document needs
+   a status at creation, the status is `REQUIREMENT — not built`.
+2. **A claim with a date is checkable; a claim without one is decoration.** `BUILT AND CLOSED 2026-10-19`
+   was checkable — `git log` had nothing for that date — and that is what made it findable.
+3. **The register's oldest rule applies to prose, not only to tables:** a typed claim drifts, a measured one
+   cannot. The measurement here was the commit hash.
+
+*Cross-ref: L193's family (the record disagreeing with the work) · `PLAN-T04-count-returns-rows.md` header,
+corrected 2026-10-20.*
+
+## L195
+
+**A test written against an imagined signature tests the imagination.**
+
+`T-04`'s scenario test was written with `check?.status` — `VerificationCheck` carries **`outcome`**. The
+author had a nearby type in mind (`VerificationResult` elsewhere) and wrote from memory. The compiler would
+have caught it in one line, which is exactly why the failure was interesting: the test was **never
+type-checked before it was run**, and when it ran, the failure surfaced as a missing value rather than as
+a wrong name.
+
+**The rules.**
+1. **Open the type before writing the assertion.** The cost is one file read; the alternative is a test
+   that asserts on `undefined` and passes for the wrong reason once the optional chain is in place.
+2. **`?.` on an assertion is a warning, not a convenience.** `expect(check?.outcome)` passes silently when
+   `check` is missing only if the expectation is loose; assert the object exists first.
+3. **A test file is code and belongs under `tsc`.** If the suite is outside the type-check, the first
+   instrument that sees its mistakes is the run.
+
+*Cross-ref: L186 (a test that spells its own input) · `t04-count-returns-rows.test.ts`.*
+
+## L196
+
+**The stage before the one you are testing answers first — and its answer looks like the one you wanted.**
+
+`T-04` needs the compiler to refuse `operation: 'count'` at **stage 9**. The first version handed
+`compileQuery` the fixture IR directly, and got `ok: false` — which the test read as success. The refusal
+was `PARAMETER_NOT_BOUND` at **stage 2**: the IR still carried a `$param` placeholder, and a placeholder is
+refused before the operation is ever looked at. **The test would have passed against a compiler that had
+not changed at all.**
+
+**Why it is easy to miss.** The assertion was `expect(compiled.ok).toBe(false)` — a true statement about the
+wrong refusal. Only asking *which* diagnostic caught it, and then asking whether that diagnostic could
+exist for another reason, separated them.
+
+**The rules.**
+1. **Assert the code, not the boolean.** `ok === false` is satisfied by every failure in the pipeline; the
+   code names the one you built.
+2. **Build the subject through the real pre-step.** The IR reaches stage 9 only after `bindParameters`, the
+   same call the runner makes — so the test binds, and proves the path rather than a literal.
+3. **When a mutation still passes, suspect the subject before the mutation.** A refusal that arrives from
+   the wrong stage is a green test over an unchanged system.
+
+*Cross-ref: L186 (the same family, from the input side) · `PLAN-T04-count-returns-rows.md` §6.*

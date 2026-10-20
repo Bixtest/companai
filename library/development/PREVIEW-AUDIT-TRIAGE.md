@@ -70,7 +70,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 
 | # | Src | The finding | Validation | Rank | Urgency | Action |
 |---|---|---|---|---|---|---|
-| **T-04** | 08 §3 | **A Function that asks for a count returns rows.** A `gap` verifies as `passed` | 🔬 CONFIRMED | high | urgent | EXECUTE |
+| **T-04** | 08 §3 | **A Function that asks for a count returns rows.** A `gap` verifies as `passed` | 🔬 CONFIRMED | high | **done** | ✅ **BUILT 2026-10-20** — `PLAN-T04-count-returns-rows.md`, code `6d7ef0ce`. The refusal is an error now, the message names its gaps, and the runner asks the IR's operation at its own gate. |
 | **T-05** | 08 §4 | **The approvals queue can approve the same act twice.** Read-then-act, no CAS | 🔬 CONFIRMED | high | urgent | EXECUTE |
 | **T-06** | 08 §5 | **`undo` writes the one record the tamper-evident chain does not cover** | 🔬 CONFIRMED | high | urgent | EXECUTE |
 | **T-07** | 08 §6 | **Nine modules' commands are invisible to the authority gate**, one of them enabled | 🔬 CONFIRMED | high | scheduled | EXECUTE |
@@ -421,13 +421,13 @@ logged and closable by `OM_ENFORCE_TENANT_SCOPE_STRICT`, which leaves **12** in 
 `T-45` `CC-97` · **`T-36` — closed by `CC-132`** (the coverage guard's denominator no longer excludes
 anything shipped outside `packages/core`; the row's own defect, fixed under a different row).
 
-### 6.2 Slot 0 — before `W1` / `CC-121` starts (13)
+### 6.2 Slot 0 — before `W1` / `CC-121` starts (10 remaining of 13; `T-27`, `T-35`, `T-04` built)
 
 The spine's own guarantees. Each is a central promise the pipeline will otherwise build on top of.
 
 | # | Rank | Why it cannot wait for its own workstream | The gate |
 |---|---|---|---|
-| **T-04** | high | A Function that asks for a count returns rows, and the gap verifies as `passed` — a green test over a wrong answer, which is the one failure this project's whole method is aimed at | Slot 0 |
+| **T-04** | high | ✅ **BUILT 2026-10-20** — was: a Function that asks for a count returns rows, and the gap verifies as `passed`. Now refused at the compiler (an error, not a gap), named at verify, and refused again at the runner. `PLAN-T04-count-returns-rows.md`. | — |
 | **T-05** | high | The approvals queue can approve the same act twice (read-then-act, no compare-and-set) — every approval built later inherits the race | Slot 0 |
 | **T-06** | high | `undo` writes the one record the tamper-evident chain does not cover — a ledger with a known gap stops being evidence | Slot 0 |
 | **T-07** | high | **7 core modules' commands are invisible to the authority gate** (re-measured today: `catalog`, `communication_channels`, `customers`, `resources`, `sales`, `staff`, `wms`). W1 re-keys principals across this gate | Slot 0 |
