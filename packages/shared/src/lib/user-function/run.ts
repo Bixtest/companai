@@ -79,6 +79,8 @@ export type RunFailureCode =
   | 'NOT_RUNNABLE'
   | 'WRONG_TENANT'
   | 'NOT_A_QUERY'
+  /** `T-04` — a read the row-oriented query layer cannot answer (count/aggregate). */
+  | 'OPERATION_NOT_LIST'
   | 'PARAMETERS_INVALID'
   | 'STALE'
   | 'COMPILE_FAILED'
@@ -155,6 +157,22 @@ export async function runFunction(
       ok: false,
       code: 'NOT_A_QUERY',
       reason: `This runner executes reads. The Function is a "${fn.operationType}" operation, so there is nothing here to compile into a query.`,
+    }
+  }
+
+  /* ---- 3b. and it must be a read the query layer can answer ------ */
+
+  // `T-04` — gate 3 refuses the wrong *kind of Function*; this refuses the wrong *kind of read*. A
+  // `count` or `aggregate` IR used to sail through both, and step 8 then returned `result.items` to
+  // somebody who asked for a number. `verify.ts` now fails such an IR (the compiler emits an error, not a
+  // gap, for `ROW_ORIENTED_TARGET`), but a Function that was verified and saved **before** that change
+  // carries its old green report with it — and the compiler's answer changing underneath it must not
+  // turn "refused with a sentence" into "silently wrong rows". So the runner asks too.
+  if (fn.businessIr.operation && fn.businessIr.operation !== 'list') {
+    return {
+      ok: false,
+      code: 'OPERATION_NOT_LIST',
+      reason: `This Function asks for a "${fn.businessIr.operation}", and the query layer is row-oriented — it can return a list of records, not the requested ${fn.businessIr.operation}. Nothing here is answering the question asked.`,
     }
   }
 

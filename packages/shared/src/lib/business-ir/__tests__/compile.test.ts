@@ -244,21 +244,25 @@ describe('compileQuery — a reference the model does not contain fails the comp
   })
 })
 
-/* ---- gaps are reported, not hidden --------------------------------- */
+/* ---- gaps are reported, not hidden; an unservable operation is refused ---- */
 
-describe('compileQuery — a valid IR the platform cannot serve compiles with a gap', () => {
-  it('an aggregate IR compiles logically and reports the row-oriented gap', () => {
-    const result = mustCompile({
+describe('compileQuery — what the platform cannot serve is said at the severity that survives', () => {
+  it('refuses an aggregate IR — ROW_ORIENTED_TARGET is an error, not a gap (T-04)', () => {
+    // Until `T-04` this compiled with a **gap**, and `verifyFunction`'s error filter excludes gaps by
+    // construction — so the check recorded `passed`, the Function saved and ran, and it returned
+    // **rows** to somebody who asked for a number. The logical plan is still complete; what is
+    // impossible is executing it, so the diagnostic is an error and reaches the report.
+    const result = mustFail({
       operation: 'aggregate',
       entity: 'external_conversation',
       dimensions: ['subject'],
       measures: [{ aggregate: 'sum', field: 'unread_count' }],
     })
-    expect(result.plan.logical.measures).toEqual([
-      { aggregate: 'sum', field: 'external_conversation.unread_count' },
-    ])
-    expect(result.plan.provenance.gaps).toContain('plan_physical')
-    expect(result.diagnostics.some((d) => d.code === 'ROW_ORIENTED_TARGET')).toBe(true)
+    const diagnostic = result.diagnostics.find((d) => d.code === 'ROW_ORIENTED_TARGET')
+    expect(diagnostic?.severity).toBe('error')
+    // The sentence says what the caller would have received, not only what the compiler could not do.
+    expect(diagnostic?.message).toContain('rows')
+    expect(diagnostic?.message).toContain('aggregate')
   })
 
   it('always reports that authorization injection does not exist yet', () => {

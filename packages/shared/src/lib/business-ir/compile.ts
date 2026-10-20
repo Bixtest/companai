@@ -404,10 +404,21 @@ export function compileQuery(
     )
   }
   if (ir.operation !== 'list') {
-    gap(
+    // `T-04` — this used to be a **gap**, and a gap is excluded by construction from verify's error filter
+    // (`verify.ts: errors = diagnostics.filter(d => d.severity === 'error')`), so the check recorded
+    // **passed** with "The compiler resolved this against the model without error" — a sentence that is
+    // literally true and materially false, because the very stage emitting it had said the plan had no
+    // physical execution. The Function then saved, published, became runnable, and returned **rows** to
+    // someone who asked for **a number**.
+    //
+    // The distinction that decides the severity: `OFFSET_NOT_SUPPORTED` above is a gap because the result
+    // is *the applied-less-than-asked truth* — a list without an offset is still a real list. An aggregate
+    // is not: "how many" answered with a page of rows is a **different question's answer**, and nothing
+    // downstream tells the reader the number they inferred is a fabrication. So this one is an error.
+    err(
       'plan_physical',
       'ROW_ORIENTED_TARGET',
-      `Operation ${ir.operation} needs aggregation, and the query layer is row-oriented (QueryOptions has no groupBy and no aggregate). The logical plan is complete; no physical execution is possible yet.`,
+      `Operation ${ir.operation} needs aggregation, and the query layer is row-oriented (QueryOptions has no groupBy and no aggregate), so the run would return rows rather than the requested ${ir.operation}.`,
       'operation',
     )
   }

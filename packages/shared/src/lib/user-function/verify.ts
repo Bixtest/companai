@@ -185,7 +185,20 @@ export function verifyFunction(
             `The compiler refused this IR: ${errors.map((e) => e.message).join(' ')}`,
           )
         } else {
-          record(name, 'passed', 'The compiler resolved this against the model without error.')
+          // `T-04` — the message used to read "The compiler resolved this against the model without
+          // error", which is the sentence the defect was hiding behind: it named the only thing that
+          // could NOT go wrong and said nothing about the one that did, so a plan that the compiler had
+          // explicitly said could not be executed was reported as `passed` beside it.
+          //
+          // When gaps remain the check still **passes** — a gap is a capability the platform lacks, not a
+          // wrong answer (`OFFSET_NOT_SUPPORTED` returns a real list, without an offset) — but the reason
+          // names what passed *and* what is still missing, so a reader cannot mistake one for the other.
+          const gaps = compiled.diagnostics.filter((d) => d.severity === 'gap')
+          const suffix =
+            gaps.length > 0
+              ? ` The plan is executable, but ${gaps.map((d) => d.message).join(' ')}`
+              : ''
+          record(name, 'passed', `The compiler resolved this check against the model without error.${suffix}`)
         }
       }
     }
