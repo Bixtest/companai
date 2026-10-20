@@ -56,6 +56,32 @@ path is waiting on the owner.**
 
 ---
 
+## 2026-10-20 — the run that is not green yet: two pre-existing failures, now rows
+
+The build is fixed (`CC-141`), and the run still fails — for two reasons that predate the remote and
+have nothing to do with the change that was pushed.
+
+**`test` stops at its second step (`CC-142`).** `yarn i18n:check-sync` fails across **45 modules × 4
+locales**: every catalog is **unsorted**, and `auth/pl.json` alone is **86 keys short**
+(`auth.delegations.cappedAt`, `auth.delegations.createHint`, …). Because it is the second step,
+**typecheck and the entire unit suite never run** — one formatting rule is currently worth more than
+every test in the repository. `--fix` exists; the missing Polish keys are a product decision
+(placeholders or real translations), which is why the row is open rather than repaired on the spot.
+
+**The integration shards never boot (`CC-143`).** The app **does** serve (`GET /login returned healthy
+HTML`), authentication **does** answer (`POST /api/auth/login returned 401` for the probe's
+credentials), and the **authenticated `GET /api/customers/people` returns 404** — the probe waits 180 s
+and gives up, so every Playwright test in the shard is skipped. Three readings are possible (probe
+user, module enablement, route); the row's next act is a measurement, not a fix.
+
+**What this says about the first run.** It found three real things in one hour — the build break, the
+i18n drift, and a harness that has never once reached a test. That is the value `CC-116` predicted
+when it argued that a workflow with no runner is a file, not a control.
+
+Register **80 · 62 · 142**.
+
+---
+
 ## 2026-10-20 — the first CI run found the build broken in 71 seconds
 
 `CC-141`. Code `6e402313`.
