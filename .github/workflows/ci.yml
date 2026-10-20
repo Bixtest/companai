@@ -1,4 +1,4 @@
-name: CI for Develop&Main
+name: CI for Develop, Main & Code
 permissions:
   contents: read
 
@@ -27,14 +27,20 @@ env:
   SELF_SERVICE_ONBOARDING_ENABLED: 'true'
 
 on:
+  # `code` is this repository's branch on the shared remote (2026-10-20). The remote holds two
+  # unrelated histories: `main` is the documentation repository and `code` is this one. A branch
+  # that carries a workflow but is absent from this list is a control nothing calls — the exact
+  # defect `CC-101` was opened for — so the branch the code actually lives on is named here.
   push:
     branches:
       - main
+      - code
       - develop
       - feat/wms
   pull_request:
     branches:
       - main
+      - code
       - develop
       - feat/wms
 
