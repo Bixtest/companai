@@ -18,7 +18,7 @@ knowledge, and a new agent that has not been bitten by them will be.
 
 | | |
 |---|---|
-| Docs repo | `C:/Users/Ramzi/Downloads/companai` — branch **`master`** → remote **`main`**, author `scout` |
+| Docs repo | `C:/Users/Ramzi/Downloads/companai` — branch **`main`** → remote **`main`**, author `scout` |
 | Code repo | `C:/Users/Ramzi/Downloads/companai/workspace/starting-kit` — branch **`main`** → remote **`code`** |
 | Remote | `https://github.com/FOOTBALLMOOD/companai` — **one repository, two unrelated branches** (2026-10-20) |
 | Node | `C:/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24/node.exe` — **v24.19.0, mandatory** |
@@ -36,9 +36,13 @@ runs on — `docs.yml` on `main`, `ci.yml` on `code`. A push from either local r
 command:
 
 ```bash
-cd C:/Users/Ramzi/Downloads/companai                    && git push    # master -> origin/main
-cd C:/Users/Ramzi/Downloads/companai/workspace/starting-kit && git push    # main   -> origin/code
+cd C:/Users/Ramzi/Downloads/companai                    && git push    # main -> origin/main
+cd C:/Users/Ramzi/Downloads/companai/workspace/starting-kit && git push    # main -> origin/code
 ```
+
+The docs branch was renamed `master` → **`main`** on 2026-10-20 so that a plain `git push` works in both
+repositories (`push.default=simple` refuses when the local and upstream names differ — it refused the
+first push after the remote was added).
 
 **If a push ever dies mid-transfer** (`RPC failed; curl 55 Send failure: Connection was reset`), the
 cause here was **18,016 loose objects** — 313 MB on disk, **10.8 MiB** once `git gc` packed them.
