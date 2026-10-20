@@ -36,7 +36,7 @@ rules, hazards and where we are.
 - **`default: false` in an entity decorator does not make the property optional** — `[OptionalProps]` must say so (L185).
 
 ## FRONTIER (2026-10-20)
-**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 79 · 60 · 139.** Docs checker PASS
+**The spine:** `PLAN-2026-10-18-one-agent.md`, W1–W8. **Register 80 · 60 · 140.** Docs checker PASS
 (36 checks, 14/14 mutations RED); `derive-counts` 78/321.
 **★ THE PLATFORM IS AN ARCHITECTURE, NOT A VERTICAL.** A type is a role for agents; chain ceiling → type
 → instance → binding, each a subset above; an agent is always inside a tenant.

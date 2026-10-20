@@ -56,6 +56,47 @@ path is waiting on the owner.**
 
 ---
 
+## 2026-10-20 — the first CI run found the build broken in 71 seconds
+
+`CC-141`. Code `6e402313`.
+
+The first GitHub Actions run on the new remote (`39357327101`) failed in `yarn build:app`:
+
+```
+Error: Turbopack build failed with 1 errors:
+The export extensions was not found in module
+  …/packages/ai-assistant/dist/modules/ai_assistant/data/extensions.js
+```
+
+**The cause is a convention that nothing checked.** `module-registry.ts:3163` emits, for every
+module with a `data/extensions.ts`:
+
+```ts
+entityExtensions: ((X.default ?? X.extensions) as EntityExtension[]) || []
+```
+
+The `??` reads as a runtime fallback, and at runtime it is one — but the bundler resolves **both**
+names **statically**. Six modules export `extensions`; `ai_assistant` exported a default and
+`entityExtensions`, and it was the one that broke the build. **2,613 shared-package tests were green**
+because none of them had ever asked whether the generated code's assumptions hold.
+
+**The fix is one line; the guard is the real deliverable.**
+`packages/cli/src/lib/generators/__tests__/extensions-export-convention.test.ts` walks every
+`data/extensions.ts`, **strips comments** (a sentence that mentions the export cannot satisfy it),
+and asserts its own **denominator** (a walker that finds nothing cannot pass by vacuity). Proven red
+by removing the export, then restored sha256-identical.
+
+**Verified twice.** Locally with CI's own sequence — `build:packages` 20/20 · `generate` ·
+`build:app` → `✓ Compiled successfully in 2.0min`, `1 successful, 1 total` in 6m19s — and on the
+runner: the next run's `prepare` job is **success**. The first local attempt died on this machine's
+memory ceiling (`errno=1455`), not on code; `--concurrency=1` cleared it.
+
+**The lesson is the project's oldest one in a new place:** a convention that nothing checks is a
+convention one module away from breaking the build. The workflow had never run — and its first minute
+found what the whole test suite could not see.
+
+---
+
 ## 2026-10-20 — the repositories are on a remote: `main` is the docs, `code` is the codebase
 
 The owner created `https://github.com/FOOTBALLMOOD/companai` and asked whether one repository was
